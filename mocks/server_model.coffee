@@ -27,7 +27,7 @@ module.exports = class MockServerModel extends Backbone.Model
   ###################################
   # Collection Extensions
   ###################################
-  @cursor: (query={}) -> return new MockCursor({model_type: MockServerModel}, query, MockServerModel.MODELS_JSON)
+  @cursor: (query={}) -> return new MockCursor(query, {model_type: MockServerModel, json: MockServerModel.MODELS_JSON})
 
   @find: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1

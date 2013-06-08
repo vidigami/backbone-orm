@@ -3,9 +3,8 @@ _ = require 'underscore'
 JSONUtils = require './json_utils'
 
 module.exports = class Cursor
-  constructor: (@backbone_sync, query) ->
-    @model_type = @backbone_sync.model_type
-    @connection = @backbone_sync.connection
+  constructor: (query, options) ->
+    @[key] = value for key, value of options # mixin
 
     if _.isObject(query)
       @_find = @_parseFindQuery(query)

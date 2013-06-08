@@ -4,8 +4,6 @@ _ = require 'underscore'
 Cursor = require '../cursor'
 
 module.exports = class MockCursor extends Cursor
-  constructor: (sync, query, @json) -> super
-
   toJSON: (callback, count) ->
     if (keys = _.keys(@_find)).length
       json = _.select(@json, (item) => _.isEqual(_.pick(item, keys), @_find))
