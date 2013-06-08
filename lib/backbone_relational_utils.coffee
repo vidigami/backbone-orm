@@ -1,7 +1,7 @@
 _ = require 'underscore'
 Backbone = require 'backbone-relational'
 
-module.exports = class Store
+module.exports = class BackboneRelationalUtils
   @find: (model_type, id) ->
     return Backbone.Relational.store.find(model_type, id) if ((new model_type()) instanceof Backbone.RelationalModel) and id
     return null
