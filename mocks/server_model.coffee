@@ -7,13 +7,9 @@ MockCursor = require './cursor'
 module.exports = class MockServerModel extends Backbone.Model
   @MODELS_JSON = []
 
-  @find: (query, callback) ->
-    id = if _.isObject(query) then query.id else query
-    json = _.find(MockServerModel.MODELS_JSON, (test) => test.id is id)
-    callback(null, if json then new MockServerModel(json) else null)
-
-  @cursor: (query) ->
-    return new MockCursor(query, MockServerModel.MODELS_JSON)
+  ###################################
+  # Override Backbone.Model methods for the json array
+  ###################################
 
   save: (attributes={}, options={}) ->
     @set(_.extend({id: _.uniqueId()}, attributes))
@@ -27,3 +23,29 @@ module.exports = class MockServerModel extends Backbone.Model
         delete MockServerModel.MODELS_JSON[index]
         return options.success?(@)
      options.error?(@)
+
+  ###################################
+  # Collection Extensions
+  ###################################
+  @cursor: (query={}) -> return new MockCursor({model_type: MockServerModel}, query, MockServerModel.MODELS_JSON)
+
+  @find: (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    @cursor(query).toModels(callback)
+
+  ###################################
+  # Convenience Functions
+  ###################################
+  @all: (callback) -> @cursor({}).toModels callback
+
+  @count: (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    @cursor(query).count(callback)
+
+  @destroy: (query, callback) ->
+    # @initialize() unless @connection
+
+    # [query, callback] = [{}, query] if arguments.length is 1
+    # @connection.collection (err, collection) =>
+    #   return callback(err) if err
+    #   collection.remove @backbone_adapter.attributesToNative(query), callback

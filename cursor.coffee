@@ -4,7 +4,6 @@ JSONUtils = require './json_utils'
 
 module.exports = class Cursor
   constructor: (@backbone_sync, query) ->
-    @backbone_adapter = @backbone_sync.backbone_adapter
     @model_type = @backbone_sync.model_type
     @connection = @backbone_sync.connection
 
@@ -46,12 +45,6 @@ module.exports = class Cursor
       return callback(new Error "Cannot call toModels on cursor with values. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
       return callback(null, if json then (new @model_type(@model_type::parse(json))) else null) if @_cursor.$one
       callback(null, (new @model_type(@model_type::parse(attributes)) for attributes in json))
-    return # terminating
-
-  value: (callback) ->
-    return @toModels(callback) if @_cursor.$one
-    return @toJSON(callback, @_cursor.$count) if @_cursor.$count
-    callback(new Error "Cursor does not refer to a single value")
     return # terminating
 
   count: (callback) -> return @toJSON(callback, true)
