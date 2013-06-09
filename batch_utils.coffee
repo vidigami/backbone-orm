@@ -16,10 +16,12 @@ module.exports = class BatchUtils
 
     processed_count = 0
     parsed_query = Cursor.parseQuery(query)
-    parallelism = if options.hasOwnProperty('$parallelism') then options.$parallelism else DEFAULT_PARALLELISM
+    parallelism = if options.hasOwnProperty('parallelism') then options.parallelism else DEFAULT_PARALLELISM
+    method = options.method or 'toModels'
 
     runBatch = (batch_cursor, callback) ->
-      model_type.cursor(batch_cursor).toModels (err, models) ->
+      cursor = model_type.cursor(batch_cursor)
+      cursor[method].call cursor, (err, models) ->
         return callback(new Error("Failed to get models")) if err or !models
         return callback(null, processed_count) unless models.length
 
