@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+moment = require 'moment'
 Queue = require 'queue-async'
 
 Helpers = require './lib/test_helpers'
@@ -23,5 +24,5 @@ module.exports = class Fabricator
     queue.await (err) -> callback(err, models)
 
   @uniqueId: (prefix) -> return -> _.uniqueId(prefix or '')
-  @date: -> new Date()
+  @date: -> date = moment.utc(); date.millisecond(0); return date.toDate() # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
   @dateString: -> Fabricator.date().toISOString()
