@@ -9,8 +9,8 @@ describe 'Batch Utils', ->
 
   beforeEach: (done) ->
     MockServerModel.MODELS = Fabricator.new(MockServerModel, 10, {
-      id: Fabricator.idFn('id_')
-      name: Fabricator.idFn('name_')
+      id: Fabricator.uniqueId('id_')
+      name: Fabricator.uniqueId('name_')
       created_at: Fabricator.dateString
       updated_at: Fabricator.dateString
     })

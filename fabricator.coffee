@@ -22,6 +22,6 @@ module.exports = class Fabricator
       do (model) -> queue.defer (callback) -> models.save {}, adapters.bbCallback(callback)
     queue.await callback
 
-  @idFn: (prefix) -> return -> _.uniqueId(prefix or '')
+  @uniqueId: (prefix) -> return -> _.uniqueId(prefix or '')
   @date: -> new Date()
   @dateString: -> Fabricator.date().toISOString()
