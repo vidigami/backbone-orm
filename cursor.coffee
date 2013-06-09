@@ -5,13 +5,8 @@ JSONUtils = require './json_utils'
 module.exports = class Cursor
   constructor: (query, options) ->
     @[key] = value for key, value of options # mixin
-
-    if _.isObject(query)
-      @_find = @_parseFindQuery(query)
-      @_cursor = @_parseCursorQuery(query)
-    else
-      @_find = {id: query}
-      @_cursor = {$one: true}
+    parsed_query = Cursor.parseQuery(query)
+    @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
   offset: (offset) -> @_cursor.$offset = offset; return @
   limit: (limit) -> @_cursor.$limit = limit; return @
@@ -51,14 +46,21 @@ module.exports = class Cursor
   ##############################################
   # Query Parsing
   ##############################################
-  _parseFindQuery: (raw_query) ->
+  @parseQuery: (query) ->
+    return {find: {id: query}, cursor: {$one: true}} unless _.isObject(query)
+    return {
+      find: Cursor.parseFindQuery(query)
+      cursor: Cursor.parseCursorQuery(query)
+    }
+
+  @parseFindQuery: (query) ->
     find = {}
-    (find[key] = JSONUtils.JSONToValue(value) if key[0] isnt '$') for key, value of raw_query
+    (find[key] = JSONUtils.JSONToValue(value) if key[0] isnt '$') for key, value of query
     return find
 
-  _parseCursorQuery: (raw_query) ->
+  @parseCursorQuery: (query) ->
     cursor = {}
-    for key, value of raw_query
+    for key, value of query
       continue if key[0] isnt '$' or key is '$ids'
 
       switch key
@@ -67,14 +69,14 @@ module.exports = class Cursor
         when '$count' then cursor.$count = true
         when '$select', '$values'
           if _.isString(value) and value.length and value[0] is '['
-            cursor[key] = @_parseArray(value)
+            cursor[key] = Cursor._parseArray(value)
             console.log("Failed to parse $select: #{value}") unless cursor[key]
           else
             cursor[key] = JSONUtils.JSONToValue(value)
             cursor[key] = [cursor[key]] unless _.isArray(cursor[key])
 
         when '$ids'
-          cursor[key] = @_parseArray(value)
+          cursor[key] = Cursor._parseArray(value)
           console.log("Failed to parse $ids: #{value}") unless cursor[key]
 
        # parse even if you don't recognize it so others can use it
@@ -83,7 +85,7 @@ module.exports = class Cursor
 
     return cursor
 
-  _parseArray: (value) ->
+  @parseArray: (value) ->
     try (array = JSON.parse(value)) catch e
     return if array and _.isArray(array) then array else undefined
 

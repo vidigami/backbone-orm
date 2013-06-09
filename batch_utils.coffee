@@ -1,61 +1,43 @@
 util = require 'util'
-EventEmitter = require('events').EventEmitter
+_ = require 'underscore'
 Queue = require 'queue-async'
 
+Cursor = require './cursor'
+
 DEFAULT_LIMIT = 1500
-PARALLEL_COUNT = 10
+DEFAULT_PARALLELISM = 1
 
 module.exports = class BatchUtils
-  @processModels: (model_type, callback, fn, limit=DEFAULT_LIMIT, parallel_count=PARALLEL_COUNT) ->
-    event_emitter = new EventEmitter()
+  @processModels: (model_type, query, options, callback, fn) ->
+    if arguments.length is 3
+      [model_type, query, options, callback, fn] = [model_type, {}, {}, query, options]
+    else if arguments.length is 4
+      [model_type, query, options, callback, fn] = [model_type, {}, query, options, callback]
 
-    runBatch = (cursor, callback) ->
-      model_type.cursor(cursor).toModels (err, models) ->
+    processed_count = 0
+    parsed_query = Cursor.parseQuery(query)
+    parallelism = if options.hasOwnProperty('$parallelism') then options.$parallelism else DEFAULT_PARALLELISM
+
+    runBatch = (batch_cursor, callback) ->
+      model_type.cursor(batch_cursor).toModels (err, models) ->
         return callback(new Error("Failed to get models")) if err or !models
-        return callback() unless models.length
-        event_emitter.emit 'progress', "Start batch length: #{models.length}"
+        return callback(null, processed_count) unless models.length
 
         # batch operations on each
-        queue = new Queue(parallel_count)
+        queue = new Queue(parallelism)
         for model in models
           do (model) -> queue.defer (callback) -> fn(model, callback)
+          processed_count++
+          break if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
         queue.await (err) ->
           return callback(err) if err
-          cursor.$offset += cursor.$limit
-          runBatch(cursor, callback)
+          return callback(null, processed_count) if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
+          batch_cursor.$offset += batch_cursor.$limit
+          runBatch(batch_cursor, callback)
 
-    cursor = {
-      $limit: DEFAULT_LIMIT
-      $offset: 0
-      $sort: [['id', 'asc']]
-    }
-    runBatch(cursor, callback)
-    return event_emitter
-
-# Queue = require 'queue-async'
-
-# DEFAULT_LIMIT = 1500
-# PARALLEL_COUNT = 100
-
-# module.exports = class BatchUtils
-#   @processModels: (model_type, callback, fn, limit=DEFAULT_LIMIT, parallel_count=PARALLEL_COUNT) ->
-#     runBatch = (cursor, callback) ->
-#       model_type.cursor(cursor).toModels (err, models) ->
-#         return callback(new Error("Failed to get models")) if err or !models
-#         return callback() unless models.length
-
-#         # batch operations on each
-#         queue = new Queue(parallel_count)
-#         for model in models
-#           do (model) -> queue.defer (callback) -> fn(model, callback)
-#         queue.await (err) ->
-#           return callback(err) if err
-#           cursor.$offset += cursor.$limit
-#           runBatch(cursor, callback)
-
-#     cursor = {
-#       $limit: limit
-#       $offset: 0
-#       $sort: [['id', 'asc']]
-#     }
-#     runBatch(cursor, callback)
+    batch_cursor = _.extend({
+      $limit: options.$limit or DEFAULT_LIMIT
+      $offset: parsed_query.$offset or 0
+      $sort: parsed_query.$sort or [['id', 'asc']] # TODO: generalize sort for different types of sync
+    }, parsed_query.find) # add find parameters
+    runBatch(batch_cursor, callback)
