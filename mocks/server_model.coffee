@@ -50,6 +50,6 @@ module.exports = class MockServerModel extends Backbone.Model
   @destroy: (query, callback) ->
     @cursor(query).toJSON (err, json) ->
       return callback(err) if err
-      ids = _.map(json, (item) -> json.id())
+      ids = _.map(json, (item) -> json.id)
       MockServerModel.MODELS = _.select(MockServerModel.MODELS, (model) -> !_.contains(ids, model.get('id')))
       callback()
