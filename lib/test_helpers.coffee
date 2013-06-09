@@ -13,8 +13,8 @@ module.exports = class Helpers
     model_type.all (err, all_models) ->
       return callback(err) if err
       queue = new Queue()
-      for album in all_models
-        do (album) -> queue.defer (callback) -> album.save {name: name}, adapters.bbCallback callback
+      for model in all_models
+        do (model) -> queue.defer (callback) -> model.save {name: name}, adapters.bbCallback callback
       queue.await callback
 
 adapters = Helpers.adapters
