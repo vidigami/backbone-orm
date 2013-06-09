@@ -23,6 +23,35 @@ module.exports = class Fabricator
       do (model) -> queue.defer (callback) -> model.save {}, adapters.bbCallback(callback)
     queue.await (err) -> callback(err, models)
 
-  @uniqueId: (prefix) -> return -> _.uniqueId(prefix or '')
-  @date: -> date = moment.utc(); date.millisecond(0); return date.toDate() # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
-  @dateString: -> Fabricator.date().toISOString()
+  # One forms
+  # 1) Fabricator.value: a fixed value
+  @value: (value) ->
+    return undefined if arguments.length is 0
+    return -> value
+
+  # Two forms
+  # 1) Fabricator.uniqueId: no prefix
+  # 2) Fabricator.uniqueId(prefix): with prefix
+  @uniqueId: (prefix) ->
+    return _.uniqueId() if arguments.length is 0
+    return -> _.uniqueId(prefix)
+  @uniqueString: @uniqueId # alias
+
+  # Two forms
+  # 1) Fabricator.date: the current date
+  # 1) Fabricator.date(step_ms): step in milliseconds from now
+  # 1) Fabricator.date(start, step_ms): step in milliseconds from start
+  @date: ->
+    _normalize = (_date) -> _date.millisecond(0); return _date.toDate()
+
+    # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
+    return _normalize(moment.utc()) if arguments.length is 0
+    if arguments.length is 1
+      [start, step_ms] = [moment.utc(), arguments[0]]
+    else
+      [start, step_ms] = [arguments[0], arguments[1]]
+    current_ms = start.valueOf()
+    return ->
+      current = new Date(current_ms)
+      current_ms += step_ms
+      return current
