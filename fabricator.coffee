@@ -19,7 +19,7 @@ module.exports = class Fabricator
     models = Fabricator.new(model_type, count, attributes_info)
     queue = new Queue()
     for model in models
-      do (model) -> queue.defer (callback) -> models.save {}, adapters.bbCallback(callback)
+      do (model) -> queue.defer (callback) -> model.save {}, adapters.bbCallback(callback)
     queue.await (err) -> callback(err, models)
 
   @uniqueId: (prefix) -> return -> _.uniqueId(prefix or '')
