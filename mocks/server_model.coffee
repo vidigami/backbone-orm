@@ -49,17 +49,8 @@ module.exports = class MockServerModel extends Backbone.Model
 
   @destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    unless (keys = _.keys(query)).length # all
-      console.log "DESTROY ALL"
+    if (keys = _.keys(query)).length
+      MockServerModel.MODELS = _.select(MockServerModel.MODELS, (item) => !_.isEqual(_.pick(item, keys), query))
+    else
       MockServerModel.MODELS = []
-      return callback()
-
-    # find them
-    console.log "FInd: #{util.inspect(query)}"
-    @cursor(query).toJSON (err, json) ->
-      return callback(err) if err
-      json_find = _.map(json, (item) -> _.pick(item, keys))
-      models_find = _.map(MockServerModel.MODELS, (model) -> _.pick(model.toJSON(), keys))
-      for index, value of models_find
-        delete MockServerModel.MODELS[index] if !!_.find(json_find, (item) -> _.isEqual(item, value))
-      callback()
+    return callback()

@@ -11,11 +11,15 @@ module.exports = class MockCursor extends Cursor
       json = _.clone(@json)
 
     # find.order = @_cursor.$sort if @_cursor.$sort # TODO: should be in form {order: 'title DESC'}
-    json.splice(@_cursor.$offset, json.length) if @_cursor.$offset
+    if @_cursor.$offset
+      number = json.length - @_cursor.$offset
+      number = 0 if number < 0
+      json = if number then json.slice(@_cursor.$offset, @_cursor.$offset+number) else []
+
     if @_cursor.$one
-      json = [json[0]]
+      json = if json.length then [json[0]] else []
     else if @_cursor.$limit
-      json = json.splice(0, @_cursor.$limit)
+      json = json.splice(0, Math.min(json.length, @_cursor.$limit))
     # args._id = {$in: _.map(ids, (id) -> new ObjectID("#{id}"))} if @_cursor.$ids # TODO
 
     return callback(null, json.length) if count or @_cursor.$count # only the count

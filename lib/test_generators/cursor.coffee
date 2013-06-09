@@ -69,11 +69,11 @@ module.exports = (options) ->
       Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
-        limit = offset = 3
+        limit = 2; offset = 1
         MODEL_TYPE.cursor({name: ALBUM_NAME}).limit(limit).offset(offset).toModels (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'cursor toModels gives us models')
-          assert.equal(models.length, limit, 'found models')
+          assert.equal(limit, models.length, "Expected: #{limit}, Actual: #{models.length}")
           done()
 
     it 'Cursor can select fields', (done) ->

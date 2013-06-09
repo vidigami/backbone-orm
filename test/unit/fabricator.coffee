@@ -73,9 +73,13 @@ describe 'Fabricator', ->
 
     it 'generate now', (done) ->
       gen = Fabricator.date
+
       assert.ok(gen().valueOf() < (new Date()).valueOf())
       assert.ok(gen().valueOf() < (new Date()).valueOf())
       assert.ok(gen().valueOf() < (new Date()).valueOf())
+
+      console.log gen().toISOString()
+
       done()
 
     it 'generate dates in steps (ms)', (done) ->
