@@ -22,7 +22,10 @@ module.exports = class JSONUtils
     return value unless value
     if _.isDate(value)
       try
-        return value.toISOString()
+        # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
+        date = moment.utc(value)
+        date.millisecond(0)
+        return date.toDate().toISOString()
       catch e
         return null # not a valid date
     else if _.isString(value)
