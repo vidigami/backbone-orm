@@ -25,6 +25,10 @@ module.exports = class MockCursor extends Cursor
 
     return callback(null, json.length) if count or @_cursor.$count # only the count
 
+    if @_cursor.$sort and Array.isArray(json)
+      $sort_fields = if Array.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+      json.sort (model, next_model) => return Helpers.jsonFieldCompare(model, next_model, $sort_fields)
+
     # only select specific fields
     if @_cursor.$values
       $fields = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
@@ -49,10 +53,6 @@ module.exports = class MockCursor extends Cursor
       json = _.map(json, (item) => _.pick(item, $select))
     else if @_cursor.$white_list
       json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
-
-    if @_cursor.$sort
-      $sort_fields = if Array.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-      json.sort (model, next_model) => return Helpers.jsonFieldCompare(model, next_model, $sort_fields)
 
     callback(null, json)
     return # terminating
