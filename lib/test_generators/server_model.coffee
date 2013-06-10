@@ -5,3 +5,4 @@ module.exports = (options) ->
   require('../../lib/test_generators/convenience')(options)
   require('../../lib/test_generators/cursor')(options)
   require('../../lib/test_generators/find')(options)
+  require('../../lib/test_generators/sort')(options)

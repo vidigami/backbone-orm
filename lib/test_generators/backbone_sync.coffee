@@ -38,6 +38,20 @@ module.exports = (options) ->
 
         queue.await done
 
+    describe 'fetch model', ->
+      it 'fetches data', (done) ->
+        Helpers.getAt MODEL_TYPE, 1, (err, model) ->
+          assert.ok(!err, 'no errors')
+          model_name = model.get('name')
+          new_model = new MODEL_TYPE({id: model.get('id')})
+
+          queue = new Queue(1)
+          queue.defer (callback) -> new_model.fetch adapters.bbCallback(callback)
+          queue.defer (callback) ->
+            assert.equal(new_model.get('name'), model_name, 'name after fetch is correct')
+            callback()
+          queue.await done
+
     # sync: new BackboneSync({database_config: require('../config/database'), collection: 'bobs', model: MODEL_TYPE, manual_id: true, indices: {id: 1}})
     # TODO: describe 'use a manual id', ->
     #   it 'assign an id', (done) ->

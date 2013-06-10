@@ -74,14 +74,3 @@ module.exports = (options) ->
           for model in models
             assert.equal(model.get('name'), test_model.get('name'), 'model has the correct name')
           done()
-
-
-    it 'Handles a select fields query', (done) ->
-      FIELD_NAMES = ['id', 'name', 'nothing']
-      MODEL_TYPE.find {$select: FIELD_NAMES}, (err, models) ->
-        assert.ok(!err, 'no errors')
-        assert.ok(models, 'gets models')
-        assert.equal(models.length, MODELS_JSON.length, 'gets all models')
-        for model in models
-          assert.equal(_.size(model.attributes), FIELD_NAMES.length-1, 'gets only the requested values that exist')
-        done()

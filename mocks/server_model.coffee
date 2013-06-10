@@ -27,7 +27,16 @@ module.exports = class MockServerModel extends Backbone.Model
       if model.get('id') is id
         delete MockServerModel.MODELS[index]
         return options.success?(@)
-     options.error?(@)
+    options.error?(@)
+
+  fetch: (options={}) ->
+    id = @get('id')
+    for index, model of MockServerModel.MODELS
+      if model.get('id') is id
+        _.extend(@, model)
+        return options.success?(@)
+    options.error?(@)
+
 
   ###################################
   # Collection Extensions

@@ -1,6 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 
+Helpers = require '../lib/test_helpers'
 Cursor = require '../cursor'
 
 module.exports = class MockCursor extends Cursor
@@ -48,5 +49,10 @@ module.exports = class MockCursor extends Cursor
       json = _.map(json, (item) => _.pick(item, $select))
     else if @_cursor.$white_list
       json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+
+    if @_cursor.$sort
+      $sort_fields = if Array.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+      json.sort (model, next_model) => return Helpers.jsonFieldCompare(model, next_model, $sort_fields)
+
     callback(null, json)
     return # terminating

@@ -103,3 +103,36 @@ module.exports = (options) ->
             assert.ok(_.isArray(json), 'cursor item values is an array')
             assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
           done()
+
+    it 'Cursor can select the intersection of a whitelist and fields', (done) ->
+      ALBUM_NAME = 'Test3'
+      WHITE_LIST = ['name']
+      FIELD_NAMES = ['id', 'name']
+
+      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+        assert.ok(!err, 'no errors')
+
+        MODEL_TYPE.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
+          assert.ok(!err, 'no errors')
+          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+          for json in models_json
+            assert.equal(_.size(json), WHITE_LIST.length, 'gets only the requested values')
+            assert.ok(!json['id'], 'does not get a value not in the whitelist')
+            assert.equal(json['name'], ALBUM_NAME, 'gets the correct value')
+          done()
+
+    it 'Cursor can select the intersection of a whitelist and values', (done) ->
+      ALBUM_NAME = 'Test4'
+      WHITE_LIST = ['name']
+      FIELD_NAMES = ['id', 'name']
+      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+        assert.ok(!err, 'no errors')
+
+        MODEL_TYPE.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
+          assert.ok(!err, 'no errors')
+          assert.ok(_.isArray(values), 'cursor values is an array')
+          for json in values
+            assert.ok(_.isArray(json), 'cursor item values is an array')
+            assert.equal(json.length, WHITE_LIST.length, 'gets only the requested values')
+            assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
+          done()
