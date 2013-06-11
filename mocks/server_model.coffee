@@ -33,7 +33,7 @@ module.exports = class MockServerModel extends Backbone.Model
     id = @get('id')
     for index, model of MockServerModel.MODELS
       if model.get('id') is id
-        _.extend(@, model)
+        (@set(model.attributes))
         return options.success?(@)
     options.error?(@)
 
