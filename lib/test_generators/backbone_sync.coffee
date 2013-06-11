@@ -11,8 +11,8 @@ module.exports = (options) ->
 
   Backbone = require 'backbone'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'BackboneSync', ->
 
@@ -41,7 +41,7 @@ module.exports = (options) ->
 
     describe 'fetch model', ->
       it 'fetches data', (done) ->
-        Helpers.getAt MODEL_TYPE, 1, (err, model) ->
+        Utils.getAt MODEL_TYPE, 1, (err, model) ->
           assert.ok(!err, 'no errors')
           assert.ok(!!model, 'got model')
           new_model = new MODEL_TYPE({id: model.get('id')})

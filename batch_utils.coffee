@@ -2,7 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Queue = require 'queue-async'
 
-Cursor = require './cursor'
+Cursor = require './lib/cursor'
 
 DEFAULT_LIMIT = 1500
 DEFAULT_PARALLELISM = 1

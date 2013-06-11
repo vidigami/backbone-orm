@@ -1,7 +1,7 @@
 _ = require 'underscore'
 Queue = require 'queue-async'
 
-module.exports = class Helpers
+module.exports = class Utils
   @adapters:
     bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: (-> callback(new Error("failed")))}
 
@@ -21,8 +21,7 @@ module.exports = class Helpers
   @isSorted: (models, fields) ->
     fields = _.uniq(fields)
     for model in models
-      if last_model
-        return false if @fieldCompare(last_model, model, fields) is 1
+      return false if last_model and @fieldCompare(last_model, model, fields) is 1
       last_model = model
     return true
 
@@ -52,5 +51,4 @@ module.exports = class Helpers
     else
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
 
-
-adapters = Helpers.adapters
+adapters = Utils.adapters

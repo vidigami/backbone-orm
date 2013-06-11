@@ -10,8 +10,8 @@ module.exports = (options) ->
   _ = require 'underscore'
   Queue = require 'queue-async'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'Model.sort', ->
 
@@ -26,19 +26,19 @@ module.exports = (options) ->
       SORT_FIELD = 'name'
       MODEL_TYPE.find {$sort: SORT_FIELD}, (err, models) ->
         assert.ok(!err, 'no errors')
-        assert.ok(Helpers.isSorted(models, [SORT_FIELD]))
+        assert.ok(Utils.isSorted(models, [SORT_FIELD]))
         done()
 
     it 'Handles a sort by multiple fields query', (done) ->
       SORT_FIELDS = ['name', 'id']
       MODEL_TYPE.find {$sort: SORT_FIELDS}, (err, models) ->
         assert.ok(!err, 'no errors')
-        assert.ok(Helpers.isSorted(models, SORT_FIELDS))
+        assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()
 
     it 'Handles a reverse sort by fields query', (done) ->
       SORT_FIELDS = ['-name', 'id']
       MODEL_TYPE.find {$sort: SORT_FIELDS}, (err, models) ->
         assert.ok(!err, 'no errors')
-        assert.ok(Helpers.isSorted(models, SORT_FIELDS))
+        assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()

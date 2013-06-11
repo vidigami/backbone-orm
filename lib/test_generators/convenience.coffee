@@ -8,8 +8,8 @@ module.exports = (options) ->
   assert = require 'assert'
   Queue = require 'queue-async'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'Convenience Methods', ->
 

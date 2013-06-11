@@ -1,6 +1,6 @@
 _ = require 'underscore'
 
-MemoryCursor = require './memory_cursor'
+MemoryCursor = require './lib/memory_cursor'
 
 S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())

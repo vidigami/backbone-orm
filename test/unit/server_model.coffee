@@ -2,7 +2,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
 
-JSONUtils = require '../../json_utils'
+JSONUtils = require '../../lib/json_utils'
 class MemoryModel extends Backbone.Model
   sync: require('../../memory_backbone_sync')(MemoryModel)
 Fabricator = require '../../fabricator'

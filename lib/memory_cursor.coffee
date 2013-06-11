@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 
-Helpers = require './lib/test_helpers'
+Utils = require '../utils'
 Cursor = require './cursor'
 
 module.exports = class MemoryCursor extends Cursor
@@ -29,7 +29,7 @@ module.exports = class MemoryCursor extends Cursor
 
     if @_cursor.$sort and Array.isArray(json)
       $sort_fields = if Array.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-      json.sort (model, next_model) => return Helpers.jsonFieldCompare(model, next_model, $sort_fields)
+      json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
     # only select specific fields
     if @_cursor.$values
