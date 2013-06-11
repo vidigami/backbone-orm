@@ -10,10 +10,7 @@ module.exports = class MemoryCursor extends Cursor
 
     # only the count
     if count or @_cursor.$count
-      if keys.length
-        json_count = _.reduce(@model_type._sync.store, ((memo, model) => return if _.isEqual(_.pick(model.attributes, keys), @_find) then memo + 1 else memo), 0)
-      else
-        json_count = _.size(@model_type._sync.store)
+      json_count = @_count(keys)
       start_index = @_cursor.$offset or 0
       if @_cursor.$one
         json_count = Math.max(0, json_count - start_index)
@@ -74,8 +71,14 @@ module.exports = class MemoryCursor extends Cursor
     if @_cursor.$page
       json =
         offset: @_cursor.$offset
-        total_rows: @json.length
+        total_rows: @_count(keys)
         rows: json
 
     callback(null, json)
     return # terminating
+
+  _count: (keys) =>
+    if keys.length
+      return _.reduce(@model_type._sync.store, ((memo, model) => return if _.isEqual(_.pick(model.attributes, keys), @_find) then memo + 1 else memo), 0)
+    else
+      return _.size(@model_type._sync.store)

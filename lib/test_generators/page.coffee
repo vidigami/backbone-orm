@@ -10,10 +10,10 @@ module.exports = (options) ->
   _ = require 'underscore'
   Queue = require 'queue-async'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
-  describe 'Model.cursor', ->
+  describe 'Model.page', ->
 
     beforeEach (done) ->
       BEFORE_EACH (err, models_json) ->
@@ -24,7 +24,7 @@ module.exports = (options) ->
 
     it 'Cursor can chain limit with paging', (done) ->
       ALBUM_NAME = 'Test1'
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         limit = 3
@@ -37,7 +37,7 @@ module.exports = (options) ->
 
     it 'Cursor can chain limit and offset with paging', (done) ->
       ALBUM_NAME = 'Test2'
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         limit = 2; offset = 1
@@ -53,7 +53,7 @@ module.exports = (options) ->
       ALBUM_NAME = 'Test3'
       FIELD_NAMES = ['id', 'name']
 
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, data) ->
@@ -66,7 +66,7 @@ module.exports = (options) ->
     it 'Cursor can select values with paging', (done) ->
       ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, data) ->
