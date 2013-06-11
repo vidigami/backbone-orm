@@ -31,7 +31,7 @@ class MemoryBackboneSync
     _.extend(store_model.attributes, model.attributes)
     options.success?(store_model.attributes)
 
-  destroy: (model) ->
+  delete: (model, options) ->
     return options.error(new Error('Model not found')) unless store_model = @store[model.attributes.id]
     delete @store[model.attributes.id]
     options.success?(store_model.attributes)
