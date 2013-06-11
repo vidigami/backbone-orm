@@ -6,7 +6,22 @@ Cursor = require './cursor'
 
 module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
-    if (keys = _.keys(@_find)).length
+    keys = _.keys(@_find)
+
+    # only the count
+    if count or @_cursor.$count
+      if keys.length
+        json_count = _.reduce(@model_type._sync.store, ((memo, model) => return if _.isEqual(_.pick(model.attributes, keys), @_find) then memo + 1 else memo), 0)
+      else
+        json_count = _.size(@model_type._sync.store)
+      start_index = @_cursor.$offset or 0
+      if @_cursor.$one
+        json_count = Math.max(0, json_count - start_index)
+      else if @_cursor.$limit
+        json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
+      return callback(null, json_count)
+
+    if keys.length
       json = []
       for id, model of @model_type._sync.store
         json.push(model.attributes) if _.isEqual(_.pick(model.attributes, keys), @_find)

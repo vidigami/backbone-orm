@@ -26,7 +26,7 @@ module.exports = (options) ->
     it 'Handles a count query to json', (done) ->
       MODEL_TYPE.cursor({$count: true}).toJSON (err, count) ->
         assert.ok(!err, 'no errors')
-        assert.equal(count, MODELS_JSON.length, 'counted expected number of photos')
+        assert.equal(MODELS_JSON.length, count, "Expected: #{MODELS_JSON.length}. Actual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->
