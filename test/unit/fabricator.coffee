@@ -4,7 +4,6 @@ _ = require 'underscore'
 moment = require 'moment'
 
 Fabricator = require '../../fabricator'
-MockServerModel = require '../../mocks/server_model'
 
 describe 'Fabricator', ->
 
@@ -102,5 +101,3 @@ describe 'Fabricator', ->
       assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
       assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
       done()
-
-

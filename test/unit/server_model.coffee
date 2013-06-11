@@ -1,15 +1,23 @@
-testGenerator = require '../../lib/test_generators/server_model'
-
 _ = require 'underscore'
+Backbone = require 'backbone'
+Queue = require 'queue-async'
 
-JSONUtils = require '../../json_utils'
-MockServerModel = require '../../mocks/server_model'
+JSONUtils = require '../../lib/json_utils'
+class MemoryModel extends Backbone.Model
+  sync: require('../../memory_backbone_sync')(MemoryModel)
 Fabricator = require '../../fabricator'
 
-testGenerator {
-  model_type: MockServerModel
+test_parameters =
+  model_type: MemoryModel
   route: 'mock_models'
   beforeEach: (callback) ->
-    MockServerModel.MODELS = Fabricator.new(MockServerModel, 10, {id: Fabricator.uniqueId('id_'), name: Fabricator.uniqueId('name_'), created_at: Fabricator.date, updated_at: Fabricator.date})
-    callback(null, _.map(MockServerModel.MODELS, (model) -> model.toJSON()))
-}
+    queue = new Queue(1)
+    queue.defer (callback) -> MemoryModel.destroy {}, callback
+    queue.defer (callback) -> Fabricator.create(MemoryModel, 10, {
+      name: Fabricator.uniqueId('album_')
+      created_at: Fabricator.date
+      updated_at: Fabricator.date
+    }, callback)
+    queue.await (err) -> callback(null, _.map(_.toArray(arguments).pop(), (test) -> JSONUtils.valueToJSON(test.toJSON())))
+
+require('../../lib/test_generators/server_model')(test_parameters)

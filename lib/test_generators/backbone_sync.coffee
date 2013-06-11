@@ -5,13 +5,14 @@ module.exports = (options) ->
   BEFORE_EACH = options.beforeEach
   MODELS_JSON = null
 
+  util = require 'util'
   assert = require 'assert'
   Queue = require 'queue-async'
 
   Backbone = require 'backbone'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'BackboneSync', ->
 
@@ -40,20 +41,11 @@ module.exports = (options) ->
 
     describe 'fetch model', ->
       it 'fetches data', (done) ->
-        Helpers.getAt MODEL_TYPE, 1, (err, model) ->
+        Utils.getAt MODEL_TYPE, 1, (err, model) ->
           assert.ok(!err, 'no errors')
-          model_name = model.get('name')
+          assert.ok(!!model, 'got model')
           new_model = new MODEL_TYPE({id: model.get('id')})
 
-          queue = new Queue(1)
-          queue.defer (callback) -> new_model.fetch adapters.bbCallback(callback)
-          queue.defer (callback) ->
-            assert.equal(new_model.get('name'), model_name, 'name after fetch is correct')
-            callback()
-          queue.await done
-
-    # sync: new BackboneSync({database_config: require('../config/database'), collection: 'bobs', model: MODEL_TYPE, manual_id: true, indices: {id: 1}})
-    # TODO: describe 'use a manual id', ->
-    #   it 'assign an id', (done) ->
-
-    # TODO: describe 'add an index', ->
+          new_model.fetch adapters.bbCallback (err) ->
+            assert.deepEqual(model.attributes, new_model.attributes, "Expected: #{util.inspect(model.attributes)}. Actual: #{util.inspect(new_model.attributes)}")
+            done()

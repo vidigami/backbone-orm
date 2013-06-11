@@ -10,8 +10,8 @@ module.exports = (options) ->
   _ = require 'underscore'
   Queue = require 'queue-async'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'Model.find', ->
 
@@ -29,7 +29,7 @@ module.exports = (options) ->
         done()
 
     it 'Handles a find id query', (done) ->
-      Helpers.getAt MODEL_TYPE, 0, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
         MODEL_TYPE.find test_model.get('id'), (err, model) ->
@@ -40,7 +40,7 @@ module.exports = (options) ->
 
 
     it 'Handles another find id query', (done) ->
-      Helpers.getAt MODEL_TYPE, 1, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -52,7 +52,7 @@ module.exports = (options) ->
 
 
     it 'Handles a find by query id', (done) ->
-      Helpers.getAt MODEL_TYPE, 0, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -64,7 +64,7 @@ module.exports = (options) ->
 
 
     it 'Handles a name find query', (done) ->
-      Helpers.getAt MODEL_TYPE, 1, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 

@@ -10,8 +10,8 @@ module.exports = (options) ->
   _ = require 'underscore'
   Queue = require 'queue-async'
 
-  Helpers = require '../../lib/test_helpers'
-  adapters = Helpers.adapters
+  Utils = require '../../utils'
+  adapters = Utils.adapters
 
   describe 'Model.cursor', ->
 
@@ -26,11 +26,11 @@ module.exports = (options) ->
     it 'Handles a count query to json', (done) ->
       MODEL_TYPE.cursor({$count: true}).toJSON (err, count) ->
         assert.ok(!err, 'no errors')
-        assert.equal(count, MODELS_JSON.length, 'counted expected number of photos')
+        assert.equal(MODELS_JSON.length, count, "Expected: #{MODELS_JSON.length}. Actual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->
-      Helpers.getAt MODEL_TYPE, 0, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -41,7 +41,7 @@ module.exports = (options) ->
           done()
 
     it 'Cursor makes models', (done) ->
-      Helpers.getAt MODEL_TYPE, 0, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -54,7 +54,7 @@ module.exports = (options) ->
 
     it 'Cursor can chain limit', (done) ->
       ALBUM_NAME = 'Test1'
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         limit = 3
@@ -66,7 +66,7 @@ module.exports = (options) ->
 
     it 'Cursor can chain limit and offset', (done) ->
       ALBUM_NAME = 'Test2'
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         limit = 2; offset = 1
@@ -80,7 +80,7 @@ module.exports = (options) ->
       ALBUM_NAME = 'Test3'
       FIELD_NAMES = ['id', 'name']
 
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
@@ -93,7 +93,7 @@ module.exports = (options) ->
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, values) ->
@@ -109,7 +109,7 @@ module.exports = (options) ->
       WHITE_LIST = ['name']
       FIELD_NAMES = ['id', 'name']
 
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
@@ -125,7 +125,7 @@ module.exports = (options) ->
       ALBUM_NAME = 'Test4'
       WHITE_LIST = ['name']
       FIELD_NAMES = ['id', 'name']
-      Helpers.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
         assert.ok(!err, 'no errors')
 
         MODEL_TYPE.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
