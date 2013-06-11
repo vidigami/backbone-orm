@@ -1,10 +1,10 @@
 util = require 'util'
 _ = require 'underscore'
 
-Helpers = require '../lib/test_helpers'
-Cursor = require '../cursor'
+Helpers = require './lib/test_helpers'
+Cursor = require './cursor'
 
-module.exports = class MockCursor extends Cursor
+module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
     if (keys = _.keys(@_find)).length
       json = []

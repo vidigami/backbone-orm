@@ -1,6 +1,6 @@
 _ = require 'underscore'
 
-MockCursor = require './mocks/cursor'
+MemoryCursor = require './memory_cursor'
 
 S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
@@ -39,7 +39,7 @@ class MemoryBackboneSync
   ###################################
   # Collection Extensions
   ###################################
-  cursor: (query={}) -> return new MockCursor(query, {model_type: @model_type})
+  cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
 
   find: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
