@@ -54,5 +54,11 @@ module.exports = class MockCursor extends Cursor
     else if @_cursor.$white_list
       json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
 
+    if @_cursor.$page
+      json =
+        offset: @_cursor.$offset
+        total_rows: @json.length
+        rows: json
+
     callback(null, json)
     return # terminating
