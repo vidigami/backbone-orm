@@ -7,9 +7,11 @@ Cursor = require '../cursor'
 module.exports = class MockCursor extends Cursor
   toJSON: (callback, count) ->
     if (keys = _.keys(@_find)).length
-      json = _.select(@json, (item) => _.isEqual(_.pick(item, keys), @_find))
+      json = []
+      for id, model of @model_type._sync.store
+        json.push(model.attributes) if _.isEqual(_.pick(model.attributes, keys), @_find)
     else
-      json = _.clone(@json)
+      json = (model.attributes for id, model of @model_type._sync.store)
 
     # find.order = @_cursor.$sort if @_cursor.$sort # TODO: should be in form {order: 'title DESC'}
     if @_cursor.$offset
