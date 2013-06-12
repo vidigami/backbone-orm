@@ -85,5 +85,5 @@ module.exports = (options) ->
           assert.ok(!err, 'no errors')
           assert.equal(data.total_rows, 1, 'has the correct total_rows')
           assert.equal(data.rows.length, 1, 'has the correct row.length')
-          assert.deepEqual(data.rows[0], model.toJSON(), 'has the correct value')
+          assert.deepEqual(expected = JSON.stringify(model.toJSON()), actual = JSON.stringify(data.rows[0]), "Expected: #{util.inspect(expected)}. Actual: #{util.inspect(actual)}")
           done()
