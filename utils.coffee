@@ -9,7 +9,8 @@ module.exports = class Utils
   @parse: (query) ->
     return JSON.parse(query) if _.isString(query)
     result = {}
-    result[key] = JSON.parse(value) for key, value of query
+    for key, value of query
+      try result[key] = JSON.parse(value) catch err then result[key] = value
     return result
 
   @getAt: (model_type, index, callback) ->
