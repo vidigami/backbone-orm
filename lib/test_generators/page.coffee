@@ -26,7 +26,7 @@ module.exports = (options) ->
       LIMIT = 3
       MODEL_TYPE.cursor({$page: true}).limit(LIMIT).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
-        assert.ok(data.rows, 'cursor toJSON gives us models')
+        assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
         assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
         done()
@@ -42,7 +42,17 @@ module.exports = (options) ->
       LIMIT = 3; OFFSET = 1
       MODEL_TYPE.cursor({$page: true}).limit(LIMIT).offset(OFFSET).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
-        assert.ok(data.rows, 'cursor toJSON gives us models')
+        assert.ok(data.rows, 'models received')
+        assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
+        assert.equal(OFFSET, data.offset, 'has the correct offset')
+        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        done()
+
+    it 'Cursor can chain limit with paging (no true or false)', (done) ->
+      LIMIT = 3; OFFSET = 1
+      MODEL_TYPE.cursor({$page: ''}).limit(LIMIT).offset(OFFSET).toJSON (err, data) ->
+        assert.ok(!err, 'no errors')
+        assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
         assert.equal(OFFSET, data.offset, 'has the correct offset')
         assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
@@ -52,7 +62,7 @@ module.exports = (options) ->
       FIELD_NAMES = ['id', 'name']
       MODEL_TYPE.cursor({$page: true}).select(FIELD_NAMES).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
-        assert.ok(_.isArray(data.rows), 'cursor toJSON gives us models')
+        assert.ok(_.isArray(data.rows), 'models received')
         for json in data.rows
           assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
         done()
