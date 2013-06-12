@@ -2,6 +2,10 @@ _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
 relation_manager = require './lib/relation_manager'
+SchemaParser = require './lib/parsers/schema'
+RelationParser = require './lib/parsers/relation'
+
+Cache = require './cache'
 
 S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
@@ -17,7 +21,11 @@ class MemoryBackboneSync
 
     # publish methods and sync on model
     @model_type[fn] = _.bind(@[fn], @) for fn in CLASS_METHODS
+    # Cache.initialize(@model_type, @)
     @model_type._sync = @
+
+    @schema_info = SchemaParser.parse(_.result(@model_type, 'schema') or {})
+    @relations = RelationParser.parse(@model_type, @schema_info.raw_relations)
 
     @model_type.get = relation_manager(@model_type, @relations)
 

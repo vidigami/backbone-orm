@@ -1,5 +1,4 @@
 _ = require 'underscore'
-Sequelize = require 'sequelize'
 
 module.exports = class SchemaParser
 

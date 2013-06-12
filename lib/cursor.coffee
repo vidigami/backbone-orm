@@ -8,6 +8,22 @@ module.exports = class Cursor
     parsed_query = Cursor.parseQuery(query)
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
+    # ensure arrays
+    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
+
+  @parseQuery: (query) ->
+    if not query
+      return {find: {}, cursor: {}}
+    else if not _.isObject(query)
+      return {find: {id: query}, cursor: {$one: true}}
+    else if query.find or query.cursor
+      return {find: query.find or {}, cursor: query.cursor or {}}
+    else
+      parsed_query = {find: {}, cursor: {}}
+      for key, value of query
+        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
+      return parsed_query
+
   offset: (offset) -> @_cursor.$offset = offset; return @
   limit: (limit) -> @_cursor.$limit = limit; return @
 
@@ -42,66 +58,3 @@ module.exports = class Cursor
     return # terminating
 
   count: (callback) -> return @toJSON(callback, true)
-
-  ##############################################
-  # Query Parsing
-  ##############################################
-  @parseQuery: (query) ->
-    return {find: {id: query}, cursor: {$one: true}} unless _.isObject(query)
-    return {
-      find: Cursor.parseFindQuery(query)
-      cursor: Cursor.parseCursorQuery(query)
-    }
-
-  @parseFindQuery: (query) ->
-    find = {}
-    (find[key] = JSONUtils.JSONToValue(value) if key[0] isnt '$') for key, value of query
-    return find
-
-  @parseCursorQuery: (query) ->
-    cursor = {}
-    for key, value of query
-      continue if key[0] isnt '$' or key is '$ids'
-
-      switch key
-        when '$limit' then cursor.$limit = parseInt(value, 10)
-        when '$offset' then cursor.$offset = parseInt(value, 10)
-        when '$count' then cursor.$count = true
-        when '$select', '$values'
-          if _.isString(value) and value.length and value[0] is '['
-            cursor[key] = Cursor._parseArray(value)
-            console.log("Failed to parse $select: #{value}") unless cursor[key]
-          else
-            cursor[key] = JSONUtils.JSONToValue(value)
-            cursor[key] = [cursor[key]] unless _.isArray(cursor[key])
-
-        when '$ids'
-          cursor[key] = Cursor._parseArray(value)
-          console.log("Failed to parse $ids: #{value}") unless cursor[key]
-
-       # parse even if you don't recognize it so others can use it
-        else
-          cursor[key] = JSONUtils.JSONToValue(value)
-
-    return cursor
-
-  @parseArray: (value) ->
-    try (array = JSON.parse(value)) catch e
-    return if array and _.isArray(array) then array else undefined
-
-  # toResponse: (results) ->
-  #   if @_cursor.$count
-  #     return 0 unless results
-  #     return results if _.isNumber(results)
-  #     return results.length if _.isArray(results)
-  #     return 1
-
-  #   if @_cursor.$limit is 1
-  #     if @_cursor.$select
-  #       return _.map(@_cursor.$select, (key) -> results[key]) if @_cursor.$select.length > 1
-  #       return results[@_cursor.$select[0]] if @_cursor.$select[0]
-  #   else
-  #     if @_cursor.$select
-  #       return _.map(results, (value) => _.map(@_cursor.$select, (key) -> value[key])) if @_cursor.$select.length > 1
-  #       return _.pluck(results, @_cursor.$select[0]) if @_cursor.$select[0]
-  #   return results

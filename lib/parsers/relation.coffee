@@ -1,6 +1,5 @@
 _ = require 'underscore'
 inflection = require 'inflection'
-Sequelize = require 'sequelize'
 
 module.exports = class RelationParser
   @relation_types: ['hasOne', 'hasMany']
