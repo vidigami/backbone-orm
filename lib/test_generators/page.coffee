@@ -35,6 +35,17 @@ module.exports = (options) ->
           assert.equal(data.rows.length, limit, 'found models')
           done()
 
+    it 'Cursor can chain limit without paging', (done) ->
+      ALBUM_NAME = 'Test1'
+      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+        assert.ok(!err, 'no errors')
+
+        limit = 3
+        MODEL_TYPE.cursor({$page: false, name: ALBUM_NAME}).limit(limit).toJSON (err, json) ->
+          assert.ok(!err, 'no errors')
+          assert.equal(json.length, limit, 'found models')
+          done()
+
     it 'Cursor can chain limit and offset with paging', (done) ->
       ALBUM_NAME = 'Test2'
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
