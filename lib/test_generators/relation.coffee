@@ -27,12 +27,6 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        queue = new Queue(1)
-        queue.defer (callback) -> test_model.get 'photos', adapters.bbCallback(callback)
-
-        queue.defer (callback) ->
-          assert.ok(!err, 'no errors')
-          assert.equal(MODELS_JSON.length, count, "Expected: #{MODELS_JSON.length}. Actual: #{count}")
-          callback()
-
-        queue.await done
+        test_model.get 'photos', adapters.bbCallback (err, models) ->
+          assert.ok(models, 'found related models')
+          done()

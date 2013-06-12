@@ -68,7 +68,7 @@ module.exports = class MemoryCursor extends Cursor
     else if @_cursor.$white_list
       json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
 
-    if @_cursor.hasOwnProperty('$page')
+    if @_cursor.$page or @_cursor.$page is ''
       json =
         offset: @_cursor.$offset
         total_rows: @_count(keys)

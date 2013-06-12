@@ -10,9 +10,9 @@ DEFAULT_PARALLELISM = 1
 module.exports = class BatchUtils
   @processModels: (model_type, query, options, callback, fn) ->
     if arguments.length is 3
-      [model_type, query, options, callback, fn] = [model_type, {}, {}, query, options]
+      [query, options, callback, fn] = [{}, {}, query, options]
     else if arguments.length is 4
-      [model_type, query, options, callback, fn] = [model_type, {}, query, options, callback]
+      [query, options, callback, fn] = [{}, query, options, callback]
 
     processed_count = 0
     parsed_query = Cursor.parseQuery(query)
@@ -40,6 +40,6 @@ module.exports = class BatchUtils
     batch_cursor = _.extend({
       $limit: options.$limit or DEFAULT_LIMIT
       $offset: parsed_query.$offset or 0
-      $sort: parsed_query.$sort or [['id', 'asc']] # TODO: generalize sort for different types of sync
+      $sort: parsed_query.$sort or 'id' # TODO: generalize sort for different types of sync
     }, parsed_query.find) # add find parameters
     runBatch(batch_cursor, callback)

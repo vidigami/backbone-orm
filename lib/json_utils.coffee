@@ -11,6 +11,8 @@ module.exports = class JSONUtils
       date = moment.utc(json)
       return if date and date.isValid() then date.toDate() else json
     else if _.isString(json)
+      return true if json is 'true'
+      return false if json is 'false'
       return json
     else if _.isArray(json)
       json[index] = @JSONToValue(value) for index, value of json

@@ -20,4 +20,4 @@ test_parameters =
     }, callback)
     queue.await (err) -> callback(null, _.map(_.toArray(arguments).pop(), (test) -> JSONUtils.valueToJSON(test.toJSON())))
 
-require('../../lib/test_generators/server_model')(test_parameters)
+require('../../lib/test_generators/all')(test_parameters)

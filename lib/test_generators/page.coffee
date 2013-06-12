@@ -23,56 +23,67 @@ module.exports = (options) ->
         done()
 
     it 'Cursor can chain limit with paging', (done) ->
-      ALBUM_NAME = 'Test1'
-      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      LIMIT = 3
+      MODEL_TYPE.cursor({$page: true}).limit(LIMIT).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
+        assert.ok(data.rows, 'models received')
+        assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
+        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        done()
 
-        limit = 3
-        MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).limit(limit).toJSON (err, data) ->
-          assert.ok(!err, 'no errors')
-          assert.ok(data.rows, 'cursor toJSON gives us models')
-          assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
-          assert.equal(data.rows.length, limit, 'found models')
-          done()
+    it 'Cursor can chain limit without paging', (done) ->
+      LIMIT = 3
+      MODEL_TYPE.cursor({$page: false}).limit(LIMIT).toJSON (err, data) ->
+        assert.ok(!err, 'no errors')
+        assert.equal(LIMIT, data.length, "Expected: #{LIMIT}, Actual: #{data.length}")
+        done()
 
     it 'Cursor can chain limit and offset with paging', (done) ->
-      ALBUM_NAME = 'Test2'
-      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      LIMIT = 3; OFFSET = 1
+      MODEL_TYPE.cursor({$page: true}).limit(LIMIT).offset(OFFSET).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
+        assert.ok(data.rows, 'models received')
+        assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
+        assert.equal(OFFSET, data.offset, 'has the correct offset')
+        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        done()
 
-        limit = 2; offset = 1
-        MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).limit(limit).offset(offset).toJSON (err, data) ->
-          assert.ok(!err, 'no errors')
-          assert.ok(data.rows, 'cursor toJSON gives us models')
-          assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
-          assert.equal(data.offset, offset, 'has the correct offset')
-          assert.equal(limit, data.rows.length, "Expected: #{limit}, Actual: #{data.rows.length}")
-          done()
+    it 'Cursor can chain limit with paging (no true or false)', (done) ->
+      LIMIT = 3; OFFSET = 1
+      MODEL_TYPE.cursor({$page: ''}).limit(LIMIT).offset(OFFSET).toJSON (err, data) ->
+        assert.ok(!err, 'no errors')
+        assert.ok(data.rows, 'models received')
+        assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
+        assert.equal(OFFSET, data.offset, 'has the correct offset')
+        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        done()
 
     it 'Cursor can select fields with paging', (done) ->
-      ALBUM_NAME = 'Test3'
       FIELD_NAMES = ['id', 'name']
-
-      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      MODEL_TYPE.cursor({$page: true}).select(FIELD_NAMES).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
-
-        MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, data) ->
-          assert.ok(!err, 'no errors')
-          assert.ok(_.isArray(data.rows), 'cursor toJSON gives us models')
-          for json in data.rows
-            assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
-          done()
+        assert.ok(_.isArray(data.rows), 'models received')
+        for json in data.rows
+          assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
+        done()
 
     it 'Cursor can select values with paging', (done) ->
-      ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
-      Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
+      MODEL_TYPE.cursor({$page: true}).values(FIELD_NAMES).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
+        assert.ok(_.isArray(data.rows), 'cursor values is an array')
+        for json in data.rows
+          assert.ok(_.isArray(json), 'cursor item values is an array')
+          assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
+        done()
 
-        MODEL_TYPE.cursor({$page: true, name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, data) ->
+    it 'Ensure the correct value is returned', (done) ->
+      Utils.getAt MODEL_TYPE, 2, (err, model) ->
+        assert.ok(!err, 'no errors')
+        assert.ok(!!model, 'model')
+        MODEL_TYPE.cursor({$page: true, name: model.get('name')}).toJSON (err, data) ->
           assert.ok(!err, 'no errors')
-          assert.ok(_.isArray(data.rows), 'cursor values is an array')
-          for json in data.rows
-            assert.ok(_.isArray(json), 'cursor item values is an array')
-            assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
+          assert.equal(data.total_rows, 1, 'has the correct total_rows')
+          assert.equal(data.rows.length, 1, 'has the correct row.length')
+          assert.deepEqual(expected = JSON.stringify(model.toJSON()), actual = JSON.stringify(data.rows[0]), "Expected: #{util.inspect(expected)}. Actual: #{util.inspect(actual)}")
           done()
