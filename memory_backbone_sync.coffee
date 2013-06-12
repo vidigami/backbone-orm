@@ -1,6 +1,7 @@
 _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
+relation_manager = require './lib/relation_manager'
 
 S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
@@ -17,6 +18,8 @@ class MemoryBackboneSync
     # publish methods and sync on model
     @model_type[fn] = _.bind(@[fn], @) for fn in CLASS_METHODS
     @model_type._sync = @
+
+    @model_type.get = relation_manager(@model_type, @relations)
 
   read: (model, options) ->
     options.success?(if model.models then (model.attributes for id, model of @store) else @store[model.attributes.id].attributes)

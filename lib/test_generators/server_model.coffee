@@ -7,3 +7,4 @@ module.exports = (options) ->
   require('../../lib/test_generators/find')(options)
   require('../../lib/test_generators/page')(options)
   require('../../lib/test_generators/sort')(options)
+  require('../../lib/test_generators/relation')(options)
