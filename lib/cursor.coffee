@@ -8,6 +8,9 @@ module.exports = class Cursor
     parsed_query = Cursor.parseQuery(query)
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
+    # ensure arrays
+    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
+
   @parseQuery: (query) ->
     if not query
       return {find: {}, cursor: {}}
