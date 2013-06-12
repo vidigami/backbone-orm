@@ -45,7 +45,7 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        MODEL_TYPE.cursor({name: test_model.get('id')}).toModels (err, models) ->
+        MODEL_TYPE.cursor({name: test_model.get('name')}).toModels (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'cursor toModels gives us models')
           for model in models
