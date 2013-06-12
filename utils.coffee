@@ -5,6 +5,13 @@ module.exports = class Utils
   @adapters:
     bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: (-> callback(new Error("failed")))}
 
+  # parse an object whose values are still JSON stringified
+  @parse: (query) ->
+    return JSON.parse(query) if _.isString(query)
+    result = {}
+    result[key] = JSON.parse(value) for key, value of query
+    return result
+
   @getAt: (model_type, index, callback) ->
     model_type.cursor().offset(index).limit(1).toModels (err, models) ->
       return callback(err) if err
