@@ -4,9 +4,31 @@ _ = require 'underscore'
 Queue = require 'queue-async'
 inflection = require 'inflection'
 
+RelationParser = require './parsers/relation'
+
 module.exports = class RelationManager
 
-  constructor: (@model_type, @relations, options={}) ->
+  constructor: (@model_type, raw_relations) ->
+    @relations = RelationParser.parse(@model_type, raw_relations)
+
+    # TODO: monkey patch
+    # override model methods
+    _this = @
+
+    @model_type::get = (key) ->
+      if relation = _this.relations[key]
+        relation_type = relation.type
+        return _this.getMany(@, relation, options) if relation_type is 'hasMany'
+        return _this.getOne(@, relation, options) if relation_type is 'hasOne'
+      else
+        return @attributes[key]
+
+    @model_type::toJSON = ->
+      json = _.clone(@attributes)
+      json[key] = value.toJSON() for key, value of json when value.toJSON
+      return json
+
+    @model_type._relationship_manager = @
 
   getMany: (model, relation, options) ->
     related_model_type = relation.model
@@ -29,14 +51,5 @@ module.exports = class RelationManager
       return options.error(new Error "Model not found. Id #{query[foreign_key]}") if not json
       options.success?(json)
 
-  get: (model, attr, options) ->
-    if relation = @relations[attr]
-      relation_type = relation.type
-      return @getMany(model, relation, options) if relation_type is 'hasMany'
-      return @getOne(model, relation, options) if relation_type is 'hasOne'
-    else
-      return model.attributes[attr]
-
-module.exports = (model_type, options) ->
-  manager = new RelationManager(model_type, options)
-  return (relation, options) -> return manager.get(@, relation, options)
+module.exports = (model_type, raw_relations) ->
+  relation_manager = new RelationManager(model_type, raw_relations)

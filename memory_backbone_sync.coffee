@@ -1,9 +1,7 @@
 _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
-relation_manager = require './lib/relation_manager'
 SchemaParser = require './lib/parsers/schema'
-RelationParser = require './lib/parsers/relation'
 
 Cache = require './cache'
 
@@ -26,9 +24,9 @@ class MemoryBackboneSync
     @model_type._sync = @
 
     @schema_info = SchemaParser.parse(_.result(@model_type, 'schema') or {})
-    @relations = RelationParser.parse(@model_type, @schema_info.raw_relations)
 
-  initialize: -> @model_type::get = relation_manager(@model_type, @relations)
+  initialize: ->
+    require('./lib/relation_manager')(@model_type, @schema_info.raw_relations)
 
   read: (model, options) ->
     options.success?(if model.models then (model.attributes for id, model of @store) else @store[model.attributes.id].attributes)

@@ -33,6 +33,7 @@ module.exports = (options) ->
           assert.ok(!err, 'no errors')
           assert.ok(model, 'found related model')
           assert.equal(test_model.first_id, model.id, 'found related model')
+          done()
 
     it 'Handles a get query for a hasOne and hasOne two sided relation', (done) ->
       Utils.getAt MODEL_TYPE, 1, (err, test_model) ->

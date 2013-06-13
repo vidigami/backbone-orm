@@ -5,16 +5,16 @@ Queue = require 'queue-async'
 JSONUtils = require '../../lib/json_utils'
 Fabricator = require '../../fabricator'
 
-class FlatMemoryModel extends Backbone.Model
-  sync: require('../../memory_backbone_sync')(FlatMemoryModel)
+class FlatModel extends Backbone.Model
+  sync: require('../../memory_backbone_sync')(FlatModel)
 
 test_parameters =
-  model_type: FlatMemoryModel
+  model_type: FlatModel
   route: 'mock_models'
   beforeEach: (callback) ->
     queue = new Queue(1)
-    queue.defer (callback) -> FlatMemoryModel.destroy {}, callback
-    queue.defer (callback) -> Fabricator.create(FlatMemoryModel, 10, {
+    queue.defer (callback) -> FlatModel.destroy callback
+    queue.defer (callback) -> Fabricator.create(FlatModel, 10, {
       name: Fabricator.uniqueId('album_')
       created_at: Fabricator.date
       updated_at: Fabricator.date

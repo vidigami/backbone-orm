@@ -32,6 +32,7 @@ module.exports = (options) ->
         test_model.get 'seconds', adapters.bbCallback (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
+          done()
 
     it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
       Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
