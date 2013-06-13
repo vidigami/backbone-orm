@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
+BelongsTo = require './relations/belongs_to'
 HasOne = require './relations/has_one'
 HasMany = require './relations/has_many'
 
@@ -32,6 +33,8 @@ module.exports = class Schema
       type_name = options[0]
       if type_name is 'hasOne'
         relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
+      else if type_name is 'belongsTo'
+        relation = @relations[key] = new BelongsTo(@model_type, key, options.slice(1))
       else if type_name is 'hasMany'
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else

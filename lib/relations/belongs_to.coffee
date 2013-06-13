@@ -2,7 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 inflection = require 'inflection'
 
-module.exports = class HasOne
+module.exports = class BelongsTo
   constructor: (@model_type, @key, options_array) ->
     @type_name = 'belongsTo'
     @ids_accessor = "#{@key}_id"
@@ -17,7 +17,7 @@ module.exports = class HasOne
       # TODO
 
     else
-      throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      throw new Error "BelongsTo::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       unless value instanceof @related_model_type
         if _.isObject(value)
           value = new @related_model_type(@related_model_type::parse(value))
@@ -35,7 +35,7 @@ module.exports = class HasOne
       return related_id
 
     else
-      throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      throw new Error "BelongsTo::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       value = model.attributes[key]
       callback(null, value) if callback
       return value
