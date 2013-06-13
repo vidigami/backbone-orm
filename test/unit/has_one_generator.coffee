@@ -80,4 +80,4 @@ test_parameters =
     queue.await (err) ->
       callback(err, _.map(MODELS.one, (test) -> JSONUtils.valueToJSON(test.toJSON())))
 
-require('../../lib/test_generators/all_relational')(test_parameters)
+require('../../lib/test_generators/relational/has_one')(test_parameters)

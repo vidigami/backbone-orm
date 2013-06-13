@@ -26,12 +26,18 @@ module.exports = class RelationManager
       return _get.apply(@, arguments)
 
     @model_type::toJSON = ->
+      return if @_locked > 0
+      @_locked or= 0
+      @_locked++
+
       json = _.clone(@attributes)
       for key, value of json
         if value.toJSON
           json[key] = value.toJSON()
         else if _.isArray(value)
           json[key] = _.map(value, (item) -> if item.toJSON then item.toJSON() else item)
+
+      @_locked--
       return json
     return
 
