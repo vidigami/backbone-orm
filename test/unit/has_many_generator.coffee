@@ -77,6 +77,7 @@ test_parameters =
       save_queue.await callback
 
     queue.await (err) ->
-      callback(err, _.map(MODELS.many, (test) -> JSONUtils.valueToJSON(test.toJSON())))
+      # callback(err, _.map(MODELS.many, (test) -> JSONUtils.valueToJSON(test.toJSON())))
+      callback(err, _.map(MODELS.many, (test) -> test.toJSON()))
 
 require('../../lib/test_generators/relational/has_many')(test_parameters)

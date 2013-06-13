@@ -1,3 +1,4 @@
+util = require 'util'
 _ = require 'underscore'
 Queue = require 'queue-async'
 
