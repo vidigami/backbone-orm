@@ -1,5 +1,7 @@
 util = require 'util'
+URL = require 'url'
 _ = require 'underscore'
+inflection = require 'inflection'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
@@ -15,6 +17,12 @@ CLASS_METHODS = [
 
 class MemoryBackboneSync
   constructor: (@model_type) ->
+    throw new Error("Missing url for model") unless @url = _.result(@model_type.prototype, 'url')
+    url_parts = URL.parse(@url)
+    database_parts = url_parts.pathname.split('/')
+    @table = database_parts[database_parts.length-1]
+    @model_name = inflection.classify(inflection.singularize(@table))
+
     @store = {}
 
     # publish methods and sync on model
