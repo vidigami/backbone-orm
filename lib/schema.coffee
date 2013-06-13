@@ -26,6 +26,7 @@ module.exports = class Schema
     @_monkeyPatchModel()
 
   initialize: ->
+    @relations_ids = {}
     for key, options of @relations
       options = options() if _.isFunction(options)
       throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
