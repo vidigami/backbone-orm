@@ -2,20 +2,16 @@ util = require 'util'
 _ = require 'underscore'
 inflection = require 'inflection'
 
-resolveModelType = (type) -> if _.isFunction(type) then type() else type
-
 class Relationship
   constructor: (@model_type, @key, @options_array) ->
-
-  initialize: ->
-    @to_model_type = resolveModelType(@options_array[0])
+    @to_model_type = @options_array[0]
     @[key] = value for key, value of @options_array[1]
     @foreign_key = inflection.foreign_key(@key) unless @foreign_key
     # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
 
 class HasOne extends Relationship
   get: (model, callback) ->
-    console.log "HasOne::get  foreign_key: #{relation.foreign_key}"
+    console.log "HasOne::get foreign_key: #{@foreign_key}"
 
     related_model_type = @to_model_type
     query = {$one: true}
@@ -55,39 +51,28 @@ module.exports = class Schema
     @_parse()
     @_monkeyPatchModel()
 
-  initialize: -> relation.initialize() for key, relation of @relations
+  initialize: ->
+    for key, options of @relations
+      options = options() if _.isFunction(options)
+      throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
+
+      type_name = options[0]
+      if type_name is 'hasOne'
+        @relations[key] = new HasOne(@model_type, key, options.slice(1))
+      else if type_name is 'hasMany'
+        @relations[key] = new HasMany(@model_type, key, options.slice(1))
+      else
+        throw new Error "Unrecognized relationship: #{util.inspect(options)}"
+
   relationship: (key) -> return @relations[key]
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
+    @fields ={}; @relations ={}
 
-    @fields ={}
-    @relations ={}
-
-    # parse
-    for key, field_options of schema
-      if _.isArray(field_options)
-        field = field_options[0]
-        options = field_options.slice(1)
-        options = [options] unless _.isArray(options)
-
-      else
-        field = field_options
-        options = null
-
-      # recognized type
-      if type = Schema.types[field]
-        @fields[key] = type
-
-      # relation
-      else
-        throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
-        if field is 'hasOne'
-          @relations[key] = new HasOne(@model_type, key, options)
-        else if field is 'hasMany'
-          @relations[key] = new HasMany(@model_type, key, options)
-        else
-          throw new Error "Unrecognized relationship type: #{field}"
+    for key, options of schema
+      type_name = if _.isArray(options) then options[0] else options
+      if type = Schema.types[type_name] then (@fields[key] = type) else (@relations[key] = options) # save relations for later binding
 
   _monkeyPatchModel: ->
     _schema = @
