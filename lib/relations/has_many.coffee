@@ -31,7 +31,6 @@ module.exports = class HasMany
 
     else
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      console.log "key: #{key} callback: #{callback}"
       collection = model.attributes[key]
       callback(null, if collection then collection.models else []) if callback
       return collection
