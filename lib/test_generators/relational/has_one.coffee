@@ -55,6 +55,6 @@ module.exports = (options) ->
 
           model.get 'one_reverse', (err, original_model) ->
             assert.ok(!err, 'no errors')
-            assert.ok(model, 'found original model')
+            assert.ok(original_model, 'found original model')
             assert.equal(test_model.get('id'), original_model.get('id'), 'reverse relation gives the correct model')
             done()
