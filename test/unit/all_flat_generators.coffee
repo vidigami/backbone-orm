@@ -3,6 +3,7 @@ Backbone = require 'backbone'
 Queue = require 'queue-async'
 
 JSONUtils = require '../../lib/json_utils'
+Fabricator = require '../../fabricator'
 
 class FlatMemoryModel extends Backbone.Model
   sync: require('../../memory_backbone_sync')(FlatMemoryModel)
