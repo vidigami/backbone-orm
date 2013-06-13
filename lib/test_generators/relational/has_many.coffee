@@ -13,7 +13,6 @@ module.exports = (options) ->
   Queue = require 'queue-async'
 
   Utils = require '../../../utils'
-  adapters = Utils.adapters
 
   describe 'Model.relation', ->
 
@@ -29,7 +28,7 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        test_model.get 'seconds', adapters.bbCallback (err, models) ->
+        test_model.get 'many', (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
           done()
@@ -39,11 +38,11 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        test_model.get 'seconds', adapters.bbCallback (err, models) ->
+        test_model.get 'many', (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
           related = models[0]
 
-          related.get 'first', adapters.bbCallback (err, original_model) ->
+          related.get 'many_reverse', (err, original_model) ->
             assert.equal(test_model, original_model, 'reverse relation gives the correct model')
             done()

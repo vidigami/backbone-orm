@@ -20,15 +20,18 @@ module.exports = class RelationManager
     @model_type::get = (key, callback) ->
       if arguments.length > 1
         if relation = _rel_manager.relations[key]
-          if relation.type is 'hasMany' then _rel_manager.getMany(@, relation, callback) else _rel_manager.getOne(@, relation, callback)
+          (if relation.type is 'hasMany' then _rel_manager.getMany else _rel_manager.getOne)(@, relation, callback)
         else
           callback(null, @attributes[key])
       return _get.apply(@, arguments)
 
-    _toJSON = @model_type::toJSON
     @model_type::toJSON = ->
-      json = _toJSON.apply(@, arguments)
-      json[key] = value.toJSON() for key, value of json when value.toJSON
+      json = _.clone(@attributes)
+      for key, value of json
+        if value.toJSON
+          json[key] = value.toJSON()
+        else if _.isArray(value)
+          json[key] = _.map(value, (item) -> if item.toJSON then item.toJSON() else item)
       return json
     return
 
@@ -36,6 +39,9 @@ module.exports = class RelationManager
     related_model_type = relation.model
     query = {}
     query[relation.foreign_key] = model.attributes.id
+
+    console.log "getMany foreign_key: #{relation.foreign_key}"
+
     related_model_type.cursor(query).toModels (err, models) ->
       return callback(err) if err
       return callback(new Error "Model not found. Id #{relation.foreign_key}") if not models.length
@@ -45,7 +51,7 @@ module.exports = class RelationManager
     related_model_type = relation.model
     query = {$one: true}
 
-    console.log "relation.foreign_key: #{relation.foreign_key}"
+    console.log "getOne foreign_key: #{relation.foreign_key}"
 
     if relation.reverse
       query[relation.foreign_key] = model.attributes.id

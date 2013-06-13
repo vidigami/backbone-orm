@@ -28,7 +28,7 @@ HasManyModel.initialize()
 BASE_COUNT = 5
 
 test_parameters =
-  model_type: FlatModel
+  model_type: HasManyModel
   route: 'mock_models'
   beforeEach: (callback) ->
     MODELS = {}
@@ -41,7 +41,6 @@ test_parameters =
 
       destroy_queue.defer (callback) -> FlatModel.destroy callback
       destroy_queue.defer (callback) -> ReverseModel.destroy callback
-      destroy_queue.defer (callback) -> HasOneModel.destroy callback
       destroy_queue.defer (callback) -> HasManyModel.destroy callback
 
       destroy_queue.await callback
