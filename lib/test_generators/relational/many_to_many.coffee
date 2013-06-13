@@ -24,7 +24,7 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+    it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
       Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
@@ -34,6 +34,8 @@ module.exports = (options) ->
           assert.ok(models, 'found related models')
           related = models[0]
 
-          related.get 'many_reverse', (err, original_model) ->
-            assert.equal(test_model, original_model, 'reverse relation gives the correct model')
+          related.get 'many_reverse', (err, original_models) ->
+            assert.ok(!err, 'no errors')
+            assert.ok(models, 'found related models')
+            assert.ok(_.contains(original_models, test_model), 'reverse relation contains the original model')
             done()

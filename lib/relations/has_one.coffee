@@ -4,11 +4,12 @@ inflection = require 'inflection'
 
 module.exports = class HasOne
   constructor: (@model_type, @key, options_array) ->
+    @type_name = 'hasOne'
     @ids_accessor = "#{@key}_id"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
-    @foreign_key = inflection.foreign_key(@key) unless @foreign_key
-    # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
+    unless @foreign_key
+      @foreign_key = if @reverse then inflection.foreign_key(model_type._sync.model_name) else inflection.foreign_key(@key)
 
   set: (model, key, value, options, _set) ->
     # hack
@@ -41,10 +42,10 @@ module.exports = class HasOne
 
     query = {$one: true}
 
-    # if @reverse
-    #   query[@foreign_key] = model.attributes.id
-    # else
-    query.id = model.get(@foreign_key)
+    if @reverse
+      query[@foreign_key] = model.attributes.id
+    else
+      query.id = model.get(@foreign_key)
 
     @related_model_type.cursor(query).toModels (err, model) =>
       return callback(err) if err

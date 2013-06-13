@@ -4,11 +4,11 @@ inflection = require 'inflection'
 
 module.exports = class HasMany
   constructor: (@model_type, @key, options_array) ->
+    @type_name = 'hasMany'
     @ids_accessor = "#{@key}_ids"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
-    @foreign_key = inflection.foreign_key(@key) unless @foreign_key
-    # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
+    @foreign_key = inflection.foreign_key(model_type._sync.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   set: (model, key, value, options) ->
