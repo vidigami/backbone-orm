@@ -74,6 +74,12 @@ test_parameters =
           many_model.set({many_reverse: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
           save_queue.defer (callback) -> many_model.save {}, adapters.bbCallback callback
 
+          # TODO: remove when automated
+          for related_model in many_model.get('many_reverse').models
+            do (related_model) ->
+              related_model.set({many_reverse: many_model})
+              save_queue.defer (callback) -> related_model.save {}, adapters.bbCallback callback
+
       save_queue.await callback
 
     queue.await (err) ->

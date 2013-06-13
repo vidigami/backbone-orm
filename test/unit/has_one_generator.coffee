@@ -72,8 +72,10 @@ test_parameters =
       for one_model in MODELS.one
         do (one_model) ->
           one_model.set({one: MODELS.flat.pop(), one_reverse: reverse_model = MODELS.reverse.pop()})
-          reverse_model.set({one_reverse: one_model})
           save_queue.defer (callback) -> one_model.save {}, adapters.bbCallback callback
+
+          # TODO: remove when automated
+          reverse_model.set({one_reverse: one_model})
           save_queue.defer (callback) -> reverse_model.save {}, adapters.bbCallback callback
 
       save_queue.await callback
