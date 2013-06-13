@@ -28,9 +28,7 @@ module.exports = class Schema
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
-      @relations[relation.id_accessor] = relation
-
-      relationship: (key) -> return @relations[key]
+      @relations[relation.ids_accessor] = relation if relation.ids_accessor
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
@@ -56,27 +54,30 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      if arguments.length > 1
-        if relation = _schema.relations[key]
-          relation.get(@, key, callback)
-        else
-          callback(null, @attributes[key])
-      return _get.apply(@, arguments)
+      if relation = _schema.relations[key]
+        return relation.get(@, key, callback)
+      else
+        value = _get.call(@, key)
+        callback(null, value) if callback
+        return value
 
+    _toJSON = @model_type::toJSON
     @model_type::toJSON = ->
       return @get('id') if @_locked > 0
       @_locked or= 0
       @_locked++
 
+      toJSON = (item) -> if (item and item.get and item.toJSON) then item.toJSON() else item
+
       json = _.clone(@attributes)
       for key, value of json
         continue unless value
         if value.models
-          json[key] = (if item.toJSON then console.log item.attributes; item.attributes.toJSON() else item) for item in value.models
+          json[key] = _.map(value.models, toJSON)
         else if _.isArray(value)
-          json[key] = _.map(value, (item) -> if item.toJSON then item.toJSON() else item)
-        else if value.toJSON
-          json[key] = value.toJSON()
+          json[key] = _.map(value, toJSON)
+        else if (value.get and value.toJSON) # model signature
+          json[key] = toJSON(value)
 
       @_locked--
       return json

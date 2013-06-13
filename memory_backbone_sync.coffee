@@ -1,3 +1,4 @@
+util = require 'util'
 _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
@@ -25,22 +26,22 @@ class MemoryBackboneSync
   initialize: -> @model_type._schema?.initialize()
 
   read: (model, options) ->
-    options.success?(if model.models then (model.attributes for id, model of @store) else @store[model.attributes.id].attributes)
+    options.success?(if model.models then (json for id, json of @store) else @store[model.attributes.id])
 
   create: (model, options) ->
     model.attributes.id = Utils.guid()
-    @store[model.attributes.id] = model.clone()
-    options.success?(model.attributes)
+    model_json = @store[model.attributes.id] = model.toJSON()
+    options.success?(model_json)
 
   update: (model, options) ->
-    return options.error(new Error('Model not found')) unless store_model = @store[model.attributes.id]
-    _.extend(store_model.attributes, model.attributes)
-    options.success?(store_model.attributes)
+    return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
+    _.extend(model_json, model.toJSON())
+    options.success?(model_json)
 
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless store_model = @store[model.attributes.id]
+    return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
     delete @store[model.attributes.id]
-    options.success?(store_model.attributes)
+    options.success?(model_json)
 
   ###################################
   # Collection Extensions

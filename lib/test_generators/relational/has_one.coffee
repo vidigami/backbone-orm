@@ -31,7 +31,7 @@ module.exports = (options) ->
         test_model.get 'one', (err, model) ->
           assert.ok(!err, 'no errors')
           assert.ok(model, 'found related model')
-          assert.equal(test_model.get('one_id'), model.get('id'), "Expected: #{test_model.one_id}. Actual: #{model.id}")
+          assert.equal(test_model.get('one_id'), model.get('id'), "Expected: #{test_model.get('one_id')}. Actual: #{model.get('id')}")
           done()
 
     it 'Handles a get query for a reversed hasOne relation', (done) ->
@@ -56,5 +56,5 @@ module.exports = (options) ->
           model.get 'one_reverse', (err, original_model) ->
             assert.ok(!err, 'no errors')
             assert.ok(model, 'found original model')
-            assert.equal(test_model.id, original_model.id, 'reverse relation gives the correct model')
+            assert.equal(test_model.get('id'), original_model.get('id'), 'reverse relation gives the correct model')
             done()

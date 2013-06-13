@@ -20,10 +20,10 @@ module.exports = class MemoryCursor extends Cursor
 
     if keys.length
       json = []
-      for id, model of @model_type._sync.store
-        json.push(model.attributes) if _.isEqual(_.pick(model.attributes, keys), @_find)
+      for id, model_json of @model_type._sync.store
+        json.push(model_json) if _.isEqual(_.pick(model_json, keys), @_find)
     else
-      json = (model.attributes for id, model of @model_type._sync.store)
+      json = (model_json for id, model_json of @model_type._sync.store)
 
     # find.order = @_cursor.$sort if @_cursor.$sort # TODO: should be in form {order: 'title DESC'}
     if @_cursor.$offset
@@ -79,6 +79,6 @@ module.exports = class MemoryCursor extends Cursor
 
   _count: (keys) =>
     if keys.length
-      return _.reduce(@model_type._sync.store, ((memo, model) => return if _.isEqual(_.pick(model.attributes, keys), @_find) then memo + 1 else memo), 0)
+      return _.reduce(@model_type._sync.store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), @_find) then memo + 1 else memo), 0)
     else
       return _.size(@model_type._sync.store)
