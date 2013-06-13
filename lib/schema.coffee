@@ -36,7 +36,7 @@ module.exports = class Schema
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
-      @relations[relation.ids_accessor] = relation if relation.ids_accessor
+      @relations_ids[relation.ids_accessor] = relation if relation.ids_accessor
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
@@ -54,7 +54,7 @@ module.exports = class Schema
       (attributes[attributes] = value; options = value) if _.isString(attributes)
 
       for key, value of attributes
-        if relation = _schema.relations[key]
+        if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
           relation.set(@, key, value, options, _set)
         else
           _set.call(@, key, value, options)
@@ -64,7 +64,7 @@ module.exports = class Schema
     @model_type::get = (key, callback) ->
       console.log "key: #{key}"
 
-      if relation = _schema.relations[key]
+      if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
         return relation.get(@, key, callback)
       else
         value = _get.call(@, key)
