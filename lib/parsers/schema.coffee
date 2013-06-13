@@ -10,10 +10,7 @@ module.exports = class SchemaParser
     Float: 'Float'
 
   @parse: (schema_definition) ->
-    result =
-      schema: {}
-      raw_relations: {}
-      field_options: {}
+    result = {schema: {}, raw_relations: {}, field_options: {}}
     for key, field_options of schema_definition
       if _.isArray(field_options)
         field = field_options[0]

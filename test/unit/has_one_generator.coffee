@@ -1,3 +1,4 @@
+util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
@@ -28,7 +29,7 @@ HasOneModel.initialize()
 BASE_COUNT = 5
 
 test_parameters =
-  model_type: FlatModel
+  model_type: HasOneModel
   route: 'mock_models'
   beforeEach: (callback) ->
     MODELS = {}
