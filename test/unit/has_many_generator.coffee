@@ -12,13 +12,13 @@ class FlatModel extends Backbone.Model
 
 class ReverseModel extends Backbone.Model
   @schema:
-    many_reverse: -> ['hasOne', HasManyModel]
+    many_reverse: -> ['hasOne', HasManyModel, foreign_key: 'reverse_id']
   sync: require('../../memory_backbone_sync')(ReverseModel)
 
 class HasManyModel extends Backbone.Model
   @schema:
-    many: -> ['hasMany', FlatModel]
-    many_reverse: -> ['hasMany', ReverseModel]
+    many: -> ['hasMany', FlatModel, foreign_key: 'many_id']
+    many_reverse: -> ['hasMany', ReverseModel, foreign_key: 'many_id']
   sync: require('../../memory_backbone_sync')(HasManyModel)
 
 FlatModel.initialize()
