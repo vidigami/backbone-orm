@@ -1,6 +1,8 @@
 _ = require 'underscore'
 Queue = require 'queue-async'
 
+S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
+
 module.exports = class Utils
   @adapters:
     bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: (-> callback(new Error("failed")))}
@@ -12,6 +14,8 @@ module.exports = class Utils
     for key, value of query
       try result[key] = JSON.parse(value) catch err then result[key] = value
     return result
+
+  @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   @getAt: (model_type, index, callback) ->
     model_type.cursor().offset(index).limit(1).toModels (err, models) ->

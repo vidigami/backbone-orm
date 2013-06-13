@@ -4,7 +4,7 @@ JSONUtils = require './json_utils'
 
 module.exports = class Cursor
   constructor: (query, options) ->
-    @[key] = value for key, value of options # mixin
+    @[key] = value for key, value of options
     parsed_query = Cursor.parseQuery(query)
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 

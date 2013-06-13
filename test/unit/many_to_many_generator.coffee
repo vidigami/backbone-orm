@@ -9,12 +9,12 @@ adapters = Utils.adapters
 
 class ReverseModel extends Backbone.Model
   @schema:
-    many_reverse: -> ['hasMany', HasManyModel]
+    many_reverse: ['hasMany', -> HasManyModel]
   sync: require('../../memory_backbone_sync')(ReverseModel)
 
 class HasManyModel extends Backbone.Model
   @schema:
-    many_reverse: -> ['hasMany', ReverseModel]
+    many_reverse: ['hasMany', -> ReverseModel]
   sync: require('../../memory_backbone_sync')(HasManyModel)
 
 ReverseModel.initialize()

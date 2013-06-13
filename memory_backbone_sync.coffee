@@ -1,12 +1,10 @@
 _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
-SchemaParser = require './lib/parsers/schema'
+Schema = require './lib/schema'
+Utils = require './utils'
 
 Cache = require './cache'
-
-S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
-guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
 CLASS_METHODS = [
   'initialize'
@@ -20,20 +18,18 @@ class MemoryBackboneSync
 
     # publish methods and sync on model
     @model_type[fn] = _.bind(@[fn], @) for fn in CLASS_METHODS
-    # Cache.initialize(@model_type, @)
+    # Cache.initialize(@model_type, @) # use composition instead
     @model_type._sync = @
+    @model_type._schema = new Schema(@model_type)
 
-    @schema_info = SchemaParser.parse(_.result(@model_type, 'schema') or {})
-
-  initialize: ->
-    require('./lib/relation_manager')(@model_type, @schema_info.raw_relations)
+  initialize: -> @model_type._schema?.initialize()
 
   read: (model, options) ->
     options.success?(if model.models then (model.attributes for id, model of @store) else @store[model.attributes.id].attributes)
 
   create: (model, options) ->
-    model.attributes.id = guid()
-    @store[model.attributes.id = guid()] = model.clone()
+    model.attributes.id = Utils.guid()
+    @store[model.attributes.id] = model.clone()
     options.success?(model.attributes)
 
   update: (model, options) ->
