@@ -1,8 +1,16 @@
 util = require 'util'
 _ = require 'underscore'
+Backbone = require 'backbone'
 
 HasOne = require './relations/has_one'
 HasMany = require './relations/has_many'
+
+# HACK: global monkey patch - WHY IS THIS NEEDED?
+_original_get = Backbone.Model::get
+Backbone.Model::get = (key, callback) ->
+  value = _original_get.call(@, key)
+  callback(null, value) if callback
+  return value
 
 module.exports = class Schema
   @types:
@@ -54,6 +62,8 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
+      console.log "key: #{key}"
+
       if relation = _schema.relations[key]
         return relation.get(@, key, callback)
       else

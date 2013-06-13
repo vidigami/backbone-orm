@@ -11,24 +11,33 @@ module.exports = class HasOne
     # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
 
   set: (model, key, value, options, _set) ->
-    unless value instanceof @related_model_type
-      if _.isObject(value)
-        value = new @related_model_type(@related_model_type::parse(value))
-      else
-        value = new @related_model_type(@related_model_type::parse({id: value})) # TODO: need to fetch
+    # hack
+    if key is @ids_accessor
+      # TODO
 
-    _set.call(model, key, value, options)
+    else
+      throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      unless value instanceof @related_model_type
+        if _.isObject(value)
+          value = new @related_model_type(@related_model_type::parse(value))
+        else
+          value = new @related_model_type(@related_model_type::parse({id: value})) # TODO: need to fetch
+
+      _set.call(model, key, value, options)
 
   get: (model, key, callback, _get) ->
     # hack
     if key is @ids_accessor
-      related_id = if related_model = model.attributes[key.replace('_id', '')] then related_model.get('id') else undefined
+      relation_key = key.replace('_id', '')
+      related_id = if related_model = model.attributes[relation_key] then related_model.get('id') else undefined
       callback(null, related_id) if callback
       return related_id
 
     else
-      callback(null, model.attributes[key]) if callback
-      return model.attributes[key]
+      throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      value = model.attributes[key]
+      callback(null, value) if callback
+      return value
 
     query = {$one: true}
 

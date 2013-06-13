@@ -12,18 +12,29 @@ module.exports = class HasMany
     @collection_type = Backbone.Collection unless @collection_type
 
   set: (model, key, value, options) ->
-    model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
+    # hack
+    if key is @ids_accessor
+      # TODO
 
-    console.trace "set value: #{util.inspect(value)}"
-
-    model.attributes[@key].set(value)
+    else
+      throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+      model.attributes[key].set(value)
 
   get: (model, key, callback) ->
     # hack
-    lookup_key = key.replace('_id', '')
-    collection = model.attributes[lookup_key]
-    callback(null, if collection then collection.models else []) if callback
-    return collection
+    if key is @ids_accessor
+      relation_key = key.replace('_ids', '')
+      related_ids = if related_collection = model.attributes[relation_key] then _.map(related_collection.models, (related_model) -> related_model.get('id')) else []
+      callback(null, related_ids) if callback
+      return related_ids
+
+    else
+      throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      console.log "key: #{key} callback: #{callback}"
+      collection = model.attributes[key]
+      callback(null, if collection then collection.models else []) if callback
+      return collection
 
     query = {}
     query[@foreign_key] = model.attributes.id
