@@ -4,12 +4,12 @@ inflection = require 'inflection'
 
 module.exports = class HasOne
   constructor: (@model_type, @key, options_array) ->
-    @type_name = 'hasOne'
+    @type_name = 'belongsTo'
     @ids_accessor = "#{@key}_id"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
     unless @foreign_key
-      @foreign_key = inflection.foreign_key(model_type._sync.model_name)
+      @foreign_key = inflection.foreign_key(@key)
 
   set: (model, key, value, options, _set) ->
     # hack
@@ -40,8 +40,9 @@ module.exports = class HasOne
       callback(null, value) if callback
       return value
 
-    query = {$one: true}
-    query[@foreign_key] = model.attributes.id
+    query =
+      $one: true
+      id: model.get(@foreign_key)
 
     @related_model_type.cursor(query).toModels (err, model) =>
       return callback(err) if err
