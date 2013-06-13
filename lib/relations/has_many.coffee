@@ -4,7 +4,7 @@ inflection = require 'inflection'
 
 module.exports = class HasMany
   constructor: (@model_type, @key, options_array) ->
-    @type_name: 'hasMany'
+    @type_name = 'hasMany'
     @ids_accessor = "#{@key}_ids"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
