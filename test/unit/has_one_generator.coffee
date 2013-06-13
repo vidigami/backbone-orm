@@ -19,7 +19,7 @@ class ReverseModel extends Backbone.Model
 class HasOneModel extends Backbone.Model
   @schema:
     one: -> ['hasOne', FlatModel] #, reverse: true]
-    one_reverse: -> ['hasOne', ReverseModel] #, reverse: true]
+    one_reverse: -> ['hasOne', ReverseModel, reverse: true]
   sync: require('../../memory_backbone_sync')(HasOneModel)
 
 FlatModel.initialize()
@@ -69,11 +69,20 @@ test_parameters =
     queue.defer (callback) ->
       save_queue = new Queue()
 
+#      reverse_models = _.clone(MODELS.reverse)
+
       for one_model in MODELS.one
         do (one_model) ->
-          one_model.set({one: MODELS.flat.pop()})
-          one_model.set({one_reverse: MODELS.reverse.pop()})
+          associated_model = MODELS.flat.pop()
+          one_model.set({one: associated_model, one_id: associated_model.id})
+#          one_model.set({one_reverse: MODELS.reverse.pop()})
           save_queue.defer (callback) -> one_model.save {}, adapters.bbCallback callback
+
+      for reverse_model in MODELS.reverse
+        do (reverse_model) ->
+          associated_model = MODELS.one.pop()
+          reverse_model.set({one_reverse: associated_model, one_reverse_id: associated_model.id})
+          save_queue.defer (callback) -> reverse_model.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 

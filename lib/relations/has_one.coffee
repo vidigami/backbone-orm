@@ -6,13 +6,14 @@ module.exports = class HasOne
     @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(@key) unless @foreign_key
     # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
+    @ids_accessor = ''
 
   set: (model, key, value, options, _set) -> _set.call(model, key, value, options)
   get: (model, callback) ->
     # hack
     console.log "HasOne::get foreign_key: #{@foreign_key}"
-    foreign_key = @foreign_key.replace('_id', '')
-    return callback(null, model.get(foreign_key))
+#    foreign_key = @foreign_key.replace('_id', '')
+#    return callback(null, model.get(foreign_key))
 
     related_model_type = @to_model_type
     query = {$one: true}

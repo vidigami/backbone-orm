@@ -7,14 +7,18 @@ module.exports = class HasMany
     @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(@key) unless @foreign_key
     # foreign_key: options.foreign_key or @_keyFromTypeAndModel(relation_type, from_model, to_model, options.reverse)
-
+    @ids_accessor = ''
     @collection_type = Backbone.Collection unless @collection_type
 
   set: (model, key, value, options, _set) ->
     model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
     model.attributes[@key].set(value)
 
-  get: (model, callback) ->
+  get: (model, key, callback) ->
+    if key is @ids_accessor
+
+    else
+
     # hack
     console.log "HasMany::get foreign_key: #{@foreign_key}"
     foreign_key = @foreign_key.replace('_id', '')

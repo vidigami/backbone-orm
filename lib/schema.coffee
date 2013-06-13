@@ -1,8 +1,8 @@
 util = require 'util'
 _ = require 'underscore'
 
-HasOne = require './has_one'
-HasMany = require './has_many'
+HasOne = require './relations/has_one'
+HasMany = require './relations/has_many'
 
 module.exports = class Schema
   @types:
@@ -23,13 +23,14 @@ module.exports = class Schema
 
       type_name = options[0]
       if type_name is 'hasOne'
-        @relations[key] = new HasOne(@model_type, key, options.slice(1))
+        relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
       else if type_name is 'hasMany'
-        @relations[key] = new HasMany(@model_type, key, options.slice(1))
+        relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
+      @relations[relation.id_accessor] = relation
 
-  relationship: (key) -> return @relations[key]
+      relationship: (key) -> return @relations[key]
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
@@ -47,7 +48,7 @@ module.exports = class Schema
       (attributes[attributes] = value; options = value) if _.isString(attributes)
 
       for key, value of attributes
-        if relation = _schema.relationship(key)
+        if relation = _schema.relations[key]
           relation.set(@, key, value, options, _set)
         else
           _set.call(@, key, value, options)
@@ -56,8 +57,8 @@ module.exports = class Schema
     _get = @model_type::get
     @model_type::get = (key, callback) ->
       if arguments.length > 1
-        if relation = _schema.relationship(key)
-          relation.get(@, callback)
+        if relation = _schema.relations[key]
+          relation.get(@, key, callback)
         else
           callback(null, @attributes[key])
       return _get.apply(@, arguments)
@@ -70,10 +71,12 @@ module.exports = class Schema
       json = _.clone(@attributes)
       for key, value of json
         continue unless value
-        if value.toJSON
-          json[key] = value.toJSON()
+        if value.models
+          json[key] = (if item.toJSON then console.log item.attributes; item.attributes.toJSON() else item) for item in value.models
         else if _.isArray(value)
           json[key] = _.map(value, (item) -> if item.toJSON then item.toJSON() else item)
+        else if value.toJSON
+          json[key] = value.toJSON()
 
       @_locked--
       return json
