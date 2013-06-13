@@ -3,12 +3,15 @@ Backbone = require 'backbone'
 Queue = require 'queue-async'
 
 JSONUtils = require '../../lib/json_utils'
+
 class FirstMemoryModel extends Backbone.Model
   sync: require('../../memory_backbone_sync')(FirstMemoryModel)
+
 class SecondMemoryModel extends Backbone.Model
   @schema:
     first: -> ['hasOne', FirstMemoryModel, reverse: true]
   sync: require('../../memory_backbone_sync')(SecondMemoryModel)
+
 class ThirdMemoryModel extends Backbone.Model
   @schema:
     firsts: -> ['hasMany', FirstMemoryModel]
@@ -32,4 +35,4 @@ test_parameters =
     }, callback)
     queue.await (err) -> callback(null, _.map(_.toArray(arguments).pop(), (test) -> JSONUtils.valueToJSON(test.toJSON())))
 
-require('../../lib/test_generators/all')(test_parameters)
+require('../../lib/test_generators/all_relational')(test_parameters)

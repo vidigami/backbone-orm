@@ -10,7 +10,7 @@ module.exports = (options) ->
   _ = require 'underscore'
   Queue = require 'queue-async'
 
-  Utils = require '../../utils'
+  Utils = require '../../../utils'
   adapters = Utils.adapters
 
   describe 'Model.find', ->

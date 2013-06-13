@@ -11,7 +11,7 @@ module.exports = (options) ->
 
   Backbone = require 'backbone'
 
-  Utils = require '../../utils'
+  Utils = require '../../../utils'
   adapters = Utils.adapters
 
   describe 'BackboneSync', ->
