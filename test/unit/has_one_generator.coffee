@@ -9,14 +9,17 @@ Utils = require '../../utils'
 adapters = Utils.adapters
 
 class FlatModel extends Backbone.Model
+  url: '/flat_models'
   sync: require('../../memory_backbone_sync')(FlatModel)
 
 class ReverseModel extends Backbone.Model
+  url: '/reverse_models'
   @schema:
     one_reverse: -> ['hasOne', HasOneModel]
   sync: require('../../memory_backbone_sync')(ReverseModel)
 
 class HasOneModel extends Backbone.Model
+  url: '/has_one_models'
   @schema:
     one: -> ['hasOne', FlatModel] #, reverse: true]
     one_reverse: -> ['hasOne', ReverseModel, reverse: true]

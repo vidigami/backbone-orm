@@ -8,14 +8,17 @@ Utils = require '../../utils'
 adapters = Utils.adapters
 
 class FlatModel extends Backbone.Model
+  url: '/flat_models'
   sync: require('../../memory_backbone_sync')(FlatModel)
 
 class ReverseModel extends Backbone.Model
+  url: '/reverse_models'
   @schema:
     many_reverse: -> ['hasOne', HasManyModel, foreign_key: 'reverse_id']
   sync: require('../../memory_backbone_sync')(ReverseModel)
 
 class HasManyModel extends Backbone.Model
+  url: '/has_many_models'
   @schema:
     many: -> ['hasMany', FlatModel, foreign_key: 'many_id']
     many_reverse: -> ['hasMany', ReverseModel, foreign_key: 'many_id']
@@ -71,19 +74,18 @@ test_parameters =
       for many_model in MODELS.many
         do (many_model) ->
           many_model.set({many: [MODELS.flat.pop(), MODELS.flat.pop()]})
-          many_model.set({many_reverse: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
+          many_model.set({many_reverse: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]})
           save_queue.defer (callback) -> many_model.save {}, adapters.bbCallback callback
 
           # TODO: remove when automated
-          for related_model in many_model.get('many_reverse').models
-            do (related_model) ->
-              related_model.set({many_reverse: many_model})
-              save_queue.defer (callback) -> related_model.save {}, adapters.bbCallback callback
+          reverse1.set({many_reverse: many_model})
+          save_queue.defer (callback) -> reverse1.save {}, adapters.bbCallback callback
+          reverse2.set({many_reverse: many_model})
+          save_queue.defer (callback) -> reverse2.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 
     queue.await (err) ->
-      # callback(err, _.map(MODELS.many, (test) -> JSONUtils.valueToJSON(test.toJSON())))
       callback(err, _.map(MODELS.many, (test) -> test.toJSON()))
 
 require('../../lib/test_generators/relational/has_many')(test_parameters)

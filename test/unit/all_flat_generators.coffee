@@ -6,6 +6,7 @@ JSONUtils = require '../../lib/json_utils'
 Fabricator = require '../../fabricator'
 
 class FlatModel extends Backbone.Model
+  url: '/flat_models'
   sync: require('../../memory_backbone_sync')(FlatModel)
 
 test_parameters =

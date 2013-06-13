@@ -23,30 +23,30 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    # it 'Handles a get query for a hasMany relation', (done) ->
-    #   Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
-    #     assert.ok(!err, 'no errors')
-    #     assert.ok(test_model, 'found model')
-
-    #     test_model.get 'many', (err, models) ->
-    #       assert.ok(!err, 'no errors')
-    #       assert.ok(models, 'found related models')
-    #       done()
-
-    it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+    it 'Handles a get query for a hasMany relation', (done) ->
       Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        test_model.get 'many_reverse', (err, models) ->
+        test_model.get 'many', (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
-          related = models[0]
+          done()
 
-          console.log "related: #{related.get}"
+    # TODO: wait for reverse
+    # it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+    #   Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
+    #     assert.ok(!err, 'no errors')
+    #     assert.ok(test_model, 'found model')
 
-          related.get 'many_reverse', (err, original_model) ->
-            console.log "original_model: #{util.inspect(original_model)}"
+    #     test_model.get 'many_reverse', (err, models) ->
+    #       assert.ok(!err, 'no errors')
+    #       assert.ok(models, 'found related models')
+    #       related = models[0]
 
-            assert.equal(test_model, original_model, 'reverse relation gives the correct model')
-            done()
+    #       related.get 'many_reverse', (err, original_models) ->
+    #         assert.ok(!err, 'no errors')
+    #         assert.ok(original_models, 'found related models')
+
+    #         assert.deepEqual(test_model.toJSON(), original_model.toJSON(), "Expected: #{util.inspect(test_model.toJSON())}. Actual: #{util.inspect(original_model.toJSON())}")
+    #         done()

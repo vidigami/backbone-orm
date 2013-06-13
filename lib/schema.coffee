@@ -62,8 +62,6 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      console.log "key: #{key}"
-
       if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
         return relation.get(@, key, callback)
       else
