@@ -12,6 +12,7 @@ module.exports = class RelationParser
 
       relation_type = relation_options[0]
       to_model = relation_options[1]
+      console.log relation_options
       options = _.reduce(relation_options.slice(2), ((k,v) -> _.extend(k, v)), {})
 
       result[name] = @createParsedRelation(name, relation_type, from_model, to_model, options)

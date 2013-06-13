@@ -11,6 +11,7 @@ S4 = -> return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
 CLASS_METHODS = [
+  'initialize'
   'cursor', 'find'
   'count', 'all', 'destroy'
 ]
@@ -27,7 +28,7 @@ class MemoryBackboneSync
     @schema_info = SchemaParser.parse(_.result(@model_type, 'schema') or {})
     @relations = RelationParser.parse(@model_type, @schema_info.raw_relations)
 
-    @model_type.get = relation_manager(@model_type, @relations)
+  initialize: -> @model_type::get = relation_manager(@model_type, @relations)
 
   read: (model, options) ->
     options.success?(if model.models then (model.attributes for id, model of @store) else @store[model.attributes.id].attributes)
