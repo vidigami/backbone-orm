@@ -28,7 +28,7 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        test_model.get 'many', (err, models) ->
+        test_model.get 'flats', (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
           done()

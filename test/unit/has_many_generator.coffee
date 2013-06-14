@@ -7,32 +7,32 @@ Fabricator = require '../../fabricator'
 Utils = require '../../utils'
 adapters = Utils.adapters
 
-class FlatModel extends Backbone.Model
-  url: '/flat_models'
-  sync: require('../../memory_backbone_sync')(FlatModel)
+class Flat extends Backbone.Model
+  url: '/flats'
+  sync: require('../../memory_backbone_sync')(Flat)
 
-class ReverseModel extends Backbone.Model
-  url: '/reverse_models'
+class Reverse extends Backbone.Model
+  url: '/reverses'
   @schema:
-    many_reverse: -> ['hasOne', HasManyModel, foreign_key: 'reverse_id']
-  sync: require('../../memory_backbone_sync')(ReverseModel)
+    owner: -> ['hasOne', Owner, foreign_key: 'reverse_id']
+  sync: require('../../memory_backbone_sync')(Reverse)
 
-class HasManyModel extends Backbone.Model
-  url: '/has_many_models'
+class Owner extends Backbone.Model
+  url: '/owners'
   @schema:
-    many: -> ['hasMany', FlatModel, foreign_key: 'many_id']
-    many_reverse: -> ['hasMany', ReverseModel, foreign_key: 'many_id']
-  sync: require('../../memory_backbone_sync')(HasManyModel)
+    flats: -> ['hasMany', Flat, foreign_key: 'owner_id']
+    reverses: -> ['hasMany', Reverse, foreign_key: 'owner_id']
+  sync: require('../../memory_backbone_sync')(Owner)
 
-FlatModel.initialize()
-ReverseModel.initialize()
-HasManyModel.initialize()
+Flat.initialize()
+Reverse.initialize()
+Owner.initialize()
 
 BASE_COUNT = 5
 
 test_parameters =
-  model_type: HasManyModel
-  route: 'mock_models'
+  model_type: Owner
+  route: 'mocks'
   beforeEach: (callback) ->
     MODELS = {}
 
@@ -42,9 +42,9 @@ test_parameters =
     queue.defer (callback) ->
       destroy_queue = new Queue()
 
-      destroy_queue.defer (callback) -> FlatModel.destroy callback
-      destroy_queue.defer (callback) -> ReverseModel.destroy callback
-      destroy_queue.defer (callback) -> HasManyModel.destroy callback
+      destroy_queue.defer (callback) -> Flat.destroy callback
+      destroy_queue.defer (callback) -> Reverse.destroy callback
+      destroy_queue.defer (callback) -> Owner.destroy callback
 
       destroy_queue.await callback
 
@@ -52,18 +52,18 @@ test_parameters =
     queue.defer (callback) ->
       create_queue = new Queue()
 
-      create_queue.defer (callback) -> Fabricator.create(FlatModel, 2*BASE_COUNT, {
+      create_queue.defer (callback) -> Fabricator.create(Flat, 2*BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.flat = models; callback(err))
-      create_queue.defer (callback) -> Fabricator.create(ReverseModel, 2*BASE_COUNT, {
+      create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
         name: Fabricator.uniqueId('reverse_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.reverse = models; callback(err))
-      create_queue.defer (callback) -> Fabricator.create(HasManyModel, BASE_COUNT, {
-        name: Fabricator.uniqueId('many_')
+      create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+        name: Fabricator.uniqueId('owner_')
         created_at: Fabricator.date
-      }, (err, models) -> MODELS.many = models; callback(err))
+      }, (err, models) -> MODELS.owner = models; callback(err))
 
       create_queue.await callback
 
@@ -71,21 +71,15 @@ test_parameters =
     queue.defer (callback) ->
       save_queue = new Queue()
 
-      for many_model in MODELS.many
-        do (many_model) ->
-          many_model.set({many: [MODELS.flat.pop(), MODELS.flat.pop()]})
-          many_model.set({many_reverse: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]})
-          save_queue.defer (callback) -> many_model.save {}, adapters.bbCallback callback
-
-          # TODO: remove when automated
-          reverse1.set({many_reverse: many_model})
-          save_queue.defer (callback) -> reverse1.save {}, adapters.bbCallback callback
-          reverse2.set({many_reverse: many_model})
-          save_queue.defer (callback) -> reverse2.save {}, adapters.bbCallback callback
+      for owner in MODELS.owner
+        do (owner) ->
+          owner.set({flats: [MODELS.flat.pop(), MODELS.flat.pop()]})
+          owner.set({reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]})
+          save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 
     queue.await (err) ->
-      callback(err, _.map(MODELS.many, (test) -> test.toJSON()))
+      callback(err, _.map(MODELS.owner, (test) -> test.toJSON()))
 
-require('../../lib/test_generators/relational/has_many')(test_parameters)
+require('../../lib/test_generators/relational/has_one')(test_parameters)
