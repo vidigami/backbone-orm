@@ -1,5 +1,6 @@
 util = require 'util'
 URL = require 'url'
+Backbone = require 'backbone'
 _ = require 'underscore'
 inflection = require 'inflection'
 Queue = require 'queue-async'
@@ -26,6 +27,26 @@ module.exports = class Utils
     table = database_parts[database_parts.length-1]
     return inflection.classify(inflection.singularize(table))
 
+  ##############################
+  # Relational
+  ##############################
+  @createRelated: (related_model_type, item) ->
+    return item if (item instanceof Backbone.Model) or (item instanceof Backbone.Collection)
+    return new related_model_type(related_model_type::parse(item)) if _.isObject(item)
+    return new related_model_type({id: item})
+
+  @reverseKey: (related_model_type, model_type) ->
+    return null unless (related_model_type._schema and model_type.model_name)
+    reverse_key = inflection.underscore(model_type.model_name)
+    return (if related_model_type._schema.relations.hasOwnProperty(reverse_key) then reverse_key else null)
+
+  @reverseRelation: (related_model_type, model_type) ->
+    return null unless reverse_key = Utils.reverseKey(related_model_type, model_type)
+    return related_model_type._schema.relations[reverse_key]
+
+  ##############################
+  # Testing
+  ##############################
   @getAt: (model_type, index, callback) ->
     model_type.cursor().offset(index).limit(1).toModels (err, models) ->
       return callback(err) if err
@@ -39,6 +60,9 @@ module.exports = class Utils
         do (model) -> queue.defer (callback) -> model.save {name: name}, adapters.bbCallback callback
       queue.await callback
 
+  ##############################
+  # Sorting
+  ##############################
   @isSorted: (models, fields) ->
     fields = _.uniq(fields)
     for model in models

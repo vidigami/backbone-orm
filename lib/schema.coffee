@@ -61,7 +61,7 @@ module.exports = class Schema
         attributes = key; options = value
 
       for key, value of attributes
-        if relation = _schema.relations[key] or relation = _schema.ids_accessor[key]
+        if (relation = _schema.relations[key]) or (relation = _schema.ids_accessor[key])
           relation.set(@, key, value, options, _set)
         else
           _set.call(@, key, value, options)

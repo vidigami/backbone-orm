@@ -2,6 +2,8 @@ util = require 'util'
 _ = require 'underscore'
 inflection = require 'inflection'
 
+Utils = require '../../utils'
+
 module.exports = class One
   constructor: (@model_type, @key, options_array, @belongs_to) ->
     @type_name = 'hasOne'
@@ -19,11 +21,17 @@ module.exports = class One
       throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       return @ if @has(model, key, value) # already set
 
-      _set.call(model, key, related_model = @create(value), options) # call so events are triggered
-      return @ unless reverse_relation = @reverseRelation()
+      # clear reverse
+      if reverse_key = Utils.reverseKey(@related_model_type, @model_type)
+        current_related_model.set(reverse_key, null) if not @has(model, key, value) and (current_related_model = model.attributes[@key])
+
+      related_model = if value then Utils.createRelated(@related_model_type, value) else null
+
+      _set.call(model, key, related_model, options)
+      return @ if not related_model or not reverse_key
 
       # set the reverse
-      related_model.set(reverse_key, model) if not reverse_relation.has(related_model, reverse_key, model)
+      related_model.set(reverse_key, model)
     return @
 
   get: (model, key, callback, _get) ->
@@ -49,20 +57,11 @@ module.exports = class One
       callback(null, model)
 
   has: (model, key, item) ->
-    current_related_model = model.attributes[@key]
-    return false if (item and not current_related_model or not item and current_related_model)
+    return true if not (current_related_model = model.attributes[@key]) and not item
+    return false if (current_related_model and not item) or (not current_related_model and item)
+
+    # compare ids
     current_id = current_related_model.get('id')
     return current_id is item.get('id') if item instanceof @related_model_type
     return current_id is item.id if _.isObject(item)
     return current_id is item
-
-  create: (item) ->
-    return item if item instanceof @related_model_type
-    return new @related_model_type(@related_model_type::parse(item)) if _.isObject(item)
-    return new @related_model_type({id: item})
-
-  # TODO: cache
-  reverseRelation: (item) ->
-    return null if @related_model_type._schema
-    reverse_key = inflection.underscore(@model_type.model_name)
-    return @related_model_type._schema.relations[reverse_key]
