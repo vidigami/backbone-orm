@@ -76,7 +76,9 @@ module.exports = class Many
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
 
-  itemId: (model, item) ->
+  has: (model, key, item) ->
+    collection = model.attributes[key]
+    return !!collection.get(Utils.itemId(item))
 
   add: (model, item) ->
     collection = model.get(@key)
