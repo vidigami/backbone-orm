@@ -1,3 +1,6 @@
+util = require 'util'
+_ = require 'underscore'
+
 MAX_CACHE_MS = 500 # TODO: determine the best amount
 
 class Cache
@@ -5,50 +8,42 @@ class Cache
     @store_by_url = {}
 
   get: (url, ids) ->
-    # many
-    if _.isArray(ids)
-      return [] unless models_store = @store_by_url[url]
-      now = (new Date()).valueOf()
+    unless model_store = @store_by_url[url] # no model store
+      return if _.isArray(ids) then [] else null
 
-      results = []
-      (results.push(model_info.model) if model = @_getOrClear(models_store, id, now)) for id in ids
-      return results
-
-    # one
-    else
-      return null unless models_store = @store_by_url[url]
-      return @_getOrClear(models_store, id)
-
-  add: (url, models) ->
-    unless models_store = @store_by_url[url]
-      @store_by_url[url] = model_store = {}
+    return @_getOrClearById(model_store, id) unless _.isArray(ids) # one
 
     # many
     now = (new Date()).valueOf()
-    if _.isArray(models)
-      model_store[model.get('id')] = {model: model, last_used: now} for model in models
+    results = []
+    results.push(model_info.model) for id in ids when (model = @_getOrClearById(model_store, id, now))
+    return results
 
-    # one
-    else
-      model_store[model.get('id')] = {model: model, last_used: now}
+  add: (url, models) ->
+    (@store_by_url[url] = model_store = {}) unless model_store = @store_by_url[url]
+
+    return @_addModel(model_store, models) unless _.isArray(models) # one
+
+    # many
+    now = (new Date()).valueOf()
+    @_addModel(model_store, model, now) for model in models
     return @
 
   clear: (url, ids) ->
-    if ids
-      if models_store = @store_by_url[url]
-        # many
-        if _.isArray(ids)
-          delete models_store[ids] for id in ids
-
-        # one
-        else
-          delete models_store[ids]
-
-    else
-      @store_by_url[url] = {}
+    (@store_by_url[url] = {}; return @) unless models
+    if model_store = @store_by_url[url]
+      if _.isArray(ids) # many
+        delete model_store[id] for id in ids
+      else # one
+        delete model_store[id]
     return @
 
-  _getOrClear: (models_store, id, now) ->
+  _addModel: (model_store, model, now) ->
+    throw new Error "Cannot store a model without an id" unless model.attributes.id
+    model_store[model.attributes.id] = {model: model, last_used: now}
+    return @
+
+  _getOrClearById: (model_store, id, now) ->
     now = (new Date()).valueOf() unless now
     return null unless model_info = model_store[id] # not found
 
@@ -59,4 +54,5 @@ class Cache
     model_info.last_used = now
     return model_info.model
 
+# singleton
 module.exports = new Cache()

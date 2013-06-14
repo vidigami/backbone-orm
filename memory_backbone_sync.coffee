@@ -4,6 +4,7 @@ _ = require 'underscore'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './utils'
+CacheSync = require './cache_sync'
 
 class MemoryBackboneSync
   CLASS_METHODS: ['initialize', 'cursor', 'find', 'count', 'all', 'destroy']
@@ -19,25 +20,28 @@ class MemoryBackboneSync
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
+    # TODO: make configurable
+    return new CacheSync(@)
+
   initialize: -> @model_type._schema?.initialize()
 
   read: (model, options) ->
-    options.success?(if model.models then (json for id, json of @store) else @store[model.attributes.id])
+    options.success(if model.models then (json for id, json of @store) else @store[model.attributes.id])
 
   create: (model, options) ->
     model.attributes.id = Utils.guid()
     model_json = @store[model.attributes.id] = model.toJSON()
-    options.success?(model_json)
+    options.success(model_json)
 
   update: (model, options) ->
     return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
     _.extend(model_json, model.toJSON())
-    options.success?(model_json)
+    options.success(model_json)
 
   delete: (model, options) ->
     return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
     delete @store[model.attributes.id]
-    options.success?(model_json)
+    options.success(model_json)
 
   ###################################
   # Collection Extensions

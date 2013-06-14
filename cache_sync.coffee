@@ -4,82 +4,84 @@ _ = require 'underscore'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './utils'
+adapters = Utils.adapters
 
 Cache = require './cache'
 
-
-class CacheSync
+module.exports = class CacheSync
   CLASS_METHODS: ['initialize', 'cursor', 'find', 'count', 'all', 'destroy']
 
   constructor: (@sync) ->
-    return @sync
-
     @model_type = @sync.model_type
-    throw new Error("Missing url for model") unless url = _.result(@model_type.prototype, 'url')
-    @model_type.model_name = Utils.urlToModelName(url)
+    throw new Error("Missing url for model") unless @url = _.result(@model_type.prototype, 'url')
 
     # publish methods and sync on model
-    @model_type[fn] = _.bind(@[fn], @) for fn in @CLASS_METHODS
-    # Cache.initialize(@model_type, @) # use composition instead
-    @model_type._sync = @
-    @model_type._schema = new Schema(@model_type)
+    # @model_type[fn] = _.bind(@[fn], @) for fn in @CLASS_METHODS
 
   initialize: -> @model_type._schema?.initialize()
 
   read: (model, options) ->
-    options.success?(if model.models then (json for id, json of @store) else @store[model.attributes.id])
+    if model.models
+      # cached_models = Cache.getAll(@url)
+    else
+      if (cached_model = Cache.get(@url, model.attributes.id)) # use cached
+        return options.success(cached_model.toJSON())
+    @sync.read(model, options)
 
   create: (model, options) ->
-    model.attributes.id = Utils.guid()
-    model_json = @store[model.attributes.id] = model.toJSON()
-    options.success?(model_json)
+    @sync.create model, adapters.bbCallback (err, json) =>
+      Cache.add(@url, new @model_type(json)) # add to the cache
+
+      return options.error(err) if err
+      options.success(json)
 
   update: (model, options) ->
-    return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
-    _.extend(model_json, model.toJSON())
-    options.success?(model_json)
+    if (cached_model = Cache.get(@url, model.attributes.id))
+      cached_model.set(model.toJSON, options) if cached_model isnt model # update cache
+
+    @sync.update model, adapters.bbCallback (err, json) =>
+      return options.error(err) if err
+      options.success(json)
 
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
-    delete @store[model.attributes.id]
-    options.success?(model_json)
+    Cache.remove(@url, model.get('id')) # remove from the cache
 
-  ###################################
-  # Collection Extensions
-  ###################################
-  cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
+    @sync.delete model, adapters.bbCallback (err, json) =>
+      return options.error(err) if err
+      options.success(json)
 
-  find: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    @cursor(query).toModels(callback)
+  # ###################################
+  # # Collection Extensions
+  # ###################################
+  # cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
 
-  ###################################
-  # Convenience Functions
-  ###################################
-  all: (callback) -> @cursor({}).toModels callback
+  # find: (query, callback) ->
+  #   [query, callback] = [{}, query] if arguments.length is 1
+  #   @cursor(query).toModels(callback)
 
-  count: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    @cursor(query).count(callback)
+  # ###################################
+  # # Convenience Functions
+  # ###################################
+  # all: (callback) -> @cursor({}).toModels callback
 
-  destroy: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    if (keys = _.keys(query)).length
-      for id, model of @store
-        delete @store[id] if _.isEqual(_.pick(model.attributes, keys), query)
-    else
-      @store = {}
-    return callback()
+  # count: (query, callback) ->
+  #   [query, callback] = [{}, query] if arguments.length is 1
+  #   @cursor(query).count(callback)
+
+  # destroy: (query, callback) ->
+  #   [query, callback] = [{}, query] if arguments.length is 1
+  #   if (keys = _.keys(query)).length
+  #     for id, model of @store
+  #       delete @store[id] if _.isEqual(_.pick(model.attributes, keys), query)
+  #   else
+  #     @store = {}
+  #   return callback()
 
   ###################################
   # Cache Extension
   ###################################
-  findCached: (query, callback) ->
-    
+  findCached: (ids, callback) -> return Cache.get(@url, ids)
 
-# options
-#   model_type - the model that will be used to add query functions to
-module.exports = (sync) ->
-  return sync
-  # sync = new CacheSync(sync)
-  # return (method, model, options={}) -> sync[method](model, options)
+# module.exports = (wrapped_sync) ->
+#   sync = new CacheSync(wrapped_sync)
+#   return (method, model, options={}) -> sync[method](model, options)
