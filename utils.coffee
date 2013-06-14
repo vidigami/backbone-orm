@@ -30,17 +30,17 @@ module.exports = class Utils
   ##############################
   # Relational
   ##############################
-  @createRelated: (related_model_type, item) ->
+  @createRelated: (reverse_model_type, item) ->
     return item if (item instanceof Backbone.Model) or (item instanceof Backbone.Collection)
-    return new related_model_type(related_model_type::parse(item)) if _.isObject(item)
-    return new related_model_type({id: item})
+    return new reverse_model_type(reverse_model_type::parse(item)) if _.isObject(item)
+    return new reverse_model_type({id: item})
 
-  @reverseRelation: (related_model_type, model_type) ->
-    return null unless (related_model_type._schema and model_type.model_name)
+  @reverseRelation: (reverse_model_type, model_type) ->
+    return null unless (reverse_model_type._schema and model_type.model_name)
     reverse_key = inflection.underscore(model_type.model_name) # singular
-    return related_model_type._schema.relations[reverse_key] if related_model_type._schema.relations.hasOwnProperty(reverse_key)
+    return reverse_model_type._schema.relations[reverse_key] if reverse_model_type._schema.relations.hasOwnProperty(reverse_key)
     reverse_key = inflection.pluralize(reverse_key) # plural
-    return related_model_type._schema.relations[reverse_key] if related_model_type._schema.relations.hasOwnProperty(reverse_key)
+    return reverse_model_type._schema.relations[reverse_key] if reverse_model_type._schema.relations.hasOwnProperty(reverse_key)
     return null
 
   @itemId: (item) ->

@@ -25,7 +25,7 @@ module.exports = (options) ->
         done()
 
     it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
-      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 

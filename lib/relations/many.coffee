@@ -14,7 +14,7 @@ module.exports = class Many
     @collection_type = Backbone.Collection unless @collection_type
 
     @reverse_model_type = options_array[0]
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
+    @reverse_relation = Utils.reverseRelation(options_array[0], @model_type)
 
   set: (model, key, value, options) ->
     # hack
@@ -32,7 +32,7 @@ module.exports = class Many
       previous_models = _.clone(collection.models) if @reverse_relation
 
       # set the collection
-      collection.reset(models = (@findOrCreate(model, item, @model_type) for item in value))
+      collection.reset(models = (@findOrCreate(model, item, @reverse_model_type) for item in value))
       return @ unless @reverse_relation
 
       # set ther references

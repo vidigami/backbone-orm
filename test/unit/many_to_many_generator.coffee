@@ -52,7 +52,7 @@ test_parameters =
       create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
         name: Fabricator.uniqueId('owners_')
         created_at: Fabricator.date
-      }, (err, models) -> MODELS.many = models; callback(err))
+      }, (err, models) -> MODELS.owner = models; callback(err))
 
       create_queue.await callback
 
@@ -60,14 +60,14 @@ test_parameters =
     queue.defer (callback) ->
       save_queue = new Queue()
 
-      for many_model in MODELS.many
-        do (many_model) ->
-          many_model.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
-          save_queue.defer (callback) -> many_model.save {}, adapters.bbCallback callback
+      for owner_model in MODELS.owner
+        do (owner_model) ->
+          owner_model.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
+          save_queue.defer (callback) -> owner_model.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 
     queue.await (err) ->
-      callback(err, _.map(MODELS.many, (test) -> test.toJSON()))
+      callback(err, _.map(MODELS.owner, (test) -> test.toJSON()))
 
 require('../../lib/test_generators/relational/many_to_many')(test_parameters)

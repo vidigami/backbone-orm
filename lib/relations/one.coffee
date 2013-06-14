@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+Backbone = require 'backbone'
 inflection = require 'inflection'
 
 Utils = require '../../utils'
@@ -71,6 +72,6 @@ module.exports = class One
 
     # compare ids
     current_id = current_related_model.get('id')
-    return current_id is item.get('id') if item instanceof @reverse_model_type
+    return current_id is item.get('id') if item instanceof Backbone.Model
     return current_id is item.id if _.isObject(item)
     return current_id is item

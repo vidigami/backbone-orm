@@ -48,5 +48,5 @@ module.exports = (options) ->
             assert.ok(!err, 'no errors')
             assert.ok(owner_model, 'found owner models')
 
-            assert.deepEqual(test_model.toJSON(), owner_model.toJSON(), "Expected: #{util.inspect(test_model.toJSON())}. Actual: #{util.inspect(owner_model.toJSON())}")
+            assert.deepEqual(test_model.get('id'), owner_model.get('id'), "Expected: #{test_model.get('id')}. Actual: #{owner_model.get('id')}")
             done()

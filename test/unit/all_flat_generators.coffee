@@ -20,6 +20,6 @@ test_parameters =
       created_at: Fabricator.date
       updated_at: Fabricator.date
     }, callback)
-    queue.await (err) -> callback(null, _.map(_.toArray(arguments).pop(), (test) -> JSONUtils.valueToJSON(test.toJSON())))
+    queue.await (err) -> callback(null, _.map(_.toArray(arguments).pop(), (test) -> test.toJSON()))
 
 require('../../lib/test_generators/all_flat')(test_parameters)
