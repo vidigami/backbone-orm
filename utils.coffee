@@ -1,5 +1,7 @@
 util = require 'util'
+URL = require 'url'
 _ = require 'underscore'
+inflection = require 'inflection'
 Queue = require 'queue-async'
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
@@ -17,6 +19,12 @@ module.exports = class Utils
     return result
 
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
+
+  @urlToModelName: (url) ->
+    url_parts = URL.parse(url)
+    database_parts = url_parts.pathname.split('/')
+    table = database_parts[database_parts.length-1]
+    return inflection.classify(inflection.singularize(table))
 
   @getAt: (model_type, index, callback) ->
     model_type.cursor().offset(index).limit(1).toModels (err, models) ->

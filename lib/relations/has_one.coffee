@@ -18,13 +18,32 @@ module.exports = class HasOne
 
     else
       throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      unless value instanceof @related_model_type
-        if _.isObject(value)
-          value = new @related_model_type(@related_model_type::parse(value))
-        else
-          value = new @related_model_type(@related_model_type::parse({id: value})) # TODO: need to fetch
 
-      _set.call(model, key, value, options)
+      # model
+      current_related_model = model.attributes[key]
+      if value instanceof @related_model_type
+        return @ if current_related_model and current_related_model.get('id') is value.get('id') # already exists
+        related_model = value
+
+      # data
+      else
+        if _.isObject(value)
+          return @ if current_related_model and current_related_model.get('id') is value.id # already exists
+          related_model = new @related_model_type(@related_model_type::parse(value))
+        else
+          return @ if current_related_model and current_related_model.get('id') is value # already exists
+          related_model = new @related_model_type({id: value}) # TODO: need to fetch and look in the cache
+
+      _set.call(model, key, related_model, options) # call so events are triggered
+
+      # set the reverse
+      if @related_model_type._schema
+        reverse_key = inflection.underscore(@model_type.model_name)
+        if reverse_relation = @related_model_type._schema.relations[reverse_key]
+          current_model = related_model.get(reverse_key)
+          unless (current_model and current_model.get('id') is model.get('id')) # already set
+            related_model.set(reverse_key, model)
+    return @
 
   get: (model, key, callback, _get) ->
     # hack

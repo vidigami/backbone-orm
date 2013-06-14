@@ -8,32 +8,32 @@ Fabricator = require '../../fabricator'
 Utils = require '../../utils'
 adapters = Utils.adapters
 
-class FlatModel extends Backbone.Model
-  url: '/flat_models'
-  sync: require('../../memory_backbone_sync')(FlatModel)
+class Flat extends Backbone.Model
+  url: '/flats'
+  sync: require('../../memory_backbone_sync')(Flat)
 
-class ReverseModel extends Backbone.Model
-  url: '/reverse_models'
+class Reverse extends Backbone.Model
+  url: '/reverses'
   @schema:
-    one_reverse: -> ['hasOne', HasOneModel]
-  sync: require('../../memory_backbone_sync')(ReverseModel)
+    owner: -> ['belongsTo', Owner]
+  sync: require('../../memory_backbone_sync')(Reverse)
 
-class HasOneModel extends Backbone.Model
-  url: '/has_one_models'
+class Owner extends Backbone.Model
+  url: '/owners'
   @schema:
-    one: -> ['hasOne', FlatModel] #, reverse: true]
-    one_reverse: -> ['hasOne', ReverseModel, reverse: true]
-  sync: require('../../memory_backbone_sync')(HasOneModel)
+    flat: -> ['belongsTo', Flat]
+    reverse: -> ['hasOne', Reverse]
+  sync: require('../../memory_backbone_sync')(Owner)
 
-FlatModel.initialize()
-ReverseModel.initialize()
-HasOneModel.initialize()
+Flat.initialize()
+Reverse.initialize()
+Owner.initialize()
 
 BASE_COUNT = 5
 
 test_parameters =
-  model_type: HasOneModel
-  route: 'mock_models'
+  model_type: Owner
+  route: 'mocks'
   beforeEach: (callback) ->
     MODELS = {}
 
@@ -43,9 +43,9 @@ test_parameters =
     queue.defer (callback) ->
       destroy_queue = new Queue()
 
-      destroy_queue.defer (callback) -> FlatModel.destroy callback
-      destroy_queue.defer (callback) -> ReverseModel.destroy callback
-      destroy_queue.defer (callback) -> HasOneModel.destroy callback
+      destroy_queue.defer (callback) -> Flat.destroy callback
+      destroy_queue.defer (callback) -> Reverse.destroy callback
+      destroy_queue.defer (callback) -> Owner.destroy callback
 
       destroy_queue.await callback
 
@@ -53,16 +53,16 @@ test_parameters =
     queue.defer (callback) ->
       create_queue = new Queue()
 
-      create_queue.defer (callback) -> Fabricator.create(FlatModel, BASE_COUNT, {
+      create_queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.flat = models; callback(err))
-      create_queue.defer (callback) -> Fabricator.create(ReverseModel, BASE_COUNT, {
+      create_queue.defer (callback) -> Fabricator.create(Reverse, BASE_COUNT, {
         name: Fabricator.uniqueId('reverse_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.reverse = models; callback(err))
-      create_queue.defer (callback) -> Fabricator.create(HasOneModel, BASE_COUNT, {
-        name: Fabricator.uniqueId('one_')
+      create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+        name: Fabricator.uniqueId('owner_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.one = models; callback(err))
 
@@ -70,16 +70,12 @@ test_parameters =
 
     # link and save all
     queue.defer (callback) ->
-      save_queue = new Queue()
+      save_queue = new Queue(1)
 
-      for one_model in MODELS.one
-        do (one_model) ->
-          one_model.set({one: MODELS.flat.pop(), one_reverse: reverse_model = MODELS.reverse.pop()})
-          save_queue.defer (callback) -> one_model.save {}, adapters.bbCallback callback
-
-          # TODO: remove when automated
-          reverse_model.set({one_reverse: one_model})
-          save_queue.defer (callback) -> reverse_model.save {}, adapters.bbCallback callback
+      for one in MODELS.one
+        do (one) ->
+          one.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop()})
+          save_queue.defer (callback) -> one.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 

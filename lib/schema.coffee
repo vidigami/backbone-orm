@@ -30,7 +30,7 @@ module.exports = class Schema
       throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
 
       type_name = options[0]
-      if type_name is 'hasOne'
+      if type_name is 'hasOne' or type_name is 'belongsTo' # TODO: make a different class
         relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
       else if type_name is 'hasMany'
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
@@ -50,8 +50,11 @@ module.exports = class Schema
     _schema = @
 
     _set = @model_type::set
-    @model_type::set = (attributes={}, value, options) ->
-      (attributes[attributes] = value; options = value) if _.isString(attributes)
+    @model_type::set = (key, value, options) ->
+      if _.isString(key)
+        (attributes = {})[key] = value;
+      else
+        attributes = key; options = value
 
       for key, value of attributes
         if relation = _schema.relations[key]
