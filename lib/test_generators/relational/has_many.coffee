@@ -33,20 +33,20 @@ module.exports = (options) ->
           assert.ok(models, 'found related models')
           done()
 
-    # TODO: wait for reverse
-    # it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
-    #   Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
-    #     assert.ok(!err, 'no errors')
-    #     assert.ok(test_model, 'found model')
+    it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
+        assert.ok(!err, 'no errors')
+        assert.ok(test_model, 'found model')
 
-    #     test_model.get 'many_reverse', (err, models) ->
-    #       assert.ok(!err, 'no errors')
-    #       assert.ok(models, 'found related models')
-    #       related = models[0]
+        test_model.get 'reverses', (err, models) ->
+          assert.ok(!err, 'no errors')
+          assert.ok(models, 'found models')
+          assert.equal(models.length, 2, 'found 2 models')
+          related = models[0]
 
-    #       related.get 'many_reverse', (err, original_models) ->
-    #         assert.ok(!err, 'no errors')
-    #         assert.ok(original_models, 'found related models')
+          related.get 'owner', (err, owner_model) ->
+            assert.ok(!err, 'no errors')
+            assert.ok(owner_model, 'found owner models')
 
-    #         assert.deepEqual(test_model.toJSON(), original_model.toJSON(), "Expected: #{util.inspect(test_model.toJSON())}. Actual: #{util.inspect(original_model.toJSON())}")
-    #         done()
+            assert.deepEqual(test_model.toJSON(), owner_model.toJSON(), "Expected: #{util.inspect(test_model.toJSON())}. Actual: #{util.inspect(owner_model.toJSON())}")
+            done()

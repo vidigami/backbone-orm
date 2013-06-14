@@ -1,5 +1,6 @@
 util = require 'util'
 Backbone = require 'backbone'
+_ = require 'underscore'
 inflection = require 'inflection'
 
 Utils = require '../../utils'
@@ -23,18 +24,19 @@ module.exports = class Many
       throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array" unless _.isArray(value)
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       models = (@findOrCreate(model, key, item) for item in value)
-      previous_models = _.clone(collection.models) if reverse_key = @reverseKey()
+      collection = model.attributes[key]
+      previous_models = _.clone(collection.models) if reverse_key = Utils.reverseKey(@related_model_type, @model_type)
 
       # set the collection
       collection.set(models)
-      return @ unless reverse_relation
+      return @ unless reverse_key
 
       # set the reverses
       related_model.set(reverse_key, model) for related_model in models
 
       # clear the reverses
       for related_model in previous_models
-        related_model.set(reverse_key, null) if related_model and not collection.find(related_model.get('id'))
+        related_model.set(reverse_key, null) if related_model and not collection.get(related_model.get('id'))
 
     return @
 
@@ -63,9 +65,9 @@ module.exports = class Many
   findOrCreate: (model, key, item) ->
     collection = model.attributes[key]
     if item instanceof @related_model_type
-      current_related_model = collection.find(item.get('id'))
+      id = item.get('id')
     else if _.isObject(item)
-      current_related_model = collection.find(item.id)
+      id = item.id
     else
-      current_related_model = collection.find(item)
-    return current_related_model or Utils.createRelated(@model_type, item)
+      id = item
+    return collection.get(id) or Utils.createRelated(@model_type, item)

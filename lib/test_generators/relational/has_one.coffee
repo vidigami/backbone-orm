@@ -53,8 +53,8 @@ module.exports = (options) ->
           assert.ok(!err, 'no errors')
           assert.ok(model, 'found related model')
 
-          model.get 'owner', (err, original_model) ->
+          model.get 'owner', (err, owner_model) ->
             assert.ok(!err, 'no errors')
-            assert.ok(original_model, 'found original model')
-            assert.equal(test_model.get('id'), original_model.get('id'), 'reverse relation gives the correct model')
+            assert.ok(owner_model, 'found original model')
+            assert.equal(test_model.get('id'), owner_model.get('id'), 'reverse relation gives the correct model')
             done()
