@@ -7,25 +7,25 @@ Fabricator = require '../../fabricator'
 Utils = require '../../utils'
 adapters = Utils.adapters
 
-class ReverseModel extends Backbone.Model
-  url: '/reverse_models'
+class Reverse extends Backbone.Model
+  url: '/reverses'
   @schema:
-    many_reverse: -> ['hasMany', HasManyModel]
-  sync: require('../../memory_backbone_sync')(ReverseModel)
+    owners: -> ['hasMany', Owner]
+  sync: require('../../memory_backbone_sync')(Reverse)
 
-class HasManyModel extends Backbone.Model
-  url: '/has_many_models'
+class Owner extends Backbone.Model
+  url: '/owners'
   @schema:
-    many_reverse: -> ['hasMany', ReverseModel]
-  sync: require('../../memory_backbone_sync')(HasManyModel)
+    reverses: -> ['hasMany', Reverse]
+  sync: require('../../memory_backbone_sync')(Owner)
 
-ReverseModel.initialize()
-HasManyModel.initialize()
+Reverse.initialize()
+Owner.initialize()
 
 BASE_COUNT = 5
 
 test_parameters =
-  model_type: HasManyModel
+  model_type: Owner
   route: 'mock_models'
   beforeEach: (callback) ->
     MODELS = {}
@@ -36,8 +36,8 @@ test_parameters =
     queue.defer (callback) ->
       destroy_queue = new Queue()
 
-      destroy_queue.defer (callback) -> ReverseModel.destroy callback
-      destroy_queue.defer (callback) -> HasManyModel.destroy callback
+      destroy_queue.defer (callback) -> Reverse.destroy callback
+      destroy_queue.defer (callback) -> Owner.destroy callback
 
       destroy_queue.await callback
 
@@ -45,12 +45,12 @@ test_parameters =
     queue.defer (callback) ->
       create_queue = new Queue()
 
-      create_queue.defer (callback) -> Fabricator.create(ReverseModel, 2*BASE_COUNT, {
-        name: Fabricator.uniqueId('reverse_')
+      create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
+        name: Fabricator.uniqueId('reverses_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.reverse = models; callback(err))
-      create_queue.defer (callback) -> Fabricator.create(HasManyModel, BASE_COUNT, {
-        name: Fabricator.uniqueId('many_')
+      create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+        name: Fabricator.uniqueId('owners_')
         created_at: Fabricator.date
       }, (err, models) -> MODELS.many = models; callback(err))
 
@@ -62,7 +62,7 @@ test_parameters =
 
       for many_model in MODELS.many
         do (many_model) ->
-          many_model.set({many_reverse: [MODELS.reverse.pop().set({many_reverse: [many_model]}), MODELS.reverse.pop().set({many_reverse: [many_model]})]})
+          many_model.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
           save_queue.defer (callback) -> many_model.save {}, adapters.bbCallback callback
 
       save_queue.await callback

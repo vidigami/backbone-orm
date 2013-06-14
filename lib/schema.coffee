@@ -61,15 +61,18 @@ module.exports = class Schema
         attributes = key; options = value
 
       for key, value of attributes
-        if (relation = _schema.relations[key]) or (relation = _schema.ids_accessor[key])
+        if relation = _schema.relation(key)
           relation.set(@, key, value, options, _set)
         else
+          # console.trace "raw key: #{key} value: #{util.inspect(_schema.relations)}" if key is 'owners'
           _set.call(@, key, value, options)
       return @
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      if relation = _schema.relations[key] or relation = _schema.ids_accessor[key]
+      # console.log "key: #{key} _schema.relations: #{util.inspect(_schema.relations)}"
+
+      if (relation = _schema.relations[key]) or (relation = _schema.ids_accessor[key])
         return relation.get(@, key, callback)
       else
         value = _get.call(@, key)
@@ -96,3 +99,6 @@ module.exports = class Schema
 
       @_locked--
       return json
+
+  relation: (key) ->
+    return @relations[key] or @ids_accessor[key]

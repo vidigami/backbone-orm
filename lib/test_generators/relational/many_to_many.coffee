@@ -29,13 +29,15 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
-        test_model.get 'many_reverse', (err, models) ->
+        test_model.get 'reverses', (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'found related models')
           related = models[0]
 
-          related.get 'many_reverse', (err, original_models) ->
+          # console.log "related: #{util.inspect(related.attributes)}"
+
+          related.get 'owners', (err, owners) ->
             assert.ok(!err, 'no errors')
             assert.ok(models, 'found related models')
-            assert.ok(_.contains(original_models, test_model), 'reverse relation contains the original model')
+            assert.ok(_.contains(_.map(owners, (test) -> test.get('id')), test_model.get('id')), 'reverse relation contains the original model')
             done()

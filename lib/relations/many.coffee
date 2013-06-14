@@ -11,32 +11,51 @@ module.exports = class Many
     @ids_accessor = "#{@key}_ids"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
-    @foreign_key = inflection.foreign_key(model_type._sync.model_name) unless @foreign_key
+    @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
+    @reverse_relation = Utils.reverseRelation(@related_model_type, @model_type)
 
   set: (model, key, value, options) ->
+    # console.log "SET key: #{key} value: #{util.inspect(value)}"
+
     # hack
     if key is @ids_accessor
       # TODO
 
     else
       throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array" unless _.isArray(value)
+      value = value.models if value instanceof Backbone.Collection
+      throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
-      models = (@findOrCreate(model, key, item) for item in value)
+      models = (@findOrCreate(model, item) for item in value)
       collection = model.attributes[key]
-      previous_models = _.clone(collection.models) if reverse_key = Utils.reverseKey(@related_model_type, @model_type)
+
+      console.log "key: #{key}"
+
+      # save previous
+      previous_models = _.clone(collection.models) if @reverse_relation
 
       # set the collection
-      collection.set(models)
-      return @ unless reverse_key
+      collection.reset(models)
+      return @ unless @reverse_relation
 
-      # set the reverses
-      related_model.set(reverse_key, model) for related_model in models
+      # set ther references
+      for related_model in models
+        if @reverse_relation.add
+          # console.log "Setting reverse #{@reverse_relation.key}: #{util.inspect(model.attributes)}"
+
+          @reverse_relation.add(related_model, model)
+        else
+          related_model.set(@reverse_relation.key, model)
 
       # clear the reverses
       for related_model in previous_models
-        related_model.set(reverse_key, null) if related_model and not collection.get(related_model.get('id'))
+        continue if not related_model or collection.get(related_model.get('id'))
+
+        if @reverse_relation.remove
+          @reverse_relation.remove(related_model, model)
+        else
+          related_model.set(@reverse_relation.key, null)
 
     return @
 
@@ -44,12 +63,13 @@ module.exports = class Many
     # hack
     if key is @ids_accessor
       relation_key = key.replace('_ids', '')
-      related_ids = if related_collection = model.attributes[relation_key] then _.map(related_collection.models, (related_model) -> related_model.get('id')) else []
+      related_ids = if related_collection = model.attributes[relation_key] then _.map(related_collection.models, (related_model) -> related_model?.get('id')) else []
       callback(null, related_ids) if callback
       return related_ids
 
     else
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       collection = model.attributes[key]
       callback(null, if collection then collection.models else []) if callback
       return collection
@@ -62,12 +82,18 @@ module.exports = class Many
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
 
-  findOrCreate: (model, key, item) ->
-    collection = model.attributes[key]
-    if item instanceof @related_model_type
-      id = item.get('id')
-    else if _.isObject(item)
-      id = item.id
-    else
-      id = item
-    return collection.get(id) or Utils.createRelated(@model_type, item)
+  findOrCreate: (model, item) ->
+    collection = model.attributes[@key]
+    return collection.get(Utils.itemId(item)) or Utils.createRelated(@model_type, item)
+
+  itemId: (model, item) ->
+
+  add: (model, item) ->
+    collection = model.get(@key)
+    item = @findOrCreate(model, item)
+    return if collection.get(item.get('id'))
+    collection.add(item)
+
+  remove: (model, item) ->
+    collection = model.get(@key)
+    collection.remove(item)

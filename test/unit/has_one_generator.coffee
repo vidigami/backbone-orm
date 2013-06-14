@@ -70,7 +70,7 @@ test_parameters =
 
     # link and save all
     queue.defer (callback) ->
-      save_queue = new Queue(1)
+      save_queue = new Queue()
 
       for owner in MODELS.owner
         owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop()})

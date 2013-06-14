@@ -28,7 +28,7 @@ Flat.initialize()
 Reverse.initialize()
 Owner.initialize()
 
-BASE_COUNT = 5
+BASE_COUNT = 2
 
 test_parameters =
   model_type: Owner
@@ -73,8 +73,10 @@ test_parameters =
 
       for owner in MODELS.owner
         do (owner) ->
-          owner.set({flats: [MODELS.flat.pop(), MODELS.flat.pop()]})
-          owner.set({reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]})
+          owner.set({
+            flats: [MODELS.flat.pop(), MODELS.flat.pop()]
+            reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]
+          })
           save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
 
       save_queue.await callback
