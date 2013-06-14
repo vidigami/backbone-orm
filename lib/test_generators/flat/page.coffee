@@ -28,14 +28,14 @@ module.exports = (options) ->
         assert.ok(!err, 'no errors')
         assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
-        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        assert.equal(LIMIT, data.rows.length, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
         done()
 
     it 'Cursor can chain limit without paging', (done) ->
       LIMIT = 3
       MODEL_TYPE.cursor({$page: false}).limit(LIMIT).toJSON (err, data) ->
         assert.ok(!err, 'no errors')
-        assert.equal(LIMIT, data.length, "Expected: #{LIMIT}, Actual: #{data.length}")
+        assert.equal(LIMIT, data.length, "\nExpected: #{LIMIT}, Actual: #{data.length}")
         done()
 
     it 'Cursor can chain limit and offset with paging', (done) ->
@@ -45,7 +45,7 @@ module.exports = (options) ->
         assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
         assert.equal(OFFSET, data.offset, 'has the correct offset')
-        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        assert.equal(LIMIT, data.rows.length, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
         done()
 
     it 'Cursor can chain limit with paging (no true or false)', (done) ->
@@ -55,7 +55,7 @@ module.exports = (options) ->
         assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, MODELS_JSON.length, 'has the correct total_rows')
         assert.equal(OFFSET, data.offset, 'has the correct offset')
-        assert.equal(LIMIT, data.rows.length, "Expected: #{LIMIT}, Actual: #{data.rows.length}")
+        assert.equal(LIMIT, data.rows.length, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
         done()
 
     it 'Cursor can select fields with paging', (done) ->
@@ -85,5 +85,5 @@ module.exports = (options) ->
           assert.ok(!err, 'no errors')
           assert.equal(data.total_rows, 1, 'has the correct total_rows')
           assert.equal(data.rows.length, 1, 'has the correct row.length')
-          assert.deepEqual(expected = JSON.stringify(model.toJSON()), actual = JSON.stringify(data.rows[0]), "Expected: #{util.inspect(expected)}. Actual: #{util.inspect(actual)}")
+          assert.deepEqual(expected = JSON.stringify(model.toJSON()), actual = JSON.stringify(data.rows[0]), "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
           done()

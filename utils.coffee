@@ -30,10 +30,13 @@ module.exports = class Utils
   ##############################
   # Relational
   ##############################
-  @createRelated: (reverse_model_type, item) ->
+  @createRelated: (model_type, item) ->
     return item if (item instanceof Backbone.Model) or (item instanceof Backbone.Collection)
-    return new reverse_model_type(reverse_model_type::parse(item)) if _.isObject(item)
-    return new reverse_model_type({id: item})
+    if model_type._cache
+      return model_type._cache.findCachedOrCreate(item, model_type)
+    else
+      return new model_type(model_type::parse(item)) if _.isObject(item)
+      return new model_type({id: item})
 
   @reverseRelation: (reverse_model_type, model_type) ->
     return null unless (reverse_model_type._schema and model_type.model_name)
@@ -43,7 +46,7 @@ module.exports = class Utils
     return reverse_model_type._schema.relations[reverse_key] if reverse_model_type._schema.relations.hasOwnProperty(reverse_key)
     return null
 
-  @itemId: (item) ->
+  @dataId: (item) ->
     if item instanceof Backbone.Model
       return item.get('id')
     else if _.isObject(item)

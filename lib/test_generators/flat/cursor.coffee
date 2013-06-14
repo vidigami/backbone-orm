@@ -26,7 +26,7 @@ module.exports = (options) ->
     it 'Handles a count query to json', (done) ->
       MODEL_TYPE.cursor({$count: true}).toJSON (err, count) ->
         assert.ok(!err, 'no errors')
-        assert.equal(MODELS_JSON.length, count, "Expected: #{MODELS_JSON.length}. Actual: #{count}")
+        assert.equal(MODELS_JSON.length, count, "\nExpected: #{MODELS_JSON.length}\nActual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->
@@ -73,7 +73,7 @@ module.exports = (options) ->
         MODEL_TYPE.cursor({name: ALBUM_NAME}).limit(limit).offset(offset).toModels (err, models) ->
           assert.ok(!err, 'no errors')
           assert.ok(models, 'cursor toModels gives us models')
-          assert.equal(limit, models.length, "Expected: #{limit}, Actual: #{models.length}")
+          assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
 
     it 'Cursor can select fields', (done) ->

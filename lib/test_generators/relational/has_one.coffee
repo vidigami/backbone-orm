@@ -31,7 +31,7 @@ module.exports = (options) ->
         test_model.get 'flat', (err, model) ->
           assert.ok(!err, 'no errors')
           assert.ok(model, 'found related model')
-          assert.equal(test_model.get('flat_id'), model.get('id'), "Expected: #{test_model.get('flat_id')}. Actual: #{model.get('id')}")
+          assert.equal(test_model.get('flat_id'), model.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{model.get('id')}")
           done()
 
     it 'Handles a get query for a reversed hasOne relation', (done) ->
@@ -56,5 +56,9 @@ module.exports = (options) ->
           model.get 'owner', (err, owner_model) ->
             assert.ok(!err, 'no errors')
             assert.ok(owner_model, 'found original model')
-            assert.equal(test_model.get('id'), owner_model.get('id'), 'reverse relation gives the correct model')
+
+            # if MODEL_TYPE._cache
+            #   assert.deepEqual(test_model.toJSON(), owner_model.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner_model.toJSON())}")
+            # else
+            assert.equal(test_model.get('id'), owner_model.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner_model.get('id')}")
             done()

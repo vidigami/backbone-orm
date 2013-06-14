@@ -32,7 +32,7 @@ module.exports = class Many
       previous_models = _.clone(collection.models) if @reverse_relation
 
       # set the collection with found or created models
-      collection.reset(models = (collection.get(Utils.itemId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
+      collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
       return @ unless @reverse_relation
 
       # set ther references
@@ -78,13 +78,13 @@ module.exports = class Many
 
   has: (model, key, item) ->
     collection = model.attributes[key]
-    return !!collection.get(Utils.itemId(item))
+    return !!collection.get(Utils.dataId(item))
 
   add: (model, item) ->
     collection = model.get(@key)
-    return if collection.get(Utils.itemId(item))
+    return if collection.get(Utils.dataId(item))
     collection.add(Utils.createRelated(@model_type, item))
 
   remove: (model, item) ->
     collection = model.get(@key)
-    collection.remove(Utils.itemId(item))
+    collection.remove(Utils.dataId(item))
