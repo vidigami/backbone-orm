@@ -9,7 +9,7 @@ module.exports = class HasOne
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
     unless @foreign_key
-      @foreign_key = if @reverse then inflection.foreign_key(model_type._sync.model_name) else inflection.foreign_key(@key)
+      @foreign_key = inflection.foreign_key(model_type._sync.model_name)
 
   set: (model, key, value, options, _set) ->
     # hack
@@ -60,11 +60,7 @@ module.exports = class HasOne
       return value
 
     query = {$one: true}
-
-    if @reverse
-      query[@foreign_key] = model.attributes.id
-    else
-      query.id = model.get(@foreign_key)
+    query[@foreign_key] = model.attributes.id
 
     @related_model_type.cursor(query).toModels (err, model) =>
       return callback(err) if err

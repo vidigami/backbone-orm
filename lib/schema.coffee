@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
+BelongsTo = require './relations/belongs_to'
 HasOne = require './relations/has_one'
 HasMany = require './relations/has_many'
 
@@ -25,6 +26,7 @@ module.exports = class Schema
     @_monkeyPatchModel()
 
   initialize: ->
+    @relations_ids = {}
     for key, options of @relations
       options = options() if _.isFunction(options)
       throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
@@ -32,11 +34,13 @@ module.exports = class Schema
       type_name = options[0]
       if type_name is 'hasOne' or type_name is 'belongsTo' # TODO: make a different class
         relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
+      else if type_name is 'belongsTo'
+        relation = @relations[key] = new BelongsTo(@model_type, key, options.slice(1))
       else if type_name is 'hasMany'
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
-      @relations[relation.ids_accessor] = relation if relation.ids_accessor
+      @relations_ids[relation.ids_accessor] = relation if relation.ids_accessor
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
@@ -57,7 +61,7 @@ module.exports = class Schema
         attributes = key; options = value
 
       for key, value of attributes
-        if relation = _schema.relations[key]
+        if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
           relation.set(@, key, value, options, _set)
         else
           _set.call(@, key, value, options)
@@ -65,7 +69,7 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      if relation = _schema.relations[key]
+      if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
         return relation.get(@, key, callback)
       else
         value = _get.call(@, key)
