@@ -34,8 +34,6 @@ module.exports = (options) ->
           assert.ok(models, 'found related models')
           related = models[0]
 
-          # console.log "related: #{util.inspect(related.attributes)}"
-
           related.get 'owners', (err, owners) ->
             assert.ok(!err, 'no errors')
             assert.ok(models, 'found related models')

@@ -8,10 +8,11 @@ module.exports = class One
   constructor: (@model_type, @key, options_array, @belongs_to) ->
     @type_name = 'hasOne'
     @ids_accessor = "#{@key}_id"
-    @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
-    @reverse_relation = Utils.reverseRelation(@related_model_type, @model_type)
+
+    @reverse_model_type = options_array[0]
+    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
 
   set: (model, key, value, options, _set) ->
     # hack
@@ -30,7 +31,7 @@ module.exports = class One
           else
             related_model.set(@reverse_relation.key, null)
 
-      related_model = if value then Utils.createRelated(@related_model_type, value) else null
+      related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
 
       _set.call(model, key, related_model, options)
       return @ if not related_model or not @reverse_relation
@@ -59,7 +60,7 @@ module.exports = class One
     query = {$one: true}
     query[@foreign_key] = model.attributes.id
 
-    @related_model_type.cursor(query).toModels (err, model) =>
+    @reverse_model_type.cursor(query).toModels (err, model) =>
       return callback(err) if err
       return callback(new Error "Model not found. Id #{@foreign_key}") if not model
       callback(null, model)
@@ -70,6 +71,6 @@ module.exports = class One
 
     # compare ids
     current_id = current_related_model.get('id')
-    return current_id is item.get('id') if item instanceof @related_model_type
+    return current_id is item.get('id') if item instanceof @reverse_model_type
     return current_id is item.id if _.isObject(item)
     return current_id is item

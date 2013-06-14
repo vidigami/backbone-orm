@@ -9,15 +9,14 @@ module.exports = class Many
   constructor: (@model_type, @key, options_array) ->
     @type_name = 'hasMany'
     @ids_accessor = "#{@key}_ids"
-    @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
-    @reverse_relation = Utils.reverseRelation(@related_model_type, @model_type)
+
+    @reverse_model_type = options_array[0]
+    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
 
   set: (model, key, value, options) ->
-    # console.log "SET key: #{key} value: #{util.inspect(value)}"
-
     # hack
     if key is @ids_accessor
       # TODO
@@ -27,23 +26,18 @@ module.exports = class Many
       value = value.models if value instanceof Backbone.Collection
       throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
-      models = (@findOrCreate(model, item) for item in value)
-      collection = model.attributes[key]
-
-      console.log "key: #{key}"
 
       # save previous
+      collection = model.attributes[key]
       previous_models = _.clone(collection.models) if @reverse_relation
 
       # set the collection
-      collection.reset(models)
+      collection.reset(models = (@findOrCreate(model, item, @model_type) for item in value))
       return @ unless @reverse_relation
 
       # set ther references
       for related_model in models
         if @reverse_relation.add
-          # console.log "Setting reverse #{@reverse_relation.key}: #{util.inspect(model.attributes)}"
-
           @reverse_relation.add(related_model, model)
         else
           related_model.set(@reverse_relation.key, model)
@@ -77,23 +71,22 @@ module.exports = class Many
     query = {}
     query[@foreign_key] = model.attributes.id
 
-    @related_model_type.cursor(query).toModels (err, models) =>
+    @reverse_model_type.cursor(query).toModels (err, models) =>
       return callback(err) if err
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
 
-  findOrCreate: (model, item) ->
+  findOrCreate: (model, item, model_type) ->
     collection = model.attributes[@key]
-    return collection.get(Utils.itemId(item)) or Utils.createRelated(@model_type, item)
+    return collection.get(Utils.itemId(item)) or Utils.createRelated(model_type, item)
 
   itemId: (model, item) ->
 
   add: (model, item) ->
     collection = model.get(@key)
-    item = @findOrCreate(model, item)
-    return if collection.get(item.get('id'))
-    collection.add(item)
+    return if collection.get(Utils.itemId(item))
+    collection.add(Utils.createRelated(@model_type, item))
 
   remove: (model, item) ->
     collection = model.get(@key)
-    collection.remove(item)
+    collection.remove(Utils.itemId(item))

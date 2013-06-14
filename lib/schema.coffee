@@ -64,14 +64,11 @@ module.exports = class Schema
         if relation = _schema.relation(key)
           relation.set(@, key, value, options, _set)
         else
-          # console.trace "raw key: #{key} value: #{util.inspect(_schema.relations)}" if key is 'owners'
           _set.call(@, key, value, options)
       return @
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      # console.log "key: #{key} _schema.relations: #{util.inspect(_schema.relations)}"
-
       if (relation = _schema.relations[key]) or (relation = _schema.ids_accessor[key])
         return relation.get(@, key, callback)
       else
