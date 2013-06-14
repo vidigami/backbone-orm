@@ -8,8 +8,7 @@ module.exports = class HasOne
     @ids_accessor = "#{@key}_id"
     @related_model_type = options_array[0]
     @[key] = value for key, value of options_array[1]
-    unless @foreign_key
-      @foreign_key = inflection.foreign_key(model_type._sync.model_name)
+    @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
 
   set: (model, key, value, options, _set) ->
     # hack
@@ -41,8 +40,7 @@ module.exports = class HasOne
         reverse_key = inflection.underscore(@model_type.model_name)
         if reverse_relation = @related_model_type._schema.relations[reverse_key]
           current_model = related_model.get(reverse_key)
-          unless (current_model and current_model.get('id') is model.get('id')) # already set
-            related_model.set(reverse_key, model)
+          related_model.set(reverse_key, model) unless (current_model and current_model.get('id') is model.get('id')) # already set
     return @
 
   get: (model, key, callback, _get) ->

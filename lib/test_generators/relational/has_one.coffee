@@ -31,7 +31,6 @@ module.exports = (options) ->
         test_model.get 'flat', (err, model) ->
           assert.ok(!err, 'no errors')
           assert.ok(model, 'found related model')
-
           assert.equal(test_model.get('flat_id'), model.get('id'), "Expected: #{test_model.get('flat_id')}. Actual: #{model.get('id')}")
           done()
 

@@ -22,17 +22,17 @@ module.exports = class Schema
     Float: 'Float'
 
   constructor: (@model_type) ->
+    @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
     @_monkeyPatchModel()
 
   initialize: ->
-    @relations_ids = {}
     for key, options of @relations
       options = options() if _.isFunction(options)
       throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
 
       type_name = options[0]
-      if type_name is 'hasOne' or type_name is 'belongsTo' # TODO: make a different class
+      if type_name is 'hasOne'
         relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
       else if type_name is 'belongsTo'
         relation = @relations[key] = new BelongsTo(@model_type, key, options.slice(1))
@@ -40,15 +40,16 @@ module.exports = class Schema
         relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
-      @relations_ids[relation.ids_accessor] = relation if relation.ids_accessor
+      @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+    return
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
-    @fields ={}; @relations ={}
 
     for key, options of schema
       type_name = if _.isArray(options) then options[0] else options
       if type = Schema.types[type_name] then (@fields[key] = type) else (@relations[key] = options) # save relations for later binding
+    return
 
   _monkeyPatchModel: ->
     _schema = @
@@ -61,7 +62,7 @@ module.exports = class Schema
         attributes = key; options = value
 
       for key, value of attributes
-        if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
+        if relation = _schema.relations[key] or relation = _schema.ids_accessor[key]
           relation.set(@, key, value, options, _set)
         else
           _set.call(@, key, value, options)
@@ -69,7 +70,7 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      if relation = _schema.relations[key] or relation = _schema.relations_ids[key]
+      if relation = _schema.relations[key] or relation = _schema.ids_accessor[key]
         return relation.get(@, key, callback)
       else
         value = _get.call(@, key)
