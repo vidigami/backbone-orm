@@ -2,16 +2,15 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
-BelongsTo = require './relations/belongs_to'
-HasOne = require './relations/has_one'
-HasMany = require './relations/has_many'
+One = require './relations/one'
+Many = require './relations/many'
 
-# HACK: global monkey patch - WHY IS THIS NEEDED?
-_original_get = Backbone.Model::get
-Backbone.Model::get = (key, callback) ->
-  value = _original_get.call(@, key)
-  callback(null, value) if callback
-  return value
+# # HACK: global monkey patch - WHY IS THIS NEEDED?
+# _original_get = Backbone.Model::get
+# Backbone.Model::get = (key, callback) ->
+#   value = _original_get.call(@, key)
+#   callback(null, value) if callback
+#   return value
 
 module.exports = class Schema
   @types:
@@ -33,11 +32,11 @@ module.exports = class Schema
 
       type_name = options[0]
       if type_name is 'hasOne'
-        relation = @relations[key] = new HasOne(@model_type, key, options.slice(1))
+        relation = @relations[key] = new One(@model_type, key, options.slice(1))
       else if type_name is 'belongsTo'
-        relation = @relations[key] = new BelongsTo(@model_type, key, options.slice(1))
+        relation = @relations[key] = new One(@model_type, key, options.slice(1), true)
       else if type_name is 'hasMany'
-        relation = @relations[key] = new HasMany(@model_type, key, options.slice(1))
+        relation = @relations[key] = new Many(@model_type, key, options.slice(1))
       else
         throw new Error "Unrecognized relationship: #{util.inspect(options)}"
       @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor

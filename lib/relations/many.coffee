@@ -2,7 +2,7 @@ util = require 'util'
 Backbone = require 'backbone'
 inflection = require 'inflection'
 
-module.exports = class HasMany
+module.exports = class Many
   constructor: (@model_type, @key, options_array) ->
     @type_name = 'hasMany'
     @ids_accessor = "#{@key}_ids"

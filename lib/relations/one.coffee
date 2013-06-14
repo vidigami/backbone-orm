@@ -2,8 +2,8 @@ util = require 'util'
 _ = require 'underscore'
 inflection = require 'inflection'
 
-module.exports = class HasOne
-  constructor: (@model_type, @key, options_array) ->
+module.exports = class One
+  constructor: (@model_type, @key, options_array, @belongs_to) ->
     @type_name = 'hasOne'
     @ids_accessor = "#{@key}_id"
     @related_model_type = options_array[0]
