@@ -31,8 +31,8 @@ module.exports = class Many
       collection = model.attributes[key]
       previous_models = _.clone(collection.models) if @reverse_relation
 
-      # set the collection
-      collection.reset(models = (@findOrCreate(model, item, @reverse_model_type) for item in value))
+      # set the collection with found or created models
+      collection.reset(models = (collection.get(Utils.itemId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
       return @ unless @reverse_relation
 
       # set ther references
@@ -75,10 +75,6 @@ module.exports = class Many
       return callback(err) if err
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
-
-  findOrCreate: (model, item, model_type) ->
-    collection = model.attributes[@key]
-    return collection.get(Utils.itemId(item)) or Utils.createRelated(model_type, item)
 
   itemId: (model, item) ->
 
