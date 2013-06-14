@@ -5,17 +5,22 @@ MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './utils'
 
-class MemoryBackboneSync
+Cache = require './cache'
+
+
+class CacheSync
   CLASS_METHODS: ['initialize', 'cursor', 'find', 'count', 'all', 'destroy']
 
-  constructor: (@model_type) ->
+  constructor: (@sync) ->
+    return @sync
+
+    @model_type = @sync.model_type
     throw new Error("Missing url for model") unless url = _.result(@model_type.prototype, 'url')
     @model_type.model_name = Utils.urlToModelName(url)
 
-    @store = {}
-
     # publish methods and sync on model
     @model_type[fn] = _.bind(@[fn], @) for fn in @CLASS_METHODS
+    # Cache.initialize(@model_type, @) # use composition instead
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
@@ -66,8 +71,15 @@ class MemoryBackboneSync
       @store = {}
     return callback()
 
+  ###################################
+  # Cache Extension
+  ###################################
+  findCached: (query, callback) ->
+    
+
 # options
 #   model_type - the model that will be used to add query functions to
-module.exports = (model_type) ->
-  sync = new MemoryBackboneSync(model_type)
-  return (method, model, options={}) -> sync[method](model, options)
+module.exports = (sync) ->
+  return sync
+  # sync = new CacheSync(sync)
+  # return (method, model, options={}) -> sync[method](model, options)

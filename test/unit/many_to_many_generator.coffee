@@ -60,10 +60,10 @@ test_parameters =
     queue.defer (callback) ->
       save_queue = new Queue()
 
-      for owner_model in MODELS.owner
-        do (owner_model) ->
-          owner_model.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
-          save_queue.defer (callback) -> owner_model.save {}, adapters.bbCallback callback
+      for owner in MODELS.owner
+        do (owner) ->
+          owner.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
+          save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
 
       save_queue.await callback
 

@@ -9,20 +9,20 @@ adapters = Utils.adapters
 
 class Flat extends Backbone.Model
   url: '/flats'
-  sync: require('../../memory_backbone_sync')(Flat)
+  sync: require('../../cache_sync')(require('../../memory_backbone_sync')(Flat)) # TODO: make configurable
 
 class Reverse extends Backbone.Model
   url: '/reverses'
   @schema:
     owner: -> ['hasOne', Owner, foreign_key: 'reverse_id']
-  sync: require('../../memory_backbone_sync')(Reverse)
+  sync: require('../../cache_sync')(require('../../memory_backbone_sync')(Reverse)) # TODO: make configurable
 
 class Owner extends Backbone.Model
   url: '/owners'
   @schema:
     flats: -> ['hasMany', Flat, foreign_key: 'owner_id']
     reverses: -> ['hasMany', Reverse, foreign_key: 'owner_id']
-  sync: require('../../memory_backbone_sync')(Owner)
+  sync: require('../../cache_sync')(require('../../memory_backbone_sync')(Owner)) # TODO: make configurable
 
 Flat.initialize()
 Reverse.initialize()

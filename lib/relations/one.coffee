@@ -7,7 +7,7 @@ Utils = require '../../utils'
 
 module.exports = class One
   constructor: (@model_type, @key, options_array, @belongs_to) ->
-    @type_name = 'hasOne'
+    @type_name = if @belongs_to then 'belongsTo' else 'hasOne'
     @ids_accessor = "#{@key}_id"
     @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
