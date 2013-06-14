@@ -17,30 +17,13 @@ module.exports = class One
 
     else
       throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+      return @ if @has(model, key, value) # already set
 
-      # model
-      current_related_model = model.attributes[key]
-      if value instanceof @related_model_type
-        return @ if current_related_model and current_related_model.get('id') is value.get('id') # already exists
-        related_model = value
-
-      # data
-      else
-        if _.isObject(value)
-          return @ if current_related_model and current_related_model.get('id') is value.id # already exists
-          related_model = new @related_model_type(@related_model_type::parse(value))
-        else
-          return @ if current_related_model and current_related_model.get('id') is value # already exists
-          related_model = new @related_model_type({id: value}) # TODO: need to fetch and look in the cache
-
-      _set.call(model, key, related_model, options) # call so events are triggered
+      _set.call(model, key, related_model = @create(value), options) # call so events are triggered
+      return @ unless reverse_relation = @reverseRelation()
 
       # set the reverse
-      if @related_model_type._schema
-        reverse_key = inflection.underscore(@model_type.model_name)
-        if reverse_relation = @related_model_type._schema.relations[reverse_key]
-          current_model = related_model.get(reverse_key)
-          related_model.set(reverse_key, model) unless (current_model and current_model.get('id') is model.get('id')) # already set
+      related_model.set(reverse_key, model) if not reverse_relation.has(related_model, reverse_key, model)
     return @
 
   get: (model, key, callback, _get) ->
@@ -64,3 +47,22 @@ module.exports = class One
       return callback(err) if err
       return callback(new Error "Model not found. Id #{@foreign_key}") if not model
       callback(null, model)
+
+  has: (model, key, item) ->
+    current_related_model = model.attributes[@key]
+    return false if (item and not current_related_model or not item and current_related_model)
+    current_id = current_related_model.get('id')
+    return current_id is item.get('id') if item instanceof @related_model_type
+    return current_id is item.id if _.isObject(item)
+    return current_id is item
+
+  create: (item) ->
+    return item if item instanceof @related_model_type
+    return new @related_model_type(@related_model_type::parse(item)) if _.isObject(item)
+    return new @related_model_type({id: item})
+
+  # TODO: cache
+  reverseRelation: (item) ->
+    return null if @related_model_type._schema
+    reverse_key = inflection.underscore(@model_type.model_name)
+    return @related_model_type._schema.relations[reverse_key]
