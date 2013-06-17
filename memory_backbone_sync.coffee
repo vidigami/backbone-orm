@@ -60,9 +60,5 @@ module.exports = (model_type, cache) ->
     sync['initialize']()
     sync[method].apply(sync, Array::slice.call(arguments, 1))
 
-  require('./lib/model_extensions')(model_type, sync_fn)
-
-  if cache
-    return require('./cache_sync')(model_type, sync_fn)
-  else
-    return sync_fn
+  require('./lib/model_extensions')(model_type, sync_fn) # mixin extensions
+  return if cache then require('./cache_sync')(model_type, sync_fn) else sync_fn
