@@ -39,7 +39,11 @@ module.exports = class Utils
       return new model_type({id: item})
 
   @reverseRelation: (model_type, owning_model_name) ->
+    console.log "owning_model_name: #{owning_model_name}. model_type.model_name: #{model_type.model_name} model_type.relation: #{!!model_type.relation}"
+
     return null unless model_type.relation
+    reverse_key = inflection.underscore(owning_model_name)
+
     return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
     return model_type.relation(inflection.pluralize(reverse_key)) # plural
 

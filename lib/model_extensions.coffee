@@ -3,15 +3,13 @@ module.exports = (model_type, sync) ->
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
-  model_type.cursor = (query={}) ->
-    sync('cursor', query)
+  model_type.cursor = (query={}) -> sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('destroy', query, callback)
 
-  model_type.relationship = (key) ->
-    sync('relationship', key)
+  model_type.relation = (key) -> sync('relation', key)
 
   ###################################
   # Backbone ORM - Convenience Functions
@@ -20,8 +18,7 @@ module.exports = (model_type, sync) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('cursor', query).count(callback)
 
-  model_type.all = (callback) ->
-    sync('cursor', {}).toModels(callback)
+  model_type.all = (callback) -> sync('cursor', {}).toModels(callback)
 
   model_type.find = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
