@@ -6,15 +6,12 @@ inflection = require 'inflection'
 Utils = require '../../utils'
 
 module.exports = class Many
-  constructor: (@model_type, @key, options_array) ->
-    @type_name = 'hasMany'
+  constructor: (@model_type, @key, options) ->
+    @[key] = value for key, value of options
     @ids_accessor = "#{@key}_ids"
-    @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
+    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
     @collection_type = Backbone.Collection unless @collection_type
-
-    @reverse_model_type = options_array[0]
-    @reverse_relation = Utils.reverseRelation(options_array[0], @model_type)
 
   set: (model, key, value, options) ->
     # hack

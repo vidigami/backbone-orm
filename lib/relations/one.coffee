@@ -6,13 +6,10 @@ inflection = require 'inflection'
 Utils = require '../../utils'
 
 module.exports = class One
-  constructor: (@model_type, @key, options_array, @belongs_to) ->
-    @type_name = if @belongs_to then 'belongsTo' else 'hasOne'
+  constructor: (@model_type, @key, options) ->
+    @[key] = value for key, value of options
     @ids_accessor = "#{@key}_id"
-    @[key] = value for key, value of options_array[1]
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
-
-    @reverse_model_type = options_array[0]
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
 
   set: (model, key, value, options, _set) ->

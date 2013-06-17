@@ -27,27 +27,63 @@ module.exports = class Schema
 
   initialize: ->
     for key, options of @relations
-      options = options() if _.isFunction(options)
-      throw new Error "parseRelations, relation does not resolve to an array of [type, model, options]. Options: #{util.inspect(options)}" unless _.isArray(options)
-
-      type_name = options[0]
-      if type_name is 'hasOne'
-        relation = @relations[key] = new One(@model_type, key, options.slice(1))
-      else if type_name is 'belongsTo'
-        relation = @relations[key] = new One(@model_type, key, options.slice(1), true)
-      else if type_name is 'hasMany'
-        relation = @relations[key] = new Many(@model_type, key, options.slice(1))
-      else
-        throw new Error "Unrecognized relationship: #{util.inspect(options)}"
+      options = @_parseFieldOptions(options()) if _.isFunction(options)
+      switch options.type
+        when 'hasOne', 'belongsTo' then relation = @relations[key] = new One(@model_type, key, options)
+        when 'hasMany' then relation = @relations[key] = new Many(@model_type, key, options)
+        else throw new Error "Unrecognized relationship: #{util.inspect(options)}"
       @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
     return
+
+  _parseFieldOptions: (options) ->
+    # convert to an object
+    return {type: options} if _.isString(options)
+    return options unless _.isArray(options)
+
+    # type
+    result = {}
+    if _.isString(options[0])
+      result.type = options[0]
+      options = options.slice(1)
+      return result if options.length is 0
+
+    # reverse relation
+    if _.isFunction(options[0])
+      result.reverse_model_type = options[0]
+      options = options.slice(1)
+
+    # too many options
+    throw new Error "Unexpected field options array: #{util.inspect(options)}" if options.length > 1
+
+    # options object
+    _.extend(result, options[0]) if options.length is 1
+    return result
 
   _parse: ->
     schema = _.result(@model_type, 'schema') or {}
 
     for key, options of schema
-      type_name = if _.isArray(options) then options[0] else options
-      if type = Schema.types[type_name] then (@fields[key] = type) else (@relations[key] = options) # save relations for later binding
+      options = @_parseFieldOptions(options)
+
+      # a relationship (defered parse)
+      if _.isFunction(options)
+        @relations[key] = options
+
+      # typed field
+      else if options.type
+        throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
+
+        # a relationship
+        switch options.type
+          when 'hasOne', 'belongsTo', 'hasMany' then @relations[key] = options
+          else
+            options.type = type if type = Schema.types[type_name]
+            @fields[key] = options
+
+      # non-typed, eg. document
+      else
+        @fields[key] = options
+
     return
 
   _monkeyPatchModel: ->
