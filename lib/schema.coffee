@@ -33,9 +33,10 @@ module.exports = class Schema
         else
           throw new Error "Unrecognized relationship: #{util.inspect(options)}"
 
-      relation.initialize() # initalize in two steps for circular dependencies
       @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
 
+     # initalize in two steps to break circular dependencies
+    relation.initialize() for key, relation of @relations
     return
 
   relation: (key) -> return @relations[key] or @ids_accessor[key]
