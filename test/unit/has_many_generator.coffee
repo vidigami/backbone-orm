@@ -24,10 +24,6 @@ class Owner extends Backbone.Model
     reverses: -> ['hasMany', Reverse, foreign_key: 'owner_id']
   sync: require('../../memory_backbone_sync')(Owner)
 
-Flat.initialize()
-Reverse.initialize()
-Owner.initialize()
-
 BASE_COUNT = 3
 
 test_parameters =

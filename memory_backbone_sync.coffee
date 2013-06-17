@@ -4,11 +4,8 @@ _ = require 'underscore'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './utils'
-CacheSync = require './cache_sync'
 
 class MemoryBackboneSync
-  CLASS_METHODS: ['initialize', 'cursor', 'find', 'count', 'all', 'destroy']
-
   constructor: (@model_type) ->
     throw new Error("Missing url for model") unless url = _.result(@model_type.prototype, 'url')
     @model_type.model_name = Utils.urlToModelName(url)
@@ -16,14 +13,12 @@ class MemoryBackboneSync
     @store = {}
 
     # publish methods and sync on model
-    @model_type[fn] = _.bind(@[fn], @) for fn in @CLASS_METHODS
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
-    # TODO: make configurable
-    return new CacheSync(@)
-
-  initialize: -> @model_type._schema?.initialize()
+  initialize: ->
+    return if @is_initialized; @is_initialized = true
+    @model_type._schema.initialize()
 
   read: (model, options) ->
     options.success(if model.models then (json for id, json of @store) else @store[model.attributes.id])
@@ -44,13 +39,9 @@ class MemoryBackboneSync
     options.success(model_json)
 
   ###################################
-  # Collection Extensions
+  # Backbone ORM - Class Extensions
   ###################################
   cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
-
-  find: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    @cursor(query).toModels(callback)
 
   destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
@@ -61,17 +52,17 @@ class MemoryBackboneSync
       @store = {}
     return callback()
 
-  ###################################
-  # Convenience Functions
-  ###################################
-  all: (callback) -> @cursor({}).toModels callback
 
-  count: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    @cursor(query).count(callback)
-
-# options
-#   model_type - the model that will be used to add query functions to
-module.exports = (model_type) ->
+module.exports = (model_type, cache) ->
   sync = new MemoryBackboneSync(model_type)
-  return (method, model, options={}) -> sync[method](model, options)
+
+  sync_fn = (method, model, options={}) ->
+    sync['initialize']()
+    sync[method](model, options)
+
+  require('./backbone_model_extensions')(model_type, sync_fn)
+
+  if cache
+    return require('./cache_sync')(model_type, sync_fn)
+  else
+    return sync_fn

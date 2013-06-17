@@ -25,10 +25,6 @@ class Owner extends Backbowner.Model
     reverse: -> ['hasOne', Reverse]
   sync: require('../../memory_backbone_sync')(Owner)
 
-Flat.initialize()
-Reverse.initialize()
-Owner.initialize()
-
 BASE_COUNT = 1
 
 test_parameters =
