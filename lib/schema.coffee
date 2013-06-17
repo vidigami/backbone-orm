@@ -5,22 +5,17 @@ Backbone = require 'backbone'
 One = require './relations/one'
 Many = require './relations/many'
 
-# # HACK: global monkey patch - WHY IS THIS NEEDED?
-# _original_get = Backbone.Model::get
-# Backbone.Model::get = (key, callback) ->
-#   value = _original_get.call(@, key)
-#   callback(null, value) if callback
-#   return value
+TYPES =
+  String: 'String'
+  Date: 'Date'
+  Boolean: 'Boolean'
+  Integer: 'Integer'
+  Float: 'Float'
 
 module.exports = class Schema
-  @types:
-    String: 'String'
-    Date: 'Date'
-    Boolean: 'Boolean'
-    Integer: 'Integer'
-    Float: 'Float'
+  constructor: (@model_type, type_overrides={}) ->
 
-  constructor: (@model_type) ->
+    @types = _.defaults(type_overrides, TYPES)
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
     @_monkeyPatchModel()
@@ -77,7 +72,7 @@ module.exports = class Schema
         switch options.type
           when 'hasOne', 'belongsTo', 'hasMany' then @relations[key] = options
           else
-            options.type = type if type = Schema.types[type_name]
+            options.type = type if type = @types[type_name]
             @fields[key] = options
 
       # non-typed, eg. document
