@@ -18,7 +18,7 @@ class CacheSync
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
-    @sync('initialize', @model_type)
+    @sync 'initialize', @model_type
 
   read: (model, options) ->
     if model.models
@@ -63,4 +63,4 @@ module.exports = (model_type, wrapped_sync) ->
 
   return (method, model, options={}) ->
     sync['initialize']()
-    sync[method](model, options)
+    sync[method].apply(sync, Array::slice.call(arguments, 1))
