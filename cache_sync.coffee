@@ -17,7 +17,8 @@ class CacheSync
     model_type._cache = @
 
   initialize: ->
-    return if @is_initialized; @is_initialized = true
+    return if @is_initialized
+    @is_initialized = true
     @sync 'initialize', @model_type
 
   read: (model, options) ->
