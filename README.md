@@ -8,7 +8,7 @@ Install
 
 Install all npm modules:
 
-  $ cd backbone-node
+  $ cd backbone-orm
   $ npm install
 
 Test
