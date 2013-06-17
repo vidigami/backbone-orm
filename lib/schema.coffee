@@ -30,6 +30,14 @@ module.exports = class Schema
       @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
     return
 
+  relation: (key) ->
+    console.log "relation: #{key}, found: #{!!(@relations[key] or @ids_accessor[key])}"
+    return @relations[key] or @ids_accessor[key]
+
+  #################################
+  # Internal
+  #################################
+
   _parseFieldOptions: (options) ->
     # convert to an object
     return {type: options} if _.isString(options)
@@ -127,6 +135,3 @@ module.exports = class Schema
 
       @_locked--
       return json
-
-  relation: (key) ->
-    return @relations[key] or @ids_accessor[key]

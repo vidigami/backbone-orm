@@ -52,6 +52,8 @@ class MemoryBackboneSync
       @store = {}
     return callback()
 
+  relation: (key) -> @model_type._schema.relation(key)
+
 
 module.exports = (model_type, cache) ->
   sync = new MemoryBackboneSync(model_type)

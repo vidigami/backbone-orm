@@ -10,6 +10,9 @@ module.exports = (model_type, sync) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('destroy', query, callback)
 
+  model_type.relationship = (key) ->
+    sync('relationship', key)
+
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################

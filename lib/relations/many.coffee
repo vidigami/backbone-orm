@@ -10,7 +10,7 @@ module.exports = class Many
     @[key] = value for key, value of options
     @ids_accessor = "#{@key}_ids"
     @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
+    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
     @collection_type = Backbone.Collection unless @collection_type
 
   set: (model, key, value, options) ->

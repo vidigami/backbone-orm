@@ -38,13 +38,10 @@ module.exports = class Utils
       return new model_type(model_type::parse(item)) if _.isObject(item)
       return new model_type({id: item})
 
-  @reverseRelation: (reverse_model_type, model_type) ->
-    return null unless (reverse_model_type._schema and model_type.model_name)
-    reverse_key = inflection.underscore(model_type.model_name) # singular
-    return reverse_model_type._schema.relations[reverse_key] if reverse_model_type._schema.relations.hasOwnProperty(reverse_key)
-    reverse_key = inflection.pluralize(reverse_key) # plural
-    return reverse_model_type._schema.relations[reverse_key] if reverse_model_type._schema.relations.hasOwnProperty(reverse_key)
-    return null
+  @reverseRelation: (model_type, owning_model_name) ->
+    return null unless model_type.relation
+    return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
+    return model_type.relation(inflection.pluralize(reverse_key)) # plural
 
   @dataId: (item) ->
     if item instanceof Backbone.Model
