@@ -35,7 +35,7 @@ module.exports = (options) ->
           callback()
 
       queue.await (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
         done()
 

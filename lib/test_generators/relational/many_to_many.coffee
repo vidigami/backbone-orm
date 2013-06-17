@@ -26,16 +26,16 @@ module.exports = (options) ->
 
     it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
         test_model.get 'reverses', (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'found related models')
           related = models[0]
 
           related.get 'owners', (err, owners) ->
-            assert.ok(!err, 'no errors')
+            assert.ok(!err, "No errors: #{err}")
             assert.ok(models, 'found related models')
 
             owner = _.find(owners, (test) -> test_model.get('id') is test.get('id'))

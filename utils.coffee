@@ -9,7 +9,7 @@ S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
 module.exports = class Utils
   @adapters:
-    bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: (-> callback(new Error("failed")))}
+    bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
 
   # parse an object whose values are still JSON stringified
   @parse: (query) ->

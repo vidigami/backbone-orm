@@ -23,7 +23,7 @@ module.exports = (options) ->
     describe 'count', ->
       it 'Handles a count query', (done) ->
         MODEL_TYPE.count (err, count) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.equal(count, MODELS_JSON.length, 'counted expected number of albums')
           done()
 
@@ -83,6 +83,6 @@ module.exports = (options) ->
     describe 'all', ->
       it 'Handles an all query', (done) ->
         MODEL_TYPE.all (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.equal(models.length, MODELS_JSON.length, 'counted expected number of albums')
           done()
