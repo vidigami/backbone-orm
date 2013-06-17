@@ -80,7 +80,7 @@ module.exports = class Schema
         switch options.type
           when 'hasOne', 'belongsTo', 'hasMany' then @relations[key] = options
           else
-            options.type = type if type = @types[options.type]
+            options.type = type if type = @types[type_name]
             @fields[key] = options
 
       # non-typed, eg. document
