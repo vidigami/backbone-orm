@@ -25,7 +25,7 @@ module.exports = class One
 
       # clear reverse
       if @reverse_relation
-        if not @has(model, key, value) and (related_model = model.attributes[@key])
+        if @has(model, key, value) and (related_model = model.attributes[@key])
           if @reverse_relation.remove
             @reverse_relation.remove(related_model, model)
           else
@@ -66,7 +66,7 @@ module.exports = class One
       callback(null, model)
 
   has: (model, key, item) ->
-    return true if not (current_related_model = model.attributes[@key]) and not item
+    current_related_model = model.attributes[@key]
     return false if (current_related_model and not item) or (not current_related_model and item)
 
     # compare ids
