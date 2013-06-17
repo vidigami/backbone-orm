@@ -22,7 +22,7 @@ class Owner extends Backbone.Model
 Reverse.initialize()
 Owner.initialize()
 
-BASE_COUNT = 5
+BASE_COUNT = 3
 
 test_parameters =
   model_type: Owner

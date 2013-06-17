@@ -1,4 +1,5 @@
 util = require 'util'
+Backbone = require 'backbone'
 _ = require 'underscore'
 
 Utils = require './utils'
@@ -25,13 +26,13 @@ class Cache
 
     now = (new Date()).valueOf()
     unless _.isArray(data) # one
-      return model if model = @_getOrInvalidateModel(model_store, Utils.dataId(data), now)
+      return model if model = @_getOrInvalidateModel(model_store, data, now)
       return @_createModel(model_store, data, model_type, now)
 
     # many
     results = []
     for item in data
-      if model = @_getOrInvalidateModel(Utils.dataId(item), now)
+      if model = @_getOrInvalidateModel(item, now)
         results.push()
       else
         results.push(@_createModel(model_store, item, model_type, now))
@@ -72,15 +73,22 @@ class Cache
     model_store[model.attributes.id] = {model: model, last_used: now}
     return @
 
-  _getOrInvalidateModel: (model_store, id, now) ->
+  _getOrInvalidateModel: (model_store, data, now) ->
+    id = Utils.dataId(data)
     return null unless model_info = model_store[id] # not found
 
     # too old
     (delete model_store[id]; return null) if (now - model_info.last_used) > MAX_CACHE_MS
 
-    # update timestamp and return
+    # update data, timestamp and return
+    model = model_info.model
+    if data instanceof Backbone.Model # TODO: is this needed?
+      model.set(data.attributes)
+    else if _.isObject(data)
+      model.set(data)
+
     model_info.last_used = now
-    return model_info.model
+    return model
 
 # singleton
 module.exports = new Cache()

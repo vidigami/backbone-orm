@@ -33,14 +33,15 @@ module.exports = class MemoryCursor extends Cursor
 
     if @_cursor.$one
       json = if json.length then [json[0]] else []
+
     else if @_cursor.$limit
       json = json.splice(0, Math.min(json.length, @_cursor.$limit))
     # args._id = {$in: _.map(ids, (id) -> new ObjectID("#{id}"))} if @_cursor.$ids # TODO
 
     return callback(null, json.length) if count or @_cursor.$count # only the count
 
-    if @_cursor.$sort and Array.isArray(json)
-      $sort_fields = if Array.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+    if @_cursor.$sort and _.isArray(json)
+      $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
       json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
     # only select specific fields

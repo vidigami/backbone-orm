@@ -30,7 +30,7 @@ module.exports = (options) ->
         done()
 
     it 'Cursor makes json', (done) ->
-      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -41,7 +41,7 @@ module.exports = (options) ->
           done()
 
     it 'Cursor makes models', (done) ->
-      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 

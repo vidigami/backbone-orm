@@ -14,7 +14,7 @@ module.exports = (options) ->
 
   Utils = require '../../../utils'
 
-  describe 'Model.relation', ->
+  describe 'hasMany', ->
 
     beforeEach (done) ->
       BEFORE_EACH (err, models_json) ->
@@ -24,7 +24,7 @@ module.exports = (options) ->
         done()
 
     it 'Handles a get query for a hasMany relation', (done) ->
-      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -34,7 +34,7 @@ module.exports = (options) ->
           done()
 
     it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
-      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 

@@ -41,7 +41,7 @@ module.exports = (options) ->
 
     describe 'fetch model', ->
       it 'fetches data', (done) ->
-        Utils.getAt MODEL_TYPE, 1, (err, model) ->
+        MODEL_TYPE.find {$one: true}, (err, model) ->
           assert.ok(!err, 'no errors')
           assert.ok(!!model, 'got model')
 

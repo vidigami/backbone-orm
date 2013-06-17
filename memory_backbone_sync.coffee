@@ -52,15 +52,6 @@ class MemoryBackboneSync
     [query, callback] = [{}, query] if arguments.length is 1
     @cursor(query).toModels(callback)
 
-  ###################################
-  # Convenience Functions
-  ###################################
-  all: (callback) -> @cursor({}).toModels callback
-
-  count: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
-    @cursor(query).count(callback)
-
   destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     if (keys = _.keys(query)).length
@@ -69,6 +60,15 @@ class MemoryBackboneSync
     else
       @store = {}
     return callback()
+
+  ###################################
+  # Convenience Functions
+  ###################################
+  all: (callback) -> @cursor({}).toModels callback
+
+  count: (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    @cursor(query).count(callback)
 
 # options
 #   model_type - the model that will be used to add query functions to

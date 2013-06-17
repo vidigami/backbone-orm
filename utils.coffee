@@ -56,11 +56,6 @@ module.exports = class Utils
   ##############################
   # Testing
   ##############################
-  @getAt: (model_type, index, callback) ->
-    model_type.cursor().offset(index).limit(1).toModels (err, models) ->
-      return callback(err) if err
-      return callback(null, if (models.length is 1) then models[0] else null)
-
   @setAllNames: (model_type, name, callback) ->
     model_type.all (err, all_models) ->
       return callback(err) if err
@@ -81,7 +76,7 @@ module.exports = class Utils
 
   @fieldCompare: (model, other_model, fields) ->
     field = fields[0]
-    field = field[0] if Array.isArray(field)
+    field = field[0] if _.isArray(field)
     if field.charAt(0) is '-'
       field = field.substr(1)
       desc = true
@@ -94,7 +89,7 @@ module.exports = class Utils
 
   @jsonFieldCompare: (model, other_model, fields) ->
     field = fields[0]
-    field = field[0] if Array.isArray(field) # for mongo
+    field = field[0] if _.isArray(field) # for mongo
     if field.charAt(0) is '-'
       field = field.substr(1)
       desc = true

@@ -78,7 +78,7 @@ module.exports = (options) ->
         done()
 
     it 'Ensure the correct value is returned', (done) ->
-      Utils.getAt MODEL_TYPE, 2, (err, model) ->
+      MODEL_TYPE.find {$one: true}, (err, model) ->
         assert.ok(!err, 'no errors')
         assert.ok(!!model, 'model')
         MODEL_TYPE.cursor({$page: true, name: model.get('name')}).toJSON (err, data) ->
