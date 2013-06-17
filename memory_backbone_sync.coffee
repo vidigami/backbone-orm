@@ -8,11 +8,11 @@ Utils = require './utils'
 class MemoryBackboneSync
   constructor: (@model_type) ->
     throw new Error("Missing url for model") unless url = _.result(@model_type.prototype, 'url')
-    @model_type.model_name = Utils.urlToModelName(url)
 
     @store = {}
 
     # publish methods and sync on model
+    @model_type.model_name = Utils.urlToModelName(url)
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
