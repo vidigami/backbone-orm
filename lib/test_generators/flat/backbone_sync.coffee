@@ -42,10 +42,11 @@ module.exports = (options) ->
     describe 'fetch model', ->
       it 'fetches data', (done) ->
         MODEL_TYPE.find {$one: true}, (err, model) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(!!model, 'got model')
 
           new_model = new MODEL_TYPE({id: model.get('id')})
           new_model.fetch adapters.bbCallback (err) ->
+            assert.ok(!err, "No errors: #{err}")
             assert.deepEqual(model.attributes, new_model.attributes, "\nExpected: #{util.inspect(model.attributes)}\nActual: #{util.inspect(new_model.attributes)}")
             done()

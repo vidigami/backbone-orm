@@ -25,20 +25,20 @@ module.exports = (options) ->
     it 'Handles a sort by one field query', (done) ->
       SORT_FIELD = 'name'
       MODEL_TYPE.find {$sort: SORT_FIELD}, (err, models) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(Utils.isSorted(models, [SORT_FIELD]))
         done()
 
     it 'Handles a sort by multiple fields query', (done) ->
       SORT_FIELDS = ['name', 'id']
       MODEL_TYPE.find {$sort: SORT_FIELDS}, (err, models) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()
 
     it 'Handles a reverse sort by fields query', (done) ->
       SORT_FIELDS = ['-name', 'id']
       MODEL_TYPE.find {$sort: SORT_FIELDS}, (err, models) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()

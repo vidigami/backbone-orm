@@ -25,27 +25,27 @@ module.exports = (options) ->
 
     it 'Handles a get query for a hasMany relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
         test_model.get 'flats', (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'found related models')
           done()
 
     it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
         test_model.get 'reverses', (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'found models')
           assert.equal(models.length, 2, 'found 2 models')
           related = models[0]
 
           related.get 'owner', (err, owner) ->
-            assert.ok(!err, 'no errors')
+            assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, 'found owner models')
 
             if MODEL_TYPE._cache

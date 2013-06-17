@@ -25,28 +25,28 @@ module.exports = (options) ->
 
     it 'Handles a count query to json', (done) ->
       MODEL_TYPE.cursor({$count: true}).toJSON (err, count) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.equal(MODELS_JSON.length, count, "\nExpected: #{MODELS_JSON.length}\nActual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
         MODEL_TYPE.cursor({id: test_model.get('id')}).toJSON (err, json) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(json, 'cursor toJSON gives us json')
           assert.ok(json.length, 'json is an array with a length')
           done()
 
     it 'Cursor makes models', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
         MODEL_TYPE.cursor({name: test_model.get('name')}).toModels (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'cursor toModels gives us models')
           for model in models
             assert.ok(model instanceof MODEL_TYPE, 'model is the correct type')
@@ -55,11 +55,11 @@ module.exports = (options) ->
     it 'Cursor can chain limit', (done) ->
       ALBUM_NAME = 'Test1'
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         limit = 3
         MODEL_TYPE.cursor({name: ALBUM_NAME}).limit(limit).toModels (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'cursor toModels gives us models')
           assert.equal(models.length, limit, 'found models')
           done()
@@ -67,11 +67,11 @@ module.exports = (options) ->
     it 'Cursor can chain limit and offset', (done) ->
       ALBUM_NAME = 'Test2'
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         limit = 2; offset = 1
         MODEL_TYPE.cursor({name: ALBUM_NAME}).limit(limit).offset(offset).toModels (err, models) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(models, 'cursor toModels gives us models')
           assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
@@ -81,10 +81,10 @@ module.exports = (options) ->
       FIELD_NAMES = ['id', 'name']
 
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         MODEL_TYPE.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
           for json in models_json
             assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
@@ -94,10 +94,10 @@ module.exports = (options) ->
       ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         MODEL_TYPE.cursor({name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, values) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
             assert.ok(_.isArray(json), 'cursor item values is an array')
@@ -110,10 +110,10 @@ module.exports = (options) ->
       FIELD_NAMES = ['id', 'name']
 
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         MODEL_TYPE.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
           for json in models_json
             assert.equal(_.size(json), WHITE_LIST.length, 'gets only the requested values')
@@ -126,10 +126,10 @@ module.exports = (options) ->
       WHITE_LIST = ['name']
       FIELD_NAMES = ['id', 'name']
       Utils.setAllNames MODEL_TYPE, ALBUM_NAME, (err) ->
-        assert.ok(!err, 'no errors')
+        assert.ok(!err, "No errors: #{err}")
 
         MODEL_TYPE.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
-          assert.ok(!err, 'no errors')
+          assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
             assert.ok(_.isArray(json), 'cursor item values is an array')
