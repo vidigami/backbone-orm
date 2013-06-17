@@ -28,7 +28,7 @@ Flat.initialize()
 Reverse.initialize()
 Owner.initialize()
 
-BASE_COUNT = 2
+BASE_COUNT = 1
 
 test_parameters =
   model_type: Owner

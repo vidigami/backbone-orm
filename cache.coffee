@@ -25,7 +25,7 @@ class Cache
 
     now = (new Date()).valueOf()
     unless _.isArray(data) # one
-      return model if model = @_getOrInvalidateModel(Utils.dataId(data), now)
+      return model if model = @_getOrInvalidateModel(model_store, Utils.dataId(data), now)
       return @_createModel(model_store, data, model_type, now)
 
     # many

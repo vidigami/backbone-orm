@@ -24,7 +24,7 @@ module.exports = (options) ->
         done()
 
     it 'Handles a get query for a hasMany relation', (done) ->
-      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -34,7 +34,7 @@ module.exports = (options) ->
           done()
 
     it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
-      Utils.getAt MODEL_TYPE, 1, (err, test_model) ->
+      Utils.getAt MODEL_TYPE, 0, (err, test_model) ->
         assert.ok(!err, 'no errors')
         assert.ok(test_model, 'found model')
 
@@ -48,8 +48,8 @@ module.exports = (options) ->
             assert.ok(!err, 'no errors')
             assert.ok(owner_model, 'found owner models')
 
-            # if MODEL_TYPE._cache
-            #   assert.deepEqual(test_model.toJSON(), owner_model.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
-            # else
-            assert.equal(test_model.get('id'), owner_model.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner_model.get('id')}")
+            if MODEL_TYPE._cache
+              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner_model.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+            else
+              assert.equal(test_model.get('id'), owner_model.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner_model.get('id')}")
             done()
