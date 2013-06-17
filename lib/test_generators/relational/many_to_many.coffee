@@ -37,5 +37,12 @@ module.exports = (options) ->
           related.get 'owners', (err, owners) ->
             assert.ok(!err, 'no errors')
             assert.ok(models, 'found related models')
-            assert.ok(_.contains(_.map(owners, (test) -> test.get('id')), test_model.get('id')), 'reverse relation contains the original model')
+
+            owner = _.find(owners, (test) -> test_model.get('id') is test.get('id'))
+            assert.ok(!!owner, 'found owner')
+
+            if MODEL_TYPE._cache
+              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+            else
+              assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
             done()

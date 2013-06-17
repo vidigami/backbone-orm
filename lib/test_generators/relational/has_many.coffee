@@ -44,12 +44,12 @@ module.exports = (options) ->
           assert.equal(models.length, 2, 'found 2 models')
           related = models[0]
 
-          related.get 'owner', (err, owner_model) ->
+          related.get 'owner', (err, owner) ->
             assert.ok(!err, 'no errors')
-            assert.ok(owner_model, 'found owner models')
+            assert.ok(owner, 'found owner models')
 
             if MODEL_TYPE._cache
-              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner_model.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
-              assert.equal(test_model.get('id'), owner_model.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner_model.get('id')}")
+              assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
             done()
