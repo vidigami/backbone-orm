@@ -48,14 +48,16 @@ class Cache
     @_addModel(model_store, model, now) for model in models
     return @
 
-  clear: (url, ids) ->
-    (@store_by_url[url] = {}; return @) unless models
+  remove: (url, ids) ->
     if model_store = @store_by_url[url]
-      if _.isArray(ids) # many
+      if _.isArray(ids) # manya
         delete model_store[id] for id in ids
       else # one
         delete model_store[id]
     return @
+
+  clear: (url, ids) ->
+    (@store_by_url[url] = {}; return @)
 
   _createModel: (model_store, data, model_type, now) ->
     if _.isObject(data)
