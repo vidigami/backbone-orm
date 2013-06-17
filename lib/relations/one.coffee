@@ -9,7 +9,7 @@ module.exports = class One
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor = "#{@key}_id"
-    @foreign_key = inflection.foreign_key(model_type.model_name) unless @foreign_key
+    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else model_type.model_name) unless @foreign_key
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type)
 
   set: (model, key, value, options, _set) ->
