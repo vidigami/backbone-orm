@@ -26,10 +26,16 @@ module.exports = class Schema
     for key, options of @relations
       options = @_parseFieldOptions(options()) if _.isFunction(options)
       switch options.type
-        when 'hasOne', 'belongsTo' then relation = @relations[key] = new One(@model_type, key, options)
-        when 'hasMany' then relation = @relations[key] = new Many(@model_type, key, options)
-        else throw new Error "Unrecognized relationship: #{util.inspect(options)}"
+        when 'hasOne', 'belongsTo'
+          relation = @relations[key] = new One(@model_type, key, options)
+        when 'hasMany'
+          relation = @relations[key] = new Many(@model_type, key, options)
+        else
+          throw new Error "Unrecognized relationship: #{util.inspect(options)}"
+
+      relation.initialize() # initalize in two steps for circular dependencies
       @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+
     return
 
   relation: (key) -> return @relations[key] or @ids_accessor[key]
@@ -94,8 +100,6 @@ module.exports = class Schema
 
     _set = @model_type::set
     @model_type::set = (key, value, options) ->
-      _schema.initialize() if not _schema.is_initialized # TODO: is this needed?
-
       if _.isString(key)
         (attributes = {})[key] = value;
       else
@@ -110,9 +114,7 @@ module.exports = class Schema
 
     _get = @model_type::get
     @model_type::get = (key, callback) ->
-      _schema.initialize() if not _schema.is_initialized # TODO: is this needed?
-
-      if (relation = _schema.relations[key]) or (relation = _schema.ids_accessor[key])
+      if relation = _schema.relation(key)
         return relation.get(@, key, callback)
       else
         value = _get.call(@, key)

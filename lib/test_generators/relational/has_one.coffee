@@ -23,39 +23,35 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    # it 'Handles a get query for a hasOne relation', (done) ->
-    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
-    #     assert.ok(!err, "No errors: #{err}")
-    #     assert.ok(test_model, 'found model')
+    it 'Handles a get query for a hasOne relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
 
-    #     test_model.get 'flat', (err, model) ->
-    #       assert.ok(!err, "No errors: #{err}")
-    #       assert.ok(model, 'found related model')
-    #       assert.equal(test_model.get('flat_id'), model.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{model.get('id')}")
-    #       done()
+        test_model.get 'flat', (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'found related model')
+          assert.equal(test_model.get('flat_id'), model.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{model.get('id')}")
+          done()
 
-    # it 'Handles a get query for a reversed hasOne relation', (done) ->
-    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
-    #     assert.ok(!err, "No errors: #{err}")
-    #     assert.ok(test_model, 'found model')
+    it 'Handles a get query for a reversed hasOne relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
 
-    #     test_model.get 'reverse', (err, model) ->
-    #       assert.ok(!err, "No errors: #{err}")
-    #       assert.ok(model, 'found related model')
-    #       done()
+        test_model.get 'reverse', (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'found related model')
+          done()
 
     it 'Handles a get query for a hasOne and hasOne two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        console.log "model: #{util.inspect(test_model.attributes)}"
-
         test_model.get 'reverse', (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(model, 'found related model')
-
-          console.log "model: #{util.inspect(model.attributes)}"
 
           model.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
