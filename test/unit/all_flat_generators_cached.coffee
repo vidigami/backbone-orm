@@ -7,7 +7,7 @@ Fabricator = require '../../fabricator'
 
 class FlatModel extends Backbone.Model
   url: '/flat_models'
-  sync: require('../../memory_backbone_sync')(FlatModel)
+  sync: require('../../memory_backbone_sync')(FlatModel, true)
 
 test_parameters =
   model_type: FlatModel
