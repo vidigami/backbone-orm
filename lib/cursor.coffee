@@ -1,6 +1,5 @@
 util = require 'util'
 _ = require 'underscore'
-JSONUtils = require './json_utils'
 
 module.exports = class Cursor
   constructor: (query, options) ->

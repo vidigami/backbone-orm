@@ -2,7 +2,6 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
 
-JSONUtils = require '../../lib/json_utils'
 Fabricator = require '../../fabricator'
 
 class FlatModel extends Backbone.Model

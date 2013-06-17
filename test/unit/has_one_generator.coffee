@@ -3,7 +3,6 @@ _ = require 'underscore'
 Backbowner = require 'backbone'
 Queue = require 'queue-async'
 
-JSONUtils = require '../../lib/json_utils'
 Fabricator = require '../../fabricator'
 Utils = require '../../utils'
 adapters = Utils.adapters
