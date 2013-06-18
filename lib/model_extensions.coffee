@@ -1,3 +1,4 @@
+util = require 'util'
 _ = @_ or require 'underscore'
 Backbone = @Backbone or require 'backbone'
 JSONUtils = require './json_utils'
@@ -61,24 +62,25 @@ module.exports = (model_type, sync) ->
 
   _original_toJSON = model_type::toJSON
   model_type::toJSON = ->
-    return _original_toJSON.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+    schema = model_type.schema() if model_type.schema
 
     return @get('id') if @_locked > 0
     @_locked or= 0
     @_locked++
 
-    json = _.clone(@attributes)
-    for key, value of json
+    json = {}
+    for key, value of @attributes
 
       if value instanceof Backbone.Collection
-        if relation = schema.relation(key)
-          json[key] = relation.toJSON(@, key)
+        if schema and (relation = schema.relation(key))
+          relation.appendJSON(json, @, key)
         else
           json[key] = _.map(value.models, (model) -> if model then model.toJSON else null)
 
       else if value instanceof Backbone.Model
-        if relation = schema.relation(key)
-          json[key] = relation.toJSON(@, key)
+
+        if schema and (relation = schema.relation(key))
+          relation.appendJSON(json, @, key)
         else
           json[key] = value.toJSON()
 

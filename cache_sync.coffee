@@ -55,8 +55,9 @@ class CacheSync
   ###################################
   # Cache Extension
   ###################################
-  findCached: (data, callback) -> return Cache.find(@url, data)
-  findCachedOrCreate: (data, model_type, callback) -> return Cache.findOrCreate(@url, data, model_type)
+  updateCached: (model) -> Cache.update(@url, model)
+  findCached: (data) -> return Cache.find(@url, data)
+  findCachedOrCreate: (data, model_type) -> return Cache.findOrCreate(@url, data, model_type)
 
 module.exports = (model_type, wrapped_sync) ->
   sync = new CacheSync(model_type, wrapped_sync)

@@ -48,6 +48,9 @@ class Cache
     @_addModel(model_store, model, now) for model in models
     return @
 
+  # alias
+  update: Cache::add
+
   remove: (url, ids) ->
     if model_store = @store_by_url[url]
       if _.isArray(ids) # manya
@@ -66,8 +69,7 @@ class Cache
     else
       data = {id: data}
       @_addModel(model_store, model = new model_type(data), now)
-      model.orm or= {} # flag as not loaded
-      model.orm.loaded = false
+      model._orm_needs_load = true
     return model
 
   _addModel: (model_store, model, now) ->

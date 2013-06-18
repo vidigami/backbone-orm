@@ -16,47 +16,44 @@ module.exports = class Many
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
 
   set: (model, key, value, options) ->
-    # hack
-    if key is @ids_accessor
-      # TODO
+    # TODO: Allow sql to sync...make a notification? use Backbone.Events?
+    key = @key if key is @ids_accessor
 
-    else
-      throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      value = value.models if value instanceof Backbone.Collection
-      throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
-      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+    throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
+    value = value.models if value instanceof Backbone.Collection
+    throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
+    model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
 
-      # save previous
-      collection = model.attributes[key]
-      previous_models = _.clone(collection.models) if @reverse_relation
+    # save previous
+    collection = model.attributes[key]
+    previous_models = _.clone(collection.models) if @reverse_relation
 
-      # set the collection with found or created models
-      collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
-      return @ unless @reverse_relation
+    # set the collection with found or created models
+    collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
+    return @ unless @reverse_relation
 
-      # set ther references
-      for related_model in models
-        if @reverse_relation.add
-          @reverse_relation.add(related_model, model)
-        else
-          related_model.set(@reverse_relation.key, model)
+    # set ther references
+    for related_model in models
+      if @reverse_relation.add
+        @reverse_relation.add(related_model, model)
+      else
+        related_model.set(@reverse_relation.key, model)
 
-      # clear the reverses
-      for related_model in previous_models
-        continue if not related_model or collection.get(related_model.get('id'))
+    # clear the reverses
+    for related_model in previous_models
+      continue if not related_model or collection.get(related_model.get('id'))
 
-        if @reverse_relation.remove
-          @reverse_relation.remove(related_model, model)
-        else
-          related_model.set(@reverse_relation.key, null)
+      if @reverse_relation.remove
+        @reverse_relation.remove(related_model, model)
+      else
+        related_model.set(@reverse_relation.key, null)
 
     return @
 
   get: (model, key, callback) ->
-    # hack
     if key is @ids_accessor
-      relation_key = key.replace('_ids', '')
-      related_ids = if related_collection = model.attributes[relation_key] then _.map(related_collection.models, (related_model) -> related_model?.get('id')) else []
+      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+      related_ids = _.map(model.attributes[key].models, (related_model) -> related_model.get('id'))
       callback(null, related_ids) if callback
       return related_ids
 
@@ -75,15 +72,12 @@ module.exports = class Many
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
 
-  toJSON: (model, key) ->
-    # hack
-    if key is @ids_accessor
-      throw new Error "Not implemented"
+  appendJSON: (json, model, key) ->
+    return if key is @ids_accessor # only write the relationships
 
-    else
-      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
-      collection = model.attributes[key]
-      return if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
+    model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+    collection = model.attributes[key]
+    return json[@foreign_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
     collection = model.attributes[key]
