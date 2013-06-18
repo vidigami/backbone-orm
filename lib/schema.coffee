@@ -18,7 +18,6 @@ module.exports = class Schema
     @types = _.defaults(type_overrides, TYPES)
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
-    @_monkeyPatchModel()
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
@@ -95,50 +94,3 @@ module.exports = class Schema
         @fields[key] = options
 
     return
-
-  _monkeyPatchModel: ->
-    _schema = @
-
-    _set = @model_type::set
-    @model_type::set = (key, value, options) ->
-      if _.isString(key)
-        (attributes = {})[key] = value;
-      else
-        attributes = key; options = value
-
-      for key, value of attributes
-        if relation = _schema.relation(key)
-          relation.set(@, key, value, options, _set)
-        else
-          _set.call(@, key, value, options)
-      return @
-
-    _get = @model_type::get
-    @model_type::get = (key, callback) ->
-      if relation = _schema.relation(key)
-        return relation.get(@, key, callback)
-      else
-        value = _get.call(@, key)
-        callback(null, value) if callback
-        return value
-
-    _toJSON = @model_type::toJSON
-    @model_type::toJSON = ->
-      return @get('id') if @_locked > 0
-      @_locked or= 0
-      @_locked++
-
-      toJSON = (item) -> if (item and item.get and item.toJSON) then item.toJSON() else item
-
-      json = _.clone(@attributes)
-      for key, value of json
-        continue unless value
-        if value.models
-          json[key] = _.map(value.models, toJSON)
-        else if _.isArray(value)
-          json[key] = _.map(value, toJSON)
-        else if (value.get and value.toJSON) # model signature
-          json[key] = toJSON(value)
-
-      @_locked--
-      return json
