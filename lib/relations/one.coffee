@@ -66,6 +66,15 @@ module.exports = class One
       return callback(new Error "Model not found. Id #{@foreign_key}") if not model
       callback(null, model)
 
+  toJSON: (model, key) ->
+    # hack
+    if key is @ids_accessor
+      throw new Error "Not implemented"
+
+    else
+      return model unless model = model.attributes[key]
+      return model.toJSON()
+
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
     return false if (current_related_model and not item) or (not current_related_model and item)

@@ -75,6 +75,15 @@ module.exports = class Many
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
 
+  toJSON: (model, key) ->
+    # hack
+    if key is @ids_accessor
+      throw new Error "Not implemented"
+
+    else
+      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+      return model.attributes[key].toJSON()
+
   has: (model, key, item) ->
     collection = model.attributes[key]
     return !!collection.get(Utils.dataId(item))

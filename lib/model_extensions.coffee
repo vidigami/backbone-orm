@@ -1,4 +1,5 @@
 _ = @_ or require 'underscore'
+JSONUtils = require 'backbone-orm/lib/json_utils'
 
 module.exports = (model_type, sync) ->
 
@@ -65,17 +66,23 @@ module.exports = (model_type, sync) ->
     @_locked or= 0
     @_locked++
 
-    toJSON = (item) -> if (item and item.get and item.toJSON) then item.toJSON() else item
-
     json = _.clone(@attributes)
     for key, value of json
-      continue unless value
-      if value.models
-        json[key] = _.map(value.models, toJSON)
-      else if _.isArray(value)
-        json[key] = _.map(value, toJSON)
-      else if (value.get and value.toJSON) # model signature
-        json[key] = toJSON(value)
+
+      if value instanceof Backbone.Collection
+        if relation = schema.relation(key)
+          json[key] = relation.toJSON(@, key)
+        else
+          json[key] = _.map(value.models, (model) -> if model then model.toJSON else null)
+
+      else if value instanceof Backbone.Model
+        if relation = schema.relation(key)
+          json[key] = relation.toJSON(@, key)
+        else
+          json[key] = value.toJSON()
+
+      else
+        json[key] = JSONUtils.valueToJSON(value)
 
     @_locked--
     return json
