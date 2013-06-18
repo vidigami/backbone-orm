@@ -48,5 +48,5 @@ module.exports = (options) ->
           new_model = new MODEL_TYPE({id: model.get('id')})
           new_model.fetch adapters.bbCallback (err) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.deepEqual(model.attributes, new_model.attributes, "\nExpected: #{util.inspect(model.attributes)}\nActual: #{util.inspect(new_model.attributes)}")
+            assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{util.inspect(model.toJSON())}\nActual: #{util.inspect(new_model.toJSON())}")
             done()
