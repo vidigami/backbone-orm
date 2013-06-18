@@ -34,7 +34,7 @@ module.exports = (options) ->
           assert.deepEqual(test_model.toJSON().flats[0], flats[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().flats[0]}. Actual: #{flats[0].get('id')}")
           done()
 
-    it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+    it 'Handles a get query for a hasMany and belongsTo two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')

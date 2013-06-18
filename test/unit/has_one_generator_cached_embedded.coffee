@@ -14,14 +14,14 @@ class Flat extends Backbowner.Model
 class Reverse extends Backbowner.Model
   url: '/reverses'
   @schema:
-    owner: -> ['belongsTo', Owner, embedded: true]
+    owner: -> ['belongsTo', Owner, embed: true]
   sync: require('../../memory_backbone_sync')(Reverse, true)
 
 class Owner extends Backbowner.Model
   url: '/owners'
   @schema:
-    flat: -> ['belongsTo', Flat, embedded: true]
-    reverse: -> ['hasOne', Reverse, embedded: true]
+    flat: -> ['belongsTo', Flat, embed: true]
+    reverse: -> ['hasOne', Reverse, embed: true]
   sync: require('../../memory_backbone_sync')(Owner, true)
 
 BASE_COUNT = 1

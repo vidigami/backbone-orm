@@ -31,44 +31,40 @@ module.exports = (options) ->
         test_model.get 'flat', (err, flat) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
-
-          console.log "test_model: #{util.inspect(test_model.toJSON())}"
-          console.log "flat: #{util.inspect(flat.toJSON())}"
-
           assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().flat)}. Actual: #{util.inspect(flat.toJSON())}")
 
           assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
           done()
 
-    # it 'Handles a get query for a reversed hasOne relation', (done) ->
-    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
-    #     assert.ok(!err, "No errors: #{err}")
-    #     assert.ok(test_model, 'found model')
+    it 'Handles a get query for a reversed hasOne relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
 
-    #     test_model.get 'reverse', (err, reverse) ->
-    #       assert.ok(!err, "No errors: #{err}")
-    #       assert.ok(reverse, 'found related model')
-    #       assert.deepEqual(test_model.toJSON().reverse, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse}. Actual: #{reverse.get('id')}")
+        test_model.get 'reverse', (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found related model')
+          assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
 
-    #       done()
+          done()
 
-    # it 'Handles a get query for a hasOne and hasOne two sided relation', (done) ->
-    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
-    #     assert.ok(!err, "No errors: #{err}")
-    #     assert.ok(test_model, 'found model')
+    it 'Handles a get query for a hasOne and hasOne two sided relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
 
-    #     test_model.get 'reverse', (err, reverse) ->
-    #       assert.ok(!err, "No errors: #{err}")
-    #       assert.ok(reverse, 'found related model')
-    #       assert.deepEqual(test_model.toJSON().reverse, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse}. Actual: #{reverse.get('id')}")
+        test_model.get 'reverse', (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found related model')
+          assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
 
-    #       reverse.get 'owner', (err, owner) ->
-    #         assert.ok(!err, "No errors: #{err}")
-    #         assert.ok(owner, 'found original model')
-    #         assert.deepEqual(reverse.toJSON().owner, owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner}. Actual: #{owner.get('id')}")
+          reverse.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, 'found original model')
+            # assert.deepEqual(reverse.toJSON().owner, owner.toJSON(), "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().owner)}. Actual: #{util.inspect(owner.toJSON())}")
 
-    #         if MODEL_TYPE._cache
-    #           assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
-    #         else
-    #           assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
-    #         done()
+            if MODEL_TYPE._cache
+              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+            else
+              assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
+            done()

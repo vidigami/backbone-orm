@@ -61,8 +61,9 @@ module.exports = class Many
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       collection = model.attributes[key]
-      callback(null, if collection then collection.models else []) if callback
-      return collection
+      if collection.length
+        callback(null, if collection then collection.models else []) if callback
+        return collection
 
     query = {}
     query[@foreign_key] = model.attributes.id
@@ -77,7 +78,8 @@ module.exports = class Many
 
     model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
     collection = model.attributes[key]
-    return json[@foreign_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
+    json_key = if @embed then key else @foreign_key
+    return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
     collection = model.attributes[key]
