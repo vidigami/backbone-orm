@@ -49,10 +49,9 @@ module.exports = class One
     # hack
     if key is @ids_accessor
       relation_key = key.replace('_id', '')
-      related_id = if related_model = model.attributes[relation_key] then related_model.get('id') else undefined
+      related_id = if related_model = model.attributes[relation_key] then related_model.get('id') else model.attributes[key]
       callback(null, related_id) if callback
       return related_id
-
     else
       throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       if value = model.attributes[key]
