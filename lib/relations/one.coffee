@@ -18,7 +18,7 @@ module.exports = class One
     # hack
     if key is @ids_accessor
       # TODO
-
+      _set.call(model, key, value, options)
     else
       throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       return @ if @has(model, key, value) # already set
@@ -32,6 +32,8 @@ module.exports = class One
             related_model.set(@reverse_relation.key, null)
 
       related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
+      _set.call(model, @foreign_key, related_model.attributes.id, options) if @type is 'belongsTo'
+      _set.call(related_model, @foreign_key, model.attributes.id, options) if @type is 'hasOne'
 
       _set.call(model, key, related_model, options)
       return @ if not related_model or not @reverse_relation
