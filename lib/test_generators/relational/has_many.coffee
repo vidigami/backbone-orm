@@ -33,7 +33,7 @@ module.exports = (options) ->
           assert.ok(models, 'found related models')
           done()
 
-    it 'Handles a get query for a hasMany and hasOne two sided relation', (done) ->
+    it 'Handles a get query for a hasMany and belongsTo two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')

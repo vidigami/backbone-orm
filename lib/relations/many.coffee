@@ -34,7 +34,7 @@ module.exports = class Many
       collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
       return @ unless @reverse_relation
 
-      # set ther references
+      # set the references
       for related_model in models
         if @reverse_relation.add
           @reverse_relation.add(related_model, model)
@@ -64,8 +64,9 @@ module.exports = class Many
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       collection = model.attributes[key]
-      callback(null, if collection then collection.models else []) if callback
-      return collection
+      if collection.length
+        callback(null, if collection then collection.models else []) if callback
+        return collection
 
     query = {}
     query[@foreign_key] = model.attributes.id
