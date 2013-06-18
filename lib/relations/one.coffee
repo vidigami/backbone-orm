@@ -75,7 +75,7 @@ module.exports = class One
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
 
-    json_key = if @embed then key else @foreign_key
+    json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
     return json[json_key] = if @embed then related_model.toJSON() else related_model.get('id')
 

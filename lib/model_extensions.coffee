@@ -78,7 +78,6 @@ module.exports = (model_type, sync) ->
           json[key] = _.map(value.models, (model) -> if model then model.toJSON else null)
 
       else if value instanceof Backbone.Model
-
         if schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
         else

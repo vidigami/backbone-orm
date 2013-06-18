@@ -79,7 +79,7 @@ module.exports = class Many
 
     model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
     collection = model.attributes[key]
-    json_key = if @embed then key else @foreign_key
+    json_key = if @embed then key else @ids_accessor
     return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
