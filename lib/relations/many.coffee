@@ -8,7 +8,7 @@ Utils = require '../../utils'
 module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor = "#{@key}_ids"
+    @ids_accessor = "#{inflection.singularize(@key)}_ids"
     @foreign_key = inflection.foreign_key(@model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
@@ -17,13 +17,14 @@ module.exports = class Many
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   set: (model, key, value, options) ->
+    model.attributes[@key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+
     # TODO: Allow sql to sync...make a notification? use Backbone.Events?
     key = @key if key is @ids_accessor
 
     throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
     value = value.models if value instanceof Backbone.Collection
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
-    model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
 
     # save previous
     collection = model.attributes[key]
@@ -52,15 +53,15 @@ module.exports = class Many
     return @
 
   get: (model, key, callback) ->
+    model.attributes[@key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+
     if key is @ids_accessor
-      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       related_ids = _.map(model.attributes[key].models, (related_model) -> related_model.get('id'))
       callback(null, related_ids) if callback
       return related_ids
 
     else
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
       collection = model.attributes[key]
       if collection.length
         callback(null, if collection then collection.models else []) if callback
@@ -70,14 +71,17 @@ module.exports = class Many
     query[@foreign_key] = model.attributes.id
 
     @reverse_model_type.cursor(query).toModels (err, models) =>
+      return if !callback
       return callback(err) if err
       return callback(new Error "Model not found. Id #{@foreign_key}") if not models.length
       callback(null, models)
+    return collection
 
   appendJSON: (json, model, key) ->
+    model.attributes[@key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+
     return if key is @ids_accessor # only write the relationships
 
-    model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
     collection = model.attributes[key]
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?

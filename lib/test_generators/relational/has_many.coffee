@@ -31,7 +31,7 @@ module.exports = (options) ->
         test_model.get 'flats', (err, flats) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, flats.length, "Expected: #{2}. Actual: #{flats.length}")
-          assert.deepEqual(test_model.toJSON().flats[0], flats[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().flats[0]}. Actual: #{flats[0].get('id')}")
+          assert.deepEqual(test_model.toJSON().flat_ids[0], flats[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_ids[0]}. Actual: #{flats[0].get('id')}")
           done()
 
     it 'Handles a get query for a hasMany and belongsTo two sided relation', (done) ->
@@ -43,13 +43,13 @@ module.exports = (options) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
           assert.equal(2, reverses.length, "Expected: #{2}. Actual: #{reverses.length}")
-          assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].get('id'), 'serialized id only')
+          assert.deepEqual(test_model.toJSON().reverse_ids[0], reverses[0].get('id'), 'serialized id only')
           reverse = reverses[0]
 
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, 'found owner models')
-            assert.deepEqual(reverse.toJSON().owner, owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner}. Actual: #{owner.get('id')}")
+            assert.deepEqual(reverse.toJSON().owner_id, owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner}. Actual: #{owner.get('id')}")
 
             if MODEL_TYPE._cache
               assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")

@@ -72,10 +72,6 @@ test_parameters =
           owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop()})
           save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
 
-      for reverse in MODELS.reverse
-        do (reverse) ->
-          save_queue.defer (callback) -> reverse.save {}, adapters.bbCallback callback
-
       save_queue.await callback
 
     queue.await (err) ->
