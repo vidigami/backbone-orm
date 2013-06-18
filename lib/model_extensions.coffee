@@ -1,6 +1,6 @@
 _ = @_ or require 'underscore'
 Backbone = @Backbone or require 'backbone'
-JSONUtils = require 'backbone-orm/lib/json_utils'
+JSONUtils = require './json_utils'
 
 module.exports = (model_type, sync) ->
 
