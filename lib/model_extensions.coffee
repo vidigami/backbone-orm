@@ -44,7 +44,7 @@ module.exports = (model_type, sync) ->
 
     for key, value of attributes
       if relation = schema.relation(key)
-        relation.set(@, key, value, options, _original_set)
+        relation.set(@, key, value, options)
       else
         _original_set.call(@, key, value, options)
     return @

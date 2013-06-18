@@ -15,7 +15,7 @@ module.exports = class One
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
-  set: (model, key, value, options, _set) ->
+  set: (model, key, value, options) ->
     # TODO: Allow sql to sync...make a notification? use Backbone.Events?
     key = @key if key is @ids_accessor
 
@@ -36,7 +36,7 @@ module.exports = class One
     # _set.call(model, @foreign_key, related_model.attributes.id, options) if @type is 'belongsTo'
     # _set.call(related_model, @foreign_key, model.attributes.id, options) if @type is 'hasOne'
 
-    _set.call(model, key, related_model, options)
+    Backbone.Model::set.call(model, key, related_model, options)
     return @ if not related_model or not @reverse_relation
 
     if @reverse_relation.add
