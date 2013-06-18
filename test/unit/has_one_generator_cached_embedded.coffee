@@ -14,7 +14,7 @@ class Flat extends Backbowner.Model
 class Reverse extends Backbowner.Model
   url: '/reverses'
   @schema:
-    owner: -> ['belongsTo', Owner, embed: true]
+    owner: -> ['belongsTo', Owner]
   sync: require('../../memory_backbone_sync')(Reverse, true)
 
 class Owner extends Backbowner.Model

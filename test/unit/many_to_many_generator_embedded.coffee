@@ -15,7 +15,7 @@ class Reverse extends Backbone.Model
 class Owner extends Backbone.Model
   url: '/owners'
   @schema:
-    reverses: -> ['hasMany', Reverse]
+    reverses: -> ['hasMany', Reverse, embed: true]
   sync: require('../../memory_backbone_sync')(Owner)
 
 BASE_COUNT = 3

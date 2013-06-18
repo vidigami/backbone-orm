@@ -9,7 +9,7 @@ adapters = Utils.adapters
 class Reverse extends Backbone.Model
   url: '/reverses'
   @schema:
-    owners: -> ['hasMany', Owner, embed: true]
+    owners: -> ['hasMany', Owner]
   sync: require('../../memory_backbone_sync')(Reverse, true)
 
 class Owner extends Backbone.Model

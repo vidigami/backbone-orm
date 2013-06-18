@@ -61,7 +61,7 @@ module.exports = (options) ->
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, 'found original model')
-            # assert.deepEqual(reverse.toJSON().owner, owner.toJSON(), "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().owner)}. Actual: #{util.inspect(owner.toJSON())}")
+            assert.deepEqual(reverse.toJSON().owner_id, owner.get('id'), "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().owner_id)}. Actual: #{util.inspect(owner.get('id'))}")
 
             if MODEL_TYPE._cache
               assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")

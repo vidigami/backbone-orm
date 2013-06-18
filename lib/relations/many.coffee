@@ -14,6 +14,7 @@ module.exports = class Many
 
   initialize: ->
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+    throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   set: (model, key, value, options) ->
     # TODO: Allow sql to sync...make a notification? use Backbone.Events?
