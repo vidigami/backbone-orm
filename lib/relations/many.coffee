@@ -32,7 +32,11 @@ module.exports = class Many
 
       # set the collection with found or created models
       collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
-      return @ unless @reverse_relation
+
+      # If there is no reverse_relation set the foreign key field on the related models
+      if not @reverse_relation
+        related_model.set(@foreign_key, model.attributes.id) for related_model in models
+        return @
 
       # set the references
       for related_model in models
@@ -83,7 +87,8 @@ module.exports = class Many
 
     else
       model.attributes[key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
-      return model.attributes[key].toJSON()
+      collection = model.attributes[key]
+      return if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
     collection = model.attributes[key]

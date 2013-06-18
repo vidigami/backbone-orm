@@ -75,8 +75,8 @@ module.exports = class One
       throw new Error "Not implemented"
 
     else
-      return model unless model = model.attributes[key]
-      return model.toJSON()
+      return null unless model = model.attributes[key]
+      return if @embed then model.toJSON() else model.get('id')
 
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
