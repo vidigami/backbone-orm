@@ -59,7 +59,10 @@ module.exports = class One
         return value
 
     query = {$one: true}
-    query[@foreign_key] = model.attributes.id
+    if @type is 'belongsTo'
+      query['id'] = model.attributes[@foreign_key]
+    else
+      query[@foreign_key] = model.attributes.id
 
     @reverse_model_type.cursor(query).toModels (err, model) =>
       return callback(err) if err
