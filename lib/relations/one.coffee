@@ -55,9 +55,9 @@ module.exports = class One
 
     else
       throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      value = model.attributes[key]
-      callback(null, value) if callback
-      return value
+      if value = model.attributes[key]
+        callback(null, value) if callback
+        return value
 
     query = {$one: true}
     query[@foreign_key] = model.attributes.id
