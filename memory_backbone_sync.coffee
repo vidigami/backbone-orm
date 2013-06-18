@@ -52,6 +52,7 @@ class MemoryBackboneSync
       @store = {}
     return callback()
 
+  schema: (key) -> @model_type._schema
   relation: (key) -> @model_type._schema.relation(key)
 
 
