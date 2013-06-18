@@ -74,12 +74,13 @@ module.exports = class Utils
 
   @fieldCompare: (model, other_model, fields) ->
     field = fields[0]
-    field = field[0] if _.isArray(field)
+    field = field[0] if _.isArray(field) # for mongo
+
     if field.charAt(0) is '-'
       field = field.substr(1)
       desc = true
     if model.get(field) == other_model.get(field)
-      return if fields.length > 0 then @fieldCompare(model, other_model, fields.splice(1)) else 0
+      return if fields.length > 1 then @fieldCompare(model, other_model, fields.splice(1)) else 0
     if desc
       return if model.get(field) < other_model.get(field) then 1 else -1
     else
@@ -88,11 +89,12 @@ module.exports = class Utils
   @jsonFieldCompare: (model, other_model, fields) ->
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo
+
     if field.charAt(0) is '-'
       field = field.substr(1)
       desc = true
     if model[field] == other_model[field]
-      return if fields.length > 0 then @jsonFieldCompare(model, other_model, fields.splice(1)) else 0
+      return if fields.length > 1 then @jsonFieldCompare(model, other_model, fields.splice(1)) else 0
     if desc
       return if JSON.stringify(model[field]) < JSON.stringify(other_model[field]) then 1 else -1
     else
