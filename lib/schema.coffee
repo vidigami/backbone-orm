@@ -12,10 +12,15 @@ TYPES =
   Integer: 'Integer'
   Float: 'Float'
 
+RELATIONS =
+  One: One
+  Many: Many
+
 module.exports = class Schema
-  constructor: (@model_type, type_overrides={}) ->
+  constructor: (@model_type, type_overrides={}, relation_types={}) ->
 
     @types = _.defaults(type_overrides, TYPES)
+    @relation_types = _.defaults(relation_types, RELATIONS)
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
 
@@ -26,9 +31,9 @@ module.exports = class Schema
       options = @_parseFieldOptions(options()) if _.isFunction(options)
       switch options.type
         when 'hasOne', 'belongsTo'
-          relation = @relations[key] = new One(@model_type, key, options)
+          relation = @relations[key] = new @relation_types.One(@model_type, key, options)
         when 'hasMany'
-          relation = @relations[key] = new Many(@model_type, key, options)
+          relation = @relations[key] = new @relation_types.Many(@model_type, key, options)
         else
           throw new Error "Unrecognized relationship: #{util.inspect(options)}"
 
