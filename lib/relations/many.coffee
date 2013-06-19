@@ -2,6 +2,7 @@ util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
 inflection = require 'inflection'
+Queue = require 'queue-async'
 
 Utils = require '../../utils'
 
@@ -17,12 +18,10 @@ module.exports = class Many
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   set: (model, key, value, options) ->
-    collection = @ensureCollection(model, key)
+    throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    collection = @_ensureCollection(model)
 
     # TODO: Allow sql to sync...make a notification? use Backbone.Events?
-    key = @key if key is @ids_accessor
-
-    throw new Error "HasMany::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
     value = value.models if value instanceof Backbone.Collection
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
@@ -52,26 +51,26 @@ module.exports = class Many
     return @
 
   get: (model, key, callback) ->
+    throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    returnValue = =>
+      collection = @_ensureCollection(model)
+      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
+
     # asynchronous path, needs load
-    needs_load = !!@_fetchRelated model, key, (err, models) =>
-      return @_reportError(err, callback) if err
-      callback(null, if key is @ids_accessor then _.map(models, (test) -> test.get('id')) else models)
+    is_loaded = @_fetchRelated model, key, (err) =>
+      return if callback then callback(err) console.log "Many: unhandled error: #{err}. Please supply a callback" if err
+      result = returnValue()
+      callback(null, if result.models then result.models else result) if callback
 
     # synchronous path
-    collection = @ensureCollection(model, key)
-    if key is @ids_accessor
-      related_ids = _.map(collection.models, (related_model) -> related_model.get('id'))
-      callback(null, related_ids) if not needs_load and callback
-      return related_ids
-    else
-      throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      callback(null, collection.models) if not needs_load and callback
-      return collection
+    result = returnValue()
+    callback(null, if result.models then result.models else result) if is_loaded and callback
+    return result
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
 
-    collection = @ensureCollection(model, key)
+    collection = @_ensureCollection(model)
     json_key = if @embed then key else @ids_accessor
 #    return json[json_key] = collection.toJSON() if @embed
     return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
@@ -89,41 +88,72 @@ module.exports = class Many
     collection = model.get(@key)
     collection.remove(Utils.dataId(item))
 
-  _reportError: (err, callback) ->
-    return callback(err) if callback
-    console.log "Many: unhandled error: #{err}. Please supply a callback"
+    #todo: check which objects are already loaded in cache and ignore ids
+  batchLoadRelated: (models_json, callback) ->
+    query = {}
+    query[@foreign_key] = {$in: (json.id for json in models_json)}
+    @reverse_model_type.cursor(query).toJSON callback
 
-  ensureCollection: (model, key) ->
-    model.attributes[@key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+  _ensureCollection: (model) ->
+    model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
     return model.attributes[@key]
 
   # TODO: optimize so don't need to check each time
-  _fetchRelated: (model, key, callback) ->
-    collection = @ensureCollection(model, key)
+  _isLoaded: (model, key) ->
+    collection = @_ensureCollection(model)
+    return false unless collection._orm_loaded
+    return false for related_model in collection.models when related_model._orm_needs_load
+    return true
 
-    # collect ids to load
-    load_ids = []
-    for related_model in collection.models
-      continue unless related_model._orm_needs_load
-      throw new Error "Missing id for load" unless id = related_model.get('id')
-      load_ids.push(id)
-    return 0 unless load_ids.length
+  #todo: check which objects are already loaded in cache and ignore ids
+  _fetchPlaceholders: (model, key, callback) -> @_loadModels(model, key, callback)
+
+  # TODO: optimize so don't need to check each time
+  _fetchRelated: (model, key, callback) ->
+    return true if @_isLoaded(model, key) # already loaded
+
+    # load placeholders with ids
+    @_fetchPlaceholders model, key, (err, related_models) =>
+      return callback(err) if err
+      return callback(null, []) unless related_models.length # no relations
+
+      return callback(null, related_models) if key is @ids_accessor # ids only, no need to fetch the models
+      @_loadModels(model, key, callback)
+
+    return false
+
+  _loadModels: (model, key, callback) ->
+    collection = @_ensureCollection(model)
+
+    #todo: check which objects are already loaded in cache and ignore ids
+#    load_ids = []
+#    for related_model in collection.models
+#      continue unless related_model._orm_needs_load
+#      throw new Error "Missing id for load" unless id = related_model.get('id')
+#      load_ids.push(id)
+
+    # loaded
+#    unless load_ids.length
+#      collection._orm_loaded = true
+#      return callback(null, collection.models)
 
     # fetch
-    @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
+    query = {}
+    query[@foreign_key] = model.attributes.id
+    @reverse_model_type.cursor(query).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}", callback) if json.length isnt load_ids.length
+#      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Expected: #{load_ids.length}. Actual: #{json.length}", callback) if load_ids.length isnt json.length
 
       # update
+      collection._orm_loaded = true
       for related_model in collection.models
-        if related_model._orm_needs_load
-          id = related_model.get('id')
-          model_json = _.find(json, (test) -> return test.id is id)
-          return @_reportError(new Error "Model not found. Id #{id}", callback) if not model_json
-          delete related_model._orm_needs_load
-          related_model.set(key, model_json)
+        continue unless related_model._orm_needs_load
+
+        id = related_model.get('id')
+        model_json = _.find(json, (test) -> return test.id is id)
+        return callback(new Error "Model not found. Id #{id}", callback) if not model_json
+        delete related_model._orm_needs_load
+        related_model.set(key, model_json)
 
       @reverse_model_type._cache.markLoaded(collection.models) if @reverse_model_type._cache
       callback(null, collection.models)
-
-    return load_ids.length

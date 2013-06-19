@@ -2,7 +2,6 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
-Queue = require 'queue-async'
 
 Utils = require '../../utils'
 
@@ -17,15 +16,17 @@ module.exports = class One
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   set: (model, key, value, options) ->
-    # TODO: Allow sql to sync...make a notification? use Backbone.Events?
-    key = @key if key is @ids_accessor
+    throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    return @ if @has(model, @key, value) # already set
 
-    throw new Error "HasOne::set: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-    return @ if @has(model, key, value) # already set
+    if @type is 'belongsTo' and key is @foreign_key
+      model._orm_lookups or= {}
+      model._orm_lookups[@foreign_key] = value
+      return @
 
     # clear reverse
     if @reverse_relation
-      if @has(model, key, value) and (related_model = model.attributes[@key])
+      if @has(model, @key, value) and (related_model = model.attributes[@key])
         if @reverse_relation.remove
           @reverse_relation.remove(related_model, model)
         else
@@ -37,7 +38,7 @@ module.exports = class One
     # _set.call(model, @foreign_key, related_model.attributes.id, options) if @type is 'belongsTo'
     # _set.call(related_model, @foreign_key, model.attributes.id, options) if @type is 'hasOne'
 
-    Backbone.Model::set.call(model, key, related_model, options)
+    Backbone.Model::set.call(model, @key, related_model, options)
     return @ if not related_model or not @reverse_relation
 
     if @reverse_relation.add
@@ -48,21 +49,20 @@ module.exports = class One
     return @
 
   get: (model, key, callback) ->
-    throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key} or #{}" unless (key is @key or key is @ids_accessor)
-    returnValue = (related_model) =>
-      return null unless related_model
+    throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+
+    returnValue = =>
+      return null unless related_model = model.attributes[@key]
       return if key is @ids_accessor then related_model.get('id') else related_model
 
     # asynchronous path, needs load
-    related_model = @_fetchRelated model, key, (err, related_model) =>
-      if err
-        return callback(err) if callback
-        return console.log "One: unhandled error: #{err}. Please supply a callback"
-      callback(null, returnValue(related_model)) if callback
+    is_loaded = @_fetchRelated model, key, (err) =>
+      return if callback then callback(err) console.log "One: unhandled error: #{err}. Please supply a callback" if err
+      callback(null, returnValue()) if callback
 
     # synchronous path
-    result = returnValue(related_model)
-    callback(null, result) if related_model and callback
+    result = returnValue()
+    callback(null, result) if is_loaded and callback
     return result
 
   appendJSON: (json, model, key) ->
@@ -83,29 +83,51 @@ module.exports = class One
     return current_id is item.id if _.isObject(item)
     return current_id is item
 
+  #todo: check which objects are already loaded in cache and ignore ids
+  batchLoadRelated: (models_json, callback) ->
+    query = {}
+    if @type is 'belongsTo'
+      query.id = {$in: (json[@foreign_key] for json in models_json)}
+    else
+      query[@foreign_key] = {$in: (json.id for json in models_json)}
+    @reverse_model_type.cursor(query).toJSON callback
+
   # TODO: optimize so don't need to check each time
-  _fetchPlaceholder: (model, key, callback) -> callback(null, model.attributes[@key])
+  _isLoaded: (model, key) ->
+    related_model = model.attributes[@key]
+    return related_model and not related_model._orm_needs_load
+
+  #todo: check which objects are already loaded in cache and ignore ids
+  _fetchPlaceholder: (model, key, callback) ->
+    related_model = model.attributes[@key]
+    return callback(null, related_model) if related_model
+
+    if @type is 'belongsTo'
+      if related_id = model._orm_lookups[@foreign_key]
+        model.set(@key, related_model = Utils.createRelated(@related_model_type, related_id))
+        callback(null, related_model)
+    else
+      query = {$one:true}
+      query[@foreign_key] = model.attributes.id
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+        model.set(@key, related_model = Utils.createRelated(@related_model_type, json))
+        callback(null, related_model)
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-    # already loaded
-    related_model = model.attributes[@key]
-    return related_model if related_model and not related_model._orm_needs_load
+    return true if @_isLoaded(model, key) # already loaded
 
     # load placeholders with ids
-    queue = new Queue(1)
-    unless related_model
-      queue.defer (callback) => @_fetchPlaceholder model, key, (err, placeholder) =>
-        return callback(err) if err
-        callback(null, related_model = placeholder)
-
-    # load actual model
-    queue.await (err) =>
+    @_fetchPlaceholder model, key, (err, related_model) =>
       return callback(err) if err
       return callback(null, null) unless related_model # no relation
+      return callback(null, related_model) if key is @ids_accessor # ids only, no need to fetch the models
+
       return callback(null, related_model) unless related_model._orm_needs_load # already loaded
       return callback(new Error "Missing id for load") unless id = related_model.get('id')
 
+      # load actual model
       @reverse_model_type.cursor(id).toJSON (err, model_json) =>
         return callback(err) if err
         return callback(new Error "Model not found. Id #{id}") if not model_json
@@ -116,4 +138,4 @@ module.exports = class One
         @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
         callback(null, related_model)
 
-    return null
+    return false

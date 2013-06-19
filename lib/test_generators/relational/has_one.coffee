@@ -23,19 +23,12 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    it 'Has an id loaded for a belongsTo relation', (done) ->
+    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        assert.ok(test_model.get('flat_id'), 'found id')
-        done()
-
-        ##todo
-    it 'Has an id loaded for a belongsTo relation', (done) ->
-      MODEL_TYPE.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        assert.ok(test_model.get('flat_id'), 'found id')
+        assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
+#        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
         done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
@@ -46,13 +39,11 @@ module.exports = (options) ->
         test_model.get 'flat', (err, flat) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
-          console.log test_model.attributes
-          console.log test_model.toJSON()
           assert.deepEqual(test_model.toJSON().flat_id, flat.get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.get('id')}")
           assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
           done()
 
-    it 'Can retrieve an id for a hasOne relation via virtual method with query', (done) ->
+    it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')

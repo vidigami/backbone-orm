@@ -36,7 +36,9 @@ module.exports = class Utils
       return model_type._cache.findCachedOrCreate(item, model_type)
     else
       return new model_type(model_type::parse(item)) if _.isObject(item)
-      return new model_type({id: item})
+      related_model = new model_type({id: item})
+      related_model._orm_needs_load = true
+      return related_model
 
   @reverseRelation: (model_type, owning_model_name) ->
     return null unless model_type.relation

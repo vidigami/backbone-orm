@@ -64,11 +64,10 @@ class Cache
 
   _createModel: (model_store, data, model_type, now) ->
     if _.isObject(data)
-      return new model_type(data) unless data.id # no id, means just create without caching
+      return new model_type(data) unless data.id # no id, means just create without caching (embedded)
       @_addModel(model_store, model = new model_type(data), now)
     else
-      data = {id: data}
-      @_addModel(model_store, model = new model_type(data), now)
+      @_addModel(model_store, model = new model_type({id: data}), now)
       model._orm_needs_load = true
     return model
 
