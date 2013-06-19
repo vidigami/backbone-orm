@@ -18,6 +18,13 @@ module.exports = class MemoryCursor extends Cursor
         json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
       return callback(null, json_count)
 
+    # filter by ids
+    if @_cursor.$ids
+      console.log "$ids (BEFORE): #{util.inspect(json)}"
+      json = _.select(json, (item) -> _.include(@_cursor.$ids, item.id))
+      console.log "$ids (AFTER): #{util.inspect(json)}"
+
+    # use find
     if keys.length
       json = []
       for id, model_json of @model_type._sync.store
@@ -25,7 +32,6 @@ module.exports = class MemoryCursor extends Cursor
     else
       json = (model_json for id, model_json of @model_type._sync.store)
 
-    # find.order = @_cursor.$sort if @_cursor.$sort # TODO: should be in form {order: 'title DESC'}
     if @_cursor.$offset
       number = json.length - @_cursor.$offset
       number = 0 if number < 0
@@ -36,7 +42,6 @@ module.exports = class MemoryCursor extends Cursor
 
     else if @_cursor.$limit
       json = json.splice(0, Math.min(json.length, @_cursor.$limit))
-    # args._id = {$in: _.map(ids, (id) -> new ObjectID("#{id}"))} if @_cursor.$ids # TODO
 
     return callback(null, json.length) if count or @_cursor.$count # only the count
 
