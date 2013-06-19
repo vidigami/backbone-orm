@@ -57,7 +57,7 @@ module.exports = class One
 
     # asynchronous path, needs load
     is_loaded = @_fetchRelated model, key, (err) =>
-      return if callback then callback(err) console.log "One: unhandled error: #{err}. Please supply a callback" if err
+      return (if callback then callback(err) else console.log "One: unhandled error: #{err}. Please supply a callback") if err
       callback(null, returnValue()) if callback
 
     # synchronous path
@@ -104,14 +104,14 @@ module.exports = class One
 
     if @type is 'belongsTo'
       if related_id = model._orm_lookups[@foreign_key]
-        model.set(@key, related_model = Utils.createRelated(@related_model_type, related_id))
+        model.set(@key, related_model = Utils.createRelated(@reverse_model_type, related_id))
         callback(null, related_model)
     else
       query = {$one:true}
       query[@foreign_key] = model.attributes.id
       @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
-        model.set(@key, related_model = Utils.createRelated(@related_model_type, json))
+        model.set(@key, related_model = Utils.createRelated(@reverse_model_type, json))
         callback(null, related_model)
 
   # TODO: optimize so don't need to check each time
@@ -135,7 +135,7 @@ module.exports = class One
         # update
         delete related_model._orm_needs_load
         related_model.set(key, model_json)
-        @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
+        @reverse_model_type._cache.updateCached(related_model) if @reverse_model_type._cache
         callback(null, related_model)
 
     return false

@@ -58,7 +58,7 @@ module.exports = class Many
 
     # asynchronous path, needs load
     is_loaded = @_fetchRelated model, key, (err) =>
-      return if callback then callback(err) console.log "Many: unhandled error: #{err}. Please supply a callback" if err
+      return (if callback then callback(err) else console.log "Many: unhandled error: #{err}. Please supply a callback") if err
       result = returnValue()
       callback(null, if result.models then result.models else result) if callback
 
@@ -151,9 +151,15 @@ module.exports = class Many
 
         id = related_model.get('id')
         model_json = _.find(json, (test) -> return test.id is id)
+
+        # # TODO: REMOVE
+        # if not model_json
+        #   console.log "query: #{util.inspect(query)}. JSON: #{util.inspect(json)}"
+        #   console.log "model_name: #{@reverse_model_type.model_name} store: #{util.inspect(@reverse_model_type._sync.store)}"
+
         return callback(new Error "Model not found. Id #{id}", callback) if not model_json
         delete related_model._orm_needs_load
         related_model.set(key, model_json)
 
-      @reverse_model_type._cache.markLoaded(collection.models) if @reverse_model_type._cache
+      @reverse_model_type._cache.updateCached(collection.models) if @reverse_model_type._cache
       callback(null, collection.models)
