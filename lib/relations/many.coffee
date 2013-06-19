@@ -5,6 +5,7 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../../utils'
+One = require './one'
 
 module.exports = class Many
   constructor: (@model_type, @key, options) ->
@@ -16,6 +17,11 @@ module.exports = class Many
   initialize: ->
     @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
+
+    if not @reverse_relation
+      reverse_schema = @reverse_model_type.schema()
+      reverse_key = inflection.underscore(@model_type.model_name)
+      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
 
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)

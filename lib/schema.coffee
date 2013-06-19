@@ -41,6 +41,11 @@ module.exports = class Schema
     return
 
   relation: (key) -> return @relations[key] or @ids_accessor[key]
+  addRelation: (relation) ->
+    @relations[relation.key] = relation
+    @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+    relation.initialize()
+    return relation
 
   #################################
   # Internal
