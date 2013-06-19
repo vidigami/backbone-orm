@@ -23,6 +23,9 @@ module.exports = class Many
       reverse_key = inflection.underscore(@model_type.model_name)
       reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
 
+    # check for join table
+    @join_table_type = Utils.createJoinTableModel(@, @reverse_relation) if @reverse_relation.type is 'hasMany'
+
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     collection = @_ensureCollection(model)
