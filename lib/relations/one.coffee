@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
+Queue = require 'queue-async'
 
 Utils = require '../../utils'
 
@@ -46,22 +47,23 @@ module.exports = class One
 
     return @
 
-  get: (model, key, callback, _get) ->
+  get: (model, key, callback) ->
+    throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key} or #{}" unless (key is @key or key is @ids_accessor)
+    returnValue = (related_model) =>
+      return null unless related_model
+      return if key is @ids_accessor then related_model.get('id') else related_model
+
     # asynchronous path, needs load
-    needs_load = !!@fetchRelated model, key, (err, related_model) =>
-      return @_reportError(err, callback) if err
-      callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
+    related_model = @_fetchRelated model, key, (err, related_model) =>
+      if err
+        return callback(err) if callback
+        return console.log "One: unhandled error: #{err}. Please supply a callback"
+      callback(null, returnValue(related_model)) if callback
 
     # synchronous path
-    related_model = model.attributes[@key]
-    if key is @ids_accessor
-      related_id = if related_model then related_model.get('id') else null
-      callback(null, related_id) if not needs_load and callback
-      return related_id
-    else
-      throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      callback(null, related_model) if not needs_load and callback
-      return related_model
+    result = returnValue(related_model)
+    callback(null, result) if related_model and callback
+    return result
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -81,24 +83,36 @@ module.exports = class One
     return current_id is item
 
   # TODO: optimize so don't need to check each time
-  fetchRelated: (model, key, callback) ->
-    related_model = model.attributes[key]
-    return 0 unless (related_model and related_model._orm_needs_load)
+  _fetchPlaceholder: (model, key, callback) -> callback(null, model.attributes[@key])
 
-    # asynchronous path, needs load
-    throw new Error "Missing id for load" unless id = related_model.get('id')
-    @reverse_model_type.cursor(id).toJSON (err, model_json) =>
+  # TODO: optimize so don't need to check each time
+  _fetchRelated: (model, key, callback) ->
+    # already loaded
+    related_model = model.attributes[@key]
+    return related_model if related_model and not related_model._orm_needs_load
+
+    # load placeholders with ids
+    queue = new Queue(1)
+    unless related_model
+      queue.defer (callback) => @_fetchPlaceholder model, key, (err, placeholder) =>
+        return callback(err) if err
+        callback(null, related_model = placeholder)
+
+    # load actual model
+    queue.await (err) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{id}", callback) if not model_json
+      return callback(null, null) unless related_model # no relation
+      return callback(null, related_model) unless related_model._orm_needs_load # already loaded
+      return callback(new Error "Missing id for load") unless id = related_model.get('id')
 
-      # update
-      delete related_model._orm_needs_load
-      related_model.set(key, model_json)
-      @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
+      @reverse_model_type.cursor(id).toJSON (err, model_json) =>
+        return callback(err) if err
+        return callback(new Error "Model not found. Id #{id}") if not model_json
 
-      callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
-    return 1
+        # update
+        delete related_model._orm_needs_load
+        related_model.set(key, model_json)
+        @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
+        callback(null, related_model)
 
-  _reportError: (err, callback) ->
-    return callback(err) if callback
-    console.log "One: unhandled error: #{err}. Please supply a callback"
+    return null

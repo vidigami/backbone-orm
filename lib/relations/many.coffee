@@ -53,7 +53,7 @@ module.exports = class Many
 
   get: (model, key, callback) ->
     # asynchronous path, needs load
-    needs_load = !!@fetchRelated model, key, (err, models) =>
+    needs_load = !!@_fetchRelated model, key, (err, models) =>
       return @_reportError(err, callback) if err
       callback(null, if key is @ids_accessor then _.map(models, (test) -> test.get('id')) else models)
 
@@ -97,7 +97,7 @@ module.exports = class Many
     return model.attributes[@key]
 
   # TODO: optimize so don't need to check each time
-  fetchRelated: (model, key, callback) ->
+  _fetchRelated: (model, key, callback) ->
     collection = @ensureCollection(model, key)
 
     # collect ids to load
