@@ -18,8 +18,6 @@ module.exports = class MemoryCursor extends Cursor
         json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
       return callback(null, json_count)
 
-    # filter by ids
-    if @_cursor.$ids
       console.log "$ids (BEFORE): #{util.inspect(json)}"
       json = _.select(json, (item) -> _.include(@_cursor.$ids, item.id))
       console.log "$ids (AFTER): #{util.inspect(json)}"
@@ -27,10 +25,19 @@ module.exports = class MemoryCursor extends Cursor
     # use find
     if keys.length
       json = []
-      for id, model_json of @model_type._sync.store
-        json.push(model_json) if _.isEqual(_.pick(model_json, keys), @_find)
+      if @_cursor.$ids
+        for id, model_json of @model_type._sync.store
+          json.push(model_json) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), @_find)
+      else
+        for id, model_json of @model_type._sync.store
+          json.push(model_json) if _.isEqual(_.pick(model_json, keys), @_find)
     else
-      json = (model_json for id, model_json of @model_type._sync.store)
+      # filter by ids
+      if @_cursor.$ids
+        json = []
+        json.push(model_json) for id, model_json of @model_type._sync.store when _.contains(@_cursor.$ids, model_json.id)
+      else
+        json = (model_json for id, model_json of @model_type._sync.store)
 
     if @_cursor.$offset
       number = json.length - @_cursor.$offset

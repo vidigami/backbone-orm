@@ -19,7 +19,7 @@ module.exports = class Many
 
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
-    collection = @ensureCollection(model)
+    collection = @_ensureCollection(model)
 
     # TODO: Allow sql to sync...make a notification? use Backbone.Events?
     value = value.models if value instanceof Backbone.Collection
@@ -53,7 +53,7 @@ module.exports = class Many
   get: (model, key, callback) ->
     throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     returnValue = =>
-      collection = @ensureCollection(model)
+      collection = @_ensureCollection(model)
       return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
 
     # asynchronous path, needs load
@@ -70,7 +70,7 @@ module.exports = class Many
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
 
-    collection = @ensureCollection(model)
+    collection = @_ensureCollection(model)
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
@@ -87,13 +87,14 @@ module.exports = class Many
     collection = model.get(@key)
     collection.remove(Utils.dataId(item))
 
-  ensureCollection: (model) ->
+  _ensureCollection: (model) ->
     model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
     return model.attributes[@key]
 
   # TODO: optimize so don't need to check each time
   _isLoaded: (model, key) ->
-    collection = @ensureCollection(model)
+    collection = @_ensureCollection(model)
+    return false unless collection._orm_loaded
     return false for related_model in collection.models when related_model._orm_needs_load
     return true
 
@@ -114,21 +115,26 @@ module.exports = class Many
     return false
 
   _loadModels: (model, key, callback) ->
-    collection = @ensureCollection(model)
+    collection = @_ensureCollection(model)
 
     load_ids = []
     for related_model in collection.models
       continue unless related_model._orm_needs_load
       throw new Error "Missing id for load" unless id = related_model.get('id')
       load_ids.push(id)
-    return callback(null, collection.models) unless load_ids.length
+
+    # loaded
+    unless load_ids.length
+      collection._orm_loaded = true
+      return callback(null, collection.models)
 
     # fetch
     @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}", callback) if json.length isnt load_ids.length
+      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Expected: #{load_ids.length}. Actual: #{json.length}", callback) if load_ids.length isnt json.length
 
       # update
+      collection._orm_loaded = true
       for related_model in collection.models
         continue unless related_model._orm_needs_load
 

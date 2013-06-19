@@ -45,12 +45,12 @@ module.exports = class One
 
   get: (model, key, callback) ->
     throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
-    returnValue = (related_model) =>
+    returnValue = =>
       return null unless related_model = model.attributes[@key]
       return if key is @ids_accessor then related_model.get('id') else related_model
 
     # asynchronous path, needs load
-    is_loaded = @_fetchRelated model, key, (err, related_model) =>
+    is_loaded = @_fetchRelated model, key, (err) =>
       return if callback then callback(err) console.log "One: unhandled error: #{err}. Please supply a callback" if err
       callback(null, returnValue()) if callback
 
