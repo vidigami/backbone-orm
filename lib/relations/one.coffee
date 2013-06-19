@@ -48,22 +48,14 @@ module.exports = class One
 
   get: (model, key, callback, _get) ->
     # asynchronous path, needs load
-    if (related_model = model.attributes[key]) and related_model._orm_needs_load
-      needs_load = true
-      throw new Error "Missing id for load" unless id = related_model.get('id')
-      @reverse_model_type.cursor(id).toJSON (err, model_json) =>
-        return @reportError(err, callback) if err
-        return @reportError(new Error "Model not found. Id #{id}", callback) if not model_json
-
-        # update
-        delete related_model._orm_needs_load
-        related_model.set(key, model_json)
-        @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
-        callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
+    needs_load = !!@fetchRelated model, key, (err, related_model) =>
+      return @_reportError(err, callback) if err
+      callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
 
     # synchronous path
+    related_model = model.attributes[@key]
     if key is @ids_accessor
-      related_id = if related_model = model.attributes[@key] then related_model.get('id') else null
+      related_id = if related_model then related_model.get('id') else null
       callback(null, related_id) if not needs_load and callback
       return related_id
     else
@@ -88,6 +80,25 @@ module.exports = class One
     return current_id is item.id if _.isObject(item)
     return current_id is item
 
-  reportError: (err, callback) ->
+  # TODO: optimize so don't need to check each time
+  fetchRelated: (model, key, callback) ->
+    related_model = model.attributes[key]
+    return 0 unless (related_model and related_model._orm_needs_load)
+
+    # asynchronous path, needs load
+    throw new Error "Missing id for load" unless id = related_model.get('id')
+    @reverse_model_type.cursor(id).toJSON (err, model_json) =>
+      return callback(err) if err
+      return callback(new Error "Model not found. Id #{id}", callback) if not model_json
+
+      # update
+      delete related_model._orm_needs_load
+      related_model.set(key, model_json)
+      @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
+
+      callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
+    return 1
+
+  _reportError: (err, callback) ->
     return callback(err) if callback
     console.log "One: unhandled error: #{err}. Please supply a callback"
