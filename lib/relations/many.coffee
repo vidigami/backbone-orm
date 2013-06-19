@@ -24,7 +24,11 @@ module.exports = class Many
       reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
 
     # check for join table
-    @join_table_type = Utils.createJoinTableModel(@, @reverse_relation) if @reverse_relation.type is 'hasMany'
+    if @reverse_relation.type is 'hasMany' and not @join_table
+      if @reverse_relation.join_table
+        @join_table = @reverse_relation.join_table
+      else
+        @join_table = Utils.createJoinTableModel(@, @reverse_relation)
 
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
@@ -115,7 +119,16 @@ module.exports = class Many
     return true
 
   #todo: check which objects are already loaded in cache and ignore ids
-  _fetchPlaceholders: (model, key, callback) -> @_loadModels(model, key, callback)
+  _fetchPlaceholders: (model, key, callback) ->
+    if @reverse_relation.type is 'hasMany'
+      query = {$values: @foreign_key}
+      query[@foreign_key] = model.attributes.id
+      @join_table.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+        related_models = (Utils.createRelated(@reverse_model_type, related_id) for id in json)
+        callback(null, related_models)
+    else
+      @_loadModels(model, key, callback)
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->

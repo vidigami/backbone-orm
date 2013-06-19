@@ -63,7 +63,7 @@ module.exports = (model_type, cache) ->
 
   sync_fn = (method, model, options={}) ->
     sync['initialize']()
-    return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync'
+    return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     sync[method].apply(sync, Array::slice.call(arguments, 1))
 
   require('./lib/model_extensions')(model_type, sync_fn) # mixin extensions
