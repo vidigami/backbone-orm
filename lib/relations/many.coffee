@@ -131,7 +131,7 @@ module.exports = class Many
     # fetch
     @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Expected: #{load_ids.length}. Actual: #{json.length}", callback) if load_ids.length isnt json.length
+      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Actual: #{util.inspect(_.pluck(json, 'id'))}", callback) if load_ids.length isnt json.length
 
       # update
       collection._orm_loaded = true
