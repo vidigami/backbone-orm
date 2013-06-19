@@ -2,25 +2,22 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
-One = require './relations/one'
-Many = require './relations/many'
-
-TYPES =
+DEFAULT_TYPES =
   String: 'String'
   Date: 'Date'
   Boolean: 'Boolean'
   Integer: 'Integer'
   Float: 'Float'
 
-RELATIONS =
-  One: One
-  Many: Many
+DEFAULT_RELATIONS =
+  One: require './relations/one'
+  Many: require './relations/many'
 
 module.exports = class Schema
-  constructor: (@model_type, type_overrides={}, relation_types={}) ->
+  constructor: (@model_type, types={}, relation_types={}) ->
 
-    @types = _.defaults(type_overrides, TYPES)
-    @relation_types = _.defaults(relation_types, RELATIONS)
+    @types = _.defaults(types, DEFAULT_TYPES)
+    @relation_types = _.defaults(relation_types, DEFAULT_RELATIONS)
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
 
