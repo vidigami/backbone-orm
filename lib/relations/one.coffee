@@ -70,6 +70,7 @@ module.exports = class One
 
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
+#  return json[json_key] = if @embed then related_model.toJSON() else (related_model.get('id') if @type is 'belongsTo')
     return json[json_key] = if @embed then related_model.toJSON() else related_model.get('id')
 
   has: (model, key, item) ->

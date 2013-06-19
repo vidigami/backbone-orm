@@ -23,7 +23,22 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    it 'Handles a get query for a hasOne relation', (done) ->
+    it 'Has an id loaded for a belongsTo relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.get('flat_id'), 'found id')
+        done()
+
+        ##todo
+    it 'Has an id loaded for a belongsTo relation', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.get('flat_id'), 'found id')
+        done()
+
+    it 'Handles a get query for a belongsTo relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -31,12 +46,22 @@ module.exports = (options) ->
         test_model.get 'flat', (err, flat) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
+          console.log test_model.attributes
+          console.log test_model.toJSON()
           assert.deepEqual(test_model.toJSON().flat_id, flat.get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.get('id')}")
-
           assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
           done()
 
-    it 'Handles a get query for a reversed hasOne relation', (done) ->
+    it 'Can retrieve an id for a hasOne relation via virtual method with query', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        test_model.get 'reverse_id', (err, id) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(id, 'found id')
+          done()
+
+    it 'Handles a get query for a hasOne relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -45,10 +70,11 @@ module.exports = (options) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found related model')
           assert.deepEqual(test_model.toJSON().reverse_id, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_id}. Actual: #{reverse.get('id')}")
+          assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
 
           done()
 
-    it 'Handles a get query for a hasOne and hasOne two sided relation', (done) ->
+    it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -57,6 +83,7 @@ module.exports = (options) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found related model')
           assert.deepEqual(test_model.toJSON().reverse_id, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_id}. Actual: #{reverse.get('id')}")
+          assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
 
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")

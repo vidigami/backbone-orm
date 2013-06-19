@@ -31,7 +31,27 @@ module.exports = (options) ->
         test_model.get 'flats', (err, flats) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, flats.length, "Expected: #{2}. Actual: #{flats.length}")
-          assert.deepEqual(test_model.toJSON().flat_ids[0], flats[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_ids[0]}. Actual: #{flats[0].get('id')}")
+          done()
+
+    it 'Handles an async get query for ids', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        test_model.get 'flat_ids', (err, ids) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(2, ids.length, "Expected count: #{2}. Actual: #{ids.length}")
+          done()
+
+    it 'Handles a synchronous get query for ids after the relations are loaded', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        test_model.get 'flats', (err, flats) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(test_model.get('flat_ids').length, flats.length, "Expected count: #{test_model.get('flat_ids').length}. Actual: #{flats.length}")
+          assert.deepEqual(test_model.get('flat_ids')[0], flats[0].get('id'), "Serialized id only. Expected: #{test_model.get('flat_ids')[0]}. Actual: #{flats[0].get('id')}")
           done()
 
     it 'Handles a get query for a hasMany and belongsTo two sided relation', (done) ->

@@ -14,7 +14,7 @@ module.exports = (options) ->
 
   Utils = require '../../../utils'
 
-  describe 'hasMany', ->
+  describe 'hasMany embedded', ->
 
     beforeEach (done) ->
       BEFORE_EACH (err, models_json) ->
