@@ -15,7 +15,7 @@ module.exports = (options) ->
   Utils = require '../../../utils'
   adapters = Utils.adapters
 
-  describe 'Many to Many', ->
+  describe 'Many to Many embedded', ->
 
     beforeEach (done) ->
       BEFORE_EACH (err, models_json) ->

@@ -19,6 +19,11 @@ module.exports = class One
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     return @ if @has(model, @key, value) # already set
 
+    if @type is 'belongsTo' and key is @foreign_key
+      model._orm_lookups or= {}
+      model._orm_lookups[@foreign_key] = value
+      return @
+
     # clear reverse
     if @reverse_relation
       if @has(model, @key, value) and (related_model = model.attributes[@key])
@@ -45,6 +50,7 @@ module.exports = class One
 
   get: (model, key, callback) ->
     throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+
     returnValue = =>
       return null unless related_model = model.attributes[@key]
       return if key is @ids_accessor then related_model.get('id') else related_model
@@ -64,6 +70,7 @@ module.exports = class One
 
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
+#  return json[json_key] = if @embed then related_model.toJSON() else (related_model.get('id') if @type is 'belongsTo')
     return json[json_key] = if @embed then related_model.toJSON() else related_model.get('id')
 
   has: (model, key, item) ->
@@ -76,12 +83,36 @@ module.exports = class One
     return current_id is item.id if _.isObject(item)
     return current_id is item
 
+  #todo: check which objects are already loaded in cache and ignore ids
+  batchLoadRelated: (models_json, callback) ->
+    query = {}
+    if @type is 'belongsTo'
+      query.id = {$in: (json[@foreign_key] for json in models_json)}
+    else
+      query[@foreign_key] = {$in: (json.id for json in models_json)}
+    @reverse_model_type.cursor(query).toJSON callback
+
   # TODO: optimize so don't need to check each time
   _isLoaded: (model, key) ->
     related_model = model.attributes[@key]
     return related_model and not related_model._orm_needs_load
 
-  _fetchPlaceholder: (model, key, callback) -> callback(null, model.attributes[@key])
+  #todo: check which objects are already loaded in cache and ignore ids
+  _fetchPlaceholder: (model, key, callback) ->
+    related_model = model.attributes[@key]
+    return callback(null, related_model) if related_model
+
+    if @type is 'belongsTo'
+      if related_id = model._orm_lookups[@foreign_key]
+        model.set(@key, related_model = Utils.createRelated(@related_model_type, related_id))
+        callback(null, related_model)
+    else
+      query = {$one:true}
+      query[@foreign_key] = model.attributes.id
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+        model.set(@key, related_model = Utils.createRelated(@related_model_type, json))
+        callback(null, related_model)
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
@@ -91,6 +122,8 @@ module.exports = class One
     @_fetchPlaceholder model, key, (err, related_model) =>
       return callback(err) if err
       return callback(null, null) unless related_model # no relation
+      return callback(null, related_model) if key is @ids_accessor # ids only, no need to fetch the models
+
       return callback(null, related_model) unless related_model._orm_needs_load # already loaded
       return callback(new Error "Missing id for load") unless id = related_model.get('id')
 

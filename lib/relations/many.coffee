@@ -72,6 +72,7 @@ module.exports = class Many
 
     collection = @_ensureCollection(model)
     json_key = if @embed then key else @ids_accessor
+#    return json[json_key] = collection.toJSON() if @embed
     return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
@@ -87,6 +88,12 @@ module.exports = class Many
     collection = model.get(@key)
     collection.remove(Utils.dataId(item))
 
+    #todo: check which objects are already loaded in cache and ignore ids
+  batchLoadRelated: (models_json, callback) ->
+    query = {}
+    query[@foreign_key] = {$in: (json.id for json in models_json)}
+    @reverse_model_type.cursor(query).toJSON callback
+
   _ensureCollection: (model) ->
     model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
     return model.attributes[@key]
@@ -98,6 +105,7 @@ module.exports = class Many
     return false for related_model in collection.models when related_model._orm_needs_load
     return true
 
+  #todo: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) -> @_loadModels(model, key, callback)
 
   # TODO: optimize so don't need to check each time
@@ -117,21 +125,24 @@ module.exports = class Many
   _loadModels: (model, key, callback) ->
     collection = @_ensureCollection(model)
 
-    load_ids = []
-    for related_model in collection.models
-      continue unless related_model._orm_needs_load
-      throw new Error "Missing id for load" unless id = related_model.get('id')
-      load_ids.push(id)
+    #todo: check which objects are already loaded in cache and ignore ids
+#    load_ids = []
+#    for related_model in collection.models
+#      continue unless related_model._orm_needs_load
+#      throw new Error "Missing id for load" unless id = related_model.get('id')
+#      load_ids.push(id)
 
     # loaded
-    unless load_ids.length
-      collection._orm_loaded = true
-      return callback(null, collection.models)
+#    unless load_ids.length
+#      collection._orm_loaded = true
+#      return callback(null, collection.models)
 
     # fetch
-    @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
+    query = {}
+    query[@foreign_key] = model.attributes.id
+    @reverse_model_type.cursor(query).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Actual: #{util.inspect(_.pluck(json, 'id'))}", callback) if load_ids.length isnt json.length
+#      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Expected: #{load_ids.length}. Actual: #{json.length}", callback) if load_ids.length isnt json.length
 
       # update
       collection._orm_loaded = true

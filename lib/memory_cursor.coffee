@@ -18,10 +18,6 @@ module.exports = class MemoryCursor extends Cursor
         json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
       return callback(null, json_count)
 
-      console.log "$ids (BEFORE): #{util.inspect(json)}"
-      json = _.select(json, (item) -> _.include(@_cursor.$ids, item.id))
-      console.log "$ids (AFTER): #{util.inspect(json)}"
-
     # use find
     if keys.length
       json = []
