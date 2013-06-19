@@ -23,6 +23,24 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
+    # TODO: lazy fetch
+    # it 'Handles a get query for a hasOne relation', (done) ->
+    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
+    #     assert.ok(!err, "No errors: #{err}")
+    #     assert.ok(test_model, 'found model')
+
+    #     cache.clear()
+
+    #     fetched_owner = new MODEL_TYPE({id: test_model.get('id')})
+    #     fetched_owner.fetch adapters.bbCallback (err) ->
+    #       # verify
+
+    #       reverse = fetched_owner.get 'reverse', (err, reverse) ->
+    #         equal(reverse, null)
+
+    #       equal(reverse, null)
+
+
     it 'Handles a get query for a hasOne relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
