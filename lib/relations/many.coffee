@@ -2,6 +2,7 @@ util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
 inflection = require 'inflection'
+Queue = require 'queue-async'
 
 Utils = require '../../utils'
 
@@ -91,20 +92,36 @@ module.exports = class Many
     return model.attributes[@key]
 
   # TODO: optimize so don't need to check each time
-  _fetchPlaceholders: (model, key, callback) ->
-    callback(null, model.attributes[@key])
+  _isLoaded: (model, key) ->
+    collection = @ensureCollection(model)
+    return false for related_model in collection.models when related_model._orm_needs_load
+    return true
+
+  _fetchPlaceholders: (model, key, callback) -> @_loadModels(model, key, callback)
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
+    return true if @_isLoaded(model, key) # already loaded
+
+    # load placeholders with ids
+    @_fetchPlaceholders model, key, (err, related_models) =>
+      return callback(err) if err
+      return callback(null, []) unless related_models.length # no relations
+
+      return callback(null, related_models) if key is @ids_accessor # ids only, no need to fetch the models
+      @_loadModels(model, key, callback)
+
+    return false
+
+  _loadModels: (model, key, callback) ->
     collection = @ensureCollection(model)
 
-    # collect ids to load
     load_ids = []
     for related_model in collection.models
       continue unless related_model._orm_needs_load
       throw new Error "Missing id for load" unless id = related_model.get('id')
       load_ids.push(id)
-    return true unless load_ids.length
+    return callback(null, collection.models) unless load_ids.length
 
     # fetch
     @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
@@ -113,14 +130,13 @@ module.exports = class Many
 
       # update
       for related_model in collection.models
-        if related_model._orm_needs_load
-          id = related_model.get('id')
-          model_json = _.find(json, (test) -> return test.id is id)
-          return callback(new Error "Model not found. Id #{id}", callback) if not model_json
-          delete related_model._orm_needs_load
-          related_model.set(key, model_json)
+        continue unless related_model._orm_needs_load
+
+        id = related_model.get('id')
+        model_json = _.find(json, (test) -> return test.id is id)
+        return callback(new Error "Model not found. Id #{id}", callback) if not model_json
+        delete related_model._orm_needs_load
+        related_model.set(key, model_json)
 
       @reverse_model_type._cache.markLoaded(collection.models) if @reverse_model_type._cache
       callback(null, collection.models)
-
-    return false

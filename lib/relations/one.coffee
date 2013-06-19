@@ -2,7 +2,6 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
-Queue = require 'queue-async'
 
 Utils = require '../../utils'
 
@@ -78,26 +77,24 @@ module.exports = class One
     return current_id is item
 
   # TODO: optimize so don't need to check each time
+  _isLoaded: (model, key) ->
+    related_model = model.attributes[@key]
+    return related_model and not related_model._orm_needs_load
+
   _fetchPlaceholder: (model, key, callback) -> callback(null, model.attributes[@key])
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-    related_model = model.attributes[@key]
-
-    return true if related_model and not related_model._orm_needs_load # already loaded
+    return true if @_isLoaded(model, key) # already loaded
 
     # load placeholders with ids
-    queue = new Queue(1)
-    unless related_model
-      queue.defer (callback) => @_fetchPlaceholder model, key, (err, placeholder) => callback(err, related_model = placeholder)
-
-    # load actual model
-    queue.await (err) =>
+    @_fetchPlaceholder model, key, (err, related_model) =>
       return callback(err) if err
       return callback(null, null) unless related_model # no relation
       return callback(null, related_model) unless related_model._orm_needs_load # already loaded
       return callback(new Error "Missing id for load") unless id = related_model.get('id')
 
+      # load actual model
       @reverse_model_type.cursor(id).toJSON (err, model_json) =>
         return callback(err) if err
         return callback(new Error "Model not found. Id #{id}") if not model_json
