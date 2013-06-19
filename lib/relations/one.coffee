@@ -47,30 +47,29 @@ module.exports = class One
     return @
 
   get: (model, key, callback, _get) ->
+    # asynchronous path, needs load
+    if (related_model = model.attributes[key]) and related_model._orm_needs_load
+      needs_load = true
+      throw new Error "Missing id for load" unless id = related_model.get('id')
+      @reverse_model_type.cursor(id).toJSON (err, model_json) =>
+        return @reportError(err, callback) if err
+        return @reportError(new Error "Model not found. Id #{id}", callback) if not model_json
+
+        # update
+        delete related_model._orm_needs_load
+        related_model.set(key, model_json)
+        @reverse_model_type._cache.markLoaded(related_model) if @reverse_model_type._cache
+        callback(null, if key is @ids_accessor then related_model.get('id') else related_model)
+
+    # synchronous path
     if key is @ids_accessor
       related_id = if related_model = model.attributes[@key] then related_model.get('id') else null
-      callback(null, related_id) if callback
+      callback(null, related_id) if not needs_load and callback
       return related_id
     else
       throw new Error "HasOne::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      if value = model.attributes[key]
-
-        # needs load
-        if value._orm_needs_load
-          throw new Error "Missing id for load" unless id = value.get('id')
-          @reverse_model_type.cursor(id).toJSON (err, json) =>
-            return callback(err) if err
-            return callback(new Error "Model not found. Id #{id}") if not json
-
-            # update
-            delete value._orm_needs_load
-            value.set(key, json)
-            @reverse_model_type._cache.markLoaded(value) if @reverse_model_type._cache
-            callback(null, value)
-          return
-
-      callback(null, value) if callback
-      return value
+      callback(null, related_model) if not needs_load and callback
+      return related_model
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -88,3 +87,7 @@ module.exports = class One
     return current_id is item.get('id') if item instanceof Backbone.Model
     return current_id is item.id if _.isObject(item)
     return current_id is item
+
+  reportError: (err, callback) ->
+    return callback(err) if callback
+    console.log "One: unhandled error: #{err}. Please supply a callback"

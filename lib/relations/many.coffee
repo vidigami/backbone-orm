@@ -54,17 +54,40 @@ module.exports = class Many
 
   get: (model, key, callback) ->
     model.attributes[@key] = new @collection_type() unless (model.attributes[key] instanceof @collection_type)
+    collection = model.attributes[@key]
 
+    # TODO: optimize so don't need to check each time
+    # asynchronous path, needs load
+    load_ids = []
+    for related_model in collection.models
+      load_ids.push(related_model.get('id')) if related_model._orm_needs_load
+    if load_ids.length
+      needs_load = true
+      @reverse_model_type.cursor({$ids: load_ids}).toJSON (err, json) =>
+        return @reportError(err, callback) if err
+        return @reportError(new Error "Failed to load all models. Id #{util.inspect(load_ids)}", callback) if json.length isnt load_ids.length
+
+        # update
+        for related_model in collection.models
+          if related_model._orm_needs_load
+            id = related_model.get('id')
+            model_json = _.find(json, (test) -> return test.id is id)
+            return @reportError(new Error "Model not found. Id #{id}", callback) if not model_json
+            delete related_model._orm_needs_load
+            related_model.set(key, model_json)
+        @reverse_model_type._cache.markLoaded(collection.models) if @reverse_model_type._cache
+        callback(null, if key is @ids_accessor then _.map(collection.models, (test) -> test.get('id')) else collection.models)
+
+    # synchronous path
     if key is @ids_accessor
-      related_ids = _.map(model.attributes[key].models, (related_model) -> related_model.get('id'))
-      callback(null, related_ids) if callback
+      related_ids = _.map(collection.models, (related_model) -> related_model.get('id'))
+      callback(null, related_ids) if not needs_load and callback
       return related_ids
 
     else
       throw new Error "HasMany::get: Unexpected key #{key}. Expecting: #{@key}" unless key is @key
-      collection = model.attributes[key]
       if collection.length
-        callback(null, if collection then collection.models else []) if callback
+        callback(null, if collection then collection.models else []) if not needs_load and callback
         return collection
 
     query = {}
@@ -98,3 +121,8 @@ module.exports = class Many
   remove: (model, item) ->
     collection = model.get(@key)
     collection.remove(Utils.dataId(item))
+
+  reportError: (err, callback) ->
+    return callback(err) if callback
+    console.log "Many: unhandled error: #{err}. Please supply a callback"
+
