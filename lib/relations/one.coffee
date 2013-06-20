@@ -62,6 +62,13 @@ module.exports = class One
     return result
 
   save: (model, key, callback) ->
+    # console.log "Save: #{key}"
+
+    # check for a save
+    # if @reverse_relation and (@reverse_relation.type is 'belongsTo') and (related_model = model.attributes[@key])
+    #   if related_model.hasChanged(@reverse_relation.key)
+    #     console.log "Related needs save: #{@reverse_relation.model_type.model_name} for #{@model_type.model_name}"
+
     # TODO: auto save the reverse 'belongsTo' relations
     callback()
 
