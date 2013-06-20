@@ -17,12 +17,13 @@ module.exports = class One
 
   set: (model, key, value, options) ->
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
-    return @ if @has(model, @key, value) # already set
 
     if @type is 'belongsTo' and key is @foreign_key
       model._orm_lookups or= {}
       model._orm_lookups[@foreign_key] = value
       return @
+
+    return @ if @has(model, @key, value) # already set
 
     # clear reverse
     if @reverse_relation
@@ -70,12 +71,11 @@ module.exports = class One
 
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
-#  return json[json_key] = if @embed then related_model.toJSON() else (related_model.get('id') if @type is 'belongsTo')
-    return json[json_key] = if @embed then related_model.toJSON() else related_model.get('id')
+    return json[json_key] = if @embed then related_model.toJSON() else (related_model.get('id') if @type is 'belongsTo')
 
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
-    return false if (current_related_model and not item) or (not current_related_model and item)
+    return false if not current_related_model
 
     # compare ids
     current_id = current_related_model.get('id')

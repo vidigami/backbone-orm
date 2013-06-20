@@ -13,6 +13,7 @@ module.exports = (options) ->
   Queue = require 'queue-async'
 
   Utils = require '../../../utils'
+  adapters = Utils.adapters
 
   describe 'hasOne', ->
 
@@ -23,22 +24,23 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    # TODO: lazy fetch
-    # it 'Handles a get query for a hasOne relation', (done) ->
-    #   MODEL_TYPE.find {$one: true}, (err, test_model) ->
-    #     assert.ok(!err, "No errors: #{err}")
-    #     assert.ok(test_model, 'found model')
+    #todo: delay the returning of memory models related models to test lazy loading properly
+    it 'Fetches a relation from the store if not present', (done) ->
+      MODEL_TYPE.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
 
-    #     cache.clear()
+        fetched_owner = new MODEL_TYPE({id: test_model.get('id')})
+        fetched_owner.fetch adapters.bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          delete fetched_owner.attributes.reverse
 
-    #     fetched_owner = new MODEL_TYPE({id: test_model.get('id')})
-    #     fetched_owner.fetch adapters.bbCallback (err) ->
-    #       # verify
-
-    #       reverse = fetched_owner.get 'reverse', (err, reverse) ->
-    #         equal(reverse, null)
-
-    #       equal(reverse, null)
+          reverse = fetched_owner.get 'reverse', (err, reverse) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, 'loaded the model lazily')
+            assert.equal(reverse.get('owner_id'), test_model.get('id'))
+            done()
+#          assert.equal(reverse, null, 'has not loaded the model initially')
 
     it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
@@ -77,9 +79,9 @@ module.exports = (options) ->
         test_model.get 'reverse', (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found related model')
-          assert.deepEqual(test_model.toJSON().reverse_id, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_id}. Actual: #{reverse.get('id')}")
           assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
-
+          assert.equal(test_model.get('id'), reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_id}")
+          assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
           done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
@@ -90,8 +92,9 @@ module.exports = (options) ->
         test_model.get 'reverse', (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found related model')
-          assert.deepEqual(test_model.toJSON().reverse_id, reverse.get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_id}. Actual: #{reverse.get('id')}")
           assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
+          assert.equal(test_model.get('id'), reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_id}")
+          assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
 
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
