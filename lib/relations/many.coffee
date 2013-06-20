@@ -64,6 +64,11 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
+    # # check for a save for the model with the key
+    # if @reverse_relation and (@reverse_relation.type is 'belongsTo') and (related_model = model.attributes[@key])
+    #   console.log "key #{key}: #{util.inspect(related_model)}"
+    #   return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key)
+
     # TODO: auto save the reverse 'belongsTo' relations
     return callback() unless @join_table
 
