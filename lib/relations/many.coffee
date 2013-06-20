@@ -83,6 +83,7 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
+    # TODO: auto save the reverse 'belongsTo' relations
     return callback() unless @join_table
 
     collection = @_ensureCollection(model)
