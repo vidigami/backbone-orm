@@ -2,6 +2,7 @@ util = require 'util'
 _ = @_ or require 'underscore'
 Backbone = @Backbone or require 'backbone'
 JSONUtils = require './json_utils'
+Queue = require 'queue-async'
 
 module.exports = (model_type, sync) ->
 
@@ -94,3 +95,29 @@ module.exports = (model_type, sync) ->
 
     @_locked--
     return json
+
+  _original_save = model_type::save
+  model_type::save = (key, value, options) ->
+    return _original_save.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+    # multiple signatures
+    if key is null or _.isObject(key)
+      attributes = key
+      options = value
+    else
+      (attributes = {})[key] = value;
+
+    original_success = options.success
+    options = _.clone(options)
+    options.success = (model, resp, options) =>
+      queue = new Queue(1) # TODO: in parallel?
+
+      # now save relations
+      for key, relation of schema.relations
+        do (relation) => queue.defer (callback) => relation.save(@, key, callback)
+
+      queue.await (err) =>
+        return options.error(@, new Error "Failed to save relations") if err
+        original_success?(model, resp, options)
+
+    return _original_save.call(@, attributes, options)

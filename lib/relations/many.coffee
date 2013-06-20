@@ -80,6 +80,10 @@ module.exports = class Many
     callback(null, if result.models then result.models else result) if is_loaded and callback
     return result
 
+  save: (model, key, callback) ->
+    return callback() if @reverse_relation.type isnt 'hasMany'
+    console.log "Save Many: #{key}"; callback()
+
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
 

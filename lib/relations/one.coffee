@@ -72,6 +72,8 @@ module.exports = class One
     callback(null, result) if is_loaded and callback
     return result
 
+  save: (model, key, callback) -> callback()
+
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
 
