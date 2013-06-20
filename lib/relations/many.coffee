@@ -45,24 +45,6 @@ module.exports = class Many
     # set the collection with found or created models
     collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
     collection._orm_loaded = @_checkLoaded(model, key)
-    return @ unless @reverse_relation
-
-    # set ther references
-    for related_model in models
-      if @reverse_relation.add
-        @reverse_relation.add(related_model, model)
-      else
-        related_model.set(@reverse_relation.key, model)
-
-    # clear the reverses
-    for related_model in previous_models
-      continue if not related_model or collection.get(related_model.get('id'))
-
-      if @reverse_relation.remove
-        @reverse_relation.remove(related_model, model)
-      else
-        related_model.set(@reverse_relation.key, null)
-
     return @
 
   get: (model, key, callback) ->
@@ -96,21 +78,21 @@ module.exports = class Many
       return callback(err) if err
 
       related_ids = _.map(collection.models, (test) -> test.get('id'))
-      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'keep' else 'destroy')
-      add = if changes.keep then _.difference(related_ids, changes.keep) else related_ids
+      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
+      added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
 
       queue = new Queue(1) # TODO: parallelism
 
       # destroy old
-      if changes.destroy
-        for model_json in changes.destroy
+      if changes.removed
+        for model_json in changes.removed
           # TODO: optimize
           do (model_json) => queue.defer (callback) =>
             # console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
             @join_table.destroy model_json.id, callback
 
       # create new
-      for related_id in add
+      for related_id in added
         do (related_id) => queue.defer (callback) =>
           attributes = {}
           attributes[@foreign_key] = model.attributes.id
@@ -129,18 +111,29 @@ module.exports = class Many
     return json[json_key] = collection.toJSON() if @embed
 #    return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
+  # TODO: review for multiple instances, eg. same id
   has: (model, key, item) ->
-    collection = model.attributes[key]
-    return !!collection.get(Utils.dataId(item))
+    collection = @_ensureCollection(model)
+    if item instanceof Backbone.Model
+      current_related_model = collection.get(Utils.dataId(item))
+      throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt item
+      return !!current_related_model
+    else
+      return !!collection.get(Utils.dataId(item))
 
-  add: (model, item) ->
-    collection = model.get(@key)
-    return if collection.get(Utils.dataId(item))
-    collection.add(Utils.createRelated(@model_type, item))
+  add: (model, related_model) ->
+    collection = @_ensureCollection(model)
+    current_related_model = collection.get(related_model.get('id'))
+    return if current_related_model is related_model
+    throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model
+    collection.add(related_model)
 
-  remove: (model, item) ->
-    collection = model.get(@key)
-    collection.remove(Utils.dataId(item))
+  remove: (model, related_model) ->
+    collection = @_ensureCollection(model)
+    current_related_model = collection.get(related_model.get('id'))
+    throw new Error "Model removed but still exists: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt related_model
+    return unless current_related_model
+    collection.remove(related_model.get('id'))
 
     #todo: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -149,8 +142,37 @@ module.exports = class Many
     @reverse_model_type.cursor(query).toJSON callback
 
   _ensureCollection: (model) ->
-    model.attributes[@key] = new @collection_type() unless (model.attributes[@key] instanceof @collection_type)
-    return model.attributes[@key]
+    return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
+    collection = model.attributes[@key] = new @collection_type()
+    return collection unless @reverse_relation # no back links
+
+    # TODO: how should destroying the collection work?
+    collection._orm_bindings = {}
+    collection._orm_bindings.add = (related_model) =>
+      if @reverse_relation.add
+        @reverse_relation.add(related_model, model)
+      else
+        related_model.set(@reverse_relation.key, model) unless related_model.attributes[@reverse_relation.key] is model
+
+    collection._orm_bindings.remove = (related_model) =>
+      if @reverse_relation.remove
+        @reverse_relation.remove(related_model, model)
+      else
+        related_model.set(@reverse_relation.key, null) unless related_model.attributes[@reverse_relation.key] is null
+
+    collection._orm_bindings.reset = (collection, options) =>
+      current_models = collection.models
+      previous_models = options.previousModels or []
+
+      changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.get('id') is test.get('id')) then 'kept' else 'removed')
+      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.get('id') is test.get('id'))) else current_models
+
+      # update back links
+      (collection._orm_bindings.remove(related_model) for related_model in changes.removed) if changes.removed
+      (collection._orm_bindings.add(related_model) for related_model in added)
+
+    collection.on(method, collection._orm_bindings[method]) for method in ['add', 'remove', 'reset']
+    return collection
 
   # TODO: optimize so don't need to check each time
   _checkLoaded: (model, key) ->
@@ -178,10 +200,6 @@ module.exports = class Many
           # skip existing
           continue if related_model = collection.get(related_id)
           collection.add(related_model = Utils.createRelated(@reverse_model_type, related_id))
-          # if @reverse_relation.add
-          #   @reverse_relation.add(related_model, model)
-          # else
-          #   related_model.set(@reverse_relation.key, model)
 
         callback(null, collection.models)
     else
@@ -234,10 +252,6 @@ module.exports = class Many
         # create new
         else
           collection.add(related_model = Utils.createRelated(@reverse_model_type, model_json))
-          if @reverse_relation.add
-            @reverse_relation.add(related_model, model)
-          else
-            related_model.set(@reverse_relation.key, model)
 
       cache.updateCached(collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)

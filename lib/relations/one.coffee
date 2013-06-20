@@ -31,13 +31,9 @@ module.exports = class One
 
     return @ if @has(model, @key, value) # already set
 
-    # clear reverse
-    if @reverse_relation
-      if @has(model, @key, value) and (related_model = model.attributes[@key])
-        if @reverse_relation.remove
-          @reverse_relation.remove(related_model, model)
-        else
-          related_model.set(@reverse_relation.key, null)
+    # update backlinks
+    if @reverse_relation and related_model = model.attributes[@key]
+      if @reverse_relation.remove then @reverse_relation.remove(related_model, model) else related_model.set(@reverse_relation.key, null)
 
     related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
 
@@ -48,10 +44,8 @@ module.exports = class One
     Backbone.Model::set.call(model, @key, related_model, options)
     return @ if not related_model or not @reverse_relation
 
-    if @reverse_relation.add
-      @reverse_relation.add(related_model, model)
-    else
-      related_model.set(@reverse_relation.key, model)
+    # update backlinks
+    if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     return @
 
