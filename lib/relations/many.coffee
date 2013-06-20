@@ -127,7 +127,6 @@ module.exports = class Many
     collection = @_ensureCollection(model)
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = collection.toJSON() if @embed
-#    return json[json_key] = if @embed then collection.toJSON() else (model.get('id') for model in collection.models) # TODO: will there ever be nulls?
 
   has: (model, key, item) ->
     collection = model.attributes[key]
