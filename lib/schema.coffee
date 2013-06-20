@@ -1,23 +1,12 @@
 util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
-
-DEFAULT_TYPES =
-  String: 'String'
-  Date: 'Date'
-  Boolean: 'Boolean'
-  Integer: 'Integer'
-  Float: 'Float'
-
-DEFAULT_RELATIONS =
-  One: require './relations/one'
-  Many: require './relations/many'
+One = require './relations/one'
+Many = require './relations/many'
 
 module.exports = class Schema
-  constructor: (@model_type, types={}, relation_types={}) ->
+  constructor: (@model_type) ->
 
-    @types = _.defaults(types, DEFAULT_TYPES)
-    @relation_types = _.defaults(relation_types, DEFAULT_RELATIONS)
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
 
@@ -28,9 +17,9 @@ module.exports = class Schema
       options = @_parseFieldOptions(options()) if _.isFunction(options)
       switch options.type
         when 'hasOne', 'belongsTo'
-          relation = @relations[key] = new @relation_types.One(@model_type, key, options)
+          relation = @relations[key] = new One(@model_type, key, options)
         when 'hasMany'
-          relation = @relations[key] = new @relation_types.Many(@model_type, key, options)
+          relation = @relations[key] = new Many(@model_type, key, options)
         else
           throw new Error "Unrecognized relationship: #{util.inspect(options)}"
 
@@ -93,7 +82,7 @@ module.exports = class Schema
         switch options.type
           when 'hasOne', 'belongsTo', 'hasMany' then @relations[key] = options
           else
-            options.type = type if type = @types[options.type]
+            options.type = type
             @fields[key] = options
 
       # non-typed, eg. document
