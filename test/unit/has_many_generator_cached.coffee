@@ -13,7 +13,7 @@ class Flat extends Backbone.Model
 class Reverse extends Backbone.Model
   url: '/reverses'
   @schema:
-    owner: -> ['hasOne', Owner]
+    owner: -> ['belongsTo', Owner]
   sync: require('../../memory_backbone_sync')(Reverse, true)
 
 class Owner extends Backbone.Model

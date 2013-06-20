@@ -71,7 +71,7 @@ module.exports = class One
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
     return json[json_key] = related_model.toJSON() if @embed
-    return json[json_key] = related_model.get('id') if @type is 'belongsTo' or (@reverse_relation and @reverse_relation.type is 'hasMany') # TODO: INVESTIGATE HACK
+    return json[json_key] = related_model.get('id') if @type is 'belongsTo'
 
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
