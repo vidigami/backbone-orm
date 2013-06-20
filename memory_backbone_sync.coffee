@@ -46,7 +46,6 @@ class MemoryBackboneSync
   cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
 
   destroy: (query, callback) ->
-    [query, callback] = [{}, query] if arguments.length is 1
     if (keys = _.keys(query)).length
       for id, model_json of @store
         delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
