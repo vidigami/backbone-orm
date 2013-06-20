@@ -48,8 +48,8 @@ class MemoryBackboneSync
   destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     if (keys = _.keys(query)).length
-      for id, model of @store
-        delete @store[id] if _.isEqual(_.pick(model.attributes, keys), query)
+      for id, model_json of @store
+        delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
     else
       @store = {}
     return callback()

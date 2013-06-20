@@ -19,6 +19,7 @@ module.exports = (model_type, sync) ->
 
   model_type.destroy = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
+    query = {id: query} unless _.isObject(query)
     sync('destroy', query, callback)
 
   ###################################

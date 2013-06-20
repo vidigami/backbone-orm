@@ -83,16 +83,10 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
-    console.log "1: #{key}"
-
     return callback() unless @join_table
-
-    console.log "2: #{key}"
 
     collection = @_ensureCollection(model)
     return callback() unless collection._orm_loaded # not loaded
-
-    console.log "3: #{key}"
 
     # TODO: optimize
     query = {$values: @foreign_key}
@@ -111,7 +105,7 @@ module.exports = class Many
         for model_json in changes.destroy
           # TODO: optimize
           do (model_json) => queue.defer (callback) =>
-            console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
+            # console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
             @join_table.destroy model_json.id, callback
 
       # create new
@@ -120,7 +114,7 @@ module.exports = class Many
           attributes = {}
           attributes[@foreign_key] = model.attributes.id
           attributes[@reverse_relation.foreign_key] = related_id
-          console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+          # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
           join = new @join_table(attributes)
           join.save {}, adapters.bbCallback callback
 
@@ -171,16 +165,24 @@ module.exports = class Many
   #todo: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
     if @reverse_relation.type is 'hasMany'
-      query = {$values: @foreign_key}
+      collection = @_ensureCollection(model)
+      return callback(null, collection.models) if collection._orm_loaded
+
+      query = {$values: @reverse_relation.foreign_key}
       query[@foreign_key] = model.attributes.id
       @join_table.cursor(query).toJSON (err, json) =>
-
-        console.log "query: #{util.inspect(query)} json: #{util.inspect(json)}"
-        console.log "name: #{@reverse_model_type.model_name} store: #{util.inspect(@join_table.sync().store)}"
-
+        collection._orm_loaded = true
         return callback(err) if err
-        related_models = (Utils.createRelated(@reverse_model_type, related_id) for related_id in json)
-        callback(null, related_models)
+        for related_id in json
+          # skip existing
+          continue if related_model = collection.get(related_id)
+          collection.add(related_model = Utils.createRelated(@reverse_model_type, related_id))
+          # if @reverse_relation.add
+          #   @reverse_relation.add(related_model, model)
+          # else
+          #   related_model.set(@reverse_relation.key, model)
+
+        callback(null, collection.models)
     else
       @_loadModels(model, key, callback)
 
@@ -230,7 +232,7 @@ module.exports = class Many
 
         # create new
         else
-          related_model = Utils.createRelated(@reverse_model_type, model_json)
+          collection.add(related_model = Utils.createRelated(@reverse_model_type, model_json))
           if @reverse_relation.add
             @reverse_relation.add(related_model, model)
           else
