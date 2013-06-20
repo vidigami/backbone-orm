@@ -136,7 +136,7 @@ module.exports = (model_type, sync) ->
         do (relation) => queue.defer (callback) => relation.save(@, key, callback)
 
       queue.await (err) =>
-        return original_error?(@, new Error "Failed to save relations") if err
+        return original_error?(@, new Error "Failed to save relations. #{err}") if err
         original_success?(model, resp, options)
 
     options.error = (model, resp, options) =>
