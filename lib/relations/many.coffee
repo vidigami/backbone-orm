@@ -67,43 +67,61 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
-    # TODO: auto save the reverse 'belongsTo' relations
-    return callback() unless @join_table
+    return callback() if not @reverse_relation or @reverse_relation.type is 'hasOne'
 
-    collection = @_ensureCollection(model)
-    return callback() unless collection._orm_loaded # not loaded
+    # belongsTo
+    if @reverse_relation.type is 'belongsTo'
+      return callback() unless related_model = model.attributes[@key]
 
-    # TODO: optimize
-    query = {$values: @foreign_key}
-    query[@foreign_key] = model.attributes.id
-    @join_table.cursor(query).toJSON (err, json) =>
-      return callback(err) if err
+      # collection
+      if related_models = related_model.models
+        queue = new Queue(1) # TODO: parallelism
 
-      related_ids = _.map(collection.models, (test) -> test.get('id'))
-      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
-      added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
+        for related_model in related_models when related_model.hasChanged(@reverse_relation.key)
+          do (related_model) => queue.defer (callback) => related_model.save {}, adapters.bbCallback callback
 
-      queue = new Queue(1) # TODO: parallelism
+        queue.await callback
 
-      # destroy old
-      if changes.removed
-        for model_json in changes.removed
-          # TODO: optimize
-          do (model_json) => queue.defer (callback) =>
-            # console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
-            @join_table.destroy model_json.id, callback
+      # model
+      else
+        return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key)
 
-      # create new
-      for related_id in added
-        do (related_id) => queue.defer (callback) =>
-          attributes = {}
-          attributes[@foreign_key] = model.attributes.id
-          attributes[@reverse_relation.foreign_key] = related_id
-          # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
-          join = new @join_table(attributes)
-          join.save {}, adapters.bbCallback callback
+    # hasMany
+    else
+      collection = @_ensureCollection(model)
+      return callback() unless collection._orm_loaded # not loaded
 
-      queue.await callback
+      # TODO: optimize
+      query = {$values: @foreign_key}
+      query[@foreign_key] = model.attributes.id
+      @join_table.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+
+        related_ids = _.map(collection.models, (test) -> test.get('id'))
+        changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
+        added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
+
+        queue = new Queue(1) # TODO: parallelism
+
+        # destroy old
+        if changes.removed
+          for model_json in changes.removed
+            # TODO: optimize
+            do (model_json) => queue.defer (callback) =>
+              # console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
+              @join_table.destroy model_json.id, callback
+
+        # create new
+        for related_id in added
+          do (related_id) => queue.defer (callback) =>
+            attributes = {}
+            attributes[@foreign_key] = model.attributes.id
+            attributes[@reverse_relation.foreign_key] = related_id
+            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+            join = new @join_table(attributes)
+            join.save {}, adapters.bbCallback callback
+
+        queue.await callback
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
