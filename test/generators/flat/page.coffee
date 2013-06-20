@@ -17,6 +17,7 @@ runTests = (options, cache) ->
 
   class Flat extends Backbone.Model
     url: "#{DATABASE_URL}/flats"
+    @schema: BASE_SCHEMA
     sync: SYNC(Flat, cache)
 
   describe "Model.page (cache: #{cache})", ->
