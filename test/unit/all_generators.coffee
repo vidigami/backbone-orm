@@ -4,4 +4,4 @@ test_parameters =
   sync: require('../../memory_backbone_sync')
   embed: true
 
-require('../../lib/test_generators/relational/many_to_many')(test_parameters)
+require('../generators/all')(test_parameters)

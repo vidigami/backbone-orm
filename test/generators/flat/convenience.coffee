@@ -1,80 +1,98 @@
-# each model should be fabricated with 'id', 'name', 'created_at', 'updated_at'
-# beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  MODEL_TYPE = options.model_type
-  BEFORE_EACH = options.beforeEach
+util = require 'util'
+assert = require 'assert'
+_ = require 'underscore'
+Backbone = require 'backbone'
+Queue = require 'queue-async'
+
+Fabricator = require '../../../fabricator'
+Utils = require '../../../utils'
+adapters = Utils.adapters
+
+runTests = (options, cache) ->
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 1
   MODELS_JSON = null
 
-  assert = require 'assert'
-  Queue = require 'queue-async'
+  class Flat extends Backbone.Model
+    url: "#{DATABASE_URL}/flats"
+    sync: SYNC(Flat, cache)
 
-  Utils = require '../../../utils'
-  adapters = Utils.adapters
-
-  describe 'Convenience Methods', ->
+  describe "Convenience Methods (cache: #{cache})", ->
 
     beforeEach (done) ->
-      BEFORE_EACH (err, models_json) ->
-        return done(err) if err
-        return done(new Error "Missing models json for initialization") unless models_json
-        MODELS_JSON = models_json
-        done()
+      queue = new Queue(1)
+
+      queue.defer (callback) -> Flat.destroy callback
+
+      queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
+        name: Fabricator.uniqueId('flat_')
+        created_at: Fabricator.date
+        updated_at: Fabricator.date
+      }, (err, models) ->
+        return callback(err) if err
+        MODELS_JSON = _.map(models, (test) -> test.toJSON())
+        callback()
+      )
+
+      queue.await done
 
     describe 'count', ->
       it 'Handles a count query', (done) ->
-        MODEL_TYPE.count (err, count) ->
+        Flat.count (err, count) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(count, MODELS_JSON.length, 'counted expected number of albums')
           done()
 
       it 'counts by query', (done) ->
-        bob = new MODEL_TYPE({name: 'Bob'})
+        bob = new Flat({name: 'Bob'})
 
         queue = new Queue(1)
         queue.defer (callback) -> bob.save {}, adapters.bbCallback(callback)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {name: 'Bob'}, (err, count) ->
+          Flat.count {name: 'Bob'}, (err, count) ->
             assert.equal(count, 1, 'found Bob through query')
             callback(err)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {name: 'Fred'}, (err, count) ->
+          Flat.count {name: 'Fred'}, (err, count) ->
             assert.equal(count, 0, 'no Fred')
             callback(err)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {}, (err, count) ->
+          Flat.count {}, (err, count) ->
             assert.ok(count >= 1, 'found Bob through empty query')
             callback(err)
 
         queue.await done
 
       it 'counts by query with multiple', (done) ->
-        bob = new MODEL_TYPE({name: 'Bob'})
-        fred = new MODEL_TYPE({name: 'Fred'})
+        bob = new Flat({name: 'Bob'})
+        fred = new Flat({name: 'Fred'})
 
         queue = new Queue(1)
         queue.defer (callback) -> bob.save {}, adapters.bbCallback(callback)
         queue.defer (callback) -> fred.save {}, adapters.bbCallback(callback)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {name: 'Bob'}, (err, count) ->
+          Flat.count {name: 'Bob'}, (err, count) ->
             assert.equal(count, 1, 'found Bob through query')
             callback(err)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {name: 'Fred'}, (err, count) ->
+          Flat.count {name: 'Fred'}, (err, count) ->
             assert.equal(count, 1, 'no Fred')
             callback(err)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count {}, (err, count) ->
+          Flat.count {}, (err, count) ->
             assert.ok(count >= 2, 'found Bob and Fred through empty query')
             callback(err)
 
         queue.defer (callback) ->
-          MODEL_TYPE.count (err, count) ->
+          Flat.count (err, count) ->
             assert.ok(count >= 2, 'found Bob and Fred when skipping query')
             callback(err)
 
@@ -82,7 +100,15 @@ module.exports = (options) ->
 
     describe 'all', ->
       it 'Handles an all query', (done) ->
-        MODEL_TYPE.all (err, models) ->
+        Flat.all (err, models) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(models.length, MODELS_JSON.length, 'counted expected number of albums')
           done()
+
+# TODO: explain required set up
+
+# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
+# beforeEach should return the models_json for the current run
+module.exports = (options) ->
+  runTests(options, false)
+  runTests(options, true)
