@@ -8,8 +8,6 @@ adapters = Utils.adapters
 
 class Flat extends Backbone.Model
   url: '/flats'
-  @schema:
-    owner: -> ['belongsTo', Owner]
   sync: require('../../memory_backbone_sync')(Flat)
 
 class Reverse extends Backbone.Model

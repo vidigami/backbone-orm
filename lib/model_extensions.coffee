@@ -6,6 +6,12 @@ JSONUtils = require './json_utils'
 module.exports = (model_type, sync) ->
 
   ###################################
+  # Backbone ORM - Sync Accessors
+  ###################################
+  model_type.sync = -> sync('sync')
+  model_type.createSync = (model_type, cache) -> sync.apply(null, ['createSync'].concat(_.toArray(arguments)))
+
+  ###################################
   # Backbone ORM - Class Extensions
   ###################################
   model_type.cursor = (query={}) -> sync('cursor', query)

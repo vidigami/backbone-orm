@@ -27,6 +27,13 @@ module.exports = class Utils
     table = database_parts[database_parts.length-1]
     return inflection.classify(inflection.singularize(table))
 
+  @urlToDatabaseEndpoint: (url) ->
+    url_parts = URL.parse(url)
+    database_parts = url_parts.pathname.split('/')
+    database_parts.pop()
+    url_parts.pathname = database_parts.join('/')
+    URL.format(url_parts)
+
   ##############################
   # Relational
   ##############################
@@ -52,6 +59,22 @@ module.exports = class Utils
     else if _.isObject(item)
       return item.id
     return item
+
+  @createJoinTableModel: (relation1, relation2) ->
+    model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))
+    model_name2 = inflection.pluralize(inflection.underscore(relation2.model_type.model_name))
+    table_name = if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+
+    schema = {}
+    schema[relation1.foreign_key] = ['Integer', indexed: true]
+    schema[relation2.foreign_key] = ['Integer', indexed: true]
+
+    class JoinTable extends Backbone.Model
+      url: "#{Utils.urlToDatabaseEndpoint(relation1.model_type::url)}/#{table_name}"
+      @schema = schema
+      sync: relation1.model_type.createSync(JoinTable)
+
+    return JoinTable
 
   ##############################
   # Testing
