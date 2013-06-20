@@ -102,7 +102,7 @@ runTests = (options, cache) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(data.total_rows, 1, 'has the correct total_rows')
           assert.equal(data.rows.length, 1, 'has the correct row.length')
-          assert.deepEqual(expected = JSON.stringify(model.toJSON()), actual = JSON.stringify(data.rows[0]), "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
+          assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
           done()
 
 # TODO: explain required set up
