@@ -16,16 +16,16 @@ runTests = (options, cache, embed) ->
 
   class Reverse extends Backbone.Model
     url: "#{DATABASE_URL}/reverses"
-    @schema: _.defaults(BASE_SCHEMA, {
+    @schema: _.defaults({
       owners: -> ['hasMany', Owner]
-    })
+    }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
   class Owner extends Backbone.Model
     url: "#{DATABASE_URL}/owners"
-    @schema: _.defaults(BASE_SCHEMA, {
+    @schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
-    })
+    }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
 
   describe "Many to Many (cache: #{cache} embed: #{embed})", ->
