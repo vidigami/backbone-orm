@@ -29,10 +29,15 @@ module.exports = (options) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
+        console.log "test_model: #{util.inspect(test_model.attributes)}"
+
         test_model.get 'reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses.length, 'found related reverses')
-          assert.deepEqual(test_model.toJSON().reverse_ids[0], reverses[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_ids[0]}. Actual: #{reverses[0].get('id')}")
+          if test_model.relationIsEmbedded('reverses')
+            assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), "Serialized embedded. Expected: #{test_model.toJSON().reverses}. Actual: #{reverses[0].toJSON()}")
+          else
+            assert.deepEqual(test_model.toJSON().reverse_ids[0], reverses[0].get('id'), "Serialized id only. Expected: #{test_model.toJSON().reverse_ids[0]}. Actual: #{reverses[0].get('id')}")
           reverse = reverses[0]
 
           reverse.get 'owners', (err, owners) ->
@@ -41,7 +46,10 @@ module.exports = (options) ->
 
             owner = _.find(owners, (test) -> test_model.get('id') is test.get('id'))
             owner_index = _.indexOf(owners, owner)
-            assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.get('id')}")
+            if reverse.relationIsEmbedded('owners')
+              assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.get('id'), "Serialized embedded. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.get('id')}")
+            else
+              assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.get('id')}")
             assert.ok(!!owner, 'found owner')
 
             if MODEL_TYPE.cache()

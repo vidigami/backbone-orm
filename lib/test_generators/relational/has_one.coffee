@@ -58,7 +58,10 @@ module.exports = (options) ->
         test_model.get 'flat', (err, flat) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
-          assert.deepEqual(test_model.toJSON().flat_id, flat.get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.get('id')}")
+          if test_model.relationIsEmbedded('flat')
+            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().flat)}. Actual: #{util.inspect(flat.toJSON())}")
+          else
+            assert.deepEqual(test_model.toJSON().flat_id, flat.get('id'), "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.get('id')}")
           assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
           done()
 
@@ -81,6 +84,8 @@ module.exports = (options) ->
           assert.ok(reverse, 'found related model')
           assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.get('id'), reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_id}")
+          if test_model.relationIsEmbedded('reverse')
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
           done()
 
@@ -94,6 +99,8 @@ module.exports = (options) ->
           assert.ok(reverse, 'found related model')
           assert.equal(test_model.get('id'), reverse.get('owner_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.get('id'), reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_id}")
+          if test_model.relationIsEmbedded('reverse')
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embedded. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
 
           reverse.get 'owner', (err, owner) ->

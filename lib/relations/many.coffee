@@ -5,6 +5,7 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../../utils'
+adapters = Utils.adapters
 One = require './one'
 
 module.exports = class Many
@@ -43,6 +44,7 @@ module.exports = class Many
 
     # set the collection with found or created models
     collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
+    collection._orm_loaded = @_checkLoaded(model, key)
     return @ unless @reverse_relation
 
     # set ther references
@@ -81,9 +83,48 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
-    return callback() if @reverse_relation.type isnt 'hasMany'
-    # console.log "Save Many: #{key}";
-    callback()
+    console.log "1: #{key}"
+
+    return callback() unless @join_table
+
+    console.log "2: #{key}"
+
+    collection = @_ensureCollection(model)
+    return callback() unless collection._orm_loaded # not loaded
+
+    console.log "3: #{key}"
+
+    # TODO: optimize
+    query = {$values: @foreign_key}
+    query[@foreign_key] = model.attributes.id
+    @join_table.cursor(query).toJSON (err, json) =>
+      return callback(err) if err
+
+      related_ids = _.map(collection.models, (test) -> test.get('id'))
+      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'keep' else 'destroy')
+      add = if changes.keep then _.difference(related_ids, changes.keep) else related_ids
+
+      queue = new Queue(1) # TODO: parallelism
+
+      # destroy old
+      if changes.destroy
+        for model_json in changes.destroy
+          # TODO: optimize
+          do (model_json) => queue.defer (callback) =>
+            console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
+            @join_table.destroy model_json.id, callback
+
+      # create new
+      for related_id in add
+        do (related_id) => queue.defer (callback) =>
+          attributes = {}
+          attributes[@foreign_key] = model.attributes.id
+          attributes[@reverse_relation.foreign_key] = related_id
+          console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+          join = new @join_table(attributes)
+          join.save {}, adapters.bbCallback callback
+
+      queue.await callback
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -117,11 +158,15 @@ module.exports = class Many
     return model.attributes[@key]
 
   # TODO: optimize so don't need to check each time
+  _checkLoaded: (model, key) ->
+    collection = @_ensureCollection(model)
+    return false for related_model in collection.models when related_model._orm_needs_load
+    return true
+
   _isLoaded: (model, key) ->
     collection = @_ensureCollection(model)
     return false unless collection._orm_loaded
-    return false for related_model in collection.models when related_model._orm_needs_load
-    return true
+    return @_checkLoaded(model, key)
 
   #todo: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
@@ -129,8 +174,12 @@ module.exports = class Many
       query = {$values: @foreign_key}
       query[@foreign_key] = model.attributes.id
       @join_table.cursor(query).toJSON (err, json) =>
+
+        console.log "query: #{util.inspect(query)} json: #{util.inspect(json)}"
+        console.log "name: #{@reverse_model_type.model_name} store: #{util.inspect(@join_table.sync().store)}"
+
         return callback(err) if err
-        related_models = (Utils.createRelated(@reverse_model_type, related_id) for id in json)
+        related_models = (Utils.createRelated(@reverse_model_type, related_id) for related_id in json)
         callback(null, related_models)
     else
       @_loadModels(model, key, callback)
