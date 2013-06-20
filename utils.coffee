@@ -39,8 +39,8 @@ module.exports = class Utils
   ##############################
   @createRelated: (model_type, item) ->
     return item if (item instanceof Backbone.Model) or (item instanceof Backbone.Collection)
-    if model_type._cache
-      return model_type._cache.findCachedOrCreate(item, model_type)
+    if cache = model_type.cache()
+      return cache.findCachedOrCreate(item, model_type)
     else
       return new model_type(model_type::parse(item)) if _.isObject(item)
       related_model = new model_type({id: item})

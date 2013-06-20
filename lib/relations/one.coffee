@@ -143,7 +143,7 @@ module.exports = class One
         # update
         delete related_model._orm_needs_load
         related_model.set(key, model_json)
-        @reverse_model_type._cache.updateCached(related_model) if @reverse_model_type._cache
+        cache.updateCached(related_model) if cache = @reverse_model_type.cache()
         callback(null, related_model)
 
     return false

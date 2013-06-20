@@ -21,9 +21,6 @@ module.exports = (model_type, sync) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('destroy', query, callback)
 
-  model_type.schema = -> sync('schema')
-  model_type.relation = (key) -> sync('relation', key)
-
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
@@ -36,6 +33,20 @@ module.exports = (model_type, sync) ->
   model_type.find = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('cursor', query).toModels(callback)
+
+  ###################################
+  # Backbone ORM - Helpers
+  ###################################
+  model_type.cache = -> model_type._cache
+  model_type::cache = -> model_type.cache()
+
+  model_type.schema = -> sync('schema')
+  model_type::schema = -> model_type.schema()
+
+  model_type.relation = (key) -> sync('relation', key)
+  model_type::relation = (key) -> model_type.relation(key)
+  model_type.relationIsEmbedded = (key) -> return if relation = sync('relation', key) then !!relation.embed else false
+  model_type::relationIsEmbedded = (key) -> model_type.relationIsEmbedded(key)
 
   ###################################
   # Backbone ORM - Model Overrides

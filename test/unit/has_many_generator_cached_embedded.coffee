@@ -79,4 +79,4 @@ test_parameters =
     queue.await (err) ->
       callback(err, _.map(MODELS.owner, (test) -> test.toJSON()))
 
-require('../../lib/test_generators/relational/has_many_embedded')(test_parameters)
+require('../../lib/test_generators/relational/has_many')(test_parameters)

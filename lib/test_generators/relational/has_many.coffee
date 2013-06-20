@@ -31,6 +31,8 @@ module.exports = (options) ->
         test_model.get 'flats', (err, flats) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, flats.length, "Expected: #{2}. Actual: #{flats.length}")
+          if test_model.relationIsEmbedded('flats')
+            assert.deepEqual(test_model.toJSON().flats[0], flats[0].toJSON(), "Serialized embedded. Expected: #{test_model.toJSON().flats[0]}. Actual: #{flats[0].toJSON()}")
           done()
 
     it 'Handles an async get query for ids', (done) ->
@@ -63,15 +65,20 @@ module.exports = (options) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
           assert.equal(2, reverses.length, "Expected: #{2}. Actual: #{reverses.length}")
+
+          if test_model.relationIsEmbedded('reverses')
+            assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), 'Serialized embedded')
           assert.deepEqual(test_model.get('reverse_ids')[0], reverses[0].get('id'), 'serialized id only')
           reverse = reverses[0]
 
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, 'found owner models')
+            if reverse.relationIsEmbedded('owner')
+              assert.deepEqual(reverse.toJSON().owner_id, owner.get('id'), "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().owner_id)}. Actual: #{util.inspect(owner.get('id'))}")
             assert.deepEqual(reverse.get('owner_id'), owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner}. Actual: #{owner.get('id')}")
 
-            if MODEL_TYPE._cache
+            if MODEL_TYPE.cache()
               assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
               assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")

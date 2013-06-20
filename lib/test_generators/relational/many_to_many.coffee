@@ -44,7 +44,7 @@ module.exports = (options) ->
             assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.get('id')}")
             assert.ok(!!owner, 'found owner')
 
-            if MODEL_TYPE._cache
+            if MODEL_TYPE.cache()
               assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
               assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")

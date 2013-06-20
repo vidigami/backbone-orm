@@ -187,5 +187,5 @@ module.exports = class Many
           else
             related_model.set(@reverse_relation.key, model)
 
-      @reverse_model_type._cache.updateCached(collection.models) if @reverse_model_type._cache
+      cache.updateCached(collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
