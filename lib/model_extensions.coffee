@@ -71,9 +71,9 @@ module.exports = (model_type, sync) ->
   model_type::toJSON = ->
     schema = model_type.schema() if model_type.schema
 
-    return @get('id') if @_locked > 0
-    @_locked or= 0
-    @_locked++
+    return @get('id') if @_orm_json > 0
+    @_orm_json or= 0
+    @_orm_json++
 
     json = {}
     for key, value of @attributes
@@ -93,11 +93,15 @@ module.exports = (model_type, sync) ->
       else
         json[key] = JSONUtils.valueToJSON(value)
 
-    @_locked--
+    delete @_orm_json if --@_orm_json is 0
     return json
 
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
+    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm_save > 0
+    @_orm_save or= 0
+    @_orm_save++
+
     return _original_save.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
     # multiple signatures
@@ -108,8 +112,11 @@ module.exports = (model_type, sync) ->
       (attributes = {})[key] = value;
 
     original_success = options.success
+    original_error = options.error
     options = _.clone(options)
     options.success = (model, resp, options) =>
+      delete @_orm_save if --@_orm_save is 0
+
       queue = new Queue(1) # TODO: in parallel?
 
       # now save relations
@@ -117,7 +124,11 @@ module.exports = (model_type, sync) ->
         do (relation) => queue.defer (callback) => relation.save(@, key, callback)
 
       queue.await (err) =>
-        return options.error(@, new Error "Failed to save relations") if err
+        return original_error?(@, new Error "Failed to save relations") if err
         original_success?(model, resp, options)
+
+    options.error = (model, resp, options) =>
+      delete @_orm_save if --@_orm_save is 0
+      original_error?(model, resp, options)
 
     return _original_save.call(@, attributes, options)

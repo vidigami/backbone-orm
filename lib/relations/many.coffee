@@ -82,7 +82,8 @@ module.exports = class Many
 
   save: (model, key, callback) ->
     return callback() if @reverse_relation.type isnt 'hasMany'
-    console.log "Save Many: #{key}"; callback()
+    # console.log "Save Many: #{key}";
+    callback()
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -168,24 +169,23 @@ module.exports = class Many
     query[@foreign_key] = model.attributes.id
     @reverse_model_type.cursor(query).toJSON (err, json) =>
       return callback(err) if err
-#      return callback(new Error "Failed to load all models. Id #{util.inspect(load_ids)}. Expected: #{load_ids.length}. Actual: #{json.length}", callback) if load_ids.length isnt json.length
 
-      # update
+      # process the found models
       collection._orm_loaded = true
-      for related_model in collection.models
-        continue unless related_model._orm_needs_load
+      for model_json in json
 
-        id = related_model.get('id')
-        model_json = _.find(json, (test) -> return test.id is id)
+        # update existing
+        if related_model = collection.get(model_json.id)
+          related_model.set(json)
+          delete related_model._orm_needs_load
 
-        # # TODO: REMOVE
-        # if not model_json
-        #   console.log "query: #{util.inspect(query)}. JSON: #{util.inspect(json)}"
-        #   console.log "model_name: #{@reverse_model_type.model_name} store: #{util.inspect(@reverse_model_type._sync.store)}"
-
-        return callback(new Error "Model not found. Id #{id}", callback) if not model_json
-        delete related_model._orm_needs_load
-        related_model.set(key, model_json)
+        # create new
+        else
+          related_model = Utils.createRelated(@reverse_model_type, model_json)
+          if @reverse_relation.add
+            @reverse_relation.add(related_model, model)
+          else
+            related_model.set(@reverse_relation.key, model)
 
       @reverse_model_type._cache.updateCached(collection.models) if @reverse_model_type._cache
       callback(null, collection.models)
