@@ -64,24 +64,31 @@ module.exports = class Many
     return result
 
   save: (model, key, callback) ->
-    return callback() if not @reverse_relation or @reverse_relation.type is 'hasOne'
+    return callback() if not @reverse_relation or not (related_model = model.attributes[@key])
 
-    # belongsTo
-    if @reverse_relation.type is 'belongsTo'
-      return callback() unless related_model = model.attributes[@key]
+    if @reverse_relation.type is 'hasOne'
+      # TODO: optimize correct ordering (eg. save other before us in save method)
+      unless related_model.get('id')
+        return related_model.save {}, adapters.bbCallback (err) =>
+          return callback() if err
+          model.save {}, adapters.bbCallback callback
+
+      return callback()
+
+    else if @reverse_relation.type is 'belongsTo'
 
       # collection
       if related_models = related_model.models
         queue = new Queue(1) # TODO: parallelism
 
-        for related_model in related_models when related_model.hasChanged(@reverse_relation.key)
+        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.get('id'))
           do (related_model) => queue.defer (callback) => related_model.save {}, adapters.bbCallback callback
 
-        queue.await callback
+        return queue.await callback
 
       # model
       else
-        return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key)
+        return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
 
     # hasMany
     else
@@ -119,6 +126,10 @@ module.exports = class Many
             join.save {}, adapters.bbCallback callback
 
         queue.await callback
+      return
+
+    # nothing to save
+    callback()
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships

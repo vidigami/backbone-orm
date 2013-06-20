@@ -63,12 +63,24 @@ module.exports = class One
     return result
 
   save: (model, key, callback) ->
-    # check for a save for the model with the key
-    if @reverse_relation and (@reverse_relation.type is 'belongsTo') and (related_model = model.attributes[@key])
-      return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key)
+    return callback() if not @reverse_relation or not (related_model = model.attributes[@key])
 
-    # TODO: auto save the reverse 'belongsTo' relations
-    callback()
+    if @reverse_relation.type is 'hasOne'
+      # TODO: optimize correct ordering (eg. save other before us in save method)
+      unless related_model.get('id')
+        return related_model.save {}, adapters.bbCallback (err) =>
+          return callback() if err
+          model.save {}, adapters.bbCallback callback
+
+      return callback()
+
+    else if @reverse_relation.type is 'belongsTo'
+      return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+
+    else # hasMany
+      # nothing to do?
+
+    callback() # nothing to save
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
