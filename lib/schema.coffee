@@ -7,7 +7,7 @@ Many = require './relations/many'
 module.exports = class Schema
   constructor: (@model_type) ->
 
-    @fields ={}; @relations ={}; @ids_accessor = {}
+    @fields ={}; @ids_accessor = {}
     @_parse()
 
   initialize: ->
