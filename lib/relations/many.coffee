@@ -35,7 +35,6 @@ module.exports = class Many
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     collection = @_ensureCollection(model)
 
-    # TODO: Allow sql to sync...make a notification? use Backbone.Events?
     value = value.models if value instanceof Backbone.Collection
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
@@ -135,7 +134,7 @@ module.exports = class Many
     return unless current_related_model
     collection.remove(related_model.get('id'))
 
-    #todo: check which objects are already loaded in cache and ignore ids
+    # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
     query = {}
     query[@foreign_key] = {$in: (json.id for json in models_json)}
@@ -185,7 +184,7 @@ module.exports = class Many
     return false unless collection._orm_loaded
     return @_checkLoaded(model, key)
 
-  #todo: check which objects are already loaded in cache and ignore ids
+  # TODO: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
     if @reverse_relation.type is 'hasMany'
       collection = @_ensureCollection(model)
@@ -222,7 +221,7 @@ module.exports = class Many
   _loadModels: (model, key, callback) ->
     collection = @_ensureCollection(model)
 
-    #todo: check which objects are already loaded in cache and ignore ids
+    # TODO: check which objects are already loaded in cache and ignore ids
 #    load_ids = []
 #    for related_model in collection.models
 #      continue unless related_model._orm_needs_load

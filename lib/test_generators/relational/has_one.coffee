@@ -24,7 +24,7 @@ module.exports = (options) ->
         MODELS_JSON = models_json
         done()
 
-    #todo: delay the returning of memory models related models to test lazy loading properly
+    # TODO: delay the returning of memory models related models to test lazy loading properly
     it 'Fetches a relation from the store if not present', (done) ->
       MODEL_TYPE.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")

@@ -36,16 +36,11 @@ module.exports = class One
       if @reverse_relation.remove then @reverse_relation.remove(related_model, model) else related_model.set(@reverse_relation.key, null)
 
     related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
-
-    # TODO: Allow sql to sync...make a notification? use Backbone.Events?
-    # _set.call(model, @foreign_key, related_model.attributes.id, options) if @type is 'belongsTo'
-    # _set.call(related_model, @foreign_key, model.attributes.id, options) if @type is 'hasOne'
-
     Backbone.Model::set.call(model, @key, related_model, options)
-    return @ if not related_model or not @reverse_relation
 
     # update backlinks
-    if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
+    if @reverse_relation and related_model
+      if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     return @
 
@@ -88,7 +83,7 @@ module.exports = class One
     return current_id is item.id if _.isObject(item)
     return current_id is item
 
-  #todo: check which objects are already loaded in cache and ignore ids
+  # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
     query = {}
     if @type is 'belongsTo'
@@ -102,7 +97,7 @@ module.exports = class One
     related_model = model.attributes[@key]
     return related_model and not related_model._orm_needs_load
 
-  #todo: check which objects are already loaded in cache and ignore ids
+  # TODO: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholder: (model, key, callback) ->
     related_model = model.attributes[@key]
     return callback(null, related_model) if related_model
