@@ -1,8 +1,8 @@
 util = require 'util'
 _ = require 'underscore'
 
-MemoryCursor = require './lib/memory_cursor'
-Schema = require './lib/schema'
+MemoryCursor = require './memory_cursor'
+Schema = require './schema'
 Utils = require './utils'
 adapters = Utils.adapters
 

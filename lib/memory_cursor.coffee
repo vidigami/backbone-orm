@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 
-Utils = require '../utils'
+Utils = require './utils'
 Cursor = require './cursor'
 
 module.exports = class MemoryCursor extends Cursor

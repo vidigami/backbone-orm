@@ -3,7 +3,7 @@ _ = require 'underscore'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
-Utils = require './utils'
+Utils = require './lib/utils'
 
 class MemorySync
   constructor: (@model_type) ->
@@ -66,4 +66,4 @@ module.exports = (model_type, cache) ->
     sync[method].apply(sync, Array::slice.call(arguments, 1))
 
   require('./lib/model_extensions')(model_type, sync_fn) # mixin extensions
-  return if cache then require('./cache_sync')(model_type, sync_fn) else sync_fn
+  return if cache then require('./lib/cache_sync')(model_type, sync_fn) else sync_fn

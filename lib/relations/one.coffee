@@ -3,7 +3,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
 
-Utils = require '../../utils'
+Utils = require '../utils'
 adapters = Utils.adapters
 
 module.exports = class One

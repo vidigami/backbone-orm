@@ -3,7 +3,7 @@ _ = require 'underscore'
 moment = require 'moment'
 Queue = require 'queue-async'
 
-Utils = require './utils'
+Utils = require './lib/utils'
 adapters = Utils.adapters
 
 module.exports = class Fabricator

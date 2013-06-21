@@ -4,7 +4,7 @@ _ = require 'underscore'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
-Utils = require '../../utils'
+Utils = require '../utils'
 adapters = Utils.adapters
 One = require './one'
 

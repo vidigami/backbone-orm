@@ -5,7 +5,7 @@ Backbone = require 'backbone'
 Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
-Utils = require '../../../utils'
+Utils = require '../../../lib/utils'
 adapters = Utils.adapters
 
 runTests = (options, cache, embed) ->
