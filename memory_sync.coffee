@@ -5,7 +5,7 @@ MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './utils'
 
-class MemoryBackboneSync
+class MemorySync
   constructor: (@model_type) ->
     throw new Error("Missing url for model") unless url = _.result(@model_type.prototype, 'url')
 
@@ -58,7 +58,7 @@ class MemoryBackboneSync
 
 
 module.exports = (model_type, cache) ->
-  sync = new MemoryBackboneSync(model_type)
+  sync = new MemorySync(model_type)
 
   sync_fn = (method, model, options={}) ->
     sync['initialize']()
