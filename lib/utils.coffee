@@ -80,7 +80,7 @@ module.exports = class Utils
     schema[relation2.foreign_key] = ['Integer', indexed: true]
 
     class JoinTable extends Backbone.Model
-      url: "#{Utils.parseUrl(relation1.model_type::url).database_path}/#{table}"
+      urlRoot: "#{Utils.parseUrl(_.result(relation1.model_type.prototype, 'url')).database_path}/#{table}"
       @schema = schema
       sync: relation1.model_type.createSync(JoinTable)
 

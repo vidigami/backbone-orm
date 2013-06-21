@@ -16,7 +16,7 @@ runTests = (options, cache) ->
   MODELS_JSON = null
 
   class Flat extends Backbone.Model
-    url: "#{DATABASE_URL}/flats"
+    urlRoot: "#{DATABASE_URL}/flats"
     @schema: BASE_SCHEMA
     sync: SYNC(Flat, cache)
 

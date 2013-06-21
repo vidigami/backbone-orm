@@ -15,19 +15,19 @@ runTests = (options, cache, embed) ->
   BASE_COUNT = 1
 
   class Flat extends Backbone.Model
-    url: "#{DATABASE_URL}/flats"
+    urlRoot: "#{DATABASE_URL}/flats"
     @schema: BASE_SCHEMA
     sync: SYNC(Flat, cache)
 
   class Reverse extends Backbone.Model
-    url: "#{DATABASE_URL}/reverses"
+    urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owner: -> ['belongsTo', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
   class Owner extends Backbone.Model
-    url: "#{DATABASE_URL}/owners"
+    urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       flat: -> ['belongsTo', Flat, embed: embed]
       reverse: -> ['hasOne', Reverse, embed: embed]

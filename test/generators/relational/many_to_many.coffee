@@ -15,14 +15,14 @@ runTests = (options, cache, embed) ->
   BASE_COUNT = 1
 
   class Reverse extends Backbone.Model
-    url: "#{DATABASE_URL}/reverses"
+    urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
   class Owner extends Backbone.Model
-    url: "#{DATABASE_URL}/owners"
+    urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
