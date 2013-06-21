@@ -43,7 +43,7 @@ runTests = (options, cache) ->
       it 'Handles a count query', (done) ->
         Flat.count (err, count) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(count, MODELS_JSON.length, 'counted expected number of albums')
+          assert.equal(count, MODELS_JSON.length, "Expected: #{count}. Actual: #{MODELS_JSON.length}")
           done()
 
       it 'counts by query', (done) ->
@@ -84,7 +84,7 @@ runTests = (options, cache) ->
 
         queue.defer (callback) ->
           Flat.count {name: 'Fred'}, (err, count) ->
-            assert.equal(count, 1, 'no Fred')
+            assert.equal(count, 1, 'Fred')
             callback(err)
 
         queue.defer (callback) ->
