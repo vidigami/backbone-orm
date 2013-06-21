@@ -11,30 +11,38 @@ module.exports = class Utils
   @adapters:
     bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
 
+  @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
+
   # parse an object whose values are still JSON stringified
-  @parse: (query) ->
+  @parseJSON: (query) ->
     return JSON.parse(query) if _.isString(query)
     result = {}
     for key, value of query
       try result[key] = JSON.parse(value) catch err then result[key] = value
     return result
 
-  @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
-
-  @urlToModelName: (url) ->
-    return inflection.classify(inflection.singularize(Utils.urlToTableName(url)))
-
-  @urlToTableName: (url) ->
-    url_parts = URL.parse(url)
-    database_parts = url_parts.pathname.split('/')
-    table = database_parts[database_parts.length-1]
-
-  @urlToDatabaseEndpoint: (url) ->
+  @parseUrl: (url) ->
     url_parts = URL.parse(url)
     database_parts = url_parts.pathname.split('/')
     database_parts.pop()
+    database_parts = url_parts.pathname.split('/')
+    table = database_parts.pop()
     url_parts.pathname = database_parts.join('/')
-    URL.format(url_parts)
+
+    result = {
+      host: url_parts.hostname
+      port: url_parts.port
+      database: URL.format(url_parts)
+      table: table
+      model_name: inflection.classify(inflection.singularize(table))
+    }
+
+    if url_parts.auth
+      auth_parts = url_parts.auth.split(':')
+      result.user = auth_parts[0]
+      result.password = if auth_parts.length > 1 then auth_parts[1] else null
+
+    return result
 
   ##############################
   # Relational
@@ -72,7 +80,7 @@ module.exports = class Utils
     schema[relation2.foreign_key] = ['Integer', indexed: true]
 
     class JoinTable extends Backbone.Model
-      url: "#{Utils.urlToDatabaseEndpoint(relation1.model_type::url)}/#{table_name}"
+      url: "#{Utils.parseUrl(relation1.model_type::url).database}/#{table_name}"
       @schema = schema
       sync: relation1.model_type.createSync(JoinTable)
 
