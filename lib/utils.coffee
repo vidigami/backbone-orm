@@ -24,15 +24,15 @@ module.exports = class Utils
   @parseUrl: (url) ->
     url_parts = URL.parse(url)
     database_parts = url_parts.pathname.split('/')
-    database_parts.pop()
-    database_parts = url_parts.pathname.split('/')
     table = database_parts.pop()
+    database = database_parts[database_parts.length-1]
     url_parts.pathname = database_parts.join('/')
 
     result = {
       host: url_parts.hostname
       port: url_parts.port
-      database: URL.format(url_parts)
+      database_path: URL.format(url_parts)
+      database: database
       table: table
       model_name: inflection.classify(inflection.singularize(table))
     }
@@ -73,14 +73,14 @@ module.exports = class Utils
   @createJoinTableModel: (relation1, relation2) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))
     model_name2 = inflection.pluralize(inflection.underscore(relation2.model_type.model_name))
-    table_name = if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+    table = if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
 
     schema = {}
     schema[relation1.foreign_key] = ['Integer', indexed: true]
     schema[relation2.foreign_key] = ['Integer', indexed: true]
 
     class JoinTable extends Backbone.Model
-      url: "#{Utils.parseUrl(relation1.model_type::url).database}/#{table_name}"
+      url: "#{Utils.parseUrl(relation1.model_type::url).database_path}/#{table}"
       @schema = schema
       sync: relation1.model_type.createSync(JoinTable)
 
