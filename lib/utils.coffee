@@ -22,10 +22,12 @@ module.exports = class Utils
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   @urlToModelName: (url) ->
+    return inflection.classify(inflection.singularize(Utils.urlToTableName(url)))
+
+  @urlToTableName: (url) ->
     url_parts = URL.parse(url)
     database_parts = url_parts.pathname.split('/')
     table = database_parts[database_parts.length-1]
-    return inflection.classify(inflection.singularize(table))
 
   @urlToDatabaseEndpoint: (url) ->
     url_parts = URL.parse(url)
