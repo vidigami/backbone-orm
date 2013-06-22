@@ -120,7 +120,7 @@ module.exports = class One
     return callback(null, related_model) if related_model
 
     if @type is 'belongsTo'
-      if related_id = model._orm_lookups[@foreign_key]
+      if related_id = model._orm_lookups and model._orm_lookups[@foreign_key]
         model.set(@key, related_model = Utils.createRelated(@reverse_model_type, related_id))
         callback(null, related_model)
     else
