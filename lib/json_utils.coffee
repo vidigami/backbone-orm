@@ -1,5 +1,7 @@
-_ = @_ or require 'underscore'
+util = require 'util'
+_ = require 'underscore'
 moment = @moment or require 'moment'
+Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
@@ -31,3 +33,75 @@ module.exports = class JSONUtils
     else if _.isObject(value)
       value[key] = @valueToJSON(item) for key, item of value
     return value
+
+  @renderModelJSON = (related_model, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+    return callback(null, null) unless related_model
+
+    # pick keys
+    if _.isArray(template)
+      queue = new Queue()
+
+      result = {}
+      for key in template
+        do (key) -> queue.defer (callback) ->
+          related_model.get key, (err, value) ->
+            return callback(err) if err
+            result[key] = value
+            callback()
+
+      queue.await (err) ->
+        return callback(err) if err
+        callback(null, result)
+
+    # render template
+    else
+      template related_model, options, (err, related_json) ->
+        return callback(err) if err
+        callback(null, related_json)
+
+  @renderModelsJSON = (related_models, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    # many
+    queue = new Queue()
+
+    result = []
+    for related_model in related_models
+      do (related_model) ->
+        queue.defer (callback) ->
+          JSONUtils.renderModelJSON related_model, template, options, (err, related_json) ->
+            return callback(err) if err
+            result.push(related_json)
+            callback()
+
+    queue.await (err) ->
+      return callback(err) if err
+      callback(null, result)
+
+  @appendModelJSON = (json, related_model, attribute_name, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 5
+
+    return callback() unless related_model
+    JSONUtils.renderModelJSON related_model, template, options, (err, model_json) ->
+      return callback(err) if err
+
+      # embed keys
+      if _.isArray(template)
+        (json["#{attribute_name}_#{key}"] = model_json[key] for key in template)
+      else
+        json[attribute_name] = model_json
+      callback()
+
+  @appendRelatedJSON = (json, model, attribute_name, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 5
+
+    model.get attribute_name, (err, related_models) ->
+      callback(err) if err
+
+      return JSONUtils.appendModelJSON(json, related_models, attribute_name, template, options, callback) unless _.isArray(related_models) # one
+
+      # many
+      JSONUtils.renderModelsJSON related_models, template, options, (err, related_json) ->
+        return callback(err) if err
+        json[attribute_name] = related_json
