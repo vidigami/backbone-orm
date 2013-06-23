@@ -64,9 +64,9 @@ module.exports = (model_type, sync) ->
 
   _original_get = model_type::get
   model_type::get = (key, callback) ->
-    return _original_get.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+    schema = model_type.schema() if model_type.schema
 
-    if relation = schema.relation(key)
+    if schema and (relation = schema.relation(key))
       return relation.get(@, key, callback)
     else
       value = _original_get.call(@, key)
