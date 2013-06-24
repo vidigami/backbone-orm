@@ -18,26 +18,31 @@ module.exports = class One
 
     # check for reverse since they need to store the foreign key
     if not @reverse_relation and @type is 'hasOne'
+      unless _.isFunction(@reverse_model_type.schema) # not a relational model
+        @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
       reverse_schema = @reverse_model_type.schema()
       reverse_key = inflection.underscore(@model_type.model_name)
       reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
 
+  initializeModel: (model, key) ->
+
   set: (model, key, value, options) ->
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    value = null if _.isUndefined(value) # Backbone clear or reset
 
     if @type is 'belongsTo' and key is @foreign_key
       model._orm_lookups or= {}
       model._orm_lookups[@foreign_key] = value
       return @
-
     return @ if @has(model, @key, value) # already set
 
-    # update backlinks
-    if @reverse_relation and related_model = model.attributes[@key]
-      if @reverse_relation.remove then @reverse_relation.remove(related_model, model) else related_model.set(@reverse_relation.key, null)
-
+    previous_related_model = model.attributes[@key]
     related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
+
+    # update backlinks
+    if @reverse_relation and previous_related_model
+      if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
 
     # update backlinks
     if @reverse_relation and related_model
@@ -54,7 +59,7 @@ module.exports = class One
 
     # asynchronous path, needs load
     is_loaded = @_fetchRelated model, key, (err) =>
-      return (if callback then callback(err) else console.log "One: unhandled error: #{err}. Please supply a callback") if err
+      return (if callback then callback(err) else console.error "One: unhandled error: #{err}. Please supply a callback") if err
       callback(null, returnValue()) if callback
 
     # synchronous path
@@ -92,7 +97,7 @@ module.exports = class One
 
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
-    return false if not current_related_model
+    return !item if not current_related_model
 
     # compare ids
     current_id = current_related_model.get('id')
@@ -129,7 +134,7 @@ module.exports = class One
       query[@foreign_key] = model.attributes.id
       @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
-        model.set(@key, related_model = Utils.createRelated(@reverse_model_type, json))
+        model.set(@key, related_model = if json then Utils.createRelated(@reverse_model_type, json) else null)
         callback(null, related_model)
 
   # TODO: optimize so don't need to check each time
@@ -141,9 +146,8 @@ module.exports = class One
       return callback(err) if err
       return callback(null, null) unless related_model # no relation
       return callback(null, related_model) if key is @ids_accessor # ids only, no need to fetch the models
-
       return callback(null, related_model) unless related_model._orm_needs_load # already loaded
-      return callback(new Error "Missing id for load") unless id = related_model.get('id')
+      return callback(new Error "Missing id for load: #{util.inspect(related_model.attributes)}") unless id = related_model.get('id')
 
       # load actual model
       @reverse_model_type.cursor(id).toJSON (err, model_json) =>
