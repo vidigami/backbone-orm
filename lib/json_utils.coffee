@@ -82,15 +82,12 @@ module.exports = class JSONUtils
   @appendModelJSON = (json, related_model, attribute_name, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 5
 
-    return callback() unless related_model
+    # empty
+    (json[attribute_name] = null; return callback()) unless related_model
+
     JSONUtils.renderModelJSON related_model, template, options, (err, model_json) ->
       return callback(err) if err
-
-      # embed keys
-      if _.isArray(template)
-        (json["#{attribute_name}_#{key}"] = model_json[key] for key in template)
-      else
-        json[attribute_name] = model_json
+      json[attribute_name] = model_json
       callback()
 
   @appendRelatedJSON = (json, model, attribute_name, template, options, callback) ->
@@ -105,3 +102,4 @@ module.exports = class JSONUtils
       JSONUtils.renderModelsJSON related_models, template, options, (err, related_json) ->
         return callback(err) if err
         json[attribute_name] = related_json
+        callback()

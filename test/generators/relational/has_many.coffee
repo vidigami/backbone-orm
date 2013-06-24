@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+JSONUtils = require '../../../lib/json_utils'
 adapters = Utils.adapters
 
 runTests = (options, cache, embed) ->
@@ -146,6 +147,22 @@ runTests = (options, cache, embed) ->
             else
               assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
             done()
+
+    it 'Appends json for a related model', (done) ->
+      Owner.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        json = {}
+        JSONUtils.appendRelatedJSON json, test_model, 'reverses', ['id', 'created_at'], (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(json.reverses.length, "json has a list of reverses")
+          assert.equal(2, json.reverses.length, "Expected: #{2}. Actual: #{json.reverses.length}")
+          for reverse in json.reverses
+            assert.ok(reverse.id, "reverse has an id")
+            assert.ok(reverse.created_at, "reverse has a created_at")
+            assert.ok(!reverse.updated_at, "reverse doesn't have updated_at")
+          done()
 
 # TODO: explain required set up
 
