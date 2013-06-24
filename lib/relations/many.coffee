@@ -36,11 +36,14 @@ module.exports = class Many
       else
         @join_table = Utils.createJoinTableModel(@, @reverse_relation)
 
+  initializeModel: (model, key) -> @_ensureCollection(model)
+
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     collection = @_ensureCollection(model)
 
     value = value.models if value instanceof Backbone.Collection
+    value = [] if _.isUndefined(value) # Backbone clear or reset
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
     # save previous
@@ -173,6 +176,7 @@ module.exports = class Many
     query[@foreign_key] = {$in: (json.id for json in models_json)}
     @reverse_model_type.cursor(query).toJSON callback
 
+  # TODO: ensure initialize is called only once and only from initializeModel
   _ensureCollection: (model) ->
     return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
     collection = model.attributes[@key] = new @collection_type()

@@ -36,6 +36,9 @@ module.exports = class Schema
     relation.initialize()
     return relation
 
+  initializeModel: (model) ->
+    relation.initializeModel(model, key) for key, relation of @relations
+
   #################################
   # Internal
   #################################

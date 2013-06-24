@@ -46,6 +46,11 @@ module.exports = (model_type, sync) ->
   ###################################
   # Backbone ORM - Model Overrides
   ###################################
+  _original_initialize = model_type::initialize
+  model_type::initialize = ->
+    schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
+    return _original_initialize.apply(@, arguments)
+
   _original_set = model_type::set
   model_type::set = (key, value, options) ->
     return _original_set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
