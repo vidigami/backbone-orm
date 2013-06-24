@@ -97,7 +97,7 @@ module.exports = class One
 
   has: (model, key, item) ->
     current_related_model = model.attributes[@key]
-    return !item if not current_related_model
+    return item is current_related_model if not current_related_model
 
     # compare ids
     current_id = current_related_model.get('id')
