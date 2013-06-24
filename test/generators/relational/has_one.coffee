@@ -182,7 +182,6 @@ runTests = (options, cache, embed) ->
 
         json = {}
         JSONUtils.appendRelatedJSON json, test_model, 'reverse', ['id', 'created_at'], (err) ->
-          console.log json
           assert.ok(!err, "No errors: #{err}")
           assert.ok(json.reverse, "json has a reverse")
           assert.ok(json.reverse.id, "reverse has an id")
