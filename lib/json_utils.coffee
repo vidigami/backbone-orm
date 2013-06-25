@@ -1,6 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
-moment = @moment or require 'moment'
+moment = require 'moment'
 Queue = require 'queue-async'
 
 module.exports = class JSONUtils
