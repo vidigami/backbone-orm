@@ -3,6 +3,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 One = require './relations/one'
 Many = require './relations/many'
+inflection = require 'inflection'
 
 module.exports = class Schema
   constructor: (@model_type) ->
@@ -15,6 +16,8 @@ module.exports = class Schema
 
     for key, options of @relations
       options = @_parseFieldOptions(options()) if _.isFunction(options)
+      options.type = inflection.camelize(inflection.underscore(options.type), true) # ensure HasOne, hasOne, and has_one resolve to hasOne
+
       switch options.type
         when 'hasOne', 'belongsTo'
           relation = @relations[key] = new One(@model_type, key, options)

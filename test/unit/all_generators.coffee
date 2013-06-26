@@ -5,3 +5,5 @@ test_parameters =
   embed: true
 
 require('../generators/all')(test_parameters)
+require('../generators/conventions/one')(test_parameters)
+require('../generators/conventions/many')(test_parameters)
