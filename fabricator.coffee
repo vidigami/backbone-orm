@@ -4,7 +4,6 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './lib/utils'
-adapters = Utils.adapters
 
 module.exports = class Fabricator
 
@@ -20,7 +19,7 @@ module.exports = class Fabricator
     models = Fabricator.new(model_type, count, attributes_info)
     queue = new Queue()
     for model in models
-      do (model) -> queue.defer (callback) -> model.save {}, adapters.bbCallback(callback)
+      do (model) -> queue.defer (callback) -> model.save {}, Utils.bbCallback(callback)
     queue.await (err) -> callback(err, models)
 
   # One forms

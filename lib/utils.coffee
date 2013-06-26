@@ -8,8 +8,7 @@ Queue = require 'queue-async'
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
 module.exports = class Utils
-  @adapters:
-    bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
+  @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
 
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
@@ -94,7 +93,7 @@ module.exports = class Utils
       return callback(err) if err
       queue = new Queue()
       for model in all_models
-        do (model) -> queue.defer (callback) -> model.save {name: name}, adapters.bbCallback callback
+        do (model) -> queue.defer (callback) -> model.save {name: name}, Utils.bbCallback callback
       queue.await callback
 
   ##############################
@@ -134,5 +133,3 @@ module.exports = class Utils
       return if JSON.stringify(model[field]) < JSON.stringify(other_model[field]) then 1 else -1
     else
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
-
-adapters = Utils.adapters

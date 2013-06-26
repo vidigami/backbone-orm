@@ -6,7 +6,6 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
-adapters = Utils.adapters
 
 runTests = (options, cache) ->
   DATABASE_URL = options.database_url or ''
@@ -50,7 +49,7 @@ runTests = (options, cache) ->
         bob = new Flat({name: 'Bob'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, adapters.bbCallback(callback)
+        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->
@@ -74,8 +73,8 @@ runTests = (options, cache) ->
         fred = new Flat({name: 'Fred'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, adapters.bbCallback(callback)
-        queue.defer (callback) -> fred.save {}, adapters.bbCallback(callback)
+        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
+        queue.defer (callback) -> fred.save {}, Utils.bbCallback(callback)
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->

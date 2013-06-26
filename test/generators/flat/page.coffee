@@ -6,7 +6,6 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
-adapters = Utils.adapters
 
 runTests = (options, cache) ->
   DATABASE_URL = options.database_url or ''

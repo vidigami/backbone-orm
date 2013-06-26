@@ -4,7 +4,6 @@ _ = require 'underscore'
 MemoryCursor = require './memory_cursor'
 Schema = require './schema'
 Utils = require './utils'
-adapters = Utils.adapters
 
 Cache = require './cache'
 
@@ -30,7 +29,7 @@ class CacheSync
     @sync 'read', model, options
 
   create: (model, options) ->
-    @sync 'create', model, adapters.bbCallback (err, json) =>
+    @sync 'create', model, Utils.bbCallback (err, json) =>
       Cache.findOrCreate(@url, json, @model_type) # add to the cache
 
       return options.error(err) if err
@@ -41,14 +40,14 @@ class CacheSync
       # console.log "CACHE: update found #{@model_type.model_name} id: #{cached_model.get('id')}"
       cached_model.set(model.toJSON, options) if cached_model isnt model # update cache
 
-    @sync 'update', model, adapters.bbCallback (err, json) =>
+    @sync 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
 
   delete: (model, options) ->
     Cache.remove(@url, model.get('id')) # remove from the cache
 
-    @sync 'delete', model, adapters.bbCallback (err, json) =>
+    @sync 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
 

@@ -6,7 +6,6 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
-adapters = Utils.adapters
 
 runTests = (options, cache) ->
   DATABASE_URL = options.database_url or ''
@@ -46,7 +45,7 @@ runTests = (options, cache) ->
         assert.ok(!bob.get('id'), 'id before save doesn\'t exist')
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, adapters.bbCallback(callback)
+        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
 
         queue.defer (callback) ->
           assert.equal(bob.get('name'), 'Bob', 'name after save is Bob')
@@ -62,7 +61,7 @@ runTests = (options, cache) ->
           assert.ok(!!model, 'got model')
 
           new_model = new Flat({id: model.get('id')})
-          new_model.fetch adapters.bbCallback (err) ->
+          new_model.fetch Utils.bbCallback (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{util.inspect(model.toJSON())}\nActual: #{util.inspect(new_model.toJSON())}")
             done()

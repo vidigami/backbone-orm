@@ -4,7 +4,6 @@ Backbone = @Backbone or require 'backbone'
 JSONUtils = require './json_utils'
 Queue = require 'queue-async'
 Utils = require './utils'
-adapters = Utils.adapters
 
 module.exports = (model_type, sync) ->
 
@@ -124,7 +123,7 @@ module.exports = (model_type, sync) ->
     else
       (attributes = {})[key] = value;
 
-    options = adapters.bbCallback(options) if _.isFunction(options) # node style callback
+    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     original_success = options.success
     original_error = options.error
     options = _.clone(options)

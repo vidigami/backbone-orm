@@ -5,7 +5,6 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
-adapters = Utils.adapters
 One = require './one'
 
 module.exports = class Many
@@ -77,9 +76,9 @@ module.exports = class Many
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
       unless related_model.get('id')
-        return related_model.save {}, adapters.bbCallback (err) =>
+        return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
-          model.save {}, adapters.bbCallback callback
+          model.save {}, Utils.bbCallback callback
 
       return callback()
 
@@ -90,13 +89,13 @@ module.exports = class Many
         queue = new Queue(1) # TODO: parallelism
 
         for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.get('id'))
-          do (related_model) => queue.defer (callback) => related_model.save {}, adapters.bbCallback callback
+          do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
         return queue.await callback
 
       # model
       else
-        return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
 
     # hasMany
     else
@@ -131,7 +130,7 @@ module.exports = class Many
             attributes[@reverse_relation.foreign_key] = related_id
             # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
             join = new @join_table(attributes)
-            join.save {}, adapters.bbCallback callback
+            join.save {}, Utils.bbCallback callback
 
         queue.await callback
       return

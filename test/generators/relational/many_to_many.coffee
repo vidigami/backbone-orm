@@ -6,7 +6,6 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
-adapters = Utils.adapters
 
 runTests = (options, cache, embed) ->
   DATABASE_URL = options.database_url or ''
@@ -66,7 +65,7 @@ runTests = (options, cache, embed) ->
         for owner in MODELS.owner
           do (owner) ->
             owner.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
-            save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
+            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 

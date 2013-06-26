@@ -7,7 +7,6 @@ Queue = require 'queue-async'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 JSONUtils = require '../../../lib/json_utils'
-adapters = Utils.adapters
 
 runTests = (options, cache, embed) ->
   DATABASE_URL = options.database_url or ''
@@ -81,7 +80,7 @@ runTests = (options, cache, embed) ->
               flats: [MODELS.flat.pop(), MODELS.flat.pop()]
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
-            save_queue.defer (callback) -> owner.save {}, adapters.bbCallback callback
+            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 
