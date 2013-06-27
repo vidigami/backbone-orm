@@ -174,7 +174,6 @@ runTests = (options, cache, embed) ->
               assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
             done()
 
-
     it 'Appends json for a related model', (done) ->
       Owner.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -194,6 +193,16 @@ runTests = (options, cache, embed) ->
 #            assert.ok(json.flat.created_at, "flat has a created_at")
             assert.ok(!json.flat.updated_at, "flat doesn't have updated_at")
             done()
+
+    it 'Can include a related (belongsTo) model', (done) ->
+      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, "found model")
+        assert.ok(test_model.flat, "Has a related flat")
+        assert.ok(test_model.flat.id, "Related model has an id")
+        done()
+#        assert.equal(test_model.flat_id, test_model.flat.id, "\nExpected: #{test_model.flat_id}\nActual: #{test_model.flat.id}")
+
 
 # TODO: explain required set up
 

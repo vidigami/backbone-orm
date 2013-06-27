@@ -161,3 +161,15 @@ module.exports = class One
         callback(null, related_model)
 
     return false
+
+  cursor: (model, key, query) ->
+    return @cursorFromJSON(model.attributes, key, query)
+
+  cursorFromJSON: (json, key, query) ->
+    query = _.extend(query or {}, {$one:true})
+    if @type is 'belongsTo'
+      query.id = json[@foreign_key]
+    else
+      query[@foreign_key] = json.id
+    (query.$values or= []).push('id') if key is @ids_accessor
+    return @reverse_model_type.cursor(query)

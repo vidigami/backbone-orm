@@ -36,6 +36,11 @@ module.exports = class Cursor
     @_cursor.$select = if @_cursor.$select then _.intersection(@_cursor.$select, keys) else keys
     return @
 
+  include: (keys) ->
+    keys = [keys] unless _.isArray(keys)
+    @_cursor.$include = if @_cursor.$include then _.intersection(@_cursor.$include, keys) else keys
+    return @
+
   values: (keys) ->
     keys = [keys] unless _.isArray(keys)
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys

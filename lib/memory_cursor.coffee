@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+Queue = require 'queue-async'
 
 Utils = require './utils'
 Cursor = require './cursor'
@@ -52,38 +53,58 @@ module.exports = class MemoryCursor extends Cursor
       $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
       json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
-    # only select specific fields
-    if @_cursor.$values
-      $fields = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-    else if @_cursor.$select
-      $fields = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-    else if @_cursor.$white_list
-      $fields = @_cursor.$white_list
-    json = _.map(json, (item) -> _.pick(item, $fields)) if $fields
+    queue = new Queue(1)
 
-    return callback(null, if json.length then json[0] else null) if @_cursor.$one
+    # todo: $select/$values = 'relation.field'
+    queue.defer (callback) =>
+      if @_cursor.$include
+        $include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
+        for key in $include_keys
+          continue if @model_type.relationIsEmbedded(key)
+          needs_lookup = true
+          # Load the included models
+          load_queue = new Queue(1)
+          for model_json in json
+            load_queue.defer (callback) =>
+              @model_type.relation(key).cursorFromJSON(model_json, key).toJSON (err, related_json) ->
+                model_json[key] = related_json
+                callback()
+          load_queue.await callback
+      callback() unless needs_lookup
 
-    # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
-    if @_cursor.$values
-      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-      if @_cursor.$values.length is 1
-        key = @_cursor.$values[0]
-        json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
-      else
-        json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
-    else if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      json = _.map(json, (item) => _.pick(item, $select))
-    else if @_cursor.$white_list
-      json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+    queue.await =>
+      # only select specific fields
+      if @_cursor.$values
+        $fields = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
+      else if @_cursor.$select
+        $fields = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      else if @_cursor.$white_list
+        $fields = @_cursor.$white_list
+      json = _.map(json, (item) -> _.pick(item, $fields)) if $fields
 
-    if @_cursor.$page or @_cursor.$page is ''
-      json =
-        offset: @_cursor.$offset
-        total_rows: @_count(keys)
-        rows: json
+      return callback(null, if json.length then json[0] else null) if @_cursor.$one
 
-    callback(null, json)
+      # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
+      if @_cursor.$values
+        $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
+        if @_cursor.$values.length is 1
+          key = @_cursor.$values[0]
+          json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
+        else
+          json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+      else if @_cursor.$select
+        $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+        json = _.map(json, (item) => _.pick(item, $select))
+      else if @_cursor.$white_list
+        json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+
+      if @_cursor.$page or @_cursor.$page is ''
+        json =
+          offset: @_cursor.$offset
+          total_rows: @_count(keys)
+          rows: json
+
+      callback(null, json)
     return # terminating
 
   _count: (keys) =>

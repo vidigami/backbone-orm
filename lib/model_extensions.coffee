@@ -143,3 +143,10 @@ module.exports = (model_type, sync) ->
       original_error?(model, resp, options)
 
     return _original_save.call(@, attributes, options)
+
+  model_type::cursor = (key, query) ->
+    schema = model_type.schema() if model_type.schema
+    if schema and (relation = schema.relation(key))
+      return relation.cursor(@, key, query, callback)
+    else
+      throw new Error "#{schema.model_name}::cursor: Unexpected key: #{key} is not a relation"

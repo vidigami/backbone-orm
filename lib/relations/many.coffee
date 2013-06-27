@@ -291,3 +291,12 @@ module.exports = class Many
 
       cache.updateCached(collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
+
+  cursor: (model, key, query) ->
+    return @cursorFromJSON(model.attributes, key, query)
+
+  cursorFromJSON: (json, key, query) ->
+    query = {}
+    query[@foreign_key] = json.id
+    (query.$values or= []).push('id') if key is @ids_accessor
+    return @reverse_model_type.cursor(query)
