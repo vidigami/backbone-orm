@@ -4,7 +4,6 @@ Backbone = require 'backbone'
 inflection = require 'inflection'
 
 Utils = require '../utils'
-adapters = Utils.adapters
 
 module.exports = class One
   constructor: (@model_type, @key, options) ->
@@ -73,14 +72,14 @@ module.exports = class One
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
       unless related_model.get('id')
-        return related_model.save {}, adapters.bbCallback (err) =>
+        return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
-          model.save {}, adapters.bbCallback callback
+          model.save {}, Utils.bbCallback callback
 
       return callback()
 
     else if @reverse_relation.type is 'belongsTo'
-      return related_model.save {}, adapters.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+      return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
 
     else # hasMany
       # nothing to do?

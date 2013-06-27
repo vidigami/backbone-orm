@@ -16,14 +16,14 @@ runTests = (options, cache, embed) ->
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
-      owners: -> ['hasMany', Owner]
+      owners: -> ['HasMany', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
-      reverses: -> ['hasMany', Reverse]
+      reverses: -> ['has_many', Reverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
 
@@ -108,6 +108,3 @@ runTests = (options, cache, embed) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
-  runTests(options, true, false)
-  runTests(options, false, true) if options.embed
-  runTests(options, true, true) if options.embed

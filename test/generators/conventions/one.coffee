@@ -22,15 +22,15 @@ runTests = (options, cache, embed) ->
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
-      owner: -> ['belongsTo', Owner]
+      owner: -> ['belongs_to', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
-      flat: -> ['belongsTo', Flat, embed: embed]
-      reverse: -> ['hasOne', Reverse, embed: embed]
+      flat: -> ['BelongsTo', Flat, embed: embed]
+      reverse: -> ['has_one', Reverse, embed: embed]
     }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
 
@@ -173,6 +173,7 @@ runTests = (options, cache, embed) ->
               assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
             done()
 
+
     it 'Appends json for a related model', (done) ->
       Owner.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -193,22 +194,9 @@ runTests = (options, cache, embed) ->
             assert.ok(!json.flat.updated_at, "flat doesn't have updated_at")
             done()
 
-    it 'Can include a related (belongsTo) model', (done) ->
-      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, "found model")
-        assert.ok(test_model.flat, "Has a related flat")
-        assert.ok(test_model.flat.id, "Related model has an id")
-        done()
-#        assert.equal(test_model.flat_id, test_model.flat.id, "\nExpected: #{test_model.flat_id}\nActual: #{test_model.flat.id}")
-
-
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
-  runTests(options, true, false)
-  runTests(options, false, true) if options.embed
-  runTests(options, true, true) if options.embed
