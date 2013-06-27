@@ -66,7 +66,7 @@ module.exports = class MemoryCursor extends Cursor
           load_queue = new Queue(1)
           for model_json in json
             load_queue.defer (callback) =>
-              @model_type.relation(key).cursorFromJSON(model_json, key).toJSON (err, related_json) ->
+              @model_type.relation(key).cursor(model_json, key).toJSON (err, related_json) ->
                 model_json[key] = related_json
                 callback()
           load_queue.await callback

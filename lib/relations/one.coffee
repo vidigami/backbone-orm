@@ -162,9 +162,7 @@ module.exports = class One
     return false
 
   cursor: (model, key, query) ->
-    return @cursorFromJSON(model.attributes, key, query)
-
-  cursorFromJSON: (json, key, query) ->
+    json = if model instanceof Backbone.Model then model.attributes else model
     query = _.extend(query or {}, {$one:true})
     if @type is 'belongsTo'
       query.id = json[@foreign_key]

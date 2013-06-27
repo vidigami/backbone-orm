@@ -292,9 +292,7 @@ module.exports = class Many
       callback(null, collection.models)
 
   cursor: (model, key, query) ->
-    return @cursorFromJSON(model.attributes, key, query)
-
-  cursorFromJSON: (json, key, query) ->
+    json = if model instanceof Backbone.Model then model.attributes else model
     query = {}
     query[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
