@@ -80,7 +80,7 @@ module.exports = class MemoryCursor extends Cursor
         $fields = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
       else if @_cursor.$white_list
         $fields = @_cursor.$white_list
-      json = _.map(json, (item) -> _.pick(item, $fields)) if $fields
+      json = _.map(json, (data) -> _.pick(data, $fields)) if $fields
 
       return callback(null, if json.length then json[0] else null) if @_cursor.$one
 
@@ -89,14 +89,14 @@ module.exports = class MemoryCursor extends Cursor
         $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
         if @_cursor.$values.length is 1
           key = @_cursor.$values[0]
-          json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
+          json = if $values.length then ((if data.hasOwnProperty(key) then data[key] else null) for data in json) else _.map(json, -> null)
         else
-          json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+          json = (((data[key] for key in $values when data.hasOwnProperty(key))) for data in json)
       else if @_cursor.$select
         $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-        json = _.map(json, (item) => _.pick(item, $select))
+        json = _.map(json, (data) => _.pick(data, $select))
       else if @_cursor.$white_list
-        json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+        json = _.map(json, (data) => _.pick(data, @_cursor.$white_list))
 
       if @_cursor.$page or @_cursor.$page is ''
         json =

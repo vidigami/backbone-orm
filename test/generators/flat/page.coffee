@@ -89,7 +89,7 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(_.isArray(data.rows), 'cursor values is an array')
         for json in data.rows
-          assert.ok(_.isArray(json), 'cursor item values is an array')
+          assert.ok(_.isArray(json), 'cursor data values is an array')
           assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
         done()
 

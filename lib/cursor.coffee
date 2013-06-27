@@ -57,13 +57,7 @@ module.exports = class Cursor
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(new Error "Cannot call toModels on cursor with values. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
-
-      if cache = @model_type.cache()
-        return callback(null, if json then cache.findCachedOrCreate(json, @model_type) else null) if @_cursor.$one
-        callback(null, cache.findCachedOrCreate(json, @model_type))
-      else
-        return callback(null, if json then (new @model_type(@model_type::parse(json))) else null) if @_cursor.$one
-        callback(null, (new @model_type(@model_type::parse(attributes)) for attributes in json))
-    return # terminating
+      return callback(null, if json then @model_type.findOrCreate(@model_type::parse(json)) else null) if @_cursor.$one
+      callback(null, @model_type.findOrCreate(@model_type::parse(json)))
 
   count: (callback) -> return @toJSON(callback, true)

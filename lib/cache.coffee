@@ -18,24 +18,24 @@ class Cache
 
     # many
     results = []
-    results.push(model) for item in data when (model = @_getOrInvalidateModel(model_store, item, now))
+    results.push(model) for data in data when (model = @_getOrInvalidateModel(model_store, data, now))
     return results
 
-  findOrCreate: (url, data, model_type) ->
+  findOrCreate: (url, model_type, data) ->
     (@store_by_url[url] = model_store = {}) unless model_store = @store_by_url[url]
 
     now = (new Date()).valueOf()
     unless _.isArray(data) # one
       return model if model = @_getOrInvalidateModel(model_store, data, now)
-      return @_createModel(model_store, data, model_type, now)
+      return @_createModel(model_store, model_type, data, now)
 
     # many
     results = []
-    for item in data
-      if model = @_getOrInvalidateModel(item, now)
+    for data in data
+      if model = @_getOrInvalidateModel(data, now)
         results.push()
       else
-        results.push(@_createModel(model_store, item, model_type, now))
+        results.push(@_createModel(model_store, model_type, data, now))
     return results
 
   add: (url, models) ->
@@ -62,7 +62,7 @@ class Cache
   clear: (url, ids) ->
     (@store_by_url[url] = {}; return @)
 
-  _createModel: (model_store, data, model_type, now) ->
+  _createModel: (model_store, model_type, data, now) ->
     if _.isObject(data)
       return new model_type(data) unless data.id # no id, means just create without caching (embedded)
       @_addModel(model_store, model = new model_type(data), now)

@@ -46,28 +46,18 @@ module.exports = class Utils
   ##############################
   # Relational
   ##############################
-  @createRelated: (model_type, item) ->
-    return item if (item instanceof Backbone.Model) or (item instanceof Backbone.Collection)
-    if cache = model_type.cache()
-      return cache.findCachedOrCreate(item, model_type)
-    else
-      return new model_type(model_type::parse(item)) if _.isObject(item)
-      related_model = new model_type({id: item})
-      related_model._orm_needs_load = true
-      return related_model
-
   @reverseRelation: (model_type, owning_model_name) ->
     return null unless model_type.relation
     reverse_key = inflection.underscore(owning_model_name)
     return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
     return model_type.relation(inflection.pluralize(reverse_key)) # plural
 
-  @dataId: (item) ->
-    if item instanceof Backbone.Model
-      return item.get('id')
-    else if _.isObject(item)
-      return item.id
-    return item
+  @dataId: (data) ->
+    if data instanceof Backbone.Model
+      return data.get('id')
+    else if _.isObject(data)
+      return data.id
+    return data
 
   @createJoinTableModel: (relation1, relation2) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))

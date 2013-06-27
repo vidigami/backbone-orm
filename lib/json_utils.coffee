@@ -29,9 +29,9 @@ module.exports = class JSONUtils
     else if _.isString(value)
       return value
     else if _.isArray(value)
-      value[index] = @JSONToValue(item) for index, item of value
+      value[index] = @JSONToValue(data) for index, data of value
     else if _.isObject(value)
-      value[key] = @valueToJSON(item) for key, item of value
+      value[key] = @valueToJSON(data) for key, data of value
     return value
 
   @renderModelJSON = (related_model, template, options, callback) ->

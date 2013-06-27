@@ -115,7 +115,7 @@ runTests = (options, cache) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
-            assert.ok(_.isArray(json), 'cursor item values is an array')
+            assert.ok(_.isArray(json), 'cursor data values is an array')
             assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
           done()
 
@@ -147,7 +147,7 @@ runTests = (options, cache) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
-            assert.ok(_.isArray(json), 'cursor item values is an array')
+            assert.ok(_.isArray(json), 'cursor data values is an array')
             assert.equal(json.length, WHITE_LIST.length, 'gets only the requested values')
             assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
           done()

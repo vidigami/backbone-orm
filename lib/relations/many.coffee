@@ -49,7 +49,7 @@ module.exports = class Many
     previous_models = _.clone(collection.models) if @reverse_relation
 
     # set the collection with found or created models
-    collection.reset(models = (collection.get(Utils.dataId(item)) or Utils.createRelated(@reverse_model_type, item) for item in value))
+    collection.reset(models = (collection.get(Utils.dataId(data)) or @reverse_model_type.findOrCreate(data) for data in value))
     collection._orm_loaded = @_checkLoaded(model, key)
     return @
 
@@ -146,14 +146,14 @@ module.exports = class Many
     return json[json_key] = collection.toJSON() if @embed
 
   # TODO: review for multiple instances, eg. same id
-  has: (model, key, item) ->
+  has: (model, key, data) ->
     collection = @_ensureCollection(model)
-    if item instanceof Backbone.Model
-      current_related_model = collection.get(Utils.dataId(item))
-      throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt item
+    if data instanceof Backbone.Model
+      current_related_model = collection.get(Utils.dataId(data))
+      throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt data
       return !!current_related_model
     else
-      return !!collection.get(Utils.dataId(item))
+      return !!collection.get(Utils.dataId(data))
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
@@ -234,7 +234,7 @@ module.exports = class Many
         for related_id in json
           # skip existing
           continue if related_model = collection.get(related_id)
-          collection.add(related_model = Utils.createRelated(@reverse_model_type, related_id))
+          collection.add(related_model = @reverse_model_type.findOrCreate(related_id))
 
         callback(null, collection.models)
     else
@@ -286,9 +286,9 @@ module.exports = class Many
 
         # create new
         else
-          collection.add(related_model = Utils.createRelated(@reverse_model_type, model_json))
+          collection.add(related_model = @reverse_model_type.findOrCreate(model_json))
 
-      cache.updateCached(collection.models) if cache = @reverse_model_type.cache()
+      cache.cacheUpdate(collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
 
   cursor: (model, key, query) ->

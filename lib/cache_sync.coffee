@@ -8,12 +8,11 @@ Utils = require './utils'
 Cache = require './cache'
 
 class CacheSync
-  constructor: (model_type, @sync) ->
-    @model_type = model_type
-    throw new Error("Missing url for model") unless @url = _.result(model_type.prototype, 'url')
+  constructor: (@model_type, @sync) ->
+    throw new Error("Missing url for model") unless @url = _.result(@model_type.prototype, 'url')
 
     # publish methods and sync on model
-    model_type._cache = @
+    @model_type._cache = @
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
@@ -30,7 +29,7 @@ class CacheSync
 
   create: (model, options) ->
     @sync 'create', model, Utils.bbCallback (err, json) =>
-      Cache.findOrCreate(@url, json, @model_type) # add to the cache
+      Cache.findOrCreate(@url, @model_type, json) # add to the cache
 
       return options.error(err) if err
       options.success(json)
@@ -54,9 +53,8 @@ class CacheSync
   ###################################
   # Cache Extension
   ###################################
-  updateCached: (model) -> Cache.update(@url, model)
-  findCached: (data) -> return Cache.find(@url, data)
-  findCachedOrCreate: (data, model_type) -> return Cache.findOrCreate(@url, data, model_type)
+  findOrCreate: (data) -> return Cache.findOrCreate(@url, @model_type, data)
+  cacheUpdate: (data) -> Cache.update(@url, data)
 
 module.exports = (model_type, wrapped_sync) ->
   sync = new CacheSync(model_type, wrapped_sync)

@@ -36,7 +36,7 @@ module.exports = class One
     return @ if @has(model, @key, value) # already set
 
     previous_related_model = model.attributes[@key]
-    related_model = if value then Utils.createRelated(@reverse_model_type, value) else null
+    related_model = if value then @reverse_model_type.findOrCreate(value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
 
     # update backlinks
@@ -94,15 +94,15 @@ module.exports = class One
     return json[json_key] = related_model.toJSON() if @embed
     return json[json_key] = related_model.get('id') if @type is 'belongsTo'
 
-  has: (model, key, item) ->
+  has: (model, key, data) ->
     current_related_model = model.attributes[@key]
-    return item is current_related_model if not current_related_model
+    return data is current_related_model if not current_related_model
 
     # compare ids
     current_id = current_related_model.get('id')
-    return current_id is item.get('id') if item instanceof Backbone.Model
-    return current_id is item.id if _.isObject(item)
-    return current_id is item
+    return current_id is data.get('id') if data instanceof Backbone.Model
+    return current_id is data.id if _.isObject(data)
+    return current_id is data
 
   # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -125,7 +125,7 @@ module.exports = class One
 
     if @type is 'belongsTo'
       if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
-        model.set(@key, related_model = Utils.createRelated(@reverse_model_type, related_id))
+        model.set(@key, related_model = @reverse_model_type.findOrCreate(related_id))
         return callback(null, related_model)
       return callback(null, null)
     else
@@ -133,7 +133,7 @@ module.exports = class One
       query[@foreign_key] = model.attributes.id
       @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
-        model.set(@key, related_model = if json then Utils.createRelated(@reverse_model_type, json) else null)
+        model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
         callback(null, related_model)
 
   # TODO: optimize so don't need to check each time
@@ -156,7 +156,7 @@ module.exports = class One
         # update
         delete related_model._orm_needs_load
         related_model.set(key, model_json)
-        cache.updateCached(related_model) if cache = @reverse_model_type.cache()
+        cache.cacheUpdate(related_model) if cache = @reverse_model_type.cache()
         callback(null, related_model)
 
     return false

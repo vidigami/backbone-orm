@@ -16,6 +16,17 @@ module.exports = (model_type, sync) ->
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
+  model_type.findOrCreate = (data) ->
+    return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
+    sync_instance = sync('sync')
+    if sync_instance and sync_instance.findOrCreate
+      return sync_instance.findOrCreate(model_type::parse(data))
+    else
+      return new model_type(model_type::parse(data)) if _.isObject(data)
+      related_model = new model_type({id: data})
+      related_model._orm_needs_load = true
+      return related_model
+
   model_type.cursor = (query={}) -> sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
