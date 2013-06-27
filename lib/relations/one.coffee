@@ -125,8 +125,7 @@ module.exports = class One
 
     # not loaded but we have the id, create a model
     if key is @ids_accessor and @type is 'belongsTo'
-      related_model = @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]})
-      model.set(@key, related_model)
+      model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
       return true
 
     # Will only load ids if key is @ids_accessor
