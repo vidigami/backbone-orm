@@ -123,6 +123,12 @@ module.exports = class One
   _fetchRelated: (model, key, callback) ->
     return true if @_isLoaded(model, key) # already loaded
 
+    # not loaded but we have the id, create a model
+    if key is @ids_accessor and @type is 'belongsTo'
+      related_model = @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]})
+      model.set(@key, related_model)
+      return true
+
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err

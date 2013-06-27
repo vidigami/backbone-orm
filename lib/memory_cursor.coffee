@@ -9,7 +9,7 @@ module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
 
     @_in = {}
-    (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value.$in
+    (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value?.$in
     keys = _.keys(@_find)
 
     # only the count

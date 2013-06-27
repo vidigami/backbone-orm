@@ -122,6 +122,17 @@ runTests = (options, cache, embed) ->
           assert.ok(id, 'found id')
           done()
 
+    it 'Can retrieve a belongsTo id synchronously and then a model asynchronously from get methods', (done) ->
+      Owner.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.get('flat_id'), 'Has the belongsTo id')
+        test_model.get 'flat', (err, flat) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(flat, 'loaded model')
+          assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
+          done()
+
     it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
       Owner.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
