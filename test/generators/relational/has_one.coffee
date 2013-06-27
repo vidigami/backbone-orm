@@ -200,7 +200,14 @@ runTests = (options, cache, embed) ->
         assert.ok(test_model.flat, "Has a related flat")
         assert.ok(test_model.flat.id, "Related model has an id")
         done()
-#        assert.equal(test_model.flat_id, test_model.flat.id, "\nExpected: #{test_model.flat_id}\nActual: #{test_model.flat.id}")
+
+    it 'Can include a related (hasOne) model', (done) ->
+      Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, "found model")
+        assert.ok(test_model.reverse, "Has a related flat")
+        assert.ok(test_model.reverse.id, "Related model has an id")
+        done()
 
 
 # TODO: explain required set up
