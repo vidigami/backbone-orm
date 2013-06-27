@@ -7,6 +7,9 @@ Cursor = require './cursor'
 
 module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
+
+    @_in = {}
+    (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value.$in
     keys = _.keys(@_find)
 
     # only the count
@@ -20,7 +23,7 @@ module.exports = class MemoryCursor extends Cursor
       return callback(null, json_count)
 
     # use find
-    if keys.length
+    if keys.length or _.keys(@_in).length
       json = []
       if @_cursor.$ids
         for id, model_json of @model_type._sync.store
@@ -28,6 +31,10 @@ module.exports = class MemoryCursor extends Cursor
       else
         for id, model_json of @model_type._sync.store
           json.push(model_json) if _.isEqual(_.pick(model_json, keys), @_find)
+        if _.keys(@_in).length
+          json = _.filter json, (model_json) =>
+            for key, values of @_in
+              return true if model_json[key] in values
     else
       # filter by ids
       if @_cursor.$ids

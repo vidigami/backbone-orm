@@ -118,24 +118,6 @@ module.exports = class One
     related_model = model.attributes[@key]
     return related_model and not related_model._orm_needs_load
 
-#  # TODO: check which objects are already loaded in cache and ignore ids
-#  _fetchPlaceholder: (model, key, callback) ->
-#    related_model = model.attributes[@key]
-#    return callback(null, related_model) if related_model
-#
-#    if @type is 'belongsTo'
-#      if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
-#        model.set(@key, related_model = @reverse_model_type.findOrCreate(related_id))
-#        return callback(null, related_model)
-#      return callback(null, null)
-#    else
-#      query = {$one:true}
-#      query[@foreign_key] = model.attributes.id
-#      @reverse_model_type.cursor(query).toJSON (err, json) =>
-#        return callback(err) if err
-#        model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
-#        callback(null, related_model)
-
   # TODO: optimize so don't need to check each time
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchRelated: (model, key, callback) ->
@@ -151,26 +133,6 @@ module.exports = class One
       callback(null, related_model)
 
     return false
-
-#    # load placeholders with ids
-#    @_fetchPlaceholder model, key, (err, related_model) =>
-#      return callback(err) if err
-#      return callback(null, null) unless related_model # no relation
-#      return callback(null, related_model) if key is @ids_accessor # ids only, no need to fetch the models
-#      return callback(null, related_model) unless related_model._orm_needs_load # already loaded
-#      return callback(new Error "Missing id for load: #{util.inspect(related_model.attributes)}") unless id = related_model.get('id')
-#
-#      # load actual model
-#      @reverse_model_type.cursor(id).toJSON (err, model_json) =>
-#        return callback(err) if err
-#        return callback(new Error "Model not found. Id #{id}") if not model_json
-#
-#        # update
-#        delete related_model._orm_needs_load
-#        related_model.set(key, model_json)
-#        cache.cacheUpdate(related_model) if cache = @reverse_model_type.cache()
-#        callback(null, related_model)
-
 
   cursor: (model, key, query) ->
     query = _.extend(query or {}, {$one:true})

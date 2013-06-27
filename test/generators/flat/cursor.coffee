@@ -16,7 +16,9 @@ runTests = (options, cache) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    @schema: _.defaults({
+      boolean: 'Boolean'
+    }, BASE_SCHEMA)
     sync: SYNC(Flat, cache)
 
   describe "Model.cursor (cache: #{cache})", ->
@@ -30,6 +32,7 @@ runTests = (options, cache) ->
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
+        boolean: true
       }, (err, models) ->
         return callback(err) if err
         MODELS_JSON = _.map(models, (test) -> test.toJSON())
@@ -151,6 +154,30 @@ runTests = (options, cache) ->
             assert.equal(json.length, WHITE_LIST.length, 'gets only the requested values')
             assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
           done()
+
+    it 'Cursor can perform an $in query', (done) ->
+      Flat.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        $in = ['random_string', 'some_9', test_model.get('name')]
+
+        Flat.cursor({name: {$in: $in}}).toModels (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(models, 'cursor toModels gives us models')
+          assert.ok(models.length, 'cursor toModels gives us one model')
+          for model in models
+            assert.equal(test_model.get('name'), model.get('name'), "Names match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+          done()
+
+    it 'Cursor can retrieve a boolean as a boolean', (done) ->
+      Flat.cursor({$one: true}).toJSON (err, json) ->
+        console.log json
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, 'found json')
+        assert.equal(typeof json.boolean, 'boolean', "Is a boolean:\nExpected: 'boolean', Actual: #{typeof json.boolean}")
+        assert.deepEqual(json.boolean, true, "Bool matches:\nExpected: #{true}, Actual: #{json.boolean}")
+        done()
+
 
 # TODO: explain required set up
 

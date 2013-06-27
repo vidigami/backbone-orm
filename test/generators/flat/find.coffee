@@ -16,7 +16,9 @@ runTests = (options, cache) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    @schema: _.defaults({
+      boolean: 'Boolean'
+    }, BASE_SCHEMA)
     sync: SYNC(Flat, cache)
 
   describe "Model.find (cache: #{cache})", ->
@@ -30,6 +32,7 @@ runTests = (options, cache) ->
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
+        boolean: true
       }, (err, models) ->
         return callback(err) if err
         MODELS_JSON = _.map(models, (test) -> test.toJSON())
@@ -90,6 +93,28 @@ runTests = (options, cache) ->
           for model in models
             assert.equal(model.get('name'), test_model.get('name'), 'model has the correct name')
           done()
+
+    it 'Handles a find $in query', (done) ->
+      Flat.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        $in = ['random_string', 'some_9', test_model.get('name')]
+
+        Flat.find {name: {$in: $in}}, (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(models.length, 'finds one model')
+          for model in models
+            assert.equal(test_model.get('name'), model.get('name'), "Names match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+          done()
+
+    it 'Find can retrieve a boolean as a boolean', (done) ->
+      Flat.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.equal(typeof test_model.get('boolean'), 'boolean', "Is a boolean:\nExpected: 'boolean', Actual: #{typeof test_model.get('boolean')}")
+        assert.deepEqual(true, test_model.get('boolean'), "Bool matches:\nExpected: #{true}, Actual: #{test_model.get('boolean')}")
+        done()
+
 
 # TODO: explain required set up
 
