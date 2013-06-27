@@ -46,6 +46,10 @@ module.exports = class Cursor
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
     return @
 
+  ids: ->
+    @_cursor.$values = ['id']
+    return @
+
   ##############################################
   # Execution of the Query
   ##############################################

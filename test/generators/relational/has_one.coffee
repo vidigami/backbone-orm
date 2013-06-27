@@ -83,32 +83,6 @@ runTests = (options, cache, embed) ->
 
       queue.await done
 
-    # TODO: delay the returning of memory models related models to test lazy loading properly
-    it 'Fetches a relation from the store if not present', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        fetched_owner = new Owner({id: test_model.get('id')})
-        fetched_owner.fetch Utils.bbCallback (err) ->
-          assert.ok(!err, "No errors: #{err}")
-          delete fetched_owner.attributes.reverse
-
-          reverse = fetched_owner.get 'reverse', (err, reverse) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(reverse, 'loaded the model lazily')
-            assert.equal(reverse.get('owner_id'), test_model.get('id'))
-            done()
-  #          assert.equal(reverse, null, 'has not loaded the model initially')
-
-    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
-  #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
-        done()
-
     it 'Handles a get query for a belongsTo relation', (done) ->
       Owner.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -124,15 +98,6 @@ runTests = (options, cache, embed) ->
           assert.equal(test_model.get('flat_id'), flat.get('id'), "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.get('id')}")
           done()
 
-    it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        test_model.get 'reverse_id', (err, id) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(id, 'found id')
-          done()
-
     it 'Handles a get query for a hasOne relation', (done) ->
       Owner.find {$one: true}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -146,6 +111,15 @@ runTests = (options, cache, embed) ->
           if test_model.relationIsEmbedded('reverse')
             assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
+          done()
+
+    it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
+      Owner.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        test_model.get 'reverse_id', (err, id) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(id, 'found id')
           done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
@@ -192,6 +166,32 @@ runTests = (options, cache, embed) ->
 #            assert.ok(json.flat.created_at, "flat has a created_at")
             assert.ok(!json.flat.updated_at, "flat doesn't have updated_at")
             done()
+
+    # TODO: delay the returning of memory models related models to test lazy loading properly
+    it 'Fetches a relation from the store if not present', (done) ->
+      Owner.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        fetched_owner = new Owner({id: test_model.get('id')})
+        fetched_owner.fetch Utils.bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          delete fetched_owner.attributes.reverse
+
+          reverse = fetched_owner.get 'reverse', (err, reverse) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, 'loaded the model lazily')
+            assert.equal(reverse.get('owner_id'), test_model.get('id'))
+            done()
+    #          assert.equal(reverse, null, 'has not loaded the model initially')
+
+    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
+      Owner.find {$one: true}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
+        #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
+        done()
 
     it 'Can include a related (belongsTo) model', (done) ->
       Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->

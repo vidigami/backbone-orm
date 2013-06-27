@@ -2,5 +2,5 @@
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   require('./relational/has_one')(options)
-  require('./relational/has_many')(options)
-  require('./relational/many_to_many')(options)
+#  require('./relational/has_many')(options)
+#  require('./relational/many_to_many')(options)
