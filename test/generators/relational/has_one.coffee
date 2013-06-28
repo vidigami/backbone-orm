@@ -216,7 +216,7 @@ runTests = (options, cache, embed) ->
       Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, "found model")
-        assert.ok(test_model.reverse, "Has a related flat")
+        assert.ok(test_model.reverse, "Has a related reverse")
         assert.ok(test_model.reverse.id, "Related model has an id")
         done()
 

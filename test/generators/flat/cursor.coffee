@@ -171,7 +171,6 @@ runTests = (options, cache) ->
 
     it 'Cursor can retrieve a boolean as a boolean', (done) ->
       Flat.cursor({$one: true}).toJSON (err, json) ->
-        console.log json
         assert.ok(!err, "No errors: #{err}")
         assert.ok(json, 'found json')
         assert.equal(typeof json.boolean, 'boolean', "Is a boolean:\nExpected: 'boolean', Actual: #{typeof json.boolean}")

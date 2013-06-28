@@ -163,13 +163,13 @@ runTests = (options, cache, embed) ->
             assert.ok(!reverse.updated_at, "reverse doesn't have updated_at")
           done()
 
-    it 'Can include related (one-way hasMany) models', (done) ->
-      Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, "found model")
-        assert.ok(test_model.flats, "Has related flats")
-        assert.ok(test_model.flats.length, "Has related flats")
-        done()
+#    it 'Can include related (one-way hasMany) models', (done) ->
+#      Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, "found model")
+#        assert.ok(test_model.flats, "Has related flats")
+#        assert.ok(test_model.flats.length, "Has related flats")
+#        done()
 
 # TODO: explain required set up
 
