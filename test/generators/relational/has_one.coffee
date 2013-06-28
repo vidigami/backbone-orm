@@ -204,21 +204,21 @@ runTests = (options, cache, embed) ->
         #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
         done()
 
-    it 'Can include a related (belongsTo) model', (done) ->
-      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, "found model")
-        assert.ok(test_model.flat, "Has a related flat")
-        assert.ok(test_model.flat.id, "Related model has an id")
-        done()
-
-    it 'Can include a related (hasOne) model', (done) ->
-      Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, "found model")
-        assert.ok(test_model.reverse, "Has a related reverse")
-        assert.ok(test_model.reverse.id, "Related model has an id")
-        done()
+#    it 'Can include a related (belongsTo) model', (done) ->
+#      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, "found model")
+#        assert.ok(test_model.flat, "Has a related flat")
+#        assert.ok(test_model.flat.id, "Related model has an id")
+#        done()
+#
+#    it 'Can include a related (hasOne) model', (done) ->
+#      Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, "found model")
+#        assert.ok(test_model.reverse, "Has a related reverse")
+#        assert.ok(test_model.reverse.id, "Related model has an id")
+#        done()
 
 
 # TODO: explain required set up
