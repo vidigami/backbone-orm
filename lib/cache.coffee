@@ -8,10 +8,10 @@ MAX_CACHE_MS = 500 # TODO: determine the best amount
 
 class Cache
   constructor: ->
-    @store_by_url = {}
+    @store = {}
 
-  find: (url, data) ->
-    (return if _.isArray(data) then [] else null) unless model_store = @store_by_url[url] # no model store, nothing to find
+  find: (model_name, data) ->
+    (return if _.isArray(data) then [] else null) unless model_store = @store[model_name] # no model store, nothing to find
 
     now = (new Date()).valueOf()
     return @_getOrInvalidateModel(model_store, data, now) unless _.isArray(data) # one
@@ -21,8 +21,8 @@ class Cache
     results.push(model) for data in data when (model = @_getOrInvalidateModel(model_store, data, now))
     return results
 
-  findOrCreate: (url, model_type, data) ->
-    (@store_by_url[url] = model_store = {}) unless model_store = @store_by_url[url]
+  findOrCreate: (model_name, model_type, data) ->
+    (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
 
     now = (new Date()).valueOf()
     unless _.isArray(data) # one
@@ -32,14 +32,14 @@ class Cache
     # many
     results = []
     for data in data
-      if model = @_getOrInvalidateModel(data, now)
+      if model = @_getOrInvalidateModel(model_store, data, now)
         results.push()
       else
         results.push(@_createModel(model_store, model_type, data, now))
     return results
 
-  add: (url, models) ->
-    (@store_by_url[url] = model_store = {}) unless model_store = @store_by_url[url]
+  add: (model_name, models) ->
+    (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
 
     now = (new Date()).valueOf()
     return @_addModel(model_store, models, now) unless _.isArray(models) # one
@@ -51,20 +51,20 @@ class Cache
   # alias
   update: Cache::add
 
-  remove: (url, ids) ->
-    if model_store = @store_by_url[url]
+  remove: (model_name, ids) ->
+    if model_store = @store[model_name]
       if _.isArray(ids) # manya
         delete model_store[id] for id in ids
       else # one
         delete model_store[id]
     return @
 
-  clear: (url, ids) ->
-    (@store_by_url[url] = {}; return @)
+  clear: (model_name, ids) ->
+    (@store[model_name] = {}; return @)
 
   _createModel: (model_store, model_type, data, now) ->
     if _.isObject(data)
-      return new model_type(data) unless data.id # no id, means just create without caching (embedded)
+      return new model_type(data) unless data.id # no id, means just create without caching (embedded) TODO: review
       @_addModel(model_store, model = new model_type(data), now)
     else
       @_addModel(model_store, model = new model_type({id: data}), now)

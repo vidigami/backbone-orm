@@ -48,7 +48,7 @@ runTests = (options, cache) ->
         done()
 
     it 'Cursor makes json', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -59,7 +59,7 @@ runTests = (options, cache) ->
           done()
 
     it 'Cursor makes models', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -156,7 +156,7 @@ runTests = (options, cache) ->
           done()
 
     it 'Cursor can perform an $in query', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         $in = ['random_string', 'some_9', test_model.get('name')]

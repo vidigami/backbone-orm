@@ -5,60 +5,60 @@ JSONUtils = require './json_utils'
 Queue = require 'queue-async'
 Utils = require './utils'
 
-module.exports = (model_type, sync) ->
+module.exports = (model_type) ->
 
   ###################################
   # Backbone ORM - Sync Accessors
   ###################################
-  model_type.sync = -> sync('sync')
-  model_type.createSync = (model_type, cache) -> sync.apply(null, ['createSync'].concat(_.toArray(arguments)))
+  model_type.sync = -> model_type._sync
+  model_type.createSync = (model_type, cache) -> model_type._sync.fn('createSync', model_type, cache)
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
   model_type.findOrCreate = (data) ->
     return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
-    sync_instance = sync('sync')
-    if sync_instance and sync_instance.findOrCreate
-      return sync_instance.findOrCreate(model_type::parse(data))
+    if cache = model_type.cache()
+      return cache.findOrCreate(model_type.model_name, model_type, model_type::parse(data))
     else
+      return (model_type.findOrCreate(item) for item in data) if _.isArray(data)
       return new model_type(model_type::parse(data)) if _.isObject(data)
       related_model = new model_type({id: data})
       related_model._orm_needs_load = true
       return related_model
 
-  model_type.cursor = (query={}) -> sync('cursor', query)
+  model_type.cursor = (query={}) -> model_type._sync.cursor(query)
 
   model_type.destroy = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     query = {id: query} unless _.isObject(query)
-    sync('destroy', query, callback)
+    model_type._sync.fn('destroy', query, callback)
 
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
   model_type.count = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    sync('cursor', query).count(callback)
+    model_type._sync.fn('cursor', query).count(callback)
 
-  model_type.all = (callback) -> sync('cursor', {}).toModels(callback)
+  model_type.all = (callback) -> model_type._sync.fn('cursor', {}).toModels(callback)
 
   model_type.find = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    sync('cursor', query).toModels(callback)
+    model_type._sync.fn('cursor', query).toModels(callback)
 
   model_type.findOne = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     query.$one = true
-    sync('cursor', query).toModels(callback)
+    model_type._sync.fn('cursor', query).toModels(callback)
 
   ###################################
   # Backbone ORM - Helpers
   ###################################
   model_type::cache = model_type.cache = -> model_type._cache
-  model_type::schema = model_type.schema = -> sync('schema')
-  model_type::relation = model_type.relation = (key) -> sync('relation', key)
-  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = sync('relation', key) then !!relation.embed else false
+  model_type::schema = model_type.schema = -> model_type._sync.fn('schema')
+  model_type::relation = model_type.relation = (key) -> model_type._sync.fn('relation', key)
+  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type._sync.fn('relation', key) then !!relation.embed else false
 
   ###################################
   # Backbone ORM - Model Overrides

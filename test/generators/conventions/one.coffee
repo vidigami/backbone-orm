@@ -85,7 +85,7 @@ runTests = (options, cache, embed) ->
 
     # TODO: delay the returning of memory models related models to test lazy loading properly
     it 'Fetches a relation from the store if not present', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -102,7 +102,7 @@ runTests = (options, cache, embed) ->
   #          assert.equal(reverse, null, 'has not loaded the model initially')
 
     it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
@@ -110,7 +110,7 @@ runTests = (options, cache, embed) ->
         done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -125,7 +125,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         test_model.get 'reverse_id', (err, id) ->
@@ -134,7 +134,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Handles a get query for a hasOne relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -149,7 +149,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -175,7 +175,7 @@ runTests = (options, cache, embed) ->
 
 
     it 'Appends json for a related model', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 

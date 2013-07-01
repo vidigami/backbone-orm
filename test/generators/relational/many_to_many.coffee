@@ -72,7 +72,7 @@ runTests = (options, cache, embed) ->
       queue.await done
 
     it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         test_model.get 'reverses', (err, reverses) ->

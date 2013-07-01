@@ -57,13 +57,14 @@ module.exports = class One
       return if key is @ids_accessor then related_model.get('id') else related_model
 
     # asynchronous path, needs load
-    is_loaded = @_fetchRelated model, key, (err) =>
-      return (if callback then callback(err) else console.error "One: unhandled error: #{err}. Please supply a callback") if err
-      callback(null, returnValue()) if callback
+    unless @manual_fetch
+      is_loaded = @_fetchRelated model, key, (err) =>
+        return (if callback then callback(err) else console.error "One: unhandled error: #{err}. Please supply a callback") if err
+        callback(null, returnValue()) if callback
 
     # synchronous path
     result = returnValue()
-    callback(null, result) if is_loaded and callback
+    callback(null, result) if (is_loaded or @manual_fetch) and callback
     return result
 
   save: (model, key, callback) ->
@@ -134,7 +135,7 @@ module.exports = class One
       return callback(new Error "Model not found. Id #{id}") if not json
       model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
       delete related_model._orm_needs_load
-      cache.cacheUpdate(related_model) if cache = @reverse_model_type.cache()
+      cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
       callback(null, related_model)
 
     return false

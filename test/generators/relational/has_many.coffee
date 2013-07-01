@@ -87,7 +87,7 @@ runTests = (options, cache, embed) ->
       queue.await done
 
     it 'Handles a get query for a hasMany relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -99,7 +99,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Handles an async get query for ids', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -109,7 +109,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Handles a synchronous get query for ids after the relations are loaded', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -120,7 +120,7 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Handles a get query for a hasMany and belongsTo two sided relation', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -148,7 +148,7 @@ runTests = (options, cache, embed) ->
             done()
 
     it 'Appends json for a related model', (done) ->
-      Owner.find {$one: true}, (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 

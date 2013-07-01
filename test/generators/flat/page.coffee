@@ -94,7 +94,7 @@ runTests = (options, cache) ->
         done()
 
     it 'Ensure the correct value is returned', (done) ->
-      Flat.find {$one: true}, (err, model) ->
+      Flat.findOne (err, model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!model, 'model')
         Flat.cursor({$page: true, name: model.get('name')}).toJSON (err, data) ->
