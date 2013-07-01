@@ -9,11 +9,9 @@ Cache = require './cache'
 
 class CacheSync
   constructor: (@model_type, @sync) ->
-    @model_type.model_name
+    throw new Error('Missing model_name for model') unless @model_type.model_name
 
     # publish methods and sync on model
-    @url = @sync.url
-    throw new Error('Missing model_name for model') unless @model_type.model_name = @sync.model_name
     @model_type._cache = @
 
   initialize: ->

@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+inflection = require 'inflection'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
@@ -13,6 +14,7 @@ class MemorySync
     @url = _.result(@model_type.prototype, 'url')
     @model_type.model_name = Utils.parseUrl(@url).model_name unless @model_type.model_name # model_name can be manually set
     throw new Error('Missing model_name for model') unless @model_type.model_name
+    @model_type.prototype.urlRoot = "/#{inflection.underscore(@model_type.model_name)}" unless @url # add a default url
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
