@@ -73,10 +73,9 @@ runTests = (options, cache, embed) ->
       queue.defer (callback) ->
         save_queue = new Queue()
 
-        reverses = MODELS.reverse.slice()
         for owner in MODELS.owner
           do (owner) ->
-            owner.set({flat: MODELS.flat.pop(), reverse: reverses.pop()})
+            owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop()})
             save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback

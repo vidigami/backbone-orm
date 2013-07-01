@@ -47,6 +47,11 @@ module.exports = (model_type, sync) ->
     [query, callback] = [{}, query] if arguments.length is 1
     sync('cursor', query).toModels(callback)
 
+  model_type.findOne = (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    query.$one = true
+    sync('cursor', query).toModels(callback)
+
   ###################################
   # Backbone ORM - Helpers
   ###################################

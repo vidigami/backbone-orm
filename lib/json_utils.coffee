@@ -34,50 +34,54 @@ module.exports = class JSONUtils
       value[key] = @valueToJSON(data) for key, data of value
     return value
 
-  @renderModelJSON = (related_model, template, options, callback) ->
+  @renderJSON = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
-    return callback(null, null) unless related_model
 
-    # pick keys
-    if _.isArray(template)
+    # one
+    unless _.isArray(models)
+      return callback(null, null) unless models
+
+      # pick keys
+      if _.isArray(template)
+        queue = new Queue()
+
+        result = {}
+        for key in template
+          do (key) -> queue.defer (callback) ->
+
+            # TODO allow for json or models
+            models.get key, (err, value) ->
+              return callback(err) if err
+              result[key] = value
+              callback()
+
+        queue.await (err) ->
+          return callback(err) if err
+          callback(null, result)
+
+      # render template
+      else
+        # TODO allow for json or models
+        template models, options, (err, json) ->
+          return callback(err) if err
+          callback(null, json)
+
+    # many
+    else
       queue = new Queue()
 
-      result = {}
-      for key in template
-        do (key) -> queue.defer (callback) ->
-          related_model.get key, (err, value) ->
-            return callback(err) if err
-            result[key] = value
-            callback()
+      result = []
+      for model in models
+        do (model) ->
+          queue.defer (callback) ->
+            JSONUtils.renderJSON model, template, options, (err, related_json) ->
+              return callback(err) if err
+              result.push(related_json)
+              callback()
 
       queue.await (err) ->
         return callback(err) if err
         callback(null, result)
-
-    # render template
-    else
-      template related_model, options, (err, related_json) ->
-        return callback(err) if err
-        callback(null, related_json)
-
-  @renderModelsJSON = (related_models, template, options, callback) ->
-    (callback = options; options = {}) if arguments.length is 3
-
-    # many
-    queue = new Queue()
-
-    result = []
-    for related_model in related_models
-      do (related_model) ->
-        queue.defer (callback) ->
-          JSONUtils.renderModelJSON related_model, template, options, (err, related_json) ->
-            return callback(err) if err
-            result.push(related_json)
-            callback()
-
-    queue.await (err) ->
-      return callback(err) if err
-      callback(null, result)
 
   @appendModelJSON = (json, related_model, attribute_name, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 5
@@ -85,7 +89,7 @@ module.exports = class JSONUtils
     # empty
     (json[attribute_name] = null; return callback()) unless related_model
 
-    JSONUtils.renderModelJSON related_model, template, options, (err, model_json) ->
+    JSONUtils.renderJSON related_model, template, options, (err, model_json) ->
       return callback(err) if err
       json[attribute_name] = model_json
       callback()
@@ -96,10 +100,7 @@ module.exports = class JSONUtils
     model.get attribute_name, (err, related_models) ->
       callback(err) if err
 
-      return JSONUtils.appendModelJSON(json, related_models, attribute_name, template, options, callback) unless _.isArray(related_models) # one
-
-      # many
-      JSONUtils.renderModelsJSON related_models, template, options, (err, related_json) ->
+      JSONUtils.renderJSON related_models, template, options, (err, related_json) ->
         return callback(err) if err
         json[attribute_name] = related_json
         callback()
