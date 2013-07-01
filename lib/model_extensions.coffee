@@ -11,15 +11,16 @@ module.exports = (model_type) ->
   # Backbone ORM - Sync Accessors
   ###################################
   model_type.sync = -> model_type._sync
-  model_type.createSync = (model_type, cache) -> model_type._sync.fn('createSync', model_type, cache)
+  model_type.createSync = (other_model_type, cache) -> model_type._sync.fn('createSync', other_model_type, cache)
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
   model_type.findOrCreate = (data) ->
+    throw 'findOrCreate requires data' unless data
     return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
     if cache = model_type.cache()
-      return cache.findOrCreate(model_type.model_name, model_type, model_type::parse(data))
+      return cache.findOrCreate(model_type.model_name, model_type, data)
     else
       return (model_type.findOrCreate(item) for item in data) if _.isArray(data)
       return new model_type(model_type::parse(data)) if _.isObject(data)

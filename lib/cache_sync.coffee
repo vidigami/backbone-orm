@@ -17,13 +17,13 @@ class CacheSync
 
     @fn = (method, model, options={}) =>
       @initialize()
-      return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
+      return @wrapped_sync.fn.apply(null, arguments) if method is 'createSync' # create a new sync
       return @ if method is 'sync'
       @[method].apply(@, Array::slice.call(arguments, 1))
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
-    @wrapped_sync.initialize()
+    @wrapped_sync.fn('initialize')
 
   read: (model, options) ->
     if model.models
@@ -63,11 +63,11 @@ class CacheSync
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync']))
 
   destroy: (query, callback) ->
-    Cache.clear(@model_type.model_name) # TODO: optimize
-    @wrapped_sync.destroy(query, callback)
+    Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
+    @wrapped_sync.fn 'destroy', query, callback
 
-  schema: (key) -> @model_type._schema
-  relation: (key) -> @model_type._schema.relation(key)
+  schema: (key) -> @wrapped_sync.fn('schema')
+  relation: (key) -> @wrapped_sync.fn('relation', key)
 
 module.exports = (model_type, wrapped_sync) ->
   sync = new CacheSync(model_type, wrapped_sync)
