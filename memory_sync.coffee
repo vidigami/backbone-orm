@@ -11,10 +11,9 @@ class MemorySync
     @store = {}
 
     # publish methods and sync on model
-    @url = _.result(@model_type.prototype, 'url')
-    @model_type.model_name = Utils.parseUrl(@url).model_name unless @model_type.model_name # model_name can be manually set
-    throw new Error('Missing model_name for model') unless @model_type.model_name
-    @model_type.prototype.urlRoot = "/#{inflection.underscore(@model_type.model_name)}" unless @url # add a default url
+    unless @model_type.model_name # model_name will come from the url
+      @url = _.result(@model_type.prototype, 'url')
+      @model_type.model_name = Utils.parseUrl(@url).model_name
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
