@@ -31,11 +31,11 @@ class Cache
 
     # many
     results = []
-    for data in data
-      if model = @_getOrInvalidateModel(model_store, data, now)
-        results.push()
+    for item in data
+      if model = @_getOrInvalidateModel(model_store, item, now)
+        results.push(model)
       else
-        results.push(@_createModel(model_store, model_type, data, now))
+        results.push(@_createModel(model_store, model_type, item, now))
     return results
 
   add: (model_name, models) ->
@@ -49,7 +49,7 @@ class Cache
     return @
 
   # alias
-  update: Cache::add
+  update: (model_name, models) -> @add(model_name, models)
 
   remove: (model_name, ids) ->
     if model_store = @store[model_name]

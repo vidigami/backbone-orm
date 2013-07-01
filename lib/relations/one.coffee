@@ -33,9 +33,23 @@ module.exports = class One
       model._orm_lookups or= {}
       model._orm_lookups[@foreign_key] = value
       return @
-    return @ if @has(model, @key, value) # already set
-
     previous_related_model = model.attributes[@key]
+    if @has(model, @key, value)
+      return @ unless previous_related_model # null
+
+      # if value instanceof Backbone.Model
+      #   if previous_related_model isnt value and not value._orm_needs_load
+      #     console.log "value.toJSON(): #{util.inspect(value.toJSON())}"
+      #     previous_related_model.set(value.toJSON())
+      #     delete previous_related_model._orm_needs_load
+      # else if _.isObject(value)
+      #   console.log "value: #{util.inspect(value)}"
+      #   previous_related_model.set(value)
+      #   delete previous_related_model._orm_needs_load
+
+      cache.update(@model_type.model_name, previous_related_model) if (cache = @model_type.cache()) and not previous_related_model._orm_needs_load
+      return @
+
     related_model = if value then @reverse_model_type.findOrCreate(value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
 
@@ -96,14 +110,8 @@ module.exports = class One
     return json[json_key] = related_model.get('id') if @type is 'belongsTo'
 
   has: (model, key, data) ->
-    current_related_model = model.attributes[@key]
-    return data is current_related_model if not current_related_model
-
-    # compare ids
-    current_id = current_related_model.get('id')
-    return current_id is data.get('id') if data instanceof Backbone.Model
-    return current_id is data.id if _.isObject(data)
-    return current_id is data
+    return data is current_related_model if not current_related_model = model.attributes[@key]
+    return current_related_model.get('id') is Utils.dataId(data)
 
   # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -126,7 +134,7 @@ module.exports = class One
 
     # not loaded but we have the id, create a model
     if key is @ids_accessor and @type is 'belongsTo'
-      model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
+      model.set(@key, @reverse_model_type.findOrCreate({id: id = model._orm_lookups[@foreign_key]}))
       return true
 
     # Will only load ids if key is @ids_accessor

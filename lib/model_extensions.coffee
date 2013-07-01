@@ -11,7 +11,7 @@ module.exports = (model_type) ->
   # Backbone ORM - Sync Accessors
   ###################################
   model_type.sync = -> model_type._sync
-  model_type.createSync = (other_model_type, cache) -> model_type._sync.fn('createSync', other_model_type, cache)
+  model_type.createSync = (target_model_type, cache) -> model_type._sync.fn('createSync', target_model_type, cache)
 
   ###################################
   # Backbone ORM - Class Extensions
