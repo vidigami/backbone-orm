@@ -17,12 +17,6 @@ class MemorySync
     @model_type._sync = @
     @model_type._schema = new Schema(@model_type)
 
-    @fn = (method, model, options={}) =>
-      @initialize()
-      return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
-      return @ if method is 'sync'
-      @[method].apply(@, Array::slice.call(arguments, 1))
-
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @model_type._schema.initialize()
@@ -64,5 +58,12 @@ class MemorySync
 
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)
+
+  sync.fn = (method, model, options={}) -> # save for access by model extensions
+    sync.initialize()
+    return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
+    return sync if method is 'sync'
+    sync[method].apply(sync, Array::slice.call(arguments, 1))
+
   require('./lib/model_extensions')(model_type) # mixin extensions
-  return if cache then require('./lib/cache_sync')(model_type, sync) else sync.fn
+  return if cache then require('./lib/cache_sync')(model_type, sync.fn) else sync.fn

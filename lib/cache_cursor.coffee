@@ -11,4 +11,4 @@ module.exports = class CacheCursor extends Cursor
     query = _.extend(_.extend({}, @_find), @_cursor)
 
     # TODO: invalidate the cache
-    @wrapped_sync.cursor(query).toJSON(callback, count)
+    @wrapped_sync_fn('cursor', query).toJSON(callback, count)
