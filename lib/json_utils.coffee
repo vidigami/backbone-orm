@@ -83,7 +83,7 @@ module.exports = class JSONUtils
         return callback(err) if err
         callback(null, result)
 
-  @appendModelJSON = (json, related_model, attribute_name, template, options, callback) ->
+  @appendJSON = (json, related_model, attribute_name, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 5
 
     # empty
