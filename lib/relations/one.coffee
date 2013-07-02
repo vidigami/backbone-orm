@@ -23,7 +23,7 @@ module.exports = class One
       reverse_key = inflection.underscore(@model_type.model_name)
       reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
 
-  initializeModel: (model, key) ->
+  initializeModel: (model, key) -> @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
@@ -52,15 +52,6 @@ module.exports = class One
 
     related_model = if value then @reverse_model_type.findOrCreate(value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
-
-    # update backlinks
-    if @reverse_relation and previous_related_model
-      if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
-
-    # update backlinks
-    if @reverse_relation and related_model
-      if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
-
     return @
 
   get: (model, key, callback) ->
@@ -147,6 +138,20 @@ module.exports = class One
       callback(null, related_model)
 
     return false
+
+  _bindBacklinks: (model) ->
+    model._orm_bindings = {}
+    model._orm_bindings.change = (model) =>
+      # update backlinks
+      if @reverse_relation and (previous_related_model = model.previous(@key))
+        if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
+
+      # update backlinks
+      if @reverse_relation and (related_model = model.get(@key))
+        if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
+
+    model.on("change:#{@key}", model._orm_bindings.change)
+    return model
 
   cursor: (model, key, query) ->
     query = _.extend(query or {}, {$one:true})

@@ -35,7 +35,7 @@ module.exports = class Many
       else
         @join_table = Utils.createJoinTableModel(@, @reverse_relation)
 
-  initializeModel: (model, key) -> @_ensureCollection(model)
+  initializeModel: (model, key) -> @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
@@ -177,7 +177,9 @@ module.exports = class Many
     @reverse_model_type.cursor(query).toJSON callback
 
   # TODO: ensure initialize is called only once and only from initializeModel
-  _ensureCollection: (model) ->
+  _ensureCollection: (model) -> @_bindBacklinks(model)
+
+  _bindBacklinks: (model) ->
     return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
