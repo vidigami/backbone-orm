@@ -166,6 +166,10 @@ module.exports = (model_type) ->
   model_type::clone = (key, value, options) ->
     return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
+    return @get('id') if @_orm_clone > 0
+    @_orm_clone or= 0
+    @_orm_clone++
+
     json = {}
     for key, value of @attributes
 
@@ -178,6 +182,7 @@ module.exports = (model_type) ->
       else
         json[key] = value
 
+    delete @_orm_clone if --@_orm_clone is 0
     return new @constructor(json)
 
   model_type::cursor = (key, query) ->
