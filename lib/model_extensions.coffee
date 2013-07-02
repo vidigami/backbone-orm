@@ -1,6 +1,6 @@
 util = require 'util'
-_ = @_ or require 'underscore'
-Backbone = @Backbone or require 'backbone'
+_ = require 'underscore'
+Backbone = require 'backbone'
 JSONUtils = require './json_utils'
 Queue = require 'queue-async'
 Utils = require './utils'
