@@ -136,7 +136,7 @@ module.exports = class One
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{id}") if not json
+      return callback(new Error "Model not found. Id #{@query(model, key)}") if not json
       model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
       delete related_model._orm_needs_load
       cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
@@ -159,7 +159,10 @@ module.exports = class One
     return model
 
   cursor: (model, key, query) ->
-    query = _.extend(query or {}, {$one:true})
+    return @reverse_model_type.cursor(@query(model, key, query))
+
+  query: (model, key, _query) ->
+    query = _.extend(_query or {}, {$one:true})
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
         if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
@@ -176,4 +179,4 @@ module.exports = class One
         query[@foreign_key] = model.id
 
     query.$values = ['id'] if key is @ids_accessor
-    return @reverse_model_type.cursor(query)
+    return query
