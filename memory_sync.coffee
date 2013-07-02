@@ -55,7 +55,7 @@ class MemorySync
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)
 
-  sync_fn = (method, model, options={}) -> # save for access by model extensions
+  model_type::sync = sync_fn = (method, model, options={}) -> # save for access by model extensions
     sync.initialize()
     return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
