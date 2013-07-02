@@ -3,3 +3,5 @@
 module.exports = (options) ->
   require('./all_flat')(options)
   require('./all_relational')(options)
+  require('./conventions/one')(options)
+  require('./conventions/many')(options)

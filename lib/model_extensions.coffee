@@ -27,7 +27,7 @@ module.exports = (model_type) ->
       related_model._orm_needs_load = true
       return related_model
 
-  model_type.cursor = (query={}) -> model_type._sync.cursor(query)
+  model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
@@ -55,10 +55,10 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Helpers
   ###################################
-  model_type::cache = model_type.cache = -> model_type._cache
+  model_type::cache = model_type.cache = -> model_type::sync('cache')
   model_type::schema = model_type.schema = -> model_type::sync('schema')
-  model_type::relation = model_type.relation = (key) -> model_type::sync('relation', key)
-  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type::sync('relation', key) then !!relation.embed else false
+  model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
+  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type.relation(key) then !!relation.embed else false
 
   ###################################
   # Backbone ORM - Model Overrides
@@ -161,6 +161,24 @@ module.exports = (model_type) ->
       original_error?(model, resp, options)
 
     return _original_save.call(@, attributes, options)
+
+  _original_clone = model_type::clone
+  model_type::clone = (key, value, options) ->
+    return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+    json = {}
+    for key, value of @attributes
+
+      if value instanceof Backbone.Collection
+        json[key] = new value.constructor(model.clone() for model in value.models)
+
+      else if value instanceof Backbone.Model
+        json[key] = value.clone()
+
+      else
+        json[key] = value
+
+    return new @constructor(json)
 
   model_type::cursor = (key, query) ->
     schema = model_type.schema() if model_type.schema

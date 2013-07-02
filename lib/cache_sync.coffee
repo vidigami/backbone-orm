@@ -11,10 +11,6 @@ class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
-    # publish methods and sync on model
-    @model_type._sync = @
-    @model_type._cache = Cache
-
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @wrapped_sync_fn('initialize')
@@ -60,8 +56,7 @@ class CacheSync
     Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
     @wrapped_sync_fn 'destroy', query, callback
 
-  schema: (key) -> @wrapped_sync_fn('schema')
-  relation: (key) -> @wrapped_sync_fn('relation', key)
+  cache: -> Cache
 
 module.exports = (model_type, wrapped_sync_fn) ->
   sync = new CacheSync(model_type, wrapped_sync_fn)
@@ -69,4 +64,5 @@ module.exports = (model_type, wrapped_sync_fn) ->
     sync.initialize()
     return wrapped_sync_fn.apply(null, arguments) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
-    sync[method].apply(sync, Array::slice.call(arguments, 1))
+    return wrapped_sync_fn('schema') if method is 'schema'
+    if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else return undefined
