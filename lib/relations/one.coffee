@@ -27,6 +27,7 @@ module.exports = class One
 
   set: (model, key, value, options) ->
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "One::set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
     if @type is 'belongsTo' and key is @foreign_key
@@ -51,7 +52,7 @@ module.exports = class One
         # delete related_model._orm_needs_load
         related_model._orm_needs_load
 
-      cache.update(@model_type.model_name, related_model) if (cache = @model_type.cache()) and not related_model._orm_needs_load
+      cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
 
     related_model = if value then @reverse_model_type.findOrCreate(value) else null
