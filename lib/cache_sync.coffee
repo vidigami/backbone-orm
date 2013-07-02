@@ -65,10 +65,8 @@ class CacheSync
 
 module.exports = (model_type, wrapped_sync_fn) ->
   sync = new CacheSync(model_type, wrapped_sync_fn)
-  sync.fn = (method, model, options={}) ->
+  return (method, model, options={}) ->
     sync.initialize()
     return wrapped_sync_fn.apply(null, arguments) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
     sync[method].apply(sync, Array::slice.call(arguments, 1))
-
-  return sync.fn
