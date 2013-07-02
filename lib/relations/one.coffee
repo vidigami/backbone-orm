@@ -33,21 +33,25 @@ module.exports = class One
       model._orm_lookups or= {}
       model._orm_lookups[@foreign_key] = value
       return @
-    previous_related_model = model.attributes[@key]
+    related_model = model.attributes[@key]
     if @has(model, @key, value)
-      return @ unless previous_related_model # null
+      return @ unless related_model # null
 
-      # if value instanceof Backbone.Model
-      #   if previous_related_model isnt value and not value._orm_needs_load
-      #     console.log "value.toJSON(): #{util.inspect(value.toJSON())}"
-      #     previous_related_model.set(value.toJSON())
-      #     delete previous_related_model._orm_needs_load
-      # else if _.isObject(value)
-      #   console.log "value: #{util.inspect(value)}"
-      #   previous_related_model.set(value)
-      #   delete previous_related_model._orm_needs_load
+      if value instanceof Backbone.Model
+        if (related_model isnt value) and not value._orm_needs_load
+          related_model.set(value.toJSON())
+          delete related_model._orm_needs_load
 
-      cache.update(@model_type.model_name, previous_related_model) if (cache = @model_type.cache()) and not previous_related_model._orm_needs_load
+      # TODO: how is this supposed along with cursor to work?
+      else if _.isObject(value)
+        # console.log "previous (#{related_model._orm_needs_load}): #{util.inspect(value)}"
+        # console.log "update 1: #{util.inspect(related_model.toJSON())}"
+        # related_model.set(value)
+        # console.log "update 2: #{util.inspect(related_model.toJSON())}"
+        # delete related_model._orm_needs_load
+        related_model._orm_needs_load
+
+      cache.update(@model_type.model_name, related_model) if (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
 
     related_model = if value then @reverse_model_type.findOrCreate(value) else null
@@ -116,7 +120,7 @@ module.exports = class One
   # TODO: optimize so don't need to check each time
   _isLoaded: (model, key) ->
     related_model = model.attributes[@key]
-    return related_model and not related_model._orm_needs_load
+    return !!(related_model and not related_model._orm_needs_load)
 
   # TODO: optimize so don't need to check each time
   # TODO: check which objects are already loaded in cache and ignore ids
@@ -125,7 +129,7 @@ module.exports = class One
 
     # not loaded but we have the id, create a model
     if key is @ids_accessor and @type is 'belongsTo'
-      model.set(@key, @reverse_model_type.findOrCreate({id: id = model._orm_lookups[@foreign_key]}))
+      model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
       return true
 
     # Will only load ids if key is @ids_accessor
