@@ -161,7 +161,10 @@ module.exports = class One
     query = _.extend(query or {}, {$one:true})
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
-        query.id = related_id if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
+        if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
+          query.id = related_id
+        else if related_model = model.attributes[@key]
+          query.id = related_model.get('id')
       else
         query[@foreign_key] = model.attributes.id
     else
