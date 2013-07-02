@@ -7,7 +7,6 @@ Cursor = require './cursor'
 
 module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
-
     @_in = {}
     (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value?.$in
     keys = _.keys(@_find)
@@ -26,10 +25,10 @@ module.exports = class MemoryCursor extends Cursor
     if keys.length or _.keys(@_in).length
       json = []
       if @_cursor.$ids
-        for id, model_json of @model_type._sync.store
+        for id, model_json of @store
           json.push(model_json) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), @_find)
       else
-        for id, model_json of @model_type._sync.store
+        for id, model_json of @store
           json.push(model_json) if _.isEqual(_.pick(model_json, keys), @_find)
         if _.keys(@_in).length
           json = _.filter json, (model_json) =>
@@ -39,9 +38,9 @@ module.exports = class MemoryCursor extends Cursor
       # filter by ids
       if @_cursor.$ids
         json = []
-        json.push(model_json) for id, model_json of @model_type._sync.store when _.contains(@_cursor.$ids, model_json.id)
+        json.push(model_json) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
       else
-        json = (model_json for id, model_json of @model_type._sync.store)
+        json = (model_json for id, model_json of @store)
 
     if @_cursor.$offset
       number = json.length - @_cursor.$offset
@@ -116,6 +115,6 @@ module.exports = class MemoryCursor extends Cursor
 
   _count: (keys) =>
     if keys.length
-      return _.reduce(@model_type._sync.store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), @_find) then memo + 1 else memo), 0)
+      return _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), @_find) then memo + 1 else memo), 0)
     else
-      return _.size(@model_type._sync.store)
+      return _.size(@store)

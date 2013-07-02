@@ -8,4 +8,3 @@ module.exports = (options) ->
   require('./flat/find')(options)
   require('./flat/page')(options)
   require('./flat/sort')(options)
-

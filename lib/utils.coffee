@@ -70,7 +70,7 @@ module.exports = class Utils
 
     class JoinTable extends Backbone.Model
       urlRoot: "#{Utils.parseUrl(_.result(relation1.model_type.prototype, 'url')).database_path}/#{table}"
-      @schema = schema
+      @schema: schema
       sync: relation1.model_type.createSync(JoinTable)
 
     return JoinTable

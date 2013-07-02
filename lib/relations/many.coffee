@@ -35,7 +35,7 @@ module.exports = class Many
       else
         @join_table = Utils.createJoinTableModel(@, @reverse_relation)
 
-  initializeModel: (model, key) -> @_ensureCollection(model)
+  initializeModel: (model, key) -> @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
@@ -60,14 +60,15 @@ module.exports = class Many
       return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
 
     # asynchronous path, needs load
-    is_loaded = @_fetchRelated model, key, (err) =>
-      return (if callback then callback(err) else console.log "Many: unhandled error: #{err}. Please supply a callback") if err
-      result = returnValue()
-      callback(null, if result.models then result.models else result) if callback
+    unless @manual_fetch
+      is_loaded = @_fetchRelated model, key, (err) =>
+        return (if callback then callback(err) else console.log "Many: unhandled error: #{err}. Please supply a callback") if err
+        result = returnValue()
+        callback(null, if result.models then result.models else result) if callback
 
     # synchronous path
     result = returnValue()
-    callback(null, if result.models then result.models else result) if is_loaded and callback
+    callback(null, if result.models then result.models else result) if (is_loaded or @manual_fetch) and callback
     return result
 
   save: (model, key, callback) ->
@@ -176,7 +177,9 @@ module.exports = class Many
     @reverse_model_type.cursor(query).toJSON callback
 
   # TODO: ensure initialize is called only once and only from initializeModel
-  _ensureCollection: (model) ->
+  _ensureCollection: (model) -> @_bindBacklinks(model)
+
+  _bindBacklinks: (model) ->
     return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
@@ -288,7 +291,7 @@ module.exports = class Many
         else
           collection.add(related_model = @reverse_model_type.findOrCreate(model_json))
 
-      cache.cacheUpdate(collection.models) if cache = @reverse_model_type.cache()
+      cache.update(@reverse_model_type.model_name, collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
 
   cursor: (model, key, query) ->

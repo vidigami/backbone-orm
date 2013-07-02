@@ -1,64 +1,74 @@
 util = require 'util'
 _ = require 'underscore'
 
-MemoryCursor = require './memory_cursor'
+CacheCursor = require './cache_cursor'
 Schema = require './schema'
 Utils = require './utils'
 
 Cache = require './cache'
 
 class CacheSync
-  constructor: (@model_type, @sync) ->
+  constructor: (@model_type, @wrapped_sync_fn) ->
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
     # publish methods and sync on model
-    @model_type._cache = @
+    @model_type._sync = @
+    @model_type._cache = Cache
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
-    @sync 'initialize', @model_type
+    @wrapped_sync_fn('initialize')
 
   read: (model, options) ->
     if model.models
-      # cached_models = Cache.findAll(@model_name)
+      # cached_models = Cache.findAll(@model_type.model_name)
     else
-      if (cached_model = Cache.find(@model_name, model.attributes.id)) # use cached
+      if (cached_model = Cache.find(@model_type.model_name, model.attributes.id)) # use cached
         # console.log "CACHE: read found #{@model_type.model_name} id: #{cached_model.get('id')}"
         return options.success(cached_model.toJSON())
-    @sync 'read', model, options
+    @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
-    @sync 'create', model, Utils.bbCallback (err, json) =>
-      Cache.findOrCreate(@model_name, @model_type, json) # add to the cache
+    @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
+      Cache.findOrCreate(@model_type.model_name, @model_type, json) # add to the cache
 
       return options.error(err) if err
       options.success(json)
 
   update: (model, options) ->
-    if (cached_model = Cache.find(@model_name, model.attributes.id))
+    if (cached_model = Cache.find(@model_type.model_name, model.attributes.id))
       # console.log "CACHE: update found #{@model_type.model_name} id: #{cached_model.get('id')}"
       cached_model.set(model.toJSON, options) if cached_model isnt model # update cache
 
-    @sync 'update', model, Utils.bbCallback (err, json) =>
+    @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
 
   delete: (model, options) ->
-    Cache.remove(@model_name, model.get('id')) # remove from the cache
+    Cache.remove(@model_type.model_name, model.get('id')) # remove from the cache
 
-    @sync 'delete', model, Utils.bbCallback (err, json) =>
+    @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
 
   ###################################
-  # Cache Extension
+  # Backbone ORM - Class Extensions
   ###################################
-  findOrCreate: (data) -> return Cache.findOrCreate(@model_name, @model_type, data)
-  cacheUpdate: (data) -> Cache.update(@model_name, data)
+  cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 
-module.exports = (model_type, wrapped_sync) ->
-  sync = new CacheSync(model_type, wrapped_sync)
+  destroy: (query, callback) ->
+    Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
+    @wrapped_sync_fn 'destroy', query, callback
 
-  return (method, model, options={}) ->
-    sync['initialize']()
+  schema: (key) -> @wrapped_sync_fn('schema')
+  relation: (key) -> @wrapped_sync_fn('relation', key)
+
+module.exports = (model_type, wrapped_sync_fn) ->
+  sync = new CacheSync(model_type, wrapped_sync_fn)
+  sync.fn = (method, model, options={}) ->
+    sync.initialize()
+    return wrapped_sync_fn.apply(null, arguments) if method is 'createSync' # create a new sync
+    return sync if method is 'sync'
     sync[method].apply(sync, Array::slice.call(arguments, 1))
+
+  return sync.fn

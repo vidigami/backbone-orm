@@ -56,7 +56,7 @@ runTests = (options, cache) ->
 
     describe 'fetch model', ->
       it 'fetches data', (done) ->
-        Flat.find {$one: true}, (err, model) ->
+        Flat.findOne (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(!!model, 'got model')
 

@@ -42,7 +42,7 @@ class MemorySync
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
-  cursor: (query={}) -> return new MemoryCursor(query, {model_type: @model_type})
+  cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   destroy: (query, callback) ->
     if (keys = _.keys(query)).length
@@ -59,11 +59,11 @@ class MemorySync
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)
 
-  sync_fn = (method, model, options={}) ->
-    sync['initialize']()
+  sync.fn = (method, model, options={}) -> # save for access by model extensions
+    sync.initialize()
     return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
     sync[method].apply(sync, Array::slice.call(arguments, 1))
 
-  require('./lib/model_extensions')(model_type, sync_fn) # mixin extensions
-  return if cache then require('./lib/cache_sync')(model_type, sync_fn) else sync_fn
+  require('./lib/model_extensions')(model_type) # mixin extensions
+  return if cache then require('./lib/cache_sync')(model_type, sync.fn) else sync.fn

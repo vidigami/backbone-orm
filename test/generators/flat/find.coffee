@@ -48,7 +48,7 @@ runTests = (options, cache) ->
         done()
 
     it 'Handles a find id query', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         Flat.find test_model.get('id'), (err, model) ->
@@ -59,7 +59,7 @@ runTests = (options, cache) ->
 
 
     it 'Handles another find id query', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -71,7 +71,7 @@ runTests = (options, cache) ->
 
 
     it 'Handles a find by query id', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -83,7 +83,7 @@ runTests = (options, cache) ->
 
 
     it 'Handles a name find query', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -95,7 +95,7 @@ runTests = (options, cache) ->
           done()
 
     it 'Handles a find $in query', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         $in = ['random_string', 'some_9', test_model.get('name')]
@@ -108,7 +108,7 @@ runTests = (options, cache) ->
           done()
 
     it 'Find can retrieve a boolean as a boolean', (done) ->
-      Flat.find {$one: true}, (err, test_model) ->
+      Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.equal(typeof test_model.get('boolean'), 'boolean', "Is a boolean:\nExpected: 'boolean', Actual: #{typeof test_model.get('boolean')}")
