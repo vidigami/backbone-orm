@@ -51,7 +51,7 @@ module.exports = class JSONUtils
 #            result[key] = value
 #            callback()
 
-      else if _.isArray(template)
+      if _.isArray(template)
         queue = new Queue()
 
         result = {}
