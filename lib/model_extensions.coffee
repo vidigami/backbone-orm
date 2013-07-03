@@ -10,8 +10,7 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Sync Accessors
   ###################################
-  model_type.sync = -> model_type._sync
-  model_type.createSync = (target_model_type, cache) -> model_type._sync.fn('createSync', target_model_type, cache)
+  model_type.createSync = (target_model_type, cache) -> model_type::sync('createSync', target_model_type, cache)
 
   ###################################
   # Backbone ORM - Class Extensions
@@ -28,38 +27,38 @@ module.exports = (model_type) ->
       related_model._orm_needs_load = true
       return related_model
 
-  model_type.cursor = (query={}) -> model_type._sync.cursor(query)
+  model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     query = {id: query} unless _.isObject(query)
-    model_type._sync.fn('destroy', query, callback)
+    model_type::sync('destroy', query, callback)
 
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
   model_type.count = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    model_type._sync.fn('cursor', query).count(callback)
+    model_type::sync('cursor', query).count(callback)
 
-  model_type.all = (callback) -> model_type._sync.fn('cursor', {}).toModels(callback)
+  model_type.all = (callback) -> model_type::sync('cursor', {}).toModels(callback)
 
   model_type.find = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    model_type._sync.fn('cursor', query).toModels(callback)
+    model_type::sync('cursor', query).toModels(callback)
 
   model_type.findOne = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     query.$one = true
-    model_type._sync.fn('cursor', query).toModels(callback)
+    model_type::sync('cursor', query).toModels(callback)
 
   ###################################
   # Backbone ORM - Helpers
   ###################################
-  model_type::cache = model_type.cache = -> model_type._cache
-  model_type::schema = model_type.schema = -> model_type._sync.fn('schema')
-  model_type::relation = model_type.relation = (key) -> model_type._sync.fn('relation', key)
-  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type._sync.fn('relation', key) then !!relation.embed else false
+  model_type::cache = model_type.cache = -> model_type::sync('cache')
+  model_type::schema = model_type.schema = -> model_type::sync('schema')
+  model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
+  model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type.relation(key) then !!relation.embed else false
 
   ###################################
   # Backbone ORM - Model Overrides
@@ -97,7 +96,7 @@ module.exports = (model_type) ->
       return value
 
   _original_toJSON = model_type::toJSON
-  model_type::toJSON = ->
+  model_type::toJSON = (options={}) ->
     schema = model_type.schema() if model_type.schema
 
     return @get('id') if @_orm_json > 0
@@ -106,18 +105,17 @@ module.exports = (model_type) ->
 
     json = {}
     for key, value of @attributes
-
       if value instanceof Backbone.Collection
-        if schema and (relation = schema.relation(key))
+        if not options.relations and schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
         else
-          json[key] = _.map(value.models, (model) -> if model then model.toJSON else null)
+          json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
 
       else if value instanceof Backbone.Model
-        if schema and (relation = schema.relation(key))
+        if not options.relations and schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
         else
-          json[key] = value.toJSON()
+          json[key] = value.toJSON(options)
 
       else
         json[key] = JSONUtils.valueToJSON(value)
@@ -162,6 +160,29 @@ module.exports = (model_type) ->
       original_error?(model, resp, options)
 
     return _original_save.call(@, attributes, options)
+
+  _original_clone = model_type::clone
+  model_type::clone = (key, value, options) ->
+    return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+    return @get('id') if @_orm_clone > 0
+    @_orm_clone or= 0
+    @_orm_clone++
+
+    json = {}
+    for key, value of @attributes
+
+      if value instanceof Backbone.Collection
+        json[key] = new value.constructor(model.clone() for model in value.models)
+
+      else if value instanceof Backbone.Model
+        json[key] = value.clone()
+
+      else
+        json[key] = value
+
+    delete @_orm_clone if --@_orm_clone is 0
+    return new @constructor(json)
 
   model_type::cursor = (key, query) ->
     schema = model_type.schema() if model_type.schema

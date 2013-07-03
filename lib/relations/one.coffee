@@ -43,14 +43,9 @@ module.exports = class One
           related_model.set(value.toJSON())
           delete related_model._orm_needs_load
 
-      # TODO: how is this supposed along with cursor to work?
       else if _.isObject(value)
-        # console.log "previous (#{related_model._orm_needs_load}): #{util.inspect(value)}"
-        # console.log "update 1: #{util.inspect(related_model.toJSON())}"
-        # related_model.set(value)
-        # console.log "update 2: #{util.inspect(related_model.toJSON())}"
-        # delete related_model._orm_needs_load
-        related_model._orm_needs_load
+        related_model.set(value)
+        delete related_model._orm_needs_load
 
       cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
@@ -128,15 +123,22 @@ module.exports = class One
   _fetchRelated: (model, key, callback) ->
     return true if @_isLoaded(model, key) # already loaded
 
+    # nothing to load
+    return true unless model.attributes.id
+
     # not loaded but we have the id, create a model
-    if key is @ids_accessor and @type is 'belongsTo'
-      model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
-      return true
+    if @type is 'belongsTo'
+      if key is @ids_accessor
+        model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
+        return true
+      # nothing to fetch
+      else if not (model._orm_lookups and model._orm_lookups[@foreign_key]) and not model.attributes[@key]
+        return true
 
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{id}") if not json
+      return callback(new Error "Model not found. Id #{util.inspect(@query(model, key))}") if not json
       model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
       delete related_model._orm_needs_load
       cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
@@ -145,26 +147,31 @@ module.exports = class One
     return false
 
   _bindBacklinks: (model) ->
+    return unless @reverse_relation
+
     model._orm_bindings = {}
     model._orm_bindings.change = (model) =>
       # update backlinks
-      if @reverse_relation and (previous_related_model = model.previous(@key))
+      if previous_related_model = model.previous(@key)
         if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
 
       # update backlinks
-      if @reverse_relation and (related_model = model.get(@key))
+      if related_model = model.get(@key)
         if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     model.on("change:#{@key}", model._orm_bindings.change)
     return model
 
   cursor: (model, key, query) ->
-    query = _.extend(query or {}, {$one:true})
+    return @reverse_model_type.cursor(@query(model, key, query))
+
+  query: (model, key, _query) ->
+    query = _.extend(_query or {}, {$one:true})
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
         if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
           query.id = related_id
-        else if related_model = model.attributes[@key]
+        else if related_model = related_model = model.attributes[@key]
           query.id = related_model.get('id')
       else
         query[@foreign_key] = model.attributes.id
@@ -176,4 +183,4 @@ module.exports = class One
         query[@foreign_key] = model.id
 
     query.$values = ['id'] if key is @ids_accessor
-    return @reverse_model_type.cursor(query)
+    return query

@@ -14,12 +14,11 @@ class MemorySync
     unless @model_type.model_name # model_name will come from the url
       @url = _.result(@model_type.prototype, 'url')
       @model_type.model_name = Utils.parseUrl(@url).model_name
-    @model_type._sync = @
-    @model_type._schema = new Schema(@model_type)
+    @schema = new Schema(@model_type)
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
-    @model_type._schema.initialize()
+    @schema.initialize()
 
   read: (model, options) ->
     options.success(if model.models then (json for id, json of @store) else @store[model.attributes.id])
@@ -52,18 +51,16 @@ class MemorySync
       @store = {}
     return callback()
 
-  schema: (key) -> @model_type._schema
-  relation: (key) -> @model_type._schema.relation(key)
-
 
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)
 
-  sync.fn = (method, model, options={}) -> # save for access by model extensions
+  model_type::sync = sync_fn = (method, model, options={}) -> # save for access by model extensions
     sync.initialize()
     return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
-    sync[method].apply(sync, Array::slice.call(arguments, 1))
+    return sync.schema if method is 'schema'
+    if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else return undefined
 
   require('./lib/model_extensions')(model_type) # mixin extensions
-  return if cache then require('./lib/cache_sync')(model_type, sync.fn) else sync.fn
+  return if cache then require('./lib/cache_sync')(model_type, sync_fn) else sync_fn

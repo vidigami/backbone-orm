@@ -189,10 +189,14 @@ runTests = (options, cache, embed) ->
           delete fetched_owner.attributes.reverse
 
           reverse = fetched_owner.get 'reverse', (err, reverse) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(reverse, 'loaded the model lazily')
-            assert.equal(reverse.get('owner_id'), test_model.get('id'))
-            done()
+            if fetched_owner.relationIsEmbedded('reverse')
+              assert.ok(err, "Errors: #{err}")
+              done()
+            else
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(reverse, 'loaded the model lazily')
+              assert.equal(reverse.get('owner_id'), test_model.get('id'))
+              done()
     #          assert.equal(reverse, null, 'has not loaded the model initially')
 
     it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->

@@ -45,12 +45,19 @@ module.exports = class Many
     value = [] if _.isUndefined(value) # Backbone clear or reset
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
-    # save previous
-    previous_models = _.clone(collection.models) if @reverse_relation
-
     # set the collection with found or created models
-    collection.reset(models = (collection.get(Utils.dataId(data)) or @reverse_model_type.findOrCreate(data) for data in value))
-    collection._orm_loaded = @_checkLoaded(model, key)
+    models = []
+    for data in value
+      if model = collection.get(Utils.dataId(data))
+        if data instanceof Backbone.Model
+          model.set(data.toJSON())
+        else if _.isObject(data)
+          model.set(data)
+      else
+        model = @reverse_model_type.findOrCreate(data)
+      models.push(model)
+    collection._orm_loaded = @_checkLoaded(models)
+    collection.reset(models)
     return @
 
   get: (model, key, callback) ->
@@ -213,18 +220,20 @@ module.exports = class Many
     return collection
 
   # TODO: optimize so don't need to check each time
-  _checkLoaded: (model, key) ->
-    collection = @_ensureCollection(model)
-    return false for related_model in collection.models when related_model._orm_needs_load
+  _checkLoaded: (models) ->
+    return false for related_model in models when related_model._orm_needs_load
     return true
 
   _isLoaded: (model, key) ->
     collection = @_ensureCollection(model)
     return false unless collection._orm_loaded
-    return @_checkLoaded(model, key)
+    return @_checkLoaded(collection.models)
 
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
+    # nothing to load
+    return callback(null, []) unless model.attributes.id
+
     if @reverse_relation.type is 'hasMany'
       collection = @_ensureCollection(model)
       return callback(null, collection.models) if collection._orm_loaded
