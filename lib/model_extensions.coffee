@@ -96,7 +96,7 @@ module.exports = (model_type) ->
       return value
 
   _original_toJSON = model_type::toJSON
-  model_type::toJSON = (options) ->
+  model_type::toJSON = (options={}) ->
     schema = model_type.schema() if model_type.schema
 
     return @get('id') if @_orm_json > 0
@@ -105,18 +105,17 @@ module.exports = (model_type) ->
 
     json = {}
     for key, value of @attributes
-
       if value instanceof Backbone.Collection
-        if schema and (relation = schema.relation(key))
+        if not options.relations and schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
         else
-          json[key] = _.map(value.models, (model) -> if model then model.toJSON else null)
+          json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
 
       else if value instanceof Backbone.Model
-        if schema and (relation = schema.relation(key))
+        if not options.relations and schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
         else
-          json[key] = value.toJSON()
+          json[key] = value.toJSON(options)
 
       else
         json[key] = JSONUtils.valueToJSON(value)

@@ -45,11 +45,18 @@ module.exports = class Many
     value = [] if _.isUndefined(value) # Backbone clear or reset
     throw new Error "HasMany::set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
-    # save previous
-    previous_models = _.clone(collection.models) if @reverse_relation
-
     # set the collection with found or created models
-    collection.reset(models = (collection.get(Utils.dataId(data)) or @reverse_model_type.findOrCreate(data) for data in value))
+    models = []
+    for data in value
+      if model = collection.get(Utils.dataId(data))
+        if data instanceof Backbone.Model
+          model.set(data.toJSON())
+        else if _.isObject(data)
+          model.set(data)
+      else
+        model = @reverse_model_type.findOrCreate(data)
+      models.push(model)
+    collection.reset(models)
     collection._orm_loaded = @_checkLoaded(model, key)
     return @
 
@@ -225,6 +232,9 @@ module.exports = class Many
 
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
+    # nothing to load
+    return callback(null, []) unless model.attributes.id
+
     if @reverse_relation.type is 'hasMany'
       collection = @_ensureCollection(model)
       return callback(null, collection.models) if collection._orm_loaded
