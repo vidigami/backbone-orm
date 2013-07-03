@@ -43,14 +43,9 @@ module.exports = class One
           related_model.set(value.toJSON())
           delete related_model._orm_needs_load
 
-      # TODO: how is this supposed along with cursor to work?
       else if _.isObject(value)
-        # console.log "previous (#{related_model._orm_needs_load}): #{util.inspect(value)}"
-        # console.log "update 1: #{util.inspect(related_model.toJSON())}"
-        # related_model.set(value)
-        # console.log "update 2: #{util.inspect(related_model.toJSON())}"
-        # delete related_model._orm_needs_load
-        related_model._orm_needs_load
+        related_model.set(value)
+        delete related_model._orm_needs_load
 
       cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
@@ -129,7 +124,7 @@ module.exports = class One
     return true if @_isLoaded(model, key) # already loaded
 
     # nothing to load
-    return callback(null, null) unless model.attributes.id
+    return true unless model.attributes.id
 
     # not loaded but we have the id, create a model
     if @type is 'belongsTo'
@@ -143,7 +138,7 @@ module.exports = class One
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{@query(model, key)}") if not json
+      return callback(new Error "Model not found. Id #{util.inspect(@query(model, key))}") if not json
       model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
       delete related_model._orm_needs_load
       cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
@@ -152,14 +147,16 @@ module.exports = class One
     return false
 
   _bindBacklinks: (model) ->
+    return unless @reverse_relation
+
     model._orm_bindings = {}
     model._orm_bindings.change = (model) =>
       # update backlinks
-      if @reverse_relation and (previous_related_model = model.previous(@key))
+      if previous_related_model = model.previous(@key)
         if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
 
       # update backlinks
-      if @reverse_relation and (related_model = model.get(@key))
+      if related_model = model.get(@key)
         if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     model.on("change:#{@key}", model._orm_bindings.change)

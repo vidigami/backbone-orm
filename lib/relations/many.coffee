@@ -56,8 +56,8 @@ module.exports = class Many
       else
         model = @reverse_model_type.findOrCreate(data)
       models.push(model)
+    collection._orm_loaded = @_checkLoaded(models)
     collection.reset(models)
-    collection._orm_loaded = @_checkLoaded(model, key)
     return @
 
   get: (model, key, callback) ->
@@ -220,15 +220,14 @@ module.exports = class Many
     return collection
 
   # TODO: optimize so don't need to check each time
-  _checkLoaded: (model, key) ->
-    collection = @_ensureCollection(model)
-    return false for related_model in collection.models when related_model._orm_needs_load
+  _checkLoaded: (models) ->
+    return false for related_model in models when related_model._orm_needs_load
     return true
 
   _isLoaded: (model, key) ->
     collection = @_ensureCollection(model)
     return false unless collection._orm_loaded
-    return @_checkLoaded(model, key)
+    return @_checkLoaded(collection.models)
 
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchPlaceholders: (model, key, callback) ->
