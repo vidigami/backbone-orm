@@ -132,9 +132,13 @@ module.exports = class One
     return callback(null, null) unless model.attributes.id
 
     # not loaded but we have the id, create a model
-    if key is @ids_accessor and @type is 'belongsTo'
-      model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
-      return true
+    if @type is 'belongsTo'
+      if key is @ids_accessor
+        model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
+        return true
+      # nothing to fetch
+      else if not (model._orm_lookups and model._orm_lookups[@foreign_key]) and not model.attributes[@key]
+        return true
 
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
@@ -170,7 +174,7 @@ module.exports = class One
       if @type is 'belongsTo'
         if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
           query.id = related_id
-        else if related_model = model.attributes[@key]
+        else if related_model = related_model = model.attributes[@key]
           query.id = related_model.get('id')
       else
         query[@foreign_key] = model.attributes.id
