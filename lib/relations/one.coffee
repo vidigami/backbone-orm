@@ -21,7 +21,7 @@ module.exports = class One
         @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
       reverse_schema = @reverse_model_type.schema()
       reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
+      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 
