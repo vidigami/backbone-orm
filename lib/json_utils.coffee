@@ -43,13 +43,13 @@ module.exports = class JSONUtils
       return callback(null, null) unless models
 
       # pick keys
-      if _.isString(template)
-        queue.defer (callback) ->
-          # TODO allow for json or models
-          models.get template, (err, value) ->
-            return callback(err) if err
-            result[key] = value
-            callback()
+#      if _.isString(template)
+#        queue.defer (callback) ->
+#          # TODO allow for json or models
+#          models.get template, (err, value) ->
+#            return callback(err) if err
+#            result[key] = value
+#            callback()
 
       else if _.isArray(template)
         queue = new Queue()
