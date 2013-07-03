@@ -34,6 +34,7 @@ module.exports = class JSONUtils
       value[key] = @valueToJSON(data) for key, data of value
     return value
 
+  # template formats: 'field', ['field', ..], template dsl { }, function()
   @renderJSON = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -42,7 +43,15 @@ module.exports = class JSONUtils
       return callback(null, null) unless models
 
       # pick keys
-      if _.isArray(template)
+      if _.isString(template)
+        queue.defer (callback) ->
+          # TODO allow for json or models
+          models.get template, (err, value) ->
+            return callback(err) if err
+            result[key] = value
+            callback()
+
+      else if _.isArray(template)
         queue = new Queue()
 
         result = {}
@@ -60,7 +69,7 @@ module.exports = class JSONUtils
           callback(null, result)
 
       # render template
-      else
+      else if _.isFunction(template)
         # TODO allow for json or models
         template models, options, (err, json) ->
           return callback(err) if err

@@ -6,28 +6,12 @@ module.exports = (grunt) ->
     copy:
       all:
         expand: true
-        src: ['server/**', 'node_modules/**', 'test/**', 'public/**', '!**/*.coffee']
-        dest: '_build'
-      node_modules:
-        expand: true
-        src: ['node_modules/**', '!**/*.coffee']
-        dest: '_build'
-      server:
-        expand: true
-        src: ['server/**', '!**/*.coffee']
-        dest: '_build'
-      test:
-        expand: true
-        src: ['server/**', 'test/**', '!**/*.coffee']
-        dest: '_build'
-      pub:
-        expand: true
-        src: ['public/**', '!**/*.coffee']
+        src: ['**/*', '!_build', '!_build/**/*', '!**/*.coffee']
         dest: '_build'
 
     watch:
       coffee:
-        files: ['server/**/*.coffee', 'node_modules/**/*.coffee', 'test/**/*.coffee', '!node_modules/eco/**/*']
+        files: ['**/*.coffee', '!_build/**/*', '!node_modules/**/*']
         tasks: ['coffee:map']
         options:
           nospawn: true
@@ -37,7 +21,7 @@ module.exports = (grunt) ->
         options:
           sourceMap: true
         expand: true
-        src: ['server/**/*.coffee', 'node_modules/**/*.coffee', 'test/**/*.coffee', '!node_modules/eco/**/*']
+        src: ['**/*.coffee', '!_build/**/*', '!node_modules/**/*']
         dest: '_build'
         ext: '.js'
 
