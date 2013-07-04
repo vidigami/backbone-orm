@@ -34,7 +34,9 @@ module.exports = class JSONUtils
       value[key] = @valueToJSON(data) for key, data of value
     return value
 
+
   # template formats: 'field', ['field', ..], template dsl { }, function()
+  # TODO allow for json or models
   @renderJSON = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -42,38 +44,17 @@ module.exports = class JSONUtils
     unless _.isArray(models)
       return callback(null, null) unless models
 
-      # pick keys
-#      if _.isString(template)
-#        queue.defer (callback) ->
-#          # TODO allow for json or models
-#          models.get template, (err, value) ->
-#            return callback(err) if err
-#            result[key] = value
-#            callback()
+      # Single field
+      return models.get(template, callback) if _.isString(template)
 
-      if _.isArray(template)
-        queue = new Queue()
+      # Array of fields, pick keys
+      return JSONUtils.renderJSONKeys(models, template, options, callback) if _.isArray(template)
 
-        result = {}
-        for key in template
-          do (key) -> queue.defer (callback) ->
+      # Render template function
+      return template(models, options, callback) if _.isFunction(template)
 
-            # TODO allow for json or models
-            models.get key, (err, value) ->
-              return callback(err) if err
-              result[key] = value
-              callback()
-
-        queue.await (err) ->
-          return callback(err) if err
-          callback(null, result)
-
-      # render template
-      else if _.isFunction(template)
-        # TODO allow for json or models
-        template models, options, (err, json) ->
-          return callback(err) if err
-          callback(null, json)
+      # dsl object
+      return JSONUtils.renderJSONDSL(models, template, options, callback)
 
     # many
     else
@@ -91,6 +72,87 @@ module.exports = class JSONUtils
       queue.await (err) ->
         return callback(err) if err
         callback(null, result)
+
+  @renderJSONDSL = (model, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    queue = new Queue()
+    result = {}
+    if template.$select
+      queue.defer (callback) ->
+        JSONUtils.renderJSONKeys model, template.$select, options, (err, related_json) ->
+          return callback(err) if err
+          result = related_json
+          callback()
+
+    for key, args of template
+      continue if key is '$select'
+
+      do (key, args) ->
+
+        # 'name': 'full_name'
+        if _.isString(args)
+          queue.defer (callback) ->
+            model.get key, (err, value) ->
+              return callback(err) if err
+              result[key] = value
+              callback()
+
+        # can_delete: {fn: (photo, options, callback) -> }
+        else if _.isFunction(args.fn)
+          queue.defer (callback) ->
+            template = _.extend({}, args, fn: undefined)
+            args.fn model, options, (err, json) ->
+              result[key] = json
+              callback()
+
+        # is_great: fn: 'isGreatFor', args: [options.user]}
+        else if args.fn
+          queue.defer (callback) ->
+            args.args or= []
+            args.args.push((err, json) -> result[key] = json; callback())
+            model[args.fn].apply(model, args.args)
+
+        # total_greats:   {key: 'greats', $count: true}
+        # classroom:      {$select: ['id', 'name']}
+        else
+          if args.key
+            field = args.key
+            delete args.key
+          else
+            field = key
+          console.log (field)
+          console.log model.relation(field)
+          if relation = model.relation(field)
+            queue.defer (callback) ->
+              relation.cursor(model, field, args).toJSON (err, value) ->
+                console.log key, field, value
+                return callback(err) if err
+                result[key] = value
+                callback()
+
+    queue.await (err) ->
+      return callback(err) if err
+      callback(null, result)
+
+  @renderJSONKeys = (model, keys, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    queue = new Queue()
+    result = {}
+
+    for key in keys
+      do (key) ->
+        queue.defer (callback) ->
+          # TODO allow for json or models
+          model.get key, (err, value) ->
+            return callback(err) if err
+            result[key] = value
+            callback()
+
+    queue.await (err) ->
+      return callback(err) if err
+      callback(null, result)
 
   @appendJSON = (json, related_model, attribute_name, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 5
