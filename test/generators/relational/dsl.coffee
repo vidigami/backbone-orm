@@ -89,109 +89,109 @@ runTests = (options, cache) ->
       queue.await done
 
 
-#    it 'Handles rendering a single field', (done) ->
-#      FIELD = 'created_at'
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, FIELD, (err, value) ->
-#          assert.ok(value, 'Returned a value')
-#          assert.equal(test_model.get(FIELD), value, "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{value}")
-#          done()
-#
-#
-#    it 'Handles rendering a list of fields', (done) ->
-#      FIELDS = ['created_at', 'name']
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, FIELDS, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          for field in FIELDS
-#            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-#          done()
-#
-#
-#    it 'Handles rendering via a function', (done) ->
-#      FIELDS = ['created_at', 'name']
-#      fn = (model, options, callback) ->
-#        json = {}
-#        (json[field] = model.get(field)) for field in FIELDS
-#        callback(null, json)
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, fn, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          for field in FIELDS
-#            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-#          done()
-#
-#    # $select: ['created_at', 'name']
-#    it 'Handles rendering $select with dsl', (done) ->
-#      FIELDS = ['created_at', 'name']
-#      TEMPLATE =
-#        $select: FIELDS
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          for field in FIELDS
-#            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-#          done()
-#
-#    # updated: 'updated_at'
-#    it 'Handles rendering $select and a name: "string" with dsl', (done) ->
-#      FIELDS = ['created_at', 'name']
-#      FIELD = 'updated_at'
-#      FIELD_AS = 'updated'
-#      TEMPLATE =
-#        $select: FIELDS
-#      TEMPLATE[FIELD_AS] = FIELD
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          for field in FIELDS
-#            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-#          assert.equal(test_model.get(FIELD), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD_AS]}")
-#          done()
-#
-#
-#    # can_delete: {fn: (photo, options, callback) -> }
-#    it 'Handles rendering a function in the dsl', (done) ->
-#      FIELD = 'name'
-#      FIELD_AS = 'upper_name'
-#      TEMPLATE = {}
-#      TEMPLATE[FIELD_AS] =
-#        fn: (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
-#          done()
-#
-#
-#    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
-#    it 'Handles rendering a models method in the dsl', (done) ->
-#      FN = 'cat'
-#      ARG = 'meow'
-#      FIELD = 'name'
-#      FIELD_AS = 'cat_name'
-#      TEMPLATE = {}
-#      TEMPLATE[FIELD_AS] = {fn: FN, args: [FIELD, ARG] }
-#      Flat.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        EXPECTED = test_model.get(FIELD) + ARG
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          assert.equal(EXPECTED, json[FIELD_AS], "Returned the correct value:\nExpected: #{EXPECTED}, Actual: #{json[FIELD_AS]}")
-#          done()
+    it 'Handles rendering a single field', (done) ->
+      FIELD = 'created_at'
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, FIELD, (err, value) ->
+          assert.ok(value, 'Returned a value')
+          assert.equal(test_model.get(FIELD), value, "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{value}")
+          done()
+
+
+    it 'Handles rendering a list of fields', (done) ->
+      FIELDS = ['created_at', 'name']
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, FIELDS, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for field in FIELDS
+            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
+          done()
+
+
+    it 'Handles rendering via a function', (done) ->
+      FIELDS = ['created_at', 'name']
+      fn = (model, options, callback) ->
+        json = {}
+        (json[field] = model.get(field)) for field in FIELDS
+        callback(null, json)
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, fn, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for field in FIELDS
+            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
+          done()
+
+    # $select: ['created_at', 'name']
+    it 'Handles rendering $select with dsl', (done) ->
+      FIELDS = ['created_at', 'name']
+      TEMPLATE =
+        $select: FIELDS
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for field in FIELDS
+            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
+          done()
+
+    # updated: 'updated_at'
+    it 'Handles rendering $select and a name: "string" with dsl', (done) ->
+      FIELDS = ['created_at', 'name']
+      FIELD = 'updated_at'
+      FIELD_AS = 'updated'
+      TEMPLATE =
+        $select: FIELDS
+      TEMPLATE[FIELD_AS] = FIELD
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for field in FIELDS
+            assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
+          assert.equal(test_model.get(FIELD), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD_AS]}")
+          done()
+
+
+    # can_delete: {fn: (photo, options, callback) -> }
+    it 'Handles rendering a function in the dsl', (done) ->
+      FIELD = 'name'
+      FIELD_AS = 'upper_name'
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] =
+        fn: (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
+          done()
+
+
+    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    it 'Handles rendering a models method in the dsl', (done) ->
+      FN = 'cat'
+      ARG = 'meow'
+      FIELD = 'name'
+      FIELD_AS = 'cat_name'
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] = {fn: FN, args: [FIELD, ARG] }
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        EXPECTED = test_model.get(FIELD) + ARG
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.equal(EXPECTED, json[FIELD_AS], "Returned the correct value:\nExpected: #{EXPECTED}, Actual: #{json[FIELD_AS]}")
+          done()
 
 #   album:         {$select: ['id', 'name']}
     it 'Handles retrieving a belongsTo relation in the dsl with a cursor query', (done) ->
@@ -239,37 +239,37 @@ runTests = (options, cache) ->
 #
 
     #   album:         {$select: ['id', 'name']}
-    it 'Handles retrieving a hasMany relation in the dsl with a cursor query', (done) ->
-      FIELD = 'reverse'
-      FIELDS = ['id', 'name']
-      TEMPLATE = {}
-      TEMPLATE[FIELD] = {$select: FIELDS}
-      Reverse.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-          assert.ok(json, 'Returned json')
-          assert.ok(related = json[FIELD], 'json has related model')
-          for field in FIELDS
-            assert.ok(related[field], "Related json has a #{field} field")
-          done()
-
-    #   total_greats:  {key: 'greats', $count: true}
-    it 'Handles retrieving a hasMany relation in the dsl with a key and cursor query', (done) ->
-      FIELD = 'reverse'
-      FIELD_AS = 'a_reverse'
-      FIELDS = ['id', 'name']
-      TEMPLATE = {}
-      TEMPLATE[FIELD_AS] = {key: FIELD, $select: FIELDS}
-      Reverse.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-          assert.ok(json, 'Returned json')
-          assert.ok(related = json[FIELD_AS], 'json has related model')
-          for field in FIELDS
-            assert.ok(related[field], "Related json has a #{field} field")
-          done()
+#    it 'Handles retrieving a hasMany relation in the dsl with a cursor query', (done) ->
+#      FIELD = 'reverse'
+#      FIELDS = ['id', 'name']
+#      TEMPLATE = {}
+#      TEMPLATE[FIELD] = {$select: FIELDS}
+#      Reverse.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+#          assert.ok(json, 'Returned json')
+#          assert.ok(related = json[FIELD], 'json has related model')
+#          for field in FIELDS
+#            assert.ok(related[field], "Related json has a #{field} field")
+#          done()
+#
+#    #   total_greats:  {key: 'greats', $count: true}
+#    it 'Handles retrieving a hasMany relation in the dsl with a key and cursor query', (done) ->
+#      FIELD = 'reverse'
+#      FIELD_AS = 'a_reverse'
+#      FIELDS = ['id', 'name']
+#      TEMPLATE = {}
+#      TEMPLATE[FIELD_AS] = {key: FIELD, $select: FIELDS}
+#      Reverse.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+#          assert.ok(json, 'Returned json')
+#          assert.ok(related = json[FIELD_AS], 'json has related model')
+#          for field in FIELDS
+#            assert.ok(related[field], "Related json has a #{field} field")
+#          done()
 
 
 # TODO: explain required set up
