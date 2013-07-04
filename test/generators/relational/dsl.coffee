@@ -17,7 +17,9 @@ runTests = (options, cache) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    @schema: _.defaults({
+      owner: -> ['hasOne', Owner]
+    }, BASE_SCHEMA)
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Flat, cache)
 
@@ -31,7 +33,7 @@ runTests = (options, cache) ->
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
-      flats: -> ['hasMany', Flat]
+      flat: -> ['belongsTo', Flat]
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
@@ -79,7 +81,7 @@ runTests = (options, cache) ->
         for owner in MODELS.owner
           do (owner) ->
             owner.set({
-              flats: [MODELS.flat.pop(), MODELS.flat.pop()]
+              flat: MODELS.flat[0]
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
             save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
@@ -89,7 +91,8 @@ runTests = (options, cache) ->
       queue.await done
 
 
-    it 'Handles rendering a single field', (done) ->
+    # renderJSON (no dsl)
+    it 'renderJSON (no dsl) handles rendering a single field', (done) ->
       FIELD = 'created_at'
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -100,7 +103,7 @@ runTests = (options, cache) ->
           done()
 
 
-    it 'Handles rendering a list of fields', (done) ->
+    it 'renderJSON (no dsl) hendering a list of fields', (done) ->
       FIELDS = ['created_at', 'name']
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -112,7 +115,7 @@ runTests = (options, cache) ->
           done()
 
 
-    it 'Handles rendering via a function', (done) ->
+    it 'renderJSON (no dsl) handles rendering via a function', (done) ->
       FIELDS = ['created_at', 'name']
       fn = (model, options, callback) ->
         json = {}
@@ -126,6 +129,19 @@ runTests = (options, cache) ->
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
           done()
+
+    # DSL example
+    # {
+    #   $select:       ['id', 'taken_at', 'rotation', 'width', 'height', 'image_id']
+    #   name:          'source_file_name'
+    #   album:         {$select: ['id', 'name']}
+    #   classroom:     {$select: ['id', 'name']}
+    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    #   total_greats:  {key: 'greats', $count: true}
+    #   is_fave:       {fn: 'isCoverFor', args: [options.user]}
+    #   can_delete:    {fn: (photo, options, callback) ->  }
+    # }
+    #
 
     # $select: ['created_at', 'name']
     it 'Handles rendering $select with dsl', (done) ->
@@ -175,9 +191,8 @@ runTests = (options, cache) ->
           assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
           done()
 
-
     #   is_great:      {fn: 'isGreatFor', args: [options.user]}
-    it 'Handles rendering a models method in the dsl', (done) ->
+    it 'Handles rendering a models method with args in the dsl', (done) ->
       FN = 'cat'
       ARG = 'meow'
       FIELD = 'name'
@@ -193,7 +208,7 @@ runTests = (options, cache) ->
           assert.equal(EXPECTED, json[FIELD_AS], "Returned the correct value:\nExpected: #{EXPECTED}, Actual: #{json[FIELD_AS]}")
           done()
 
-#   album:         {$select: ['id', 'name']}
+    #   album:         {$select: ['id', 'name']}
     it 'Handles retrieving a belongsTo relation in the dsl with a cursor query', (done) ->
       FIELD = 'owner'
       FIELDS = ['id', 'name']
@@ -226,50 +241,73 @@ runTests = (options, cache) ->
             assert.ok(related[field], "Related json has a #{field} field")
           done()
 
-# {
-#   $select:       ['id', 'taken_at', 'rotation', 'width', 'height', 'image_id']
-#   name:          'source_file_name'
-#   album:         {$select: ['id', 'name']}
-#   classroom:     {$select: ['id', 'name']}
-#   is_great:      {fn: 'isGreatFor', args: [options.user]}
-#   total_greats:  {key: 'greats', $count: true}
-#   is_fave:       {fn: 'isCoverFor', args: [options.user]}
-#   can_delete:    {fn: (photo, options, callback) ->  }
-# }
-#
+    #   album:         {$select: ['id', 'name']}
+    it 'Handles retrieving a hasOne relation in the dsl with a cursor query', (done) ->
+      FIELD = 'owner'
+      FIELDS = ['id', 'name']
+      TEMPLATE = {}
+      TEMPLATE[FIELD] = {$select: FIELDS}
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.ok(related = json[FIELD], 'json has related model')
+          for field in FIELDS
+            assert.ok(related[field], "Related json has a #{field} field")
+          done()
+
+    #   total_greats:  {key: 'greats', $count: true}
+    it 'Handles retrieving a hasOne relation in the dsl with a key and cursor query', (done) ->
+      FIELD = 'owner'
+      FIELD_AS = 'an_owner'
+      FIELDS = ['id', 'name']
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] = {key: FIELD, $select: FIELDS}
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.ok(related = json[FIELD_AS], 'json has related model')
+          for field in FIELDS
+            assert.ok(related[field], "Related json has a #{field} field")
+          done()
 
     #   album:         {$select: ['id', 'name']}
-#    it 'Handles retrieving a hasMany relation in the dsl with a cursor query', (done) ->
-#      FIELD = 'reverse'
-#      FIELDS = ['id', 'name']
-#      TEMPLATE = {}
-#      TEMPLATE[FIELD] = {$select: FIELDS}
-#      Reverse.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          assert.ok(related = json[FIELD], 'json has related model')
-#          for field in FIELDS
-#            assert.ok(related[field], "Related json has a #{field} field")
-#          done()
-#
-#    #   total_greats:  {key: 'greats', $count: true}
-#    it 'Handles retrieving a hasMany relation in the dsl with a key and cursor query', (done) ->
-#      FIELD = 'reverse'
-#      FIELD_AS = 'a_reverse'
-#      FIELDS = ['id', 'name']
-#      TEMPLATE = {}
-#      TEMPLATE[FIELD_AS] = {key: FIELD, $select: FIELDS}
-#      Reverse.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          assert.ok(json, 'Returned json')
-#          assert.ok(related = json[FIELD_AS], 'json has related model')
-#          for field in FIELDS
-#            assert.ok(related[field], "Related json has a #{field} field")
-#          done()
+    it 'Handles retrieving a hasMany relation in the dsl with a cursor query', (done) ->
+      FIELD = 'reverses'
+      FIELDS = ['id', 'name']
+      TEMPLATE = {}
+      TEMPLATE[FIELD] = {$select: FIELDS}
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for owner_json in json
+            assert.ok(related = owner_json[FIELD], 'json has related model')
+            for field in FIELDS
+              assert.ok(related[field], "Related json has a #{field} field")
+          done()
+
+    #   total_greats:  {key: 'greats', $count: true}
+    it 'Handles retrieving a hasMany relation in the dsl with a key and cursor query', (done) ->
+      FIELD = 'reverses'
+      FIELD_AS = 'some_reverses'
+      FIELDS = ['id', 'name']
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] = {key: FIELD, $select: FIELDS}
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          for owner_json in json
+            assert.ok(related = owner_json[FIELD_AS], 'json has related model')
+            for field in FIELDS
+              assert.ok(related[field], "Related json has a #{field} field")
+          done()
 
 
 # TODO: explain required set up

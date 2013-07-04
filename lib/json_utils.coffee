@@ -121,12 +121,9 @@ module.exports = class JSONUtils
             delete args.key
           else
             field = key
-          console.log (field)
-          console.log model.relation(field)
           if relation = model.relation(field)
             queue.defer (callback) ->
               relation.cursor(model, field, args).toJSON (err, value) ->
-                console.log key, field, value
                 return callback(err) if err
                 result[key] = value
                 callback()
