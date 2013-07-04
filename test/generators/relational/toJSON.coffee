@@ -35,7 +35,6 @@ runTests = (options, cache) ->
       flat: -> ['belongsTo', Flat]
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
-    cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner, cache)
 
   describe "JSONUtils.renderJSON (cache: #{cache})", ->
@@ -62,17 +61,14 @@ runTests = (options, cache) ->
         create_queue.defer (callback) -> Fabricator.create(Flat, 2*BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
           created_at: Fabricator.date
-          updated_at: Fabricator.date
         }, (err, models) -> MODELS.flat = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
           name: Fabricator.uniqueId('reverse_')
           created_at: Fabricator.date
-          updated_at: Fabricator.date
         }, (err, models) -> MODELS.reverse = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
           name: Fabricator.uniqueId('owner_')
           created_at: Fabricator.date
-          updated_at: Fabricator.date
         }, (err, models) -> MODELS.owner = models; callback(err))
 
         create_queue.await callback
@@ -105,7 +101,8 @@ runTests = (options, cache) ->
           assert.equal(test_model.get(FIELD), value, "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{value}")
           done()
 
-    it 'renderJSON (no dsl) handles a list of fields', (done) ->
+
+    it 'renderJSON (no dsl) hendering a list of fields', (done) ->
       FIELDS = ['created_at', 'name']
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -114,8 +111,8 @@ runTests = (options, cache) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
+
 
     it 'renderJSON (no dsl) handles rendering via a function', (done) ->
       FIELDS = ['created_at', 'name']
@@ -130,7 +127,6 @@ runTests = (options, cache) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     # DSL example
@@ -158,12 +154,11 @@ runTests = (options, cache) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     # updated: 'updated_at'
     it 'Handles rendering $select and a name: "string" with dsl', (done) ->
-      FIELDS = ['created_at']
+      FIELDS = ['created_at', 'name']
       FIELD = 'updated_at'
       FIELD_AS = 'updated'
       TEMPLATE =
@@ -177,8 +172,8 @@ runTests = (options, cache) ->
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
           assert.equal(test_model.get(FIELD), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD_AS]}")
-          assert.ok(!json.name, 'Does not have an excluded field')
           done()
+
 
     # can_delete: {fn: (photo, options, callback) -> }
     it 'Handles rendering a function in the dsl', (done) ->
@@ -193,7 +188,6 @@ runTests = (options, cache) ->
         JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   is_great:      {fn: 'isGreatFor', args: [options.user]}
@@ -211,11 +205,10 @@ runTests = (options, cache) ->
         JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.equal(EXPECTED, json[FIELD_AS], "Returned the correct value:\nExpected: #{EXPECTED}, Actual: #{json[FIELD_AS]}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   album:         {$select: ['id', 'name']}
-    it 'Handles rendering a belongsTo relation in the dsl with a cursor query', (done) ->
+    it 'Handles retrieving a belongsTo relation in the dsl with a cursor query', (done) ->
       FIELD = 'owner'
       FIELDS = ['id', 'name']
       TEMPLATE = {}
@@ -228,11 +221,10 @@ runTests = (options, cache) ->
           assert.ok(related = json[FIELD], 'json has related model')
           for field in FIELDS
             assert.ok(related[field], "Related json has a #{field} field")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   total_greats:  {key: 'greats', $count: true}
-    it 'Handles rendering a belongsTo relation in the dsl with a key and cursor query', (done) ->
+    it 'Handles retrieving a belongsTo relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'owner'
       FIELD_AS = 'an_owner'
       FIELDS = ['id', 'name']
@@ -246,11 +238,10 @@ runTests = (options, cache) ->
           assert.ok(related = json[FIELD_AS], 'json has related model')
           for field in FIELDS
             assert.ok(related[field], "Related json has a #{field} field")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   album:         {$select: ['id', 'name']}
-    it 'Handles rendering a hasOne relation in the dsl with a cursor query', (done) ->
+    it 'Handles retrieving a hasOne relation in the dsl with a cursor query', (done) ->
       FIELD = 'owner'
       FIELDS = ['id', 'name']
       TEMPLATE = {}
@@ -263,11 +254,10 @@ runTests = (options, cache) ->
           assert.ok(related = json[FIELD], 'json has related model')
           for field in FIELDS
             assert.ok(related[field], "Related json has a #{field} field")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   total_greats:  {key: 'greats', $count: true}
-    it 'Handles rendering a hasOne relation in the dsl with a key and cursor query', (done) ->
+    it 'Handles retrieving a hasOne relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'owner'
       FIELD_AS = 'an_owner'
       FIELDS = ['id', 'name']
@@ -281,11 +271,10 @@ runTests = (options, cache) ->
           assert.ok(related = json[FIELD_AS], 'json has related model')
           for field in FIELDS
             assert.ok(related[field], "Related json has a #{field} field")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
     #   album:         {$select: ['id', 'name']}
-    it 'Handles rendering a hasMany relation in the dsl with a cursor query', (done) ->
+    it 'Handles retrieving a hasMany relation in the dsl with a cursor query', (done) ->
       FIELD = 'reverses'
       FIELDS = ['id', 'name']
       TEMPLATE = {}
@@ -299,11 +288,10 @@ runTests = (options, cache) ->
             assert.ok(related = owner_json[FIELD], 'json has related model')
             for field in FIELDS
               assert.ok(related[field], "Related json has a #{field} field")
-            assert.ok(!owner_json.updated_at, 'Does not have an excluded field')
           done()
 
     #   total_greats:  {key: 'greats', $count: true}
-    it 'Handles rendering a hasMany relation in the dsl with a key and cursor query', (done) ->
+    it 'Handles retrieving a hasMany relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'reverses'
       FIELD_AS = 'some_reverses'
       FIELDS = ['id', 'name']
@@ -318,59 +306,6 @@ runTests = (options, cache) ->
             assert.ok(related = owner_json[FIELD_AS], 'json has related model')
             for field in FIELDS
               assert.ok(related[field], "Related json has a #{field} field")
-            assert.ok(!owner_json.updated_at, 'Does not have an excluded field')
-          done()
-
-    #   album:         {$select: ['id', 'name']}
-    it 'Handles rendering a hasMany relation in the dsl with a $count query', (done) ->
-      REVERSE_COUNT = 2
-      FIELD = 'reverse_count'
-      TEMPLATE = {}
-      TEMPLATE[FIELD] = {key: 'reverses', $count: true}
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-          assert.ok(json, 'Returned json')
-          assert.ok(count = json[FIELD], 'json has the related count')
-          assert.equal(REVERSE_COUNT, count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{count}")
-          assert.ok(!json.updated_at, 'Does not have an excluded field')
-          done()
-
-    #   All
-    it 'Handles rendering a complete dsl', (done) ->
-      REVERSE_COUNT = 2
-
-      TEMPLATE =
-        $select:        ['id', 'name']
-        this_name:      'name'
-        reverses:       {$select: ['id', 'name']}
-        reverse_count:  {key: 'reverses', $count: true}
-        mew:            {fn: 'cat', args: ['name', 'meow']}
-        upper_name:     {fn: (model, options, callback) -> callback(null, model.get('name').toUpperCase())}
-
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-          assert.ok(json, 'Returned json')
-
-          assert.equal(test_model.get('id'), json.id, "Returned the correct value:\nExpected: #{test_model.get('id')}, Actual: #{json.id}")
-          assert.equal(test_model.get('name'), json.name, "Returned the correct value:\nExpected: #{test_model.get('name')}, Actual: #{json.name}")
-          assert.equal(test_model.get('name'), json.this_name, "Returned the correct value:\nExpected: #{test_model.get('name')}, Actual: #{json.this_name}")
-
-          for reverse in json.reverses
-            assert.ok(reverse.id, "Has reverses with the correct fields")
-            assert.ok(reverse.name, "Has reverses with the correct fields")
-
-          assert.equal(REVERSE_COUNT, json.reverse_count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{json.reverse_count}")
-
-          mew = test_model.get('name') + 'meow'
-          assert.equal(mew, json.mew, "Returned the correct value:\nExpected: #{mew}, Actual: #{json.mew}")
-
-          upper_name = test_model.get('name').toUpperCase()
-          assert.equal(upper_name, json.upper_name, "Returned the correct value:\nExpected: #{upper_name}, Actual: #{json.upper_name}")
-
           done()
 
 

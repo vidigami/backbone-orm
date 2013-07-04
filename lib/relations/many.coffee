@@ -305,7 +305,7 @@ module.exports = class Many
 
   cursor: (model, key, query) ->
     json = if model instanceof Backbone.Model then model.attributes else model
-    query = {}
+    query or= {}
     query[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
     return @reverse_model_type.cursor(query)
