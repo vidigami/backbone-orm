@@ -92,7 +92,6 @@ module.exports = class JSONUtils
         # can_delete: {fn: (photo, options, callback) -> }
         if _.isFunction(args.fn)
           queue.defer (callback) ->
-            template = _.extend({}, args, fn: undefined)
             args.fn model, options, (err, json) ->
               result[key] = json
               callback()
@@ -100,10 +99,12 @@ module.exports = class JSONUtils
         # is_great: {fn: 'isGreatFor', args: [options.user]}
         else if args.fn
           queue.defer (callback) ->
-            args.args or= []
-            args.args = [args.args] unless _.isArray(args.args)
-            args.args.push((err, json) -> result[key] = json; callback())
-            model[args.fn].apply(model, args.args)
+            if _.isArray(args.args)
+              fn_args = args.args.slice()
+            else
+              fn_args = if args.args then [args.args] else []
+            fn_args.push((err, json) -> result[key] = json; callback())
+            model[args.fn].apply(model, fn_args)
 
         # full_name:      'name'
         else if _.isString(args)
@@ -118,11 +119,7 @@ module.exports = class JSONUtils
         # classroom:      {$query: {year: '2012'}}                      -> query
         # total_greats:   {key: 'greats', $query: {$count: true}}       -> query
         else
-          if args.key
-            field = args.key
-            delete args.key
-          else
-            field = key
+          field = if args.key then args.key else key
           relation = model.relation(field)
 
           # query
@@ -140,7 +137,10 @@ module.exports = class JSONUtils
             queue.defer (callback) ->
               model.get field, (err, related_model) ->
                 return callback(err) if err
-                JSONUtils.renderJSON related_model, args, (err, value) ->
+                # Clone the args so we don't clobber the key if we're using it for more than one model
+                render_args = _.extend({}, args)
+                delete render_args[field]
+                JSONUtils.renderJSON related_model, render_args, (err, value) ->
                   return callback(err) if err
                   result[key] = value
                   callback()
