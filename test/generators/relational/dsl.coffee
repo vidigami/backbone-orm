@@ -140,7 +140,7 @@ runTests = (options, cache) ->
     #   album:         {$select: ['id', 'name']}
     #   classroom:     {$select: ['id', 'name']}
     #   is_great:      {fn: 'isGreatFor', args: [options.user]}
-    #   total_greats:  {key: 'greats', $count: true}
+    #   total_greats:  {key: 'greats', $query: {$count: true}}
     #   is_fave:       {fn: 'isCoverFor', args: [options.user]}
     #   can_delete:    {fn: (photo, options, callback) ->  }
     # }
@@ -180,7 +180,7 @@ runTests = (options, cache) ->
           assert.ok(!json.name, 'Does not have an excluded field')
           done()
 
-    # $select: ['created_at', 'name']
+    # $select: ['name', 'reverses']
     it 'Handles rendering a related field with $select', (done) ->
       FIELD = 'name'
       RELATED_FIELD = 'flat'
@@ -201,6 +201,55 @@ runTests = (options, cache) ->
 
           assertRelated(json[RELATED_FIELD])
           assertRelated(model_json) for model_json in json[MANY_FIELD]
+
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
+
+    # owner: {$select: ['name', 'flat']}
+    it 'Handles rendering a related fields related field with $select', (done) ->
+      FIELD = 'name'
+      RELATED_FIELD = 'owner'
+      SECOND_RELATED_FIELD = 'flat'
+      TEMPLATE = {}
+      TEMPLATE[RELATED_FIELD] = {$select: [FIELD, SECOND_RELATED_FIELD]}
+      Reverse.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+
+          assertRelated = (model_json) ->
+            assert.ok(model_json, 'Returned related model')
+            assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
+            assert.ok(model_json.name, 'Related model has data')
+
+          assertRelated(json[RELATED_FIELD])
+          assertRelated(json[RELATED_FIELD][SECOND_RELATED_FIELD])
+
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
+
+    # flat: {$select: ['name', 'reverses']}
+    it 'Handles rendering a related fields hasMany related field with $select', (done) ->
+      FIELD = 'name'
+      RELATED_FIELD = 'owner'
+      SECOND_RELATED_FIELD = 'reverses'
+      TEMPLATE = {}
+      TEMPLATE[RELATED_FIELD] = {$select: [FIELD, SECOND_RELATED_FIELD]}
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+
+#          console.log 'REVERSES?:', json[RELATED_FIELD][SECOND_RELATED_FIELD][0].attributes
+          assertRelated = (model_json) ->
+            assert.ok(model_json, 'Returned related model')
+            assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
+            assert.ok(model_json.name, 'Related model has data')
+
+          assertRelated(json[RELATED_FIELD])
+          assertRelated(model_json) for model_json in json[RELATED_FIELD][SECOND_RELATED_FIELD]
 
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
@@ -271,7 +320,7 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    #   total_greats:  {key: 'greats', $count: true}
+    #   an_owner:         {key: 'owner', $select: ['id', 'name']}
     it 'Handles rendering a belongsTo relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'owner'
       FIELD_AS = 'an_owner'
@@ -306,7 +355,7 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    #   total_greats:  {key: 'greats', $count: true}
+    # an_owner:         {key: 'owner', $select: ['id', 'name']}
     it 'Handles rendering a hasOne relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'owner'
       FIELD_AS = 'an_owner'
@@ -342,7 +391,7 @@ runTests = (options, cache) ->
             assert.ok(!owner_json.updated_at, 'Does not have an excluded field')
           done()
 
-    #   total_greats:  {key: 'greats', $count: true}
+    #   some_reverses:         {key: 'reverses', $select: ['id', 'name']}
     it 'Handles rendering a hasMany relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'reverses'
       FIELD_AS = 'some_reverses'
@@ -361,12 +410,12 @@ runTests = (options, cache) ->
             assert.ok(!owner_json.updated_at, 'Does not have an excluded field')
           done()
 
-    #   album:         {$select: ['id', 'name']}
+    # reverse_count:         {key: 'reverses', $query: {$count: true}}
     it 'Handles rendering a hasMany relation in the dsl with a $count query', (done) ->
       REVERSE_COUNT = 2
       FIELD = 'reverse_count'
       TEMPLATE = {}
-      TEMPLATE[FIELD] = {key: 'reverses', $count: true}
+      TEMPLATE[FIELD] = {key: 'reverses', $query: {$count: true}}
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -385,7 +434,7 @@ runTests = (options, cache) ->
         $select:        ['id', 'name']
         this_name:      'name'
         reverses:       {$select: ['id', 'name']}
-        reverse_count:  {key: 'reverses', $count: true}
+        reverse_count:  {key: 'reverses', $query: {$count: true}}
         mew:            {fn: 'cat', args: ['name', 'meow']}
         upper_name:     {fn: (model, options, callback) -> callback(null, model.get('name').toUpperCase())}
 
@@ -420,4 +469,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-#  runTests(options, true)
+  runTests(options, true)

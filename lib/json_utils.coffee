@@ -44,7 +44,7 @@ module.exports = class JSONUtils
       return callback(null, null) unless models
 
       # Single field
-      return models.get(template, callback) if _.isString(template)
+      return JSONUtils.renderJSONKey(models, template, options, callback) if _.isString(template)
 
       # Array of fields, pick keys
       return JSONUtils.renderJSONKeys(models, template, options, callback) if _.isArray(template)
@@ -97,7 +97,7 @@ module.exports = class JSONUtils
               result[key] = json
               callback()
 
-        # is_great: fn: 'isGreatFor', args: [options.user]}
+        # is_great: {fn: 'isGreatFor', args: [options.user]}
         else if args.fn
           queue.defer (callback) ->
             args.args or= []
@@ -105,31 +105,45 @@ module.exports = class JSONUtils
             args.args.push((err, json) -> result[key] = json; callback())
             model[args.fn].apply(model, args.args)
 
-        # total_greats:   {key: 'greats', $count: true}
-        # classroom:      {$select: ['id', 'name']}
         # full_name:      'name'
+        else if _.isString(args)
+          queue.defer (callback) ->
+            JSONUtils.renderJSONKey model, args, options, (err, value) ->
+              return callback(err) if err
+              result[key] = value
+              callback()
+
+        # classroom:      {$select: ['id', 'name']}                     -> dsl
+        # a_class:        {key: 'classroom', $select: ['id', 'name']}   -> dsl
+        # classroom:      {$query: {year: '2012'}}                      -> query
+        # total_greats:   {key: 'greats', $query: {$count: true}}       -> query
         else
           if args.key
             field = args.key
             delete args.key
-          else if _.isString(args)
-            field = args
-            args = {}
           else
             field = key
-            args = {}
+          relation = model.relation(field)
 
-          queue.defer (callback) ->
-            if relation = model.relation(field)
-              relation.cursor(model, field, args).toJSON (err, value) ->
+          # query
+          if args.$query
+            return callback("Template $query provided for a field that isn't a relation: #{field}") unless relation
+            queue.defer (callback) ->
+              relation.cursor(model, field, args.$query).toJSON (err, value) ->
                 return callback(err) if err
                 result[key] = value
                 callback()
-            else
-              model.get field, (err, value) ->
+
+          # dsl
+          else
+            return callback("Template provided for a field that isn't a relation: #{field}") unless relation
+            queue.defer (callback) ->
+              model.get field, (err, related_model) ->
                 return callback(err) if err
-                result[key] = value
-                callback()
+                JSONUtils.renderJSON related_model, args, (err, value) ->
+                  return callback(err) if err
+                  result[key] = value
+                  callback()
 
     queue.await (err) ->
       return callback(err) if err
@@ -140,26 +154,36 @@ module.exports = class JSONUtils
 
     queue = new Queue()
     result = {}
-
     for key in keys
       do (key) ->
         queue.defer (callback) ->
-          # TODO allow for json or models
-          model.get key, (err, value) ->
+          JSONUtils.renderJSONKey model, key, options, (err, value) ->
             return callback(err) if err
-
-            # Related models need to be converted to json
-            if model.relation(key)
-              if _.isArray(value)
-                result[key] = val.toJSON() for val in value
-              else
-                result[key] = value.toJSON()
-            else
-              result[key] = value
+            result[key] = value
             callback()
 
     queue.await (err) ->
       return callback(err) if err
+      callback(null, result)
+
+  @renderJSONKey = (model, key, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+    model.get key, (err, value) ->
+      return callback(err) if err
+      # Related models need to be converted to json
+      if model.relation(key)
+        if _.isArray(value)
+          #todo: check bug, incorrect models are being returned, they contian themselves? {0:model, 1: model, <correct model fields are here>}
+#          console.log '----------------------------'
+#          console.log 'isArray', key, value
+          result = (val.toJSON() for val in value)
+#          console.log '++++++++++++++'
+#          console.log 'isArray', key, result
+#          console.log '----------------------------'
+        else
+          result = value.toJSON()
+      else
+        result = value
       callback(null, result)
 
   @appendJSON = (json, related_model, attribute_name, template, options, callback) ->
