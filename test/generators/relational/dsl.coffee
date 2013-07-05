@@ -180,6 +180,31 @@ runTests = (options, cache) ->
           assert.ok(!json.name, 'Does not have an excluded field')
           done()
 
+    # $select: ['created_at', 'name']
+    it 'Handles rendering a related field with $select', (done) ->
+      FIELD = 'name'
+      RELATED_FIELD = 'flat'
+      MANY_FIELD = 'reverses'
+      TEMPLATE =
+        $select: [FIELD, RELATED_FIELD, MANY_FIELD]
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.equal(test_model.get(FIELD), json[FIELD], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD]}")
+
+          assertRelated = (model_json) ->
+            assert.ok(model_json, 'Returned related model')
+            assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
+            assert.ok(model_json.name, 'Related model has data')
+
+          assertRelated(json[RELATED_FIELD])
+          assertRelated(model_json) for model_json in json[MANY_FIELD]
+
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
+
     # can_delete: {fn: (photo, options, callback) -> }
     it 'Handles rendering a function in the dsl', (done) ->
       FIELD = 'name'

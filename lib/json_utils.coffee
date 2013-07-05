@@ -119,14 +119,13 @@ module.exports = class JSONUtils
             field = key
             args = {}
 
-          if relation = model.relation(field)
-            queue.defer (callback) ->
+          queue.defer (callback) ->
+            if relation = model.relation(field)
               relation.cursor(model, field, args).toJSON (err, value) ->
                 return callback(err) if err
                 result[key] = value
                 callback()
-          else
-            queue.defer (callback) ->
+            else
               model.get field, (err, value) ->
                 return callback(err) if err
                 result[key] = value
@@ -148,7 +147,15 @@ module.exports = class JSONUtils
           # TODO allow for json or models
           model.get key, (err, value) ->
             return callback(err) if err
-            result[key] = value
+
+            # Related models need to be converted to json
+            if model.relation(key)
+              if _.isArray(value)
+                result[key] = val.toJSON() for val in value
+              else
+                result[key] = value.toJSON()
+            else
+              result[key] = value
             callback()
 
     queue.await (err) ->
