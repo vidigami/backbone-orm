@@ -9,10 +9,8 @@ DEFAULT_PARALLELISM = 1
 
 module.exports = class BatchUtils
   @processModels: (model_type, query, options, callback, fn) ->
-    if arguments.length is 3
-      [query, options, callback, fn] = [{}, {}, query, options]
-    else if arguments.length is 4
-      [query, options, callback, fn] = [{}, query, options, callback]
+    [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
+    [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
 
     processed_count = 0
     parsed_query = Cursor.parseQuery(query)

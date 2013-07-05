@@ -57,7 +57,7 @@ module.exports = (model_type) ->
     args = _.toArray(arguments)
     args.unshift({}) while args.length < 4
     args.unshift(model_type)
-    BatchUtils.apply(null, args)
+    BatchUtils.processModels.apply(null, args)
 
   ###################################
   # Backbone ORM - Helpers
