@@ -89,16 +89,8 @@ module.exports = class JSONUtils
 
       do (key, args) ->
 
-        # full_name: 'name'
-        if _.isString(args)
-          queue.defer (callback) ->
-            model.get args, (err, value) ->
-              return callback(err) if err
-              result[key] = value
-              callback()
-
         # can_delete: {fn: (photo, options, callback) -> }
-        else if _.isFunction(args.fn)
+        if _.isFunction(args.fn)
           queue.defer (callback) ->
             template = _.extend({}, args, fn: undefined)
             args.fn model, options, (err, json) ->
@@ -115,15 +107,27 @@ module.exports = class JSONUtils
 
         # total_greats:   {key: 'greats', $count: true}
         # classroom:      {$select: ['id', 'name']}
+        # full_name:      'name'
         else
           if args.key
             field = args.key
             delete args.key
+          else if _.isString(args)
+            field = args
+            args = {}
           else
             field = key
+            args = {}
+
           if relation = model.relation(field)
             queue.defer (callback) ->
               relation.cursor(model, field, args).toJSON (err, value) ->
+                return callback(err) if err
+                result[key] = value
+                callback()
+          else
+            queue.defer (callback) ->
+              model.get field, (err, value) ->
                 return callback(err) if err
                 result[key] = value
                 callback()

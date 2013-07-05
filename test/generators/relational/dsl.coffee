@@ -214,6 +214,21 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
+    #   a_reverse:    'reverse'
+    it 'Handles rendering a relation specified by a string', (done) ->
+      FIELD = 'flat'
+      FIELD_AS = 'a_flat'
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] = FIELD
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.ok(json[FIELD_AS].name, 'Has data')
+          assert.ok(!(json instanceof Backbone.Model), 'Is not a backbone model')
+          done()
+
     #   album:         {$select: ['id', 'name']}
     it 'Handles rendering a belongsTo relation in the dsl with a cursor query', (done) ->
       FIELD = 'owner'

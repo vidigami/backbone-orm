@@ -37,7 +37,7 @@ runTests = (options, cache) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
 
-  describe "JSONUtils.renderJSON (cache: #{cache})", ->
+  describe "JSONUtils.toJSON (cache: #{cache})", ->
 
     beforeEach (done) ->
       MODELS = {}
@@ -102,7 +102,7 @@ runTests = (options, cache) ->
           done()
 
 
-    it 'renderJSON (no dsl) hendering a list of fields', (done) ->
+    it 'renderJSON (no dsl) rendering a list of fields', (done) ->
       FIELDS = ['created_at', 'name']
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
