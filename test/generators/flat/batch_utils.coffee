@@ -19,7 +19,7 @@ runTests = (options, cache) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Flat, cache)
 
-  BatchUtils = require '../../../batch_utils'
+  BatchUtils = require '../../../lib/batch_utils'
 
   DATE_START = '2013-06-09T08:00:00.000Z'
   DATE_STEP_MS = 1000
