@@ -426,6 +426,42 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
+    # reverses:         {key: 'reverses', $query: {$count: true}}
+    it 'Handles rendering a hasMany relation in the dsl with a template with function', (done) ->
+      REVERSE_COUNT = 2
+      FIELD = 'reverse_count'
+      TEMPLATE = {}
+      TEMPLATE[FIELD] = {key: 'reverses', $query: {$count: true}}
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.ok(count = json[FIELD], 'json has the related count')
+          assert.equal(REVERSE_COUNT, count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{count}")
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
+
+    #todo
+#    # a_flat: {key: 'flat', fn: (model, options, callback) -> }
+#    it 'Handles rendering a related models function in the dsl', (done) ->
+#      FIELD = 'flat'
+#      FIELD_AS = 'a_flat'
+#      TEMPLATE = {}
+#      TEMPLATE[FIELD_AS] =
+#        key: FIELD
+#        fn: (model, options, callback) -> callback(null, { name: model.get('name')})
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+#          console.log json
+#          assert.ok(json, 'Returned json')
+#          assert.ok(json[FIELD_AS], 'Has related model')
+#          assert.ok(json[FIELD_AS].name, 'Related model has json set by function')
+#          assert.ok(!json[FIELD_AS].updated_at, 'Related model does not have an excluded field')
+#          done()
+
     #   All
     it 'Handles rendering a complete dsl', (done) ->
       REVERSE_COUNT = 2
@@ -469,4 +505,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-  runTests(options, true)
+#  runTests(options, true)
