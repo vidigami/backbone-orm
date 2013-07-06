@@ -9,11 +9,12 @@ Cache = require './cache'
 
 class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
-    throw new Error('Missing model_name for model') unless @model_type.model_name
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
+
     @wrapped_sync_fn('initialize')
+    throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
     if model.models
