@@ -20,7 +20,7 @@ module.exports = class BatchUtils
     runBatch = (batch_cursor, callback) ->
       cursor = model_type.cursor(batch_cursor)
       cursor[method].call cursor, (err, models) ->
-        return callback(new Error("Failed to get models")) if err or !models
+        return callback(new Error("Failed to get models. Error: #{err}")) if err or !models
         return callback(null, processed_count) unless models.length
 
         # batch operations on each
