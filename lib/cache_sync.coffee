@@ -12,7 +12,6 @@ class CacheSync
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
-
     @wrapped_sync_fn('initialize')
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
