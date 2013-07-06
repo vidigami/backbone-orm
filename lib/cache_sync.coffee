@@ -53,8 +53,14 @@ class CacheSync
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 
   destroy: (query, callback) ->
-    Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
-    @wrapped_sync_fn 'destroy', query, callback
+    @wrapped_sync_fn 'destroy', query, (err) =>
+      Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
+      callback(err)
+
+  connect: (url, callback) ->
+    @wrapped_sync_fn 'connect', url, (err) =>
+      Cache.clear(@model_type.model_name)
+      callback(err)
 
   cache: -> Cache
 
