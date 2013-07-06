@@ -57,10 +57,12 @@ class CacheSync
       Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
       callback(err)
 
-  connect: (url, callback) ->
-    @wrapped_sync_fn 'connect', url, (err) =>
-      Cache.clear(@model_type.model_name)
-      callback(err)
+  ###################################
+  # Backbone Cache Sync - Custom Extensions
+  ###################################
+  connect: (url) ->
+    Cache.clear(@model_type.model_name)
+    @wrapped_sync_fn('connect')
 
   cache: -> Cache
 
