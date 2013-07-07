@@ -72,34 +72,16 @@ module.exports = class JSONUtils
         return callback(err) if err
         callback(null, result)
 
-  @renderJSONDSL = (model, template, options, callback) ->
+  @renderJSONDSL = (model, dsl, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
-    queue = new Queue()
+    queue = new Queue(1)
     result = {}
-    if template.$select
-      queue.defer (callback) ->
-        JSONUtils.renderJSONKeys model, template.$select, options, (err, related_json) ->
-          return callback(err) if err
-          result = related_json
-          callback()
-
-    for key, args of template
-      continue if key is '$select'
-
+    for key, args of dsl
       do (key, args) ->
         field = if args.key then args.key else key
-        relation = model.relation(field)
 
-        # full_name:      'name'
-        if _.isString(args)
-          queue.defer (callback) ->
-            JSONUtils.renderJSONKey model, args, options, (err, value) ->
-              return callback(err) if err
-              result[key] = value
-              callback()
-
-        else if relation
+        if relation = model.relation(field)
           # classroom:      {$select: ['id', 'name']}                     -> dsl
           # a_class:        {key: 'classroom', $select: ['id', 'name']}   -> dsl
           # classroom:      {$query: {year: '2012'}}                      -> query
@@ -115,44 +97,47 @@ module.exports = class JSONUtils
 #                JSONUtils.renderJSONFunction related_model, key, args, options, (err, json) ->
 #                  result[key] = json
 #                  callback()
+            if args.$query
+              query = args.$query
+            else if args.$count
+              query = args
+            else if args.template
+              if _.isObject(args.template) and not _.isFunction(args.template)
+                query = args.template
+              else
+                template = args.template
+            else
+              template = _.extend({}, args)
+              delete template['key']
 
             # query
-            if args.$query
-              return callback("Template $query provided for a field that isn't a relation: #{field}") unless relation
-              relation.cursor(model, field, args.$query).toJSON (err, value) ->
+            if query
+              relation.cursor(model, field, query).toJSON (err, value) ->
                 return callback(err) if err
                 result[key] = value
                 callback()
 
             # template
-            else if args.template
-              return callback("Template provided for a field that isn't a relation: #{field}") unless relation
-              if _.isObject(args.template) and not _.isFunction(args.template)
-                relation.cursor(model, field, args.template).toJSON (err, value) ->
-                  return callback(err) if err
-                  result[key] = value
-                  callback()
-
-              else
-                model.get field, (err, related_model) ->
-                  render_args = _.extend({}, args)
-                  delete render_args['key']; delete render_args['template']
-                  JSONUtils.renderJSON related_model, args.template, render_args, (err, json) ->
-                    result[key] = json
-                    callback()
-
-            # dsl
             else
-              return callback("Template provided for a field that isn't a relation: #{field}") unless relation
               model.get field, (err, related_model) ->
-                return callback(err) if err
-                # Clone the args so we don't clobber the key if we're using it for more than one model
-                render_args = _.extend({}, args)
-                delete render_args['key']
-                JSONUtils.renderJSON related_model, render_args, (err, value) ->
-                  return callback(err) if err
-                  result[key] = value
+                JSONUtils.renderJSON related_model, template, options, (err, json) ->
+                  result[key] = json
                   callback()
+
+        else if key is '$select'
+          queue.defer (callback) ->
+            JSONUtils.renderJSONKeys model, args, options, (err, related_json) ->
+              return callback(err) if err
+              _.extend(result, related_json)
+              callback()
+
+        # full_name:      'name'
+        else if _.isString(args)
+          queue.defer (callback) ->
+            JSONUtils.renderJSONKey model, args, options, (err, value) ->
+              return callback(err) if err
+              result[key] = value
+              callback()
 
         # can_delete: (photo, options, callback) ->
         else if _.isFunction(args)
@@ -169,7 +154,8 @@ module.exports = class JSONUtils
             model[args.fn].apply(model, fn_args)
 
         else
-          throw "Unknown DSL action: #{key} #{util.inspect(args)}"
+          console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
+          return callback(new Error "Unknown DSL action: #{key}: #{util.inspect(args)}")
 
     queue.await (err) ->
       return callback(err) if err
