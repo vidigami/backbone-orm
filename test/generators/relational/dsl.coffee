@@ -467,12 +467,14 @@ runTests = (options, cache) ->
       REVERSE_COUNT = 2
 
       TEMPLATE =
-        $select:        ['id', 'name']
-        this_name:      'name'
-        reverses:       {$select: ['id', 'name']}
-        reverse_count:  {key: 'reverses', $query: {$count: true}}
-        mew:            {fn: 'cat', args: ['name', 'meow']}
-        upper_name:     (model, options, callback) -> callback(null, model.get('name').toUpperCase())
+        $select:          ['id', 'name']
+        this_name:        'name'
+        reverses:         {$select: ['id', 'name']}
+        reverse_count:    {key: 'reverses', $query: {$count: true}}
+        reverse_count2:   {key: 'reverses', template: {$count: true}}
+        reverses_upnames: {key: 'reverses', template: (model, options, callback) -> callback(null, model.get('name').toUpperCase())}
+        mew:              {fn: 'cat', args: ['name', 'meow']}
+        upper_name:       (model, options, callback) -> callback(null, model.get('name').toUpperCase())
 
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -485,10 +487,14 @@ runTests = (options, cache) ->
           assert.equal(test_model.get('name'), json.this_name, "Returned the correct value:\nExpected: #{test_model.get('name')}, Actual: #{json.this_name}")
 
           for reverse in json.reverses
-            assert.ok(reverse.id, "Has reverses with the correct fields")
-            assert.ok(reverse.name, "Has reverses with the correct fields")
+            assert.ok(reverse.id, 'Has reverses with the correct fields')
+            assert.ok(reverse.name, 'Has reverses with the correct fields')
 
           assert.equal(REVERSE_COUNT, json.reverse_count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{json.reverse_count}")
+          assert.equal(REVERSE_COUNT, json.reverse_count2, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{json.reverse_count2}")
+
+          for reverse_upname in json.reverses_upnames
+            assert.ok(_.isString(reverse_upname), 'Has reverses with the correct fields')
 
           mew = test_model.get('name') + 'meow'
           assert.equal(mew, json.mew, "Returned the correct value:\nExpected: #{mew}, Actual: #{json.mew}")

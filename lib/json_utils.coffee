@@ -123,6 +123,24 @@ module.exports = class JSONUtils
                 return callback(err) if err
                 result[key] = value
                 callback()
+
+            # template
+            else if args.template
+              return callback("Template provided for a field that isn't a relation: #{field}") unless relation
+              if _.isObject(args.template) and not _.isFunction(args.template)
+                relation.cursor(model, field, args.template).toJSON (err, value) ->
+                  return callback(err) if err
+                  result[key] = value
+                  callback()
+
+              else
+                model.get field, (err, related_model) ->
+                  render_args = _.extend({}, args)
+                  delete render_args['key']; delete render_args['template']
+                  JSONUtils.renderJSON related_model, args.template, render_args, (err, json) ->
+                    result[key] = json
+                    callback()
+
             # dsl
             else
               return callback("Template provided for a field that isn't a relation: #{field}") unless relation
