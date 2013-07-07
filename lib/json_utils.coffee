@@ -92,6 +92,8 @@ module.exports = class JSONUtils
               query = args.$query
             else if args.$count
               query = args
+            else if _.isFunction(args)
+              template = args
             else if args.template
               if _.isObject(args.template) and not _.isFunction(args.template)
                 query = args.template
@@ -107,7 +109,9 @@ module.exports = class JSONUtils
 
             # template
             else
-              model.get field, (err, related_model) -> JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
+              model.get field, (err, related_model) ->
+                return callback(err) if err
+                JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
           queue.defer (callback) -> JSONUtils.renderJSONKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
