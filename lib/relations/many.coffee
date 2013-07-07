@@ -241,6 +241,8 @@ module.exports = class Many
       query = {$values: @reverse_relation.foreign_key}
       query[@foreign_key] = model.attributes.id
       @join_table.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+
         collection._orm_loaded = true
         return callback(err) if err
         for related_id in json

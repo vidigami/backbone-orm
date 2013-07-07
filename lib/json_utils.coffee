@@ -88,15 +88,6 @@ module.exports = class JSONUtils
           # total_greats:   {key: 'greats', $query: {$count: true}}       -> query
           queue.defer (callback) ->
 
-            # template function
-            #todo: how to handle
-            #todo: a_class:        {key: 'classroom', template: (model, options, callback) -> )}   -> dsl
-#            if args.fn
-#              model.get field, (err, related_model) ->
-#                return callback(err) if err
-#                JSONUtils.renderJSONFunction related_model, key, args, options, (err, json) ->
-#                  result[key] = json
-#                  callback()
             if args.$query
               query = args.$query
             else if args.$count
@@ -112,39 +103,22 @@ module.exports = class JSONUtils
 
             # query
             if query
-              relation.cursor(model, field, query).toJSON (err, value) ->
-                return callback(err) if err
-                result[key] = value
-                callback()
+              relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
             # template
             else
-              model.get field, (err, related_model) ->
-                JSONUtils.renderJSON related_model, template, options, (err, json) ->
-                  result[key] = json
-                  callback()
+              model.get field, (err, related_model) -> JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
-          queue.defer (callback) ->
-            JSONUtils.renderJSONKeys model, args, options, (err, related_json) ->
-              return callback(err) if err
-              _.extend(result, related_json)
-              callback()
+          queue.defer (callback) -> JSONUtils.renderJSONKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
 
         # full_name:      'name'
         else if _.isString(args)
-          queue.defer (callback) ->
-            JSONUtils.renderJSONKey model, args, options, (err, value) ->
-              return callback(err) if err
-              result[key] = value
-              callback()
+          queue.defer (callback) -> JSONUtils.renderJSONKey model, args, options, (err, json) -> result[key] = json; callback(err)
 
         # can_delete: (photo, options, callback) ->
         else if _.isFunction(args)
-          queue.defer (callback) ->
-            args model, options, (err, json) ->
-              result[key] = json
-              callback()
+          queue.defer (callback) -> args model, options, (err, json) -> result[key] = json; callback(err)
 
         # is_great: {fn: 'isGreatFor', args: [options.user]}
         else if _.isString(args.fn)
