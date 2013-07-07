@@ -160,6 +160,7 @@ module.exports = class JSONUtils
   # Render a single key friom a model to json: model.get('key')
   @renderJSONKey = (model, key, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
+
     model.get key, (err, value) ->
       return callback(err) if err
       # Related models need to be converted to json
