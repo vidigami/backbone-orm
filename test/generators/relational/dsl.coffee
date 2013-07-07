@@ -260,7 +260,7 @@ runTests = (options, cache) ->
       FIELD_AS = 'upper_name'
       TEMPLATE = {}
       TEMPLATE[FIELD_AS] =
-        fn: (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
+        (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -472,7 +472,7 @@ runTests = (options, cache) ->
         reverses:       {$select: ['id', 'name']}
         reverse_count:  {key: 'reverses', $query: {$count: true}}
         mew:            {fn: 'cat', args: ['name', 'meow']}
-        upper_name:     {fn: (model, options, callback) -> callback(null, model.get('name').toUpperCase())}
+        upper_name:     (model, options, callback) -> callback(null, model.get('name').toUpperCase())
 
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")

@@ -108,7 +108,7 @@ module.exports = class JSONUtils
 
             # template function
             #todo: how to handle
-            #todo: a_class:        {key: 'classroom', fn: (model, options, callback) -> )}   -> dsl
+            #todo: a_class:        {key: 'classroom', template: (model, options, callback) -> )}   -> dsl
 #            if args.fn
 #              model.get field, (err, related_model) ->
 #                return callback(err) if err
@@ -136,19 +136,22 @@ module.exports = class JSONUtils
                   result[key] = value
                   callback()
 
-        # can_delete: {fn: (photo, options, callback) -> }
-        else if _.isFunction(args.fn)
+        # can_delete: (photo, options, callback) ->
+        else if _.isFunction(args)
           queue.defer (callback) ->
-            args.fn model, options, (err, json) ->
+            args model, options, (err, json) ->
               result[key] = json
               callback()
 
         # is_great: {fn: 'isGreatFor', args: [options.user]}
-        else if args.fn
+        else if _.isString(args.fn)
           queue.defer (callback) ->
             fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
             fn_args.push((err, json) -> result[key] = json; callback())
             model[args.fn].apply(model, fn_args)
+
+        else
+          throw "Unknown DSL action: #{key} #{util.inspect(args)}"
 
     queue.await (err) ->
       return callback(err) if err
