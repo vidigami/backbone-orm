@@ -75,7 +75,7 @@ module.exports = class JSONUtils
   @renderJSONDSL = (model, dsl, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
-    queue = new Queue(1)
+    queue = new Queue()
     result = {}
     for key, args of dsl
       do (key, args) ->
