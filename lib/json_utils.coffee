@@ -90,8 +90,10 @@ module.exports = class JSONUtils
 
             if args.$query
               query = args.$query
+              template = args.template
             else if args.$count
-              query = args
+              query = _.clone(args)
+              delete query.key
             else if _.isFunction(args)
               template = args
             else if args.template
@@ -99,19 +101,28 @@ module.exports = class JSONUtils
                 query = args.template
               else
                 template = args.template
+                query = _.clone(args)
+                delete query.key; delete query.template
+                query = null if _.size(query) is 0
             else
-              template = _.extend({}, args)
-              delete template['key']
-
-            # query
-            if query
-              relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
+              template = _.clone(args)
+              delete template.key
 
             # template
+            if template
+              if query
+                relation.cursor(model, field, query).toModels (err, models) ->
+                  return callback(err) if err
+                  JSONUtils.renderJSON models, template, options, (err, json) -> result[key] = json; callback(err)
+
+              else
+                model.get field, (err, related_model) ->
+                  return callback(err) if err
+                  JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
+
+            # query
             else
-              model.get field, (err, related_model) ->
-                return callback(err) if err
-                JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
+              relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
           queue.defer (callback) -> JSONUtils.renderJSONKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
@@ -168,7 +179,7 @@ module.exports = class JSONUtils
         if _.isArray(value)
           #todo: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
           value = (val.toJSON() for val in value)
-        else
+        else if value and value.toJSON
           value = value.toJSON()
       callback(null, value)
 
