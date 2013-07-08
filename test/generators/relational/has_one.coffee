@@ -190,7 +190,8 @@ runTests = (options, cache, embed) ->
 
           reverse = fetched_owner.get 'reverse', (err, reverse) ->
             if fetched_owner.relationIsEmbedded('reverse')
-              assert.ok(err, "Errors: #{err}")
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!reverse, 'Cannot yet load the model') # TODO: implement a fecth from the related model
               done()
             else
               assert.ok(!err, "No errors: #{err}")

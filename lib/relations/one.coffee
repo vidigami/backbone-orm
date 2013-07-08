@@ -138,10 +138,10 @@ module.exports = class One
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{util.inspect(@query(model, key))}") if not json
       model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
-      delete related_model._orm_needs_load
-      cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
+      if related_model
+        delete related_model._orm_needs_load
+        cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
       callback(null, related_model)
 
     return false

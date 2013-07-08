@@ -9,11 +9,11 @@ Cache = require './cache'
 
 class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
-    throw new Error('Missing model_name for model') unless @model_type.model_name
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @wrapped_sync_fn('initialize')
+    throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
     if model.models
@@ -53,8 +53,16 @@ class CacheSync
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 
   destroy: (query, callback) ->
-    Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
-    @wrapped_sync_fn 'destroy', query, callback
+    @wrapped_sync_fn 'destroy', query, (err) =>
+      Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
+      callback(err)
+
+  ###################################
+  # Backbone Cache Sync - Custom Extensions
+  ###################################
+  connect: (url) ->
+    Cache.clear(@model_type.model_name)
+    @wrapped_sync_fn('connect')
 
   cache: -> Cache
 
