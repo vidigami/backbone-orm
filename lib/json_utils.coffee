@@ -84,12 +84,12 @@ module.exports = class JSONUtils
         if relation = model.relation(field)
           # classroom:      {$select: ['id', 'name']}                     -> dsl
           # a_class:        {key: 'classroom', $select: ['id', 'name']}   -> dsl
-          # classroom:      {$query: {year: '2012'}}                      -> query
-          # total_greats:   {key: 'greats', $query: {$count: true}}       -> query
+          # classroom:      {query: {year: '2012'}}                      -> query
+          # total_greats:   {key: 'greats', query: {$count: true}}       -> query
           queue.defer (callback) ->
 
-            if args.$query
-              query = args.$query
+            if args.query
+              query = args.query
               template = args.template
             else if args.$count
               query = _.clone(args)
