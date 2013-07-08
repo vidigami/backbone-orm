@@ -135,10 +135,10 @@ runTests = (options, cache) ->
     #   name:          'source_file_name'
     #   album:         {$select: ['id', 'name']}
     #   classroom:     {$select: ['id', 'name']}
-    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    #   is_great:      {method: 'isGreatFor', args: [options.user]}
     #   total_greats:  {key: 'greats', $count: true}
-    #   is_fave:       {fn: 'isCoverFor', args: [options.user]}
-    #   can_delete:    {fn: (photo, options, callback) ->  }
+    #   is_fave:       {method: 'isCoverFor', args: [options.user]}
+    #   can_delete:    (photo, options, callback) ->
     # }
     #
 
@@ -175,13 +175,13 @@ runTests = (options, cache) ->
           done()
 
 
-    # can_delete: {fn: (photo, options, callback) -> }
+    # can_delete: (photo, options, callback) ->
     it 'Handles rendering a function in the dsl', (done) ->
       FIELD = 'name'
       FIELD_AS = 'upper_name'
       TEMPLATE = {}
       TEMPLATE[FIELD_AS] =
-        fn: (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
+        (model, options, callback) -> callback(null, model.get(FIELD).toUpperCase())
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -190,14 +190,14 @@ runTests = (options, cache) ->
           assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
           done()
 
-    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    #   is_great:      {method: 'isGreatFor', args: [options.user]}
     it 'Handles rendering a models method with args in the dsl', (done) ->
       FN = 'cat'
       ARG = 'meow'
       FIELD = 'name'
       FIELD_AS = 'cat_name'
       TEMPLATE = {}
-      TEMPLATE[FIELD_AS] = {fn: FN, args: [FIELD, ARG] }
+      TEMPLATE[FIELD_AS] = {method: FN, args: [FIELD, ARG] }
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
