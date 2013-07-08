@@ -50,7 +50,9 @@ module.exports = class JSONUtils
       return JSONUtils.renderJSONKeys(models, template, options, callback) if _.isArray(template)
 
       # Render template function
-      return template(models, options, callback) if _.isFunction(template)
+      if _.isFunction(template) or _.isFunction(template.fn)
+        fn = if template.fn then template.fn else template
+        return fn(models, options, callback)
 
       # dsl object
       return JSONUtils.renderJSONDSL(models, template, options, callback)
@@ -102,19 +104,10 @@ module.exports = class JSONUtils
         else if relation
           # classroom:      {$select: ['id', 'name']}                     -> dsl
           # a_class:        {key: 'classroom', $select: ['id', 'name']}   -> dsl
+          # a_class:        {key: 'classroom', fn: (model, options, callback) -> )}   -> dsl
           # classroom:      {$query: {year: '2012'}}                      -> query
           # total_greats:   {key: 'greats', $query: {$count: true}}       -> query
           queue.defer (callback) ->
-
-            # template function
-            #todo: how to handle
-            #todo: a_class:        {key: 'classroom', fn: (model, options, callback) -> )}   -> dsl
-#            if args.fn
-#              model.get field, (err, related_model) ->
-#                return callback(err) if err
-#                JSONUtils.renderJSONFunction related_model, key, args, options, (err, json) ->
-#                  result[key] = json
-#                  callback()
 
             # query
             if args.$query

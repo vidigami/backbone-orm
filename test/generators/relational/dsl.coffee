@@ -443,24 +443,23 @@ runTests = (options, cache) ->
           done()
 
     #todo
-#    # a_flat: {key: 'flat', fn: (model, options, callback) -> }
-#    it 'Handles rendering a related models function in the dsl', (done) ->
-#      FIELD = 'flat'
-#      FIELD_AS = 'a_flat'
-#      TEMPLATE = {}
-#      TEMPLATE[FIELD_AS] =
-#        key: FIELD
-#        fn: (model, options, callback) -> callback(null, { name: model.get('name')})
-#      Owner.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
-#          console.log json
-#          assert.ok(json, 'Returned json')
-#          assert.ok(json[FIELD_AS], 'Has related model')
-#          assert.ok(json[FIELD_AS].name, 'Related model has json set by function')
-#          assert.ok(!json[FIELD_AS].updated_at, 'Related model does not have an excluded field')
-#          done()
+    # a_flat: {key: 'flat', fn: (model, options, callback) -> }
+    it 'Handles rendering a related models function in the dsl', (done) ->
+      FIELD = 'flat'
+      FIELD_AS = 'a_flat'
+      TEMPLATE = {}
+      TEMPLATE[FIELD_AS] =
+        key: FIELD
+        fn: (model, options, callback) -> callback(null, { name: model.get('name')})
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.ok(json[FIELD_AS], 'Has related model')
+          assert.ok(json[FIELD_AS].name, 'Related model has json set by function')
+          assert.ok(!json[FIELD_AS].updated_at, 'Related model does not have an excluded field')
+          done()
 
     #   All
     it 'Handles rendering a complete dsl', (done) ->
