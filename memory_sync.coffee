@@ -28,7 +28,7 @@ class MemorySync
     options.success(model_json)
 
   update: (model, options) ->
-    return options.error(new Error('Model not found')) unless model_json = @store[model.attributes.id]
+    return @create(model, options) unless model_json = @store[model.attributes.id] # if bootstrapped, it may not yet be in the store
     _.extend(model_json, model.toJSON())
     options.success(model_json)
 
