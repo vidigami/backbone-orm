@@ -119,14 +119,14 @@ runTests = (options, cache) ->
 
     it 'renderJSON (no dsl) handles rendering via a function', (done) ->
       FIELDS = ['created_at', 'name']
-      fn = (model, options, callback) ->
+      template = (model, options, callback) ->
         json = {}
         (json[field] = model.get(field)) for field in FIELDS
         callback(null, json)
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, fn, (err, json) ->
+        JSONUtils.renderJSON test_model, template, (err, json) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
@@ -139,10 +139,10 @@ runTests = (options, cache) ->
     #   name:          'source_file_name'
     #   album:         {$select: ['id', 'name']}
     #   classroom:     {$select: ['id', 'name']}
-    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    #   is_great:      {method: 'isGreatFor', args: [options.user]}
     #   total_greats:  {key: 'greats', query: {$count: true}}
-    #   is_fave:       {fn: 'isCoverFor', args: [options.user]}
-    #   can_delete:    {fn: (photo, options, callback) ->  }
+    #   is_fave:       {method: 'isCoverFor', args: [options.user]}
+    #   can_delete:    (photo, options, callback) ->
     # }
     #
 
@@ -254,7 +254,7 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    # can_delete: {fn: (photo, options, callback) -> }
+    # can_delete: (photo, options, callback) ->
     it 'Handles rendering a function in the dsl', (done) ->
       FIELD = 'name'
       FIELD_AS = 'upper_name'
@@ -270,14 +270,14 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    #   is_great:      {fn: 'isGreatFor', args: [options.user]}
+    #   is_great:      {method: 'isGreatFor', args: [options.user]}
     it 'Handles rendering a models method with args in the dsl', (done) ->
       FN = 'cat'
       ARG = 'meow'
       FIELD = 'name'
       FIELD_AS = 'cat_name'
       TEMPLATE = {}
-      TEMPLATE[FIELD_AS] = {fn: FN, args: [FIELD, ARG] }
+      TEMPLATE[FIELD_AS] = {method: FN, args: [FIELD, ARG] }
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -472,7 +472,7 @@ runTests = (options, cache) ->
         reverse_count:    {key: 'reverses', query: {$count: true}}
         reverse_count2:   {key: 'reverses', template: {$count: true}}
         reverses_upnames: {key: 'reverses', template: (model, options, callback) -> callback(null, model.get('name').toUpperCase())}
-        mew:              {fn: 'cat', args: ['name', 'meow']}
+        mew:              {method: 'cat', args: ['name', 'meow']}
         upper_name:       (model, options, callback) -> callback(null, model.get('name').toUpperCase())
 
       Owner.findOne (err, test_model) ->

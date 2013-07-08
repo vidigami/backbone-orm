@@ -135,12 +135,12 @@ module.exports = class JSONUtils
         else if _.isFunction(args)
           queue.defer (callback) -> args model, options, (err, json) -> result[key] = json; callback(err)
 
-        # is_great: {fn: 'isGreatFor', args: [options.user]}
-        else if _.isString(args.fn)
+        # is_great: {method: 'isGreatFor', args: [options.user]}
+        else if _.isString(args.method)
           queue.defer (callback) ->
             fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
             fn_args.push((err, json) -> result[key] = json; callback())
-            model[args.fn].apply(model, fn_args)
+            model[args.method].apply(model, fn_args)
 
         else
           console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
