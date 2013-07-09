@@ -43,12 +43,27 @@ runTests = (options, cache) ->
 
       queue.await done
 
-    it 'callback for all models', (done) ->
+    it 'callback for all models (util)', (done) ->
       processed_count = 0
 
       queue = new Queue(1)
       queue.defer (callback) ->
         BatchUtils.processModels Flat, callback, (model, callback) ->
+          assert.ok(!!model, 'model returned')
+          processed_count++
+          callback()
+
+      queue.await (err) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        done()
+
+    it 'callback for all models (model)', (done) ->
+      processed_count = 0
+
+      queue = new Queue(1)
+      queue.defer (callback) ->
+        Flat.batch callback, (model, callback) ->
           assert.ok(!!model, 'model returned')
           processed_count++
           callback()
