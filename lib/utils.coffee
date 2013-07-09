@@ -2,6 +2,7 @@ util = require 'util'
 URL = require 'url'
 Backbone = require 'backbone'
 _ = require 'underscore'
+moment = require 'moment'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
@@ -12,7 +13,7 @@ S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 BATCH_DEFAULT_LIMIT = 1500
 BATCH_DEFAULT_PARALLELISM = 1
 
-INTERVAL_TYPES = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
+INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
 
 
 module.exports = class Utils
@@ -173,39 +174,49 @@ module.exports = class Utils
     iteration_info = _.clone(options)
     iteration_info.interval = {}
 
+    queue = new Queue(1)
+
     # start
-    start = moment.utc(options.range.$gte) if options.range.$gte
-    start = moment.utc(options.range.$gt) if not start and options.range.$gt
-    start = moment.utc()
-    iteration_info.start = start.toDate()
-    iteration_info.first = @model_type.findOneNearestDate start.toDate(), {key: @key, reverse: true}, query, callback
+    queue.defer (callback) ->
+      start = moment.utc(options.range.$gte) if options.range.$gte
+      start = moment.utc(options.range.$gt) if not start and options.range.$gt
+      start = moment.utc()
+      iteration_info.start = start.toDate()
+      iteration_info.first = model_type.findOneNearestDate start.toDate(), {key: key, reverse: true}, query, callback
 
     # end
-    end = moment.utc(options.range.$lte) if options.range.$lte
-    end = moment.utc(options.range.$lt) if not end and options.range.$lt
-    end = moment.utc() unless end
-    iteration_info.end = end.toDate()
-    iteration_info.last = @model_type.findOneNearestDate end.toDate(), {key: @key}, query, callback
+    queue.defer (callback) ->
+      end = moment.utc(options.range.$lte) if options.range.$lte
+      end = moment.utc(options.range.$lt) if not end and options.range.$lt
+      end = moment.utc() unless end
+      iteration_info.end = end.toDate()
+      iteration_info.last = model_type.findOneNearestDate end.toDate(), {key: key}, query, callback
 
-    # interval length
-    interval_length_ms = moment.duration((if _.isUndefined(options.interval_length) then 1 else options.interval_length), options.interval_type).asMilliseconds()
-    throw Error("interval_length_ms is invalid: #{interval_length_ms} for range: #{util.inspect(options.range)}") unless interval_length_ms
+    # process
+    queue.await (err) ->
+      return callback(err) if err
 
-    processed_count = 0
-    interval_index = 0
-    query = _.clone(query)
+      # interval length
+      interval_length_ms = moment.duration((if _.isUndefined(options.interval_length) then 1 else options.interval_length), options.interval_type).asMilliseconds()
+      throw Error("interval_length_ms is invalid: #{interval_length_ms} for range: #{util.inspect(options.range)}") unless interval_length_ms
 
-    runInterval = (current, index) ->
-      return callback() if current.isAfter(end) # done
+      processed_count = 0
+      query = _.clone(query)
+      start = moment(iteration_info.start)
+      end = moment(iteration_info.end)
+      iteration_info.index = 0
 
-      iteration_info.interval.start = current.toDate()
-      next = current.clone().add({milliseconds: interval_length_ms})
-      iteration_info.interval.end = next.toDate()
-      iteration_info.interval.index = index
+      runInterval = (current) ->
+        return callback() if current.isAfter(end) # done
 
-      query[key] = {$gte: current.toDate(), $lt: next.toDate()}
-      fn query, iteration_info, (err) ->
-        return callback(err) if err
-        runInterval(next, index++)
+        iteration_info.interval.start = current.toDate()
+        next = current.clone().add({milliseconds: interval_length_ms})
+        iteration_info.interval.end = next.toDate()
 
-    runBatch(start, index)
+        query[key] = {$gte: current.toDate(), $lt: next.toDate()}
+        fn query, iteration_info, (err) ->
+          return callback(err) if err
+          iteration_info.interval.index++
+          runInterval(next)
+
+      runInterval(start)

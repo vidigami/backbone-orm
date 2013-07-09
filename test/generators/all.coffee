@@ -2,6 +2,6 @@
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   require('./all_flat')(options)
-  require('./all_relational')(options)
-  require('./conventions/one')(options)
-  require('./conventions/many')(options)
+  # require('./all_relational')(options)
+  # require('./conventions/one')(options)
+  # require('./conventions/many')(options)

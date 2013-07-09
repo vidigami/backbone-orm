@@ -14,15 +14,12 @@ runTests = (options, cache) ->
   BASE_COUNT = 1
   MODELS_JSON = null
 
-  DATE_START = '2013-06-09T08:00:00.000Z'
-  DATE_STEP_MS = 1000
-
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
     @schema: BASE_SCHEMA
     sync: SYNC(Flat, cache)
 
-  describe "Batch Utils (cache: #{cache})", ->
+  describe "Utils.batch (cache: #{cache})", ->
 
     beforeEach (done) ->
       queue = new Queue(1)

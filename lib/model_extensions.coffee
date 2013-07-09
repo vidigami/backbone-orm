@@ -1,8 +1,10 @@
 util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
-JSONUtils = require './json_utils'
+moment = require 'moment'
 Queue = require 'queue-async'
+
+JSONUtils = require './json_utils'
 Utils = require './utils'
 
 module.exports = (model_type) ->
@@ -53,13 +55,15 @@ module.exports = (model_type) ->
     model_type::sync('cursor', query).toModels(callback)
 
   # options:
+  #  @key: mandatory attribute name
   #  @reverse: default false
-  findOneNearestDate: (date, options, query, callback) ->
+  model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key
-    if arguments.length is 3
+
+    if arguments.length is 2
       [query, callback] = [{}, query]
-    else if arguments.length is 4
-      [date, query, callback] = [moment.utc().toDate(), {}, query]
+    else if arguments.length is 3
+      [options, query, callback] = [moment.utc().toDate(), {}, query]
     else
       query = _.clone(query)
     query.$one = true
