@@ -53,6 +53,31 @@ module.exports = (model_type) ->
     query.$one = true
     model_type::sync('cursor', query).toModels(callback)
 
+  # options:
+  #  @key: default 'created_at'
+  #  @reverse: default false
+  #  @date: default now
+  #  @query: default none
+  findOneNearestDate: (options, callback) ->
+    key = options.key or 'created_at'
+    date = options.date or moment.utc().toDate()
+    query = _.clone(options.query or {})
+    query.$one = true
+
+    findForward = (callback) =>
+      query[key] = {$lte: date.toISOString()}
+      @model_type.cursor(query).sort("-#{key}").toModels callback
+
+    findReverse = (callback) =>
+      query[key] = {$gte: date.toISOString()}
+      @model_type.cursor(query).sort(key).toModels callback
+
+    functions = if options.reverse then [findReverse, findForward] else [findForward, findReverse]
+    functions[0] (err, model) ->
+      return callback(err) if err
+      return callback(null, model) if model
+      functions[1] callback
+
   model_type.batch = (query, options, callback, fn) ->
     args = _.toArray(arguments)
     args.unshift({}) while args.length < 4

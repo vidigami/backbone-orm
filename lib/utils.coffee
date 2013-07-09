@@ -76,17 +76,6 @@ module.exports = class Utils
     return JoinTable
 
   ##############################
-  # Testing
-  ##############################
-  @setAllNames: (model_type, name, callback) ->
-    model_type.all (err, all_models) ->
-      return callback(err) if err
-      queue = new Queue()
-      for model in all_models
-        do (model) -> queue.defer (callback) -> model.save {name: name}, Utils.bbCallback callback
-      queue.await callback
-
-  ##############################
   # Sorting
   ##############################
   @isSorted: (models, fields) ->

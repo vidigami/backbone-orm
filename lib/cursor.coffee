@@ -25,6 +25,7 @@ module.exports = class Cursor
 
   offset: (offset) -> @_cursor.$offset = offset; return @
   limit: (limit) -> @_cursor.$limit = limit; return @
+  sort: (sort) -> @_cursor.$sort = sort; return @
 
   whiteList: (keys) ->
     keys = [keys] unless _.isArray(keys)
