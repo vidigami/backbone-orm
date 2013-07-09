@@ -53,23 +53,24 @@ module.exports = (model_type) ->
     model_type::sync('cursor', query).toModels(callback)
 
   # options:
-  #  @key: default 'created_at'
   #  @reverse: default false
-  #  @date: default now
-  #  @query: default none
-  findOneNearestDate: (options, callback) ->
-    key = options.key or 'created_at'
-    date = options.date or moment.utc().toDate()
-    query = _.clone(options.query or {})
+  findOneNearestDate: (date, options, query, callback) ->
+    throw new Error "Missing options key" unless key = options.key
+    if arguments.length is 3
+      [query, callback] = [{}, query]
+    else if arguments.length is 4
+      [date, query, callback] = [moment.utc().toDate(), {}, query]
+    else
+      query = _.clone(query)
     query.$one = true
 
     findForward = (callback) =>
       query[key] = {$lte: date.toISOString()}
-      @model_type.cursor(query).sort("-#{key}").toModels callback
+      model_type.cursor(query).sort("-#{key}").toModels callback
 
     findReverse = (callback) =>
       query[key] = {$gte: date.toISOString()}
-      @model_type.cursor(query).sort(key).toModels callback
+      model_type.cursor(query).sort(key).toModels callback
 
     functions = if options.reverse then [findReverse, findForward] else [findForward, findReverse]
     functions[0] (err, model) ->

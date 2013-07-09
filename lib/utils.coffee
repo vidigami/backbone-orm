@@ -8,8 +8,12 @@ Queue = require 'queue-async'
 Cursor = require './cursor'
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
+
 BATCH_DEFAULT_LIMIT = 1500
 BATCH_DEFAULT_PARALLELISM = 1
+
+INTERVAL_TYPES = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
+
 
 module.exports = class Utils
   @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
@@ -153,3 +157,55 @@ module.exports = class Utils
       $sort: parsed_query.$sort or 'id' # TODO: generalize sort for different types of sync
     }, parsed_query.find) # add find parameters
     runBatch(batch_cursor, callback)
+
+
+  ##############################
+  # Interval
+  ##############################
+  @interval: (model_type, query, options, callback, fn) ->
+    [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
+    [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
+
+    throw new Error 'missing option: key' unless key = options.key
+    throw new Error 'missing option: interval_type' unless options.interval_type
+    throw new Error("interval_type is not recognized: #{options.interval_type}, #{_.contains(INTERVAL_TYPES, options.interval_type)}") unless _.contains(INTERVAL_TYPES, options.interval_type)
+    throw new Error 'missing option: range' unless options.range
+    iteration_info = _.clone(options)
+    iteration_info.interval = {}
+
+    # start
+    start = moment.utc(options.range.$gte) if options.range.$gte
+    start = moment.utc(options.range.$gt) if not start and options.range.$gt
+    start = moment.utc()
+    iteration_info.start = start.toDate()
+    iteration_info.first = @model_type.findOneNearestDate start.toDate(), {key: @key, reverse: true}, query, callback
+
+    # end
+    end = moment.utc(options.range.$lte) if options.range.$lte
+    end = moment.utc(options.range.$lt) if not end and options.range.$lt
+    end = moment.utc() unless end
+    iteration_info.end = end.toDate()
+    iteration_info.last = @model_type.findOneNearestDate end.toDate(), {key: @key}, query, callback
+
+    # interval length
+    interval_length_ms = moment.duration((if _.isUndefined(options.interval_length) then 1 else options.interval_length), options.interval_type).asMilliseconds()
+    throw Error("interval_length_ms is invalid: #{interval_length_ms} for range: #{util.inspect(options.range)}") unless interval_length_ms
+
+    processed_count = 0
+    interval_index = 0
+    query = _.clone(query)
+
+    runInterval = (current, index) ->
+      return callback() if current.isAfter(end) # done
+
+      iteration_info.interval.start = current.toDate()
+      next = current.clone().add({milliseconds: interval_length_ms})
+      iteration_info.interval.end = next.toDate()
+      iteration_info.interval.index = index
+
+      query[key] = {$gte: current.toDate(), $lt: next.toDate()}
+      fn query, iteration_info, (err) ->
+        return callback(err) if err
+        runInterval(next, index++)
+
+    runBatch(start, index)
