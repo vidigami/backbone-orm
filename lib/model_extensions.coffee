@@ -4,7 +4,6 @@ Backbone = require 'backbone'
 JSONUtils = require './json_utils'
 Queue = require 'queue-async'
 Utils = require './utils'
-BatchUtils = require './batch_utils'
 
 module.exports = (model_type) ->
 
@@ -82,7 +81,13 @@ module.exports = (model_type) ->
     args = _.toArray(arguments)
     args.unshift({}) while args.length < 4
     args.unshift(model_type)
-    BatchUtils.processModels.apply(null, args)
+    Utils.batch.apply(null, args)
+
+  model_type.interval = (query, options, callback, fn) ->
+    args = _.toArray(arguments)
+    args.unshift({}) while args.length < 4
+    args.unshift(model_type)
+    Utils.interval.apply(null, args)
 
   ###################################
   # Backbone ORM - Helpers

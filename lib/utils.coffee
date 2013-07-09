@@ -5,7 +5,11 @@ _ = require 'underscore'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
+Cursor = require './cursor'
+
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
+BATCH_DEFAULT_LIMIT = 1500
+BATCH_DEFAULT_PARALLELISM = 1
 
 module.exports = class Utils
   @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
@@ -112,3 +116,40 @@ module.exports = class Utils
       return if JSON.stringify(model[field]) < JSON.stringify(other_model[field]) then 1 else -1
     else
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
+
+  ##############################
+  # Batch
+  ##############################
+  @batch: (model_type, query, options, callback, fn) ->
+    [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
+    [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
+
+    processed_count = 0
+    parsed_query = Cursor.parseQuery(query)
+    parallelism = if options.hasOwnProperty('parallelism') then options.parallelism else BATCH_DEFAULT_PARALLELISM
+    method = options.method or 'toModels'
+
+    runBatch = (batch_cursor, callback) ->
+      cursor = model_type.cursor(batch_cursor)
+      cursor[method].call cursor, (err, models) ->
+        return callback(new Error("Failed to get models. Error: #{err}")) if err or !models
+        return callback(null, processed_count) unless models.length
+
+        # batch operations on each
+        queue = new Queue(parallelism)
+        for model in models
+          do (model) -> queue.defer (callback) -> fn(model, callback)
+          processed_count++
+          break if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
+        queue.await (err) ->
+          return callback(err) if err
+          return callback(null, processed_count) if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
+          batch_cursor.$offset += batch_cursor.$limit
+          runBatch(batch_cursor, callback)
+
+    batch_cursor = _.extend({
+      $limit: options.$limit or BATCH_DEFAULT_LIMIT
+      $offset: parsed_query.$offset or 0
+      $sort: parsed_query.$sort or 'id' # TODO: generalize sort for different types of sync
+    }, parsed_query.find) # add find parameters
+    runBatch(batch_cursor, callback)

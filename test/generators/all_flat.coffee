@@ -6,5 +6,6 @@ module.exports = (options) ->
   require('./flat/convenience')(options)
   require('./flat/cursor')(options)
   require('./flat/find')(options)
+  require('./flat/interval')(options)
   require('./flat/page')(options)
   require('./flat/sort')(options)
