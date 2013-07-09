@@ -129,8 +129,9 @@ module.exports = class One
     # not loaded but we have the id, create a model
     if @type is 'belongsTo'
       if key is @ids_accessor
-        model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
-        return true
+        if model._orm_lookups
+          model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
+          return true
       # nothing to fetch
       else if not (model._orm_lookups and model._orm_lookups[@foreign_key]) and not model.attributes[@key]
         return true
