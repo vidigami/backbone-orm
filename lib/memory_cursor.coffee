@@ -62,6 +62,10 @@ module.exports = class MemoryCursor extends Cursor
       else
         json = (model_json for id, model_json of @store)
 
+    if @_cursor.$sort and _.isArray(json)
+      $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+      json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
+
     if @_cursor.$offset
       number = json.length - @_cursor.$offset
       number = 0 if number < 0
@@ -74,10 +78,6 @@ module.exports = class MemoryCursor extends Cursor
       json = json.splice(0, Math.min(json.length, @_cursor.$limit))
 
     return callback(null, json.length) if count or @_cursor.$count # only the count
-
-    if @_cursor.$sort and _.isArray(json)
-      $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-      json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
     queue = new Queue(1)
 

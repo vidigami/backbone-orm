@@ -182,7 +182,10 @@ module.exports = class Utils
       start = moment.utc(options.range.$gt) if not start and options.range.$gt
       start = moment.utc() unless start
       iteration_info.start = start.toDate()
-      iteration_info.first = model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, callback
+      model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, (err, model) ->
+        return callback(err) if err
+        iteration_info.first = model
+        callback()
 
     # end
     queue.defer (callback) ->
@@ -190,7 +193,10 @@ module.exports = class Utils
       end = moment.utc(options.range.$lt) if not end and options.range.$lt
       end = moment.utc() unless end
       iteration_info.end = end.toDate()
-      iteration_info.last = model_type.findOneNearestDate iteration_info.end, {key: key}, query, callback
+      model_type.findOneNearestDate iteration_info.end, {key: key}, query, (err, model) ->
+        return callback(err) if err
+        iteration_info.last = model
+        callback()
 
     # process
     queue.await (err) ->
@@ -206,17 +212,23 @@ module.exports = class Utils
       end = moment(iteration_info.end)
       iteration_info.index = 0
 
-      runInterval = (current) ->
-        return callback() if current.isAfter(end) # done
+      queue = new Queue(1)
 
-        iteration_info.interval.start = current.toDate()
+      current = start
+      until current.isAfter(end)
         next = current.clone().add({milliseconds: interval_length_ms})
-        iteration_info.interval.end = next.toDate()
+        do (current, next, iteration_info) ->
+          queue.defer (callback) ->
+            iteration_info.interval.start = current.toDate()
+            iteration_info.interval.end = next.toDate()
 
-        query[key] = {$gte: current.toDate(), $lt: next.toDate()}
-        fn query, iteration_info, (err) ->
-          return callback(err) if err
-          iteration_info.interval.index++
-          runInterval(next)
+            console.log "iteration_info.interval.start: #{iteration_info.interval.start}\niteration_info.interval.end: #{iteration_info.interval.end}"
 
-      runInterval(start)
+            query[key] = {$gte: current.toDate(), $lt: next.toDate()}
+
+            fn query, iteration_info, callback
+
+        iteration_info.interval.index++
+        current = next
+
+      queue.await callback
