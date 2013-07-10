@@ -180,9 +180,9 @@ module.exports = class Utils
     queue.defer (callback) ->
       start = moment.utc(options.range.$gte) if options.range.$gte
       start = moment.utc(options.range.$gt) if not start and options.range.$gt
-      start = moment.utc()
+      start = moment.utc() unless start
       iteration_info.start = start.toDate()
-      iteration_info.first = model_type.findOneNearestDate start.toDate(), {key: key, reverse: true}, query, callback
+      iteration_info.first = model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, callback
 
     # end
     queue.defer (callback) ->
@@ -190,7 +190,7 @@ module.exports = class Utils
       end = moment.utc(options.range.$lt) if not end and options.range.$lt
       end = moment.utc() unless end
       iteration_info.end = end.toDate()
-      iteration_info.last = model_type.findOneNearestDate end.toDate(), {key: key}, query, callback
+      iteration_info.last = model_type.findOneNearestDate iteration_info.end, {key: key}, query, callback
 
     # process
     queue.await (err) ->

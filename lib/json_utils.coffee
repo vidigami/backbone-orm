@@ -7,12 +7,12 @@ module.exports = class JSONUtils
 
   @JSONToValue: (json) ->
     return json unless json
-    if _.isDate(json)
-      return json
-    else if _.isString(json) and (json.length > 20) and json[json.length-1] is 'Z'
-      date = moment.utc(json)
-      return if date and date.isValid() then date.toDate() else json
-    else if _.isString(json)
+    # if _.isDate(json)
+    #   return json
+    # else if _.isString(json) and (json.length > 20) and json[json.length-1] is 'Z'
+    #   date = moment.utc(json)
+    #   return if date and date.isValid() then date.toDate() else json
+    if _.isString(json)
       return true if json is 'true'
       return false if json is 'false'
       return json
@@ -23,15 +23,15 @@ module.exports = class JSONUtils
     return json
 
   @valueToJSON: (value) ->
-    return value unless value
-    if value.toJSON
-      return value.toJSON()
-    else if _.isString(value)
-      return value
-    else if _.isArray(value)
-      value[index] = @JSONToValue(data) for index, data of value
-    else if _.isObject(value)
-      value[key] = @valueToJSON(data) for key, data of value
+    # return value unless value
+    # if value.toJSON
+    #   return value.toJSON()
+    # else if _.isString(value)
+    #   return value
+    # else if _.isArray(value)
+    #   value[index] = @JSONToValue(data) for index, data of value
+    # else if _.isObject(value)
+    #   value[key] = @valueToJSON(data) for key, data of value
     return value
 
   # template formats: 'field', ['field', ..], template dsl { }, function()

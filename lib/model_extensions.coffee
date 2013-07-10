@@ -68,15 +68,16 @@ module.exports = (model_type) ->
       query = _.clone(query)
     query.$one = true
 
-    findForward = (callback) =>
-      query[key] = {$lte: date.toISOString()}
-      model_type.cursor(query).sort("-#{key}").toModels callback
+    functions = [
+      ((callback) =>
+        query[key] = {$lte: date}
+        model_type.cursor(query).sort("-#{key}").toModels callback),
+      ((callback) =>
+        query[key] = {$gte: date}
+        model_type.cursor(query).sort(key).toModels callback)
+    ]
 
-    findReverse = (callback) =>
-      query[key] = {$gte: date.toISOString()}
-      model_type.cursor(query).sort(key).toModels callback
-
-    functions = if options.reverse then [findReverse, findForward] else [findForward, findReverse]
+    functions = [functions[1], functions[0]] if options.reverse
     functions[0] (err, model) ->
       return callback(err) if err
       return callback(null, model) if model
