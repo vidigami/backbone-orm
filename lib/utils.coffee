@@ -22,7 +22,7 @@ module.exports = class Utils
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   # parse an object whose values are still JSON stringified
-  @parseRawQuery: (query) ->
+  @parseJSON: (query) ->
     return JSON.parse(query) if _.isString(query)
     result = {}
     for key, value of query
