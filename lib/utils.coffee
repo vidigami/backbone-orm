@@ -226,9 +226,6 @@ module.exports = class Utils
 
           # skip to next
           next = model.get(key)
-          console.log "next: #{next}"
-
-
           iteration_info.interval.index = Math.floor((next.getTime() - start_ms) / interval_length_ms)
 
           current = moment.utc(iteration_info.start).add({milliseconds: iteration_info.interval.index * interval_length_ms})
