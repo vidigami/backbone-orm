@@ -161,7 +161,7 @@ module.exports = (model_type) ->
           json[key] = value.toJSON(options)
 
       else
-        json[key] = JSONUtils.valueToJSON(value)
+        json[key] = value
 
     delete @_orm_json if --@_orm_json is 0
     return json

@@ -22,18 +22,6 @@ module.exports = class JSONUtils
       json[key] = @JSONToValue(value) for key, value of json
     return json
 
-  @valueToJSON: (value) ->
-    # return value unless value
-    # if value.toJSON
-    #   return value.toJSON()
-    # else if _.isString(value)
-    #   return value
-    # else if _.isArray(value)
-    #   value[index] = @JSONToValue(data) for index, data of value
-    # else if _.isObject(value)
-    #   value[key] = @valueToJSON(data) for key, data of value
-    return value
-
   # template formats: 'field', ['field', ..], template dsl { }, function()
   # TODO allow for json or models
   @renderJSON = (models, template, options, callback) ->
