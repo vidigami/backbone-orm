@@ -179,8 +179,8 @@ module.exports = class Utils
     [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
 
     throw new Error 'missing option: key' unless key = options.key
-    throw new Error 'missing option: interval_type' unless options.interval_type
-    throw new Error("interval_type is not recognized: #{options.interval_type}, #{_.contains(INTERVAL_TYPES, options.interval_type)}") unless _.contains(INTERVAL_TYPES, options.interval_type)
+    throw new Error 'missing option: type' unless options.type
+    throw new Error("type is not recognized: #{options.type}, #{_.contains(INTERVAL_TYPES, options.type)}") unless _.contains(INTERVAL_TYPES, options.type)
     throw new Error 'missing option: range' unless options.range
     iteration_info = _.clone(options)
     iteration_info.interval = {}
@@ -215,8 +215,8 @@ module.exports = class Utils
 
       # interval length
       start_ms = iteration_info.start.getTime()
-      interval_length_ms = moment.duration((if _.isUndefined(options.interval_length) then 1 else options.interval_length), options.interval_type).asMilliseconds()
-      throw Error("interval_length_ms is invalid: #{interval_length_ms} for range: #{util.inspect(options.range)}") unless interval_length_ms
+      length_ms = moment.duration((if _.isUndefined(options.length) then 1 else options.length), options.type).asMilliseconds()
+      throw Error("length_ms is invalid: #{length_ms} for range: #{util.inspect(options.range)}") unless length_ms
 
       query = _.clone(query)
       query.$sort = [key]
@@ -237,11 +237,11 @@ module.exports = class Utils
 
           # skip to next
           next = model.get(key)
-          iteration_info.interval.index = Math.floor((next.getTime() - start_ms) / interval_length_ms)
+          iteration_info.interval.index = Math.floor((next.getTime() - start_ms) / length_ms)
 
-          current = moment.utc(iteration_info.start).add({milliseconds: iteration_info.interval.index * interval_length_ms})
+          current = moment.utc(iteration_info.start).add({milliseconds: iteration_info.interval.index * length_ms})
           iteration_info.interval.start = current.toDate()
-          next = current.clone().add({milliseconds: interval_length_ms})
+          next = current.clone().add({milliseconds: length_ms})
           iteration_info.interval.end = next.toDate()
 
           query[key] = {$gte: current.toDate(), $lt: next.toDate()}

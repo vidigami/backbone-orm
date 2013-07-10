@@ -67,8 +67,8 @@ runTests = (options, cache) ->
         Flat.interval {
           key: 'created_at'
           range: {$gte: DATE_START}
-          interval_type: 'milliseconds'
-          interval_length: 2*DATE_STEP_MS
+          type: 'milliseconds'
+          length: 2*DATE_STEP_MS
         }, callback, (query, info, callback) ->
           interval_count++
           Flat.batch query, {}, callback, (model, callback) ->
