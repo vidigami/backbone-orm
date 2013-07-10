@@ -181,42 +181,68 @@ module.exports = class Utils
     throw new Error 'missing option: key' unless key = options.key
     throw new Error 'missing option: type' unless options.type
     throw new Error("type is not recognized: #{options.type}, #{_.contains(INTERVAL_TYPES, options.type)}") unless _.contains(INTERVAL_TYPES, options.type)
-    throw new Error 'missing option: range' unless options.range
     iteration_info = _.clone(options)
+    iteration_info.range = {} unless iteration_info.range
     iteration_info.interval = {}
+    no_models = false
 
     queue = new Queue(1)
 
     # start
     queue.defer (callback) ->
-      start = moment.utc(options.range.$gte) if options.range.$gte
-      start = moment.utc(options.range.$gt) if not start and options.range.$gt
-      start = moment.utc() unless start
-      iteration_info.start = start.toDate()
-      model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, (err, model) ->
-        return callback(err) if err
-        iteration_info.first = model.get(key)
-        callback()
+      range = iteration_info.range
+      start = range.$gte if range.$gte
+      start = range.$gt if not start and range.$gt
+
+      # find the first record
+      unless start
+        model_type.cursor(query).limit(1).sort(key).toModels (err, models) ->
+          return callback(err) if err
+          (no_models = true; return callback()) unless models.length
+          iteration_info.start = iteration_info.first = models[0].get(key)
+          callback()
+
+      # find the closest record to the start
+      else
+        iteration_info.start = start
+        model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, (err, model) ->
+          return callback(err) if err
+          iteration_info.first = model.get(key)
+          callback()
 
     # end
     queue.defer (callback) ->
-      end = moment.utc(options.range.$lte) if options.range.$lte
-      end = moment.utc(options.range.$lt) if not end and options.range.$lt
-      end = moment.utc() unless end
-      iteration_info.end = end.toDate()
-      model_type.findOneNearestDate iteration_info.end, {key: key}, query, (err, model) ->
-        return callback(err) if err
-        iteration_info.last = model.get(key)
-        callback()
+      return callback() if no_models
+
+      range = iteration_info.range
+      end = range.$lte if range.$lte
+      end = range.$lt if not end and range.$lt
+
+      # find the last record
+      unless end
+        model_type.cursor(query).limit(1).sort("-#{key}").toModels (err, models) ->
+          return callback(err) if err
+          (no_models = true; return callback()) unless models.length
+          iteration_info.end = iteration_info.last = models[0].get(key)
+          callback()
+
+      # find the closest record to the end
+      else
+        iteration_info.end = end
+        model_type.findOneNearestDate iteration_info.end, {key: key}, query, (err, model) ->
+          return callback(err) if err
+          iteration_info.last = model.get(key)
+          callback()
 
     # process
     queue.await (err) ->
       return callback(err) if err
+      return callback() if no_models
 
       # interval length
       start_ms = iteration_info.start.getTime()
       length_ms = moment.duration((if _.isUndefined(options.length) then 1 else options.length), options.type).asMilliseconds()
-      throw Error("length_ms is invalid: #{length_ms} for range: #{util.inspect(options.range)}") unless length_ms
+      throw Error("length_ms is invalid: #{length_ms} for range: #{util.inspect(range)}") unless length_ms
 
       query = _.clone(query)
       query.$sort = [key]

@@ -81,6 +81,29 @@ runTests = (options, cache) ->
         assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
         done()
 
+    it 'callback for all models (model and no range)', (done) ->
+      processed_count = 0
+      interval_count = 0
+
+      queue = new Queue(1)
+
+      queue.defer (callback) ->
+        Flat.interval {
+          key: 'created_at'
+          type: 'milliseconds'
+          length: 2*DATE_STEP_MS
+        }, callback, (query, info, callback) ->
+          interval_count++
+          Flat.batch query, {}, callback, (model, callback) ->
+            processed_count++
+            callback()
+
+      queue.await (err) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(MODELS_JSON.length/2, interval_count, "\nExpected: #{MODELS_JSON.length/2}\nActual: #{interval_count}")
+        assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        done()
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
