@@ -41,11 +41,9 @@ module.exports = class Fabricator
   # 1) Fabricator.date(step_ms): step in milliseconds from now
   # 1) Fabricator.date(start, step_ms): step in milliseconds from start
   @date: (start, step_ms) ->
-    _normalize = (_date) -> _date.millisecond(0); return _date.toDate()
+    return moment.utc().toDate() if arguments.length is 0
 
-    # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
-    return _normalize(moment.utc()) if arguments.length is 0
-    [start, step_ms] = [moment.utc(), start] if arguments.length is 1
+    [start, step_ms] = [moment.utc().toDate(), start] if arguments.length is 1
     current_ms = start.valueOf()
     return ->
       current = new Date(current_ms)

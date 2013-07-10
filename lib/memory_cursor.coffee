@@ -31,20 +31,19 @@ module.exports = class MemoryCursor extends Cursor
         for id, model_json of @store
           is_match = true
           for key, value of @_find
-            if _.isObject(value)
-              if value.$lt or value.$lte or value.$gt or value.$gte
-                if value.$lt
-                  break unless is_match = model_json[key] < value.$lt
+            if _.isObject(value) and (value.$lt or value.$lte or value.$gt or value.$gte)
+              if value.$lt
+                break unless is_match = model_json[key] < value.$lt
 
-                else if value.$lte
-                  break unless is_match = (model_json[key] <= value.$lte) or _.isEqual(model_json[key], value.$lte)
+              else if value.$lte
+                break unless is_match = (model_json[key] <= value.$lte) or _.isEqual(model_json[key], value.$lte)
 
-                if value.$gt
-                  break unless is_match = model_json[key] > value.$gt
+              if value.$gt
+                break unless is_match = model_json[key] > value.$gt
 
-                else if value.$gte
-                  break unless is_match = (model_json[key] >= value.$gte) or _.isEqual(model_json[key], value.$gte)
-                continue
+              else if value.$gte
+                break unless is_match = (model_json[key] >= value.$gte) or _.isEqual(model_json[key], value.$gte)
+              continue
 
             break unless is_match = _.isEqual(model_json[key], value)
 
