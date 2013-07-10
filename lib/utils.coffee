@@ -207,6 +207,7 @@ module.exports = class Utils
         iteration_info.start = start
         model_type.findOneNearestDate iteration_info.start, {key: key, reverse: true}, query, (err, model) ->
           return callback(err) if err
+          (no_models = true; return callback()) unless model
           iteration_info.first = model.get(key)
           callback()
 
@@ -231,6 +232,7 @@ module.exports = class Utils
         iteration_info.end = end
         model_type.findOneNearestDate iteration_info.end, {key: key}, query, (err, model) ->
           return callback(err) if err
+          (no_models = true; return callback()) unless model
           iteration_info.last = model.get(key)
           callback()
 
