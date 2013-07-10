@@ -28,6 +28,8 @@ module.exports = class Utils
       date = moment.utc(value)
       return if date and date.isValid() then date.toDate() else value
     else
+      return true if value is 'true'
+      return false if value is 'false'
       try value = JSON.parse(value) catch err
     return value
 

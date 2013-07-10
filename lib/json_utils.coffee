@@ -5,23 +5,6 @@ Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
-  @JSONToValue: (json) ->
-    return json unless json
-    # if _.isDate(json)
-    #   return json
-    # else if _.isString(json) and (json.length > 20) and json[json.length-1] is 'Z'
-    #   date = moment.utc(json)
-    #   return if date and date.isValid() then date.toDate() else json
-    if _.isString(json)
-      return true if json is 'true'
-      return false if json is 'false'
-      return json
-    else if _.isArray(json)
-      json[index] = @JSONToValue(value) for index, value of json
-    else if _.isObject(json)
-      json[key] = @JSONToValue(value) for key, value of json
-    return json
-
   # template formats: 'field', ['field', ..], template dsl { }, function()
   # TODO allow for json or models
   @renderJSON = (models, template, options, callback) ->
