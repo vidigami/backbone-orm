@@ -71,6 +71,8 @@ runTests = (options, cache) ->
           interval_length: 2*DATE_STEP_MS
         }, callback, (query, info, callback) ->
           interval_count++
+          console.log "query: #{util.inspect(query)}"
+
           Flat.batch query, callback, (model, callback) ->
             processed_count++
             callback()
