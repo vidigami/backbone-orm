@@ -21,26 +21,6 @@ module.exports = class Utils
 
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
-  # parse an object whose values are still JSON stringified
-  @parseValues: (values) ->
-    if _.isArray(values)
-      return _.map(values, Utils.parseValues)
-    else if _.isObject(values)
-      result = {}
-      result[key] = Utils.parseValues(value) for key, value of values
-      return result
-    else if _.isString(values)
-      if (values.length >= 20) and values[values.length-1] is 'Z'
-        date = moment.utc(values)
-        return if date and date.isValid() then date.toDate() else values
-      else
-        return true if values is 'true'
-        return false if values is 'false'
-        try
-          return Utils.parseValues(values) if values = JSON.parse(values)
-        catch err
-    return values
-
   @parseUrl: (url) ->
     url_parts = URL.parse(url)
     database_parts = url_parts.pathname.split('/')

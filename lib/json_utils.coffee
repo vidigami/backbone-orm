@@ -5,6 +5,26 @@ Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
+  # parse an object whose values are still JSON stringified
+  @parse: (values) ->
+    if _.isArray(values)
+      return _.map(values, JSONUtils.parse)
+    else if _.isObject(values)
+      result = {}
+      result[key] = JSONUtils.parse(value) for key, value of values
+      return result
+    else if _.isString(values)
+      if (values.length >= 20) and values[values.length-1] is 'Z'
+        date = moment.utc(values)
+        return if date and date.isValid() then date.toDate() else values
+      else
+        return true if values is 'true'
+        return false if values is 'false'
+        try
+          return JSONUtils.parse(values) if values = JSON.parse(values)
+        catch err
+    return values
+
   # template formats: 'field', ['field', ..], template dsl { }, function()
   # TODO allow for json or models
   @renderJSON = (models, template, options, callback) ->

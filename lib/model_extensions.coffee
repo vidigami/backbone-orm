@@ -4,7 +4,6 @@ Backbone = require 'backbone'
 moment = require 'moment'
 Queue = require 'queue-async'
 
-JSONUtils = require './json_utils'
 Utils = require './utils'
 
 module.exports = (model_type) ->
