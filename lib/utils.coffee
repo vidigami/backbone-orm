@@ -30,7 +30,7 @@ module.exports = class Utils
       result[key] = Utils.parseValues(value) for key, value of values
       return result
     else if _.isString(values)
-      if (values.length > 20) and values[values.length-1] is 'Z'
+      if (values.length >= 20) and values[values.length-1] is 'Z'
         date = moment.utc(values)
         return if date and date.isValid() then date.toDate() else values
       else
