@@ -30,10 +30,6 @@ module.exports = class One
     throw new Error "One::set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
-    if @type is 'belongsTo' and key is @foreign_key
-      model._orm_lookups or= {}
-      model._orm_lookups[@foreign_key] = value
-      return @
     related_model = model.attributes[@key]
     if @has(model, @key, value)
       return @ unless related_model # null
@@ -128,13 +124,7 @@ module.exports = class One
 
     # not loaded but we have the id, create a model
     if @type is 'belongsTo'
-      if key is @ids_accessor
-        if model._orm_lookups
-          model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
-          return true
-      # nothing to fetch
-      else if not (model._orm_lookups and model._orm_lookups[@foreign_key]) and not model.attributes[@key]
-        return true
+      return true if not model.attributes[@key]
 
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
@@ -170,9 +160,7 @@ module.exports = class One
     query = _.extend(_query or {}, {$one:true})
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
-        if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
-          query.id = related_id
-        else if related_model = related_model = model.attributes[@key]
+        if related_model = related_model = model.attributes[@key]
           query.id = related_model.get('id')
       else
         query[@foreign_key] = model.attributes.id
