@@ -226,9 +226,9 @@ module.exports = (model_type) ->
     delete @_orm_clone if --@_orm_clone is 0
     return new @constructor(json)
 
-  model_type::cursor = (key, query) ->
+  model_type::cursor = (key, query={}) ->
     schema = model_type.schema() if model_type.schema
     if schema and (relation = schema.relation(key))
-      return relation.cursor(@, key, query, callback)
+      return relation.cursor(@, key, query)
     else
       throw new Error "#{schema.model_name}::cursor: Unexpected key: #{key} is not a relation"
