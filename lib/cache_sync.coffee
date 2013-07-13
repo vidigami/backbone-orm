@@ -7,6 +7,9 @@ Utils = require './utils'
 
 Cache = require './cache'
 
+DEFAULT_LIMIT = 1000
+DEFAULT_PARALLELISM = 100
+
 class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
 
@@ -52,9 +55,9 @@ class CacheSync
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 
   destroy: (query, callback) ->
-    @wrapped_sync_fn 'destroy', query, (err) =>
-      Cache.clear(@model_type.model_name) # TODO: optimize through selective cache clearing
-      callback(err)
+    # TODO: review for optimization
+    @model_type.batch query, {$limit: DEFAULT_LIMIT, parallelism: DEFAULT_PARALLELISM}, callback, (model, callback) ->
+      model.destroy Utils.bbCallback callback
 
   ###################################
   # Backbone Cache Sync - Custom Extensions
