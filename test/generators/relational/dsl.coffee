@@ -38,7 +38,7 @@ runTests = (options, cache) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner, cache)
 
-  describe "JSONUtils.renderJSON (cache: #{cache})", ->
+  describe "JSONUtils.renderTemplate (cache: #{cache})", ->
 
     beforeEach (done) ->
       MODELS = {}
@@ -94,30 +94,30 @@ runTests = (options, cache) ->
       queue.await done
 
 
-    # renderJSON (no dsl)
-    it 'renderJSON (no dsl) handles rendering a single field', (done) ->
+    # renderTemplate (no dsl)
+    it 'renderTemplate (no dsl) handles rendering a single field', (done) ->
       FIELD = 'created_at'
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, FIELD, (err, value) ->
+        JSONUtils.renderTemplate test_model, FIELD, (err, value) ->
           assert.ok(value, 'Returned a value')
           assert.equal(test_model.get(FIELD), value, "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{value}")
           done()
 
-    it 'renderJSON (no dsl) handles a list of fields', (done) ->
+    it 'renderTemplate (no dsl) handles a list of fields', (done) ->
       FIELDS = ['created_at', 'name']
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, FIELDS, (err, json) ->
+        JSONUtils.renderTemplate test_model, FIELDS, (err, json) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    it 'renderJSON (no dsl) handles rendering via a function', (done) ->
+    it 'renderTemplate (no dsl) handles rendering via a function', (done) ->
       FIELDS = ['created_at', 'name']
       template = (model, options, callback) ->
         json = {}
@@ -126,7 +126,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, template, (err, json) ->
+        JSONUtils.renderTemplate test_model, template, (err, json) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
@@ -154,7 +154,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
@@ -172,7 +172,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           for field in FIELDS
             assert.equal(test_model.get(field), json[field], "Returned the correct value:\nExpected: #{test_model.get(field)}, Actual: #{json[field]}")
@@ -190,7 +190,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.equal(test_model.get(FIELD), json[FIELD], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD]}")
 
@@ -215,7 +215,7 @@ runTests = (options, cache) ->
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
           assertRelated = (model_json) ->
@@ -239,7 +239,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
 #          console.log 'REVERSES?:', json[RELATED_FIELD][SECOND_RELATED_FIELD][0].attributes
@@ -264,7 +264,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.equal(test_model.get(FIELD).toUpperCase(), json[FIELD_AS], "Returned the correct value:\nExpected: #{test_model.get(FIELD).toUpperCase()}, Actual: #{json[FIELD_AS]}")
           assert.ok(!json.updated_at, 'Does not have an excluded field')
@@ -282,7 +282,7 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         EXPECTED = test_model.get(FIELD) + ARG
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.equal(EXPECTED, json[FIELD_AS], "Returned the correct value:\nExpected: #{EXPECTED}, Actual: #{json[FIELD_AS]}")
           assert.ok(!json.updated_at, 'Does not have an excluded field')
@@ -297,7 +297,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(json[FIELD_AS].name, 'Has data')
           assert.ok(!(json instanceof Backbone.Model), 'Is not a backbone model')
@@ -312,7 +312,7 @@ runTests = (options, cache) ->
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(related = json[FIELD], 'json has related model')
           for field in FIELDS
@@ -330,7 +330,7 @@ runTests = (options, cache) ->
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(related = json[FIELD_AS], 'json has related model')
           for field in FIELDS
@@ -347,7 +347,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(related = json[FIELD], 'json has related model')
           for field in FIELDS
@@ -365,7 +365,7 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(related = json[FIELD_AS], 'json has related model')
           for field in FIELDS
@@ -382,7 +382,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           for owner_json in json
             assert.ok(related = owner_json[FIELD], 'json has related model')
@@ -401,7 +401,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           for owner_json in json
             assert.ok(related = owner_json[FIELD_AS], 'json has related model')
@@ -419,7 +419,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(count = json[FIELD], 'json has the related count')
           assert.equal(REVERSE_COUNT, count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{count}")
@@ -435,7 +435,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(count = json[FIELD], 'json has the related count')
           assert.equal(REVERSE_COUNT, count, "Returned the correct value:\nExpected: #{REVERSE_COUNT}, Actual: #{count}")
@@ -454,7 +454,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
           assert.ok(json[FIELD_AS], 'Has related model')
           assert.ok(json[FIELD_AS].name, 'Related model has json set by function')
@@ -478,7 +478,7 @@ runTests = (options, cache) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        JSONUtils.renderJSON test_model, TEMPLATE, (err, json) ->
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
           assert.equal(test_model.get('id'), json.id, "Returned the correct value:\nExpected: #{test_model.get('id')}, Actual: #{json.id}")

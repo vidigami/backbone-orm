@@ -27,7 +27,7 @@ module.exports = class JSONUtils
 
   # template formats: 'field', ['field', ..], template dsl { }, function()
   # TODO allow for json or models
-  @renderJSON = (models, template, options, callback) ->
+  @renderTemplate = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
     # one
@@ -35,16 +35,16 @@ module.exports = class JSONUtils
       return callback(null, null) unless models
 
       # Single field
-      return JSONUtils.renderJSONKey(models, template, options, callback) if _.isString(template)
+      return JSONUtils.renderKey(models, template, options, callback) if _.isString(template)
 
       # Array of fields, pick keys
-      return JSONUtils.renderJSONKeys(models, template, options, callback) if _.isArray(template)
+      return JSONUtils.renderKeys(models, template, options, callback) if _.isArray(template)
 
       # Render template function
       return template(models, options, callback) if _.isFunction(template)
 
       # dsl object
-      return JSONUtils.renderJSONDSL(models, template, options, callback)
+      return JSONUtils.renderDSL(models, template, options, callback)
 
     # many
     else
@@ -54,7 +54,7 @@ module.exports = class JSONUtils
       for model in models
         do (model) ->
           queue.defer (callback) ->
-            JSONUtils.renderJSON model, template, options, (err, related_json) ->
+            JSONUtils.renderTemplate model, template, options, (err, related_json) ->
               return callback(err) if err
               result.push(related_json)
               callback()
@@ -63,7 +63,7 @@ module.exports = class JSONUtils
         return callback(err) if err
         callback(null, result)
 
-  @renderJSONDSL = (model, dsl, options, callback) ->
+  @renderDSL = (model, dsl, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
     queue = new Queue()
@@ -104,23 +104,23 @@ module.exports = class JSONUtils
               if query
                 relation.cursor(model, field, query).toModels (err, models) ->
                   return callback(err) if err
-                  JSONUtils.renderJSON models, template, options, (err, json) -> result[key] = json; callback(err)
+                  JSONUtils.renderTemplate models, template, options, (err, json) -> result[key] = json; callback(err)
 
               else
                 model.get field, (err, related_model) ->
                   return callback(err) if err
-                  JSONUtils.renderJSON related_model, template, options, (err, json) -> result[key] = json; callback(err)
+                  JSONUtils.renderTemplate related_model, template, options, (err, json) -> result[key] = json; callback(err)
 
             # query
             else
               relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
-          queue.defer (callback) -> JSONUtils.renderJSONKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
+          queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
 
         # full_name:      'name'
         else if _.isString(args)
-          queue.defer (callback) -> JSONUtils.renderJSONKey model, args, options, (err, json) -> result[key] = json; callback(err)
+          queue.defer (callback) -> JSONUtils.renderKey model, args, options, (err, json) -> result[key] = json; callback(err)
 
         # can_delete: (photo, options, callback) ->
         else if _.isFunction(args)
@@ -142,7 +142,7 @@ module.exports = class JSONUtils
       callback(null, result)
 
   # Render a list of keys from a model to json: ['key', 'key_two', ..]
-  @renderJSONKeys = (model, keys, options, callback) ->
+  @renderKeys = (model, keys, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
     queue = new Queue()
@@ -150,7 +150,7 @@ module.exports = class JSONUtils
     for key in keys
       do (key) ->
         queue.defer (callback) ->
-          JSONUtils.renderJSONKey model, key, options, (err, value) ->
+          JSONUtils.renderKey model, key, options, (err, value) ->
             return callback(err) if err
             result[key] = value
             callback()
@@ -160,7 +160,7 @@ module.exports = class JSONUtils
       callback(null, result)
 
   # Render a single key friom a model to json: model.get('key')
-  @renderJSONKey = (model, key, options, callback) ->
+  @renderKey = (model, key, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
     model.get key, (err, value) ->
@@ -174,24 +174,30 @@ module.exports = class JSONUtils
           value = value.toJSON()
       callback(null, value)
 
-  @appendJSON = (json, related_model, attribute_name, template, options, callback) ->
-    (callback = options; options = {}) if arguments.length is 5
+  @renderRelated = (models, attribute_name, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 4
 
-    # empty
-    (json[attribute_name] = null; return callback()) unless related_model
+    # one
+    unless _.isArray(models)
+      models.get attribute_name, (err, related_models) ->
+        callback(err) if err
+        JSONUtils.renderTemplate related_models, template, options, callback
 
-    JSONUtils.renderJSON related_model, template, options, (err, model_json) ->
-      return callback(err) if err
-      json[attribute_name] = model_json
-      callback()
+    # many
+    else
+      queue = new Queue()
 
-  @appendRelatedJSON = (json, model, attribute_name, template, options, callback) ->
-    (callback = options; options = {}) if arguments.length is 5
+      result = []
+      for model in models
+        do (model) ->
+          queue.defer (callback) ->
+            models.get attribute_name, (err, related_models) ->
+              callback(err) if err
+              JSONUtils.renderTemplate related_models, template, options, (err, related_json) ->
+                return callback(err) if err
+                result.push(related_json)
+                callback()
 
-    model.get attribute_name, (err, related_models) ->
-      callback(err) if err
-
-      JSONUtils.renderJSON related_models, template, options, (err, related_json) ->
+      queue.await (err) ->
         return callback(err) if err
-        json[attribute_name] = related_json
-        callback()
+        callback(null, result)
