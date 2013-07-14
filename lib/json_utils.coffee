@@ -191,7 +191,7 @@ module.exports = class JSONUtils
       for model in models
         do (model) ->
           queue.defer (callback) ->
-            models.get attribute_name, (err, related_models) ->
+            model.get attribute_name, (err, related_models) ->
               callback(err) if err
               JSONUtils.renderTemplate related_models, template, options, (err, related_json) ->
                 return callback(err) if err
