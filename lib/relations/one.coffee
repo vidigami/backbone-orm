@@ -46,7 +46,7 @@ module.exports = class One
       cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
 
-    related_model = if value then @reverse_model_type.findOrCreate(value) else null
+    related_model = if value then @reverse_model_type.findOrNew(value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
     return @
 
@@ -129,7 +129,7 @@ module.exports = class One
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
+      model.set(@key, related_model = if json then @reverse_model_type.findOrNew(json) else null)
       if related_model
         delete related_model._orm_needs_load
         cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()

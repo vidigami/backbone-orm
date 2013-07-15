@@ -16,18 +16,6 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
-  model_type.findOrCreate = (data) ->
-    throw 'findOrCreate requires data' unless data
-    return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
-    if cache = model_type.cache()
-      return cache.findOrCreate(model_type.model_name, model_type, data)
-    else
-      return (model_type.findOrCreate(item) for item in data) if _.isArray(data)
-      return new model_type(model_type::parse(data)) if _.isObject(data)
-      related_model = new model_type({id: data})
-      related_model._orm_needs_load = true
-      return related_model
-
   model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
@@ -52,6 +40,32 @@ module.exports = (model_type) ->
     [query, callback] = [{}, query] if arguments.length is 1
     query.$one = true
     model_type::sync('cursor', query).toModels(callback)
+
+  model_type.findOrCreate = (data, callback) ->
+    throw 'findOrCreate requires object data' if not _.isObject(data) or (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
+
+    query = {id: data.id, $one: true}
+    model_type::sync('cursor', query).toModels (err, model) ->
+      return callback(err) if err
+      return callback(null, model) if model
+      model = new model_type(data)
+      model.save {}, (err) ->
+        return callback(err) if err
+        cache.add(model_type.model_name, model) if cache = model_type.cache()
+        callback(null, model)
+
+  model_type.findOrNew = (data) ->
+    throw 'findOrNew requires data' unless data
+    return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
+
+    if cache = model_type.cache()
+      return cache.findOrNew(model_type.model_name, model_type, data)
+    else
+      return (model_type.findOrNew(item) for item in data) if _.isArray(data)
+      return new model_type(model_type::parse(data)) if _.isObject(data)
+      related_model = new model_type({id: data})
+      related_model._orm_needs_load = true
+      return related_model
 
   # options:
   #  @key: mandatory attribute name

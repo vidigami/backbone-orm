@@ -21,7 +21,7 @@ class Cache
     results.push(model) for data in data when (model = @_getOrInvalidateModel(model_store, data, now))
     return results
 
-  findOrCreate: (model_name, model_type, data) ->
+  findOrNew: (model_name, model_type, data) ->
     (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
 
     now = (new Date()).valueOf()
