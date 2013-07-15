@@ -44,7 +44,7 @@ module.exports = (model_type) ->
   model_type.findOrCreate = (data, callback) ->
     throw 'findOrCreate requires object data' if not _.isObject(data) or (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
 
-    query = {id: data.id, $one: true}
+    query = _.extend({$one: true}, data)
     model_type::sync('cursor', query).toModels (err, model) ->
       return callback(err) if err
       return callback(null, model) if model
