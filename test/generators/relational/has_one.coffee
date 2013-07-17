@@ -23,6 +23,7 @@ runTests = (options, cache, embed) ->
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owner: -> ['belongsTo', Owner]
+      owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
     }, BASE_SCHEMA)
     sync: SYNC(Reverse, cache)
 
@@ -31,6 +32,7 @@ runTests = (options, cache, embed) ->
     @schema: _.defaults({
       flat: -> ['belongsTo', Flat, embed: embed]
       reverse: -> ['hasOne', Reverse, embed: embed]
+      reverse_as: -> ['hasOne', Reverse, as: 'owner_as', embed: embed]
     }, BASE_SCHEMA)
     sync: SYNC(Owner, cache)
 
@@ -73,9 +75,10 @@ runTests = (options, cache, embed) ->
       queue.defer (callback) ->
         save_queue = new Queue()
 
-        for owner in MODELS.owner
-          do (owner) ->
-            owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop()})
+        for owner, index in MODELS.owner
+          do (owner, index) ->
+            as_index = BASE_COUNT - index - 1
+            owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse[index], reverse_as: MODELS.reverse[as_index]})
             save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
@@ -144,7 +147,7 @@ runTests = (options, cache, embed) ->
           assert.equal(test_model.get('id'), reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
             assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
-          assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
+          assert.ok(!test_model.toJSON().reverse_id, 'No reverse_id in owner json')
 
           reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
@@ -205,6 +208,31 @@ runTests = (options, cache, embed) ->
         assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
         #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
         done()
+
+    it 'Handles a get query for a hasOne and belongsTo two sided relation as "as" fields', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        test_model.get 'reverse_as', (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found related model')
+          assert.equal(test_model.get('id'), reverse.get('owner_as_id'), "\nExpected: #{test_model.get('id')}\nActual: #{reverse.get('owner_as_id')}")
+          assert.equal(test_model.get('id'), reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.get('id')}\nActual: #{reverse.toJSON().owner_as_id}")
+          if test_model.relationIsEmbedded('reverse_as')
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+          assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
+
+          reverse.get 'owner_as', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, 'found original model')
+            assert.deepEqual(reverse.toJSON().owner_as_id, owner.get('id'), "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.get('id')}")
+
+            if Owner.cache()
+              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+            else
+              assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
+            done()
 
 #    it 'Can include a related (belongsTo) model', (done) ->
 #      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->

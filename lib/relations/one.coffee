@@ -8,11 +8,15 @@ Utils = require '../utils'
 module.exports = class One
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor = "#{@key}_id"
-    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else @model_type.model_name) unless @foreign_key
+    @ids_accessor or= "#{@key}_id"
+    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+    if @as
+      @reverse_relation = @reverse_model_type.relation(@as)
+    else
+      @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
     # check for reverse since they need to store the foreign key

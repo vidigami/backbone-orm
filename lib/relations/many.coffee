@@ -10,12 +10,16 @@ One = require './one'
 module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor = "#{inflection.singularize(@key)}_ids"
-    @foreign_key = inflection.foreign_key(@model_type.model_name) unless @foreign_key
+    @ids_accessor or= "#{inflection.singularize(@key)}_ids"
+    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+    if @as
+      @reverse_relation = @reverse_model_type.relation(@as)
+    else
+      @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
     # The reverse of a hasMany relation should be `belongsTo`, not `hasOne`

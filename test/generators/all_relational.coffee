@@ -5,5 +5,5 @@ module.exports = (options) ->
   require('./relational/has_many')(options)
   require('./relational/many_to_many')(options)
   require('./relational/dsl')(options)
-#  require('./relational/to_json')(options)
+  require('./relational/to_json')(options)
 
