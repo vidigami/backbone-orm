@@ -124,6 +124,8 @@ module.exports = (model_type) ->
     schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
     return _original_initialize.apply(@, arguments)
 
+  model_type::model_name = -> return model_type.model_name
+
   _original_set = model_type::set
   model_type::set = (key, value, options) ->
     return _original_set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
