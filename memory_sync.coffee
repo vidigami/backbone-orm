@@ -1,6 +1,5 @@
 util = require 'util'
 _ = require 'underscore'
-inflection = require 'inflection'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
