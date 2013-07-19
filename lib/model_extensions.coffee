@@ -176,7 +176,9 @@ module.exports = (model_type) ->
           json[key] = value.toJSON(options)
 
       else
-        json[key] = value
+        #todo: ensure that relation fields are not null when given to sequelize
+        unless schema and (relation = schema.relation(key))
+          json[key] = value
 
     delete @_orm_json if --@_orm_json is 0
     return json
