@@ -10,6 +10,7 @@ Cache = require './cache'
 DEFAULT_LIMIT = 1000
 DEFAULT_PARALLELISM = 100
 
+# @private
 class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
 

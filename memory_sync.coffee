@@ -5,6 +5,18 @@ MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
 
+# Backbone Sync for in-memory models.
+#
+# @example How to configure using a model name
+#   class Thing extends Backbone.Model
+#     @model_name: 'Thing'
+#     sync: require('backbone-orm/memory_sync')(Thing)
+#
+# @example How to configure using a url
+#   class Thing extends Backbone.Model
+#     url: '/things'
+#     sync: require('backbone-orm/memory_sync')(Thing)
+#
 class MemorySync
   constructor: (@model_type) ->
     @store = {}

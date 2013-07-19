@@ -8,6 +8,51 @@ Utils = require './utils'
 
 module.exports = (model_type) ->
 
+  # Extensions to the base Backbone.Model class
+  #
+  # @method .cursor(query={})
+  #   Create a cursor for iterating over models or JSON.
+  #
+  # @method .destroy(query, callback)
+  #   Destroy a batch of models by query.
+  #
+  # @method .count(query, callback)
+  #   Helper method for counting Models matching a query.
+  #
+  # @method .all(callback)
+  #   Helper method for processing all Models.
+  #
+  # @method .find(query, callback)
+  #   Find models by query.
+  #
+  # @method .findOne(query, callback)
+  #   Helper method for finding a single model.
+  #
+  # @method .findOrCreate(data, callback)
+  #   Find a model by data (including the id) or create with save if it does not already exist.
+  #
+  # @method .findOrNew(data, callback)
+  #   Find a model by data (including the id) or create a new one without save if it does not already exist.
+  #
+  # @method .findOneNearestDate(date, options, query, callback)
+  #   Find a model near a date. It will search in both directions until a model is found depending on the reverse flag (default is forwards).
+  #   @param [Object] options
+  #   @option reverse [String] Start searching backwards from the given date.
+  #
+  # @method .batch(query, options, callback, fn)
+  #   Fetch a batch of models at a time and process them.
+  #
+  # @method .interval(query, options, callback, fn)
+  #   Process a batch of models in fixed-size time intervals. For example, if map-reducing in fixed intervals.
+  #
+  # @method #modelName()
+  #   Get a model name from a model instance.
+  #
+  # @method #cursor(key, query={})
+  #   Create a cursor for a model's relationship.
+  #
+  class BackboneModelExtensions
+
   ###################################
   # Backbone ORM - Sync Accessors
   ###################################
@@ -26,6 +71,7 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
+
   model_type.count = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
     model_type::sync('cursor', query).count(callback)
@@ -124,7 +170,7 @@ module.exports = (model_type) ->
     schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
     return _original_initialize.apply(@, arguments)
 
-  model_type::model_name = -> return model_type.model_name
+  model_type::modelName = -> return model_type.model_name
 
   _original_set = model_type::set
   model_type::set = (key, value, options) ->

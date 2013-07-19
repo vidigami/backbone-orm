@@ -19,8 +19,10 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 module.exports = class Utils
   @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
 
+  # @private
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
+  # @private
   @parseUrl: (url) ->
     url_parts = URL.parse(url)
     database_parts = url_parts.pathname.split('/')
@@ -47,12 +49,14 @@ module.exports = class Utils
   ##############################
   # Relational
   ##############################
+  # @private
   @reverseRelation: (model_type, owning_model_name) ->
     return null unless model_type.relation
     reverse_key = inflection.underscore(owning_model_name)
     return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
     return model_type.relation(inflection.pluralize(reverse_key)) # plural
 
+  # @private
   @dataId: (data) ->
     if data instanceof Backbone.Model
       return data.get('id')
@@ -60,6 +64,7 @@ module.exports = class Utils
       return data.id
     return data
 
+  # @private
   @createJoinTableModel: (relation1, relation2) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))
     model_name2 = inflection.pluralize(inflection.underscore(relation2.model_type.model_name))
@@ -69,6 +74,7 @@ module.exports = class Utils
     schema[relation1.foreign_key] = ['Integer', indexed: true]
     schema[relation2.foreign_key] = ['Integer', indexed: true]
 
+    # @private
     class JoinTable extends Backbone.Model
       urlRoot: "#{Utils.parseUrl(_.result(relation1.model_type.prototype, 'url')).database_path}/#{table}"
       @schema: schema
@@ -79,6 +85,7 @@ module.exports = class Utils
   ##############################
   # Sorting
   ##############################
+  # @private
   @isSorted: (models, fields) ->
     fields = _.uniq(fields)
     for model in models
@@ -86,6 +93,7 @@ module.exports = class Utils
       last_model = model
     return true
 
+  # @private
   @fieldCompare: (model, other_model, fields) ->
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo
@@ -100,6 +108,7 @@ module.exports = class Utils
     else
       return if model.get(field) > other_model.get(field) then 1 else -1
 
+  # @private
   @jsonFieldCompare: (model, other_model, fields) ->
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo
@@ -117,6 +126,7 @@ module.exports = class Utils
   ##############################
   # Batch
   ##############################
+  # @private
   @batch: (model_type, query, options, callback, fn) ->
     [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
     [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
@@ -155,6 +165,7 @@ module.exports = class Utils
   ##############################
   # Interval
   ##############################
+  # @private
   @interval: (model_type, query, options, callback, fn) ->
     [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
     [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4

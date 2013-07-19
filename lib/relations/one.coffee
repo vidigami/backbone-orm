@@ -5,6 +5,7 @@ inflection = require 'inflection'
 
 Utils = require '../utils'
 
+# @private
 module.exports = class One
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options

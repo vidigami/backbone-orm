@@ -6,6 +6,7 @@ Utils = require './utils'
 
 MAX_CACHE_MS = 500*1000*1000 # TODO: determine the best amount
 
+# @private
 class Cache
   constructor: ->
     @store = {}

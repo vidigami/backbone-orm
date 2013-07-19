@@ -5,6 +5,7 @@ One = require './relations/one'
 Many = require './relations/many'
 inflection = require 'inflection'
 
+# @private
 module.exports = class Schema
   constructor: (@model_type) ->
 

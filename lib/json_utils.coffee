@@ -5,7 +5,12 @@ Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
-  # parse an object whose values are still JSON stringified
+  # Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format).
+  #
+  # @example
+  #   method: (req, res) ->
+  #     query = JSONUtils.parse(req.query)
+  #
   @parse: (values) ->
     if _.isArray(values)
       return _.map(values, JSONUtils.parse)
@@ -25,8 +30,20 @@ module.exports = class JSONUtils
         catch err
     return values
 
-  # template formats: 'field', ['field', ..], template dsl { }, function()
-  # TODO allow for json or models
+  # Render a template that can be a key, keys, DSL object, or function.
+  #
+  # @example: render a key
+  #   JSONUtils.renderTemplate model, 'name', callback
+  #
+  # @example: render multiple keys
+  #   JSONUtils.renderTemplate model, ['id', 'name'], callback
+  #
+  # @example: render a DSL object
+  #   JSONUtils.renderTemplate model, {$select: ['id', 'name']}
+  #
+  # @example: render a template
+  #   JSONUtils.renderTemplate model, ((model, render_options, callback) -> callback(null, _.pick(model.attributes, 'id', 'name')), callback
+  #
   @renderTemplate = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -63,6 +80,7 @@ module.exports = class JSONUtils
         return callback(err) if err
         callback(null, result)
 
+  # @private
   @renderDSL = (model, dsl, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -142,6 +160,7 @@ module.exports = class JSONUtils
       callback(null, result)
 
   # Render a list of keys from a model to json: ['key', 'key_two', ..]
+  # @private
   @renderKeys = (model, keys, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -160,6 +179,7 @@ module.exports = class JSONUtils
       callback(null, result)
 
   # Render a single key friom a model to json: model.get('key')
+  # @private
   @renderKey = (model, key, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
@@ -174,6 +194,7 @@ module.exports = class JSONUtils
           value = value.toJSON()
       callback(null, value)
 
+  # Render a Model or Collection relationship
   @renderRelated = (models, attribute_name, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 4
 

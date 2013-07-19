@@ -7,6 +7,7 @@ Queue = require 'queue-async'
 Utils = require '../utils'
 One = require './one'
 
+# @private
 module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
