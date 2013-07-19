@@ -11,6 +11,9 @@ module.exports = class Fabricator
 
   # Create new models without saving them.
   #
+  # @example
+  #   Fabricator.create(Thing, 200, {name: Fabricator.uniqueId('thing_'), created_at: Fabricator.date}, (err, models) -> # do something
+  #
   @new: (model_type, count, attributes_info) ->
     results = []
     while(count-- > 0)

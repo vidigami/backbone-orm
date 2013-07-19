@@ -56,11 +56,13 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Sync Accessors
   ###################################
+
   model_type.createSync = (target_model_type, cache) -> model_type::sync('createSync', target_model_type, cache)
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
+
   model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
@@ -113,9 +115,6 @@ module.exports = (model_type) ->
       related_model._orm_needs_load = true
       return related_model
 
-  # options:
-  #  @key: mandatory attribute name
-  #  @reverse: default false
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key
 
@@ -157,6 +156,7 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Helpers
   ###################################
+
   model_type::cache = model_type.cache = -> model_type::sync('cache')
   model_type::schema = model_type.schema = -> model_type::sync('schema')
   model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
@@ -165,6 +165,7 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Model Overrides
   ###################################
+
   _original_initialize = model_type::initialize
   model_type::initialize = ->
     schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
