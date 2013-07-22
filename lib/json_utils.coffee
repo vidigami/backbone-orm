@@ -65,20 +65,20 @@ module.exports = class JSONUtils
 
     # many
     else
+      results = []
       queue = new Queue()
 
-      result = []
       for model in models
         do (model) ->
           queue.defer (callback) ->
             JSONUtils.renderTemplate model, template, options, (err, related_json) ->
               return callback(err) if err
-              result.push(related_json)
+              results.push(related_json)
               callback()
 
       queue.await (err) ->
         return callback(err) if err
-        callback(null, result)
+        callback(null, results)
 
   # @private
   @renderDSL = (model, dsl, options, callback) ->

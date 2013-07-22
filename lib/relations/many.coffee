@@ -72,11 +72,11 @@ module.exports = class Many
       return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
 
     # asynchronous path, needs load
-    unless @manual_fetch
+    if not @manual_fetch and callback
       is_loaded = @_fetchRelated model, key, (err) =>
-        return (if callback then callback(err) else console.log "Many: unhandled error: #{err}. Please supply a callback") if err
+        return callback(err) if err
         result = returnValue()
-        callback(null, if result.models then result.models else result) if callback
+        callback(null, if result.models then result.models else result)
 
     # synchronous path
     result = returnValue()

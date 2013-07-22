@@ -63,10 +63,10 @@ module.exports = class One
       return if key is @ids_accessor then related_model.get('id') else related_model
 
     # asynchronous path, needs load
-    unless @manual_fetch
+    if not @manual_fetch and callback
       is_loaded = @_fetchRelated model, key, (err) =>
-        return (if callback then callback(err) else console.error "One: unhandled error: #{err}. Please supply a callback") if err
-        callback(null, returnValue()) if callback
+        return callback(err) if err
+        callback(null, returnValue())
 
     # synchronous path
     result = returnValue()
