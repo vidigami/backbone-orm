@@ -209,7 +209,8 @@ module.exports = (model_type) ->
     @_orm_json++
 
     json = {}
-    for key, value of @attributes
+    attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
+    for key, value of attributes
       if value instanceof Backbone.Collection
         if not options.relations and schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
