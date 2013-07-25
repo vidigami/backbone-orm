@@ -23,6 +23,7 @@ module.exports = class Many
         @reverse_relation.foreign_key = @foreign_key
         @reverse_relation.reverse_relation = @
     else
+      # May have been set already if `as` was specified on the reverse relation
       @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
 
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed

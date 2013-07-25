@@ -20,6 +20,7 @@ module.exports = class One
         @reverse_relation.foreign_key = @foreign_key
         @reverse_relation.reverse_relation = @
     else
+      # May have been set already if `as` was specified on the reverse relation
       @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
 
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
@@ -56,8 +57,6 @@ module.exports = class One
       return @
 
     related_model = if value then @reverse_model_type.findOrNew(value) else null
-    console.log '+++target_user set', @key, related_model.id if @key is 'target_user_id' or @key is 'target_user'
-    console.log '!!!user set', @key, related_model.id if @key is 'user_id' or @key is 'user'
     Backbone.Model::set.call(model, @key, related_model, options)
     return @
 
@@ -159,7 +158,6 @@ module.exports = class One
 
       # update backlinks
       if related_model = model.get(@key)
-        console.log 'setting', @key, @reverse_relation.key
         if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     model.on("change:#{@key}", model._orm_bindings.change)
