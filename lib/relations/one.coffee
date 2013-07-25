@@ -15,6 +15,7 @@ module.exports = class One
   initialize: ->
     if @as
       @reverse_relation = @reverse_model_type.relation(@as)
+      @reverse_relation.foreign_key = @foreign_key
     else
       @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
 
