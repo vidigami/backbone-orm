@@ -19,9 +19,11 @@ module.exports = class Many
     if @as
       @reverse_relation = @reverse_model_type.relation(@as)
 #      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
-      @reverse_relation.foreign_key = @foreign_key if @reverse_relation
+      if @reverse_relation
+        @reverse_relation.foreign_key = @foreign_key
+        @reverse_relation.reverse_relation = @
     else
-      @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+      @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
 
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
