@@ -481,7 +481,7 @@ runTests = (options, cache) ->
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
-          assert.equal(test_model.get('id'), json.id, "Returned the correct value:\nExpected: #{test_model.get('id')}, Actual: #{json.id}")
+          assert.equal(test_model.id, json.id, "Returned the correct value:\nExpected: #{test_model.id}, Actual: #{json.id}")
           assert.equal(test_model.get('name'), json.name, "Returned the correct value:\nExpected: #{test_model.get('name')}, Actual: #{json.name}")
           assert.equal(test_model.get('name'), json.this_name, "Returned the correct value:\nExpected: #{test_model.get('name')}, Actual: #{json.this_name}")
 

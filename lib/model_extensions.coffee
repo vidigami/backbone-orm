@@ -204,7 +204,7 @@ module.exports = (model_type) ->
   model_type::toJSON = (options={}) ->
     schema = model_type.schema() if model_type.schema
 
-    return @get('id') if @_orm_json > 0
+    return @id if @_orm_json > 0
     @_orm_json or= 0
     @_orm_json++
 
@@ -273,7 +273,7 @@ module.exports = (model_type) ->
   model_type::clone = (key, value, options) ->
     return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
-    return @get('id') if @_orm_clone > 0
+    return @id if @_orm_clone > 0
     @_orm_clone or= 0
     @_orm_clone++
 

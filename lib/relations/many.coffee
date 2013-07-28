@@ -74,7 +74,7 @@ module.exports = class Many
     throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     returnValue = =>
       collection = @_ensureCollection(model)
-      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
+      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
 
     # asynchronous path, needs load
     if not @manual_fetch and callback
@@ -93,7 +93,7 @@ module.exports = class Many
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
-      unless related_model.get('id')
+      unless related_model.id
         return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
           model.save {}, Utils.bbCallback callback
@@ -106,14 +106,14 @@ module.exports = class Many
       if related_models = related_model.models
         queue = new Queue(1) # TODO: parallelism
 
-        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.get('id'))
+        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
           do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
         return queue.await callback
 
       # model
       else
-        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
 
     # hasMany
     else
@@ -126,7 +126,7 @@ module.exports = class Many
       @join_table.cursor(query).toJSON (err, json) =>
         return callback(err) if err
 
-        related_ids = _.map(collection.models, (test) -> test.get('id'))
+        related_ids = _.map(collection.models, (test) -> test.id)
         changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
         added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
 
@@ -175,17 +175,17 @@ module.exports = class Many
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
-    current_related_model = collection.get(related_model.get('id'))
+    current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
     throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model
     collection.add(related_model)
 
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
-    current_related_model = collection.get(related_model.get('id'))
+    current_related_model = collection.get(related_model.id)
     throw new Error "Model removed but still exists: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt related_model
     return unless current_related_model
-    collection.remove(related_model.get('id'))
+    collection.remove(related_model.id)
 
     # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -219,8 +219,8 @@ module.exports = class Many
       current_models = collection.models
       previous_models = options.previousModels or []
 
-      changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.get('id') is test.get('id')) then 'kept' else 'removed')
-      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.get('id') is test.get('id'))) else current_models
+      changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
+      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 
       # update back links
       (collection._orm_bindings.remove(related_model) for related_model in changes.removed) if changes.removed
@@ -285,7 +285,7 @@ module.exports = class Many
 #    load_ids = []
 #    for related_model in collection.models
 #      continue unless related_model._orm_needs_load
-#      throw new Error "Missing id for load" unless id = related_model.get('id')
+#      throw new Error "Missing id for load" unless id = related_model.id
 #      load_ids.push(id)
 
     # loaded

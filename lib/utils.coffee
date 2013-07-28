@@ -59,7 +59,7 @@ module.exports = class Utils
   # @private
   @dataId: (data) ->
     if data instanceof Backbone.Model
-      return data.get('id')
+      return data.id
     else if _.isObject(data)
       return data.id
     return data

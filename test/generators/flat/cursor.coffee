@@ -52,7 +52,7 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        Flat.cursor({id: test_model.get('id')}).toJSON (err, json) ->
+        Flat.cursor({id: test_model.id}).toJSON (err, json) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(json, 'cursor toJSON gives us json')
           assert.ok(json.length, 'json is an array with a length')

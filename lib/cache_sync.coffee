@@ -24,7 +24,7 @@ class CacheSync
       # cached_models = Cache.findAll(@model_type.model_name)
     else
       if (cached_model = Cache.find(@model_type.model_name, model.attributes.id)) # use cached
-        # console.log "CACHE: read found #{@model_type.model_name} id: #{cached_model.get('id')}"
+        # console.log "CACHE: read found #{@model_type.model_name} id: #{cached_model.id}"
         return options.success(cached_model.toJSON())
     @wrapped_sync_fn 'read', model, options
 
@@ -36,7 +36,7 @@ class CacheSync
 
   update: (model, options) ->
     if (cached_model = Cache.find(@model_type.model_name, model.attributes.id))
-      # console.log "CACHE: update found #{@model_type.model_name} id: #{cached_model.get('id')}"
+      # console.log "CACHE: update found #{@model_type.model_name} id: #{cached_model.id}"
       cached_model.set(model.toJSON, options) if cached_model isnt model # update cache
 
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
@@ -44,7 +44,7 @@ class CacheSync
       options.success(json)
 
   delete: (model, options) ->
-    Cache.remove(@model_type.model_name, model.get('id')) # remove from the cache
+    Cache.remove(@model_type.model_name, model.id) # remove from the cache
 
     @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err

@@ -42,14 +42,14 @@ runTests = (options, cache) ->
       it 'assign an id', (done) ->
         bob = new Flat({name: 'Bob'})
         assert.equal(bob.get('name'), 'Bob', 'name before save is Bob')
-        assert.ok(!bob.get('id'), 'id before save doesn\'t exist')
+        assert.ok(!bob.id, 'id before save doesn\'t exist')
 
         queue = new Queue(1)
         queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
 
         queue.defer (callback) ->
           assert.equal(bob.get('name'), 'Bob', 'name after save is Bob')
-          assert.ok(!!bob.get('id'), 'id after save is assigned')
+          assert.ok(!!bob.id, 'id after save is assigned')
           callback()
 
         queue.await done
@@ -60,7 +60,7 @@ runTests = (options, cache) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(!!model, 'got model')
 
-          new_model = new Flat({id: model.get('id')})
+          new_model = new Flat({id: model.id})
           new_model.fetch Utils.bbCallback (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{util.inspect(model.toJSON())}\nActual: #{util.inspect(new_model.toJSON())}")
@@ -71,7 +71,7 @@ runTests = (options, cache) ->
         Flat.findOne (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(!!model, 'got model')
-          model_id = model.get('id')
+          model_id = model.id
 
           model.destroy Utils.bbCallback (err) ->
             assert.ok(!err, "No errors: #{err}")

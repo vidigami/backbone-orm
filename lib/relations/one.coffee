@@ -53,7 +53,7 @@ module.exports = class One
         related_model.set(value)
         delete related_model._orm_needs_load
 
-      cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
+      cache.update(@model_type.model_name, related_model) if related_model.id and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
 
     related_model = if value then @reverse_model_type.findOrNew(value) else null
@@ -65,7 +65,7 @@ module.exports = class One
 
     returnValue = =>
       return null unless related_model = model.attributes[@key]
-      return if key is @ids_accessor then related_model.get('id') else related_model
+      return if key is @ids_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
     if not @manual_fetch and callback
@@ -83,7 +83,7 @@ module.exports = class One
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
-      unless related_model.get('id')
+      unless related_model.id
         return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
           model.save {}, Utils.bbCallback callback
@@ -91,7 +91,7 @@ module.exports = class One
       return callback()
 
     else if @reverse_relation.type is 'belongsTo'
-      return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+      return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
 
     else # hasMany
       # nothing to do?
@@ -104,11 +104,11 @@ module.exports = class One
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
     return json[json_key] = related_model.toJSON() if @embed
-    return json[json_key] = related_model.get('id') if @type is 'belongsTo'
+    return json[json_key] = related_model.id if @type is 'belongsTo'
 
   has: (model, key, data) ->
     return data is current_related_model if not current_related_model = model.attributes[@key]
-    return current_related_model.get('id') is Utils.dataId(data)
+    return current_related_model.id is Utils.dataId(data)
 
   # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -171,7 +171,7 @@ module.exports = class One
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
         if related_model = related_model = model.attributes[@key]
-          query.id = related_model.get('id')
+          query.id = related_model.id
       else
         query[@foreign_key] = model.attributes.id
     else
