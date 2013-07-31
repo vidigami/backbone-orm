@@ -51,10 +51,10 @@ runTests = (options, cache) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
-        Flat.find test_model.get('id'), (err, model) ->
+        Flat.find test_model.id, (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(model, 'gets a model')
-          assert.equal(model.get('id'), test_model.get('id'), 'model has the correct id')
+          assert.equal(model.id, test_model.id, 'model has the correct id')
           done()
 
 
@@ -63,10 +63,10 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        Flat.find test_model.get('id'), (err, model) ->
+        Flat.find test_model.id, (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(model, 'gets a model')
-          assert.equal(model.get('id'), test_model.get('id'), 'model has the correct id')
+          assert.equal(model.id, test_model.id, 'model has the correct id')
           done()
 
 
@@ -75,10 +75,10 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        Flat.find {id: test_model.get('id')}, (err, models) ->
+        Flat.find {id: test_model.id}, (err, models) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(models.length, 1, 'finds the model')
-          assert.equal(models[0].get('id'), test_model.get('id'), 'model has the correct id')
+          assert.equal(models[0].id, test_model.id, 'model has the correct id')
           done()
 
 

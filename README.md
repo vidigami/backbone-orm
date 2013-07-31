@@ -9,7 +9,12 @@ Install
 Install all npm modules:
 
   $ cd backbone-orm
+
   $ npm install
+
+Generate docs
+
+  $ npm run-script docs
 
 Test
 ====

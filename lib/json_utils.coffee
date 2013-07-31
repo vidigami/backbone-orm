@@ -5,66 +5,204 @@ Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
-  @JSONToValue: (json) ->
-    return json unless json
-    if _.isDate(json)
-      return json
-    else if _.isString(json) and (json.length > 20) and json[json.length-1] is 'Z'
-      date = moment.utc(json)
-      return if date and date.isValid() then date.toDate() else json
-    else if _.isString(json)
-      return true if json is 'true'
-      return false if json is 'false'
-      return json
-    else if _.isArray(json)
-      json[index] = @JSONToValue(value) for index, value of json
-    else if _.isObject(json)
-      json[key] = @JSONToValue(value) for key, value of json
-    return json
+  # Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format).
+  #
+  # @example
+  #   method: (req, res) ->
+  #     query = JSONUtils.parse(req.query)
+  #
+  @parse: (values) ->
+    if _.isArray(values)
+      return _.map(values, JSONUtils.parse)
+    else if _.isObject(values)
+      result = {}
+      result[key] = JSONUtils.parse(value) for key, value of values
+      return result
+    else if _.isString(values)
+      if (values.length >= 20) and values[values.length-1] is 'Z'
+        date = moment.utc(values)
+        return if date and date.isValid() then date.toDate() else values
+      else
+        return true if values is 'true'
+        return false if values is 'false'
+        try
+          return JSONUtils.parse(values) if values = JSON.parse(values)
+        catch err
+    return values
 
-  @valueToJSON: (value) ->
-    return value unless value
-    if value.toJSON
-      return value.toJSON()
-    else if _.isString(value)
-      return value
-    else if _.isArray(value)
-      value[index] = @JSONToValue(data) for index, data of value
-    else if _.isObject(value)
-      value[key] = @valueToJSON(data) for key, data of value
-    return value
-
-  @renderJSON = (models, template, options, callback) ->
+  # Render a template that can be a key, keys, DSL object, or function.
+  #
+  # @example: render a key
+  #   JSONUtils.renderTemplate model, 'name', callback
+  #
+  # @example: render multiple keys
+  #   JSONUtils.renderTemplate model, ['id', 'name'], callback
+  #
+  # @example: render a DSL object
+  #   JSONUtils.renderTemplate model, {$select: ['id', 'name']}
+  #
+  # @example: render a template
+  #   JSONUtils.renderTemplate model, ((model, render_options, callback) -> callback(null, _.pick(model.attributes, 'id', 'name')), callback
+  #
+  @renderTemplate = (models, template, options, callback) ->
     (callback = options; options = {}) if arguments.length is 3
 
     # one
     unless _.isArray(models)
       return callback(null, null) unless models
 
-      # pick keys
-      if _.isArray(template)
-        queue = new Queue()
+      # Single field
+      return JSONUtils.renderKey(models, template, options, callback) if _.isString(template)
 
-        result = {}
-        for key in template
-          do (key) -> queue.defer (callback) ->
+      # Array of fields, pick keys
+      return JSONUtils.renderKeys(models, template, options, callback) if _.isArray(template)
 
-            # TODO allow for json or models
-            models.get key, (err, value) ->
+      # Render template function
+      return template(models, options, callback) if _.isFunction(template)
+
+      # dsl object
+      return JSONUtils.renderDSL(models, template, options, callback)
+
+    # many
+    else
+      results = []
+      queue = new Queue()
+
+      for model in models
+        do (model) ->
+          queue.defer (callback) ->
+            JSONUtils.renderTemplate model, template, options, (err, related_json) ->
               return callback(err) if err
-              result[key] = value
+              results.push(related_json)
               callback()
 
-        queue.await (err) ->
-          return callback(err) if err
-          callback(null, result)
+      queue.await (err) ->
+        return callback(err) if err
+        callback(null, results)
 
-      # render template
-      else
-        # TODO allow for json or models
-        template models, options, (err, json) ->
-          return callback(err) if err
-          callback(null, json)
+  # @private
+  @renderDSL = (model, dsl, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    queue = new Queue()
+    result = {}
+    for key, args of dsl
+      do (key, args) ->
+        field = args.key or key
+
+        if relation = model.relation(field)
+          # classroom:      {$select: ['id', 'name']}                     -> dsl
+          # a_class:        {key: 'classroom', $select: ['id', 'name']}   -> dsl
+          # classroom:      {query: {year: '2012'}}                      -> query
+          # total_greats:   {key: 'greats', query: {$count: true}}       -> query
+          queue.defer (callback) ->
+
+            if args.query
+              query = args.query
+              template = args.template
+            else if args.$count
+              query = _.clone(args)
+              delete query.key
+            else if _.isFunction(args)
+              template = args
+            else if args.template
+              if _.isObject(args.template) and not _.isFunction(args.template)
+                query = args.template
+              else
+                template = args.template
+                query = _.clone(args)
+                delete query.key; delete query.template
+                query = null if _.size(query) is 0
+            else
+              template = _.clone(args)
+              delete template.key
+
+            # template
+            if template
+              if query
+                relation.cursor(model, field, query).toModels (err, models) ->
+                  return callback(err) if err
+                  JSONUtils.renderTemplate models, template, options, (err, json) -> result[key] = json; callback(err)
+
+              else
+                model.get field, (err, related_model) ->
+                  return callback(err) if err
+                  JSONUtils.renderTemplate related_model, template, options, (err, json) -> result[key] = json; callback(err)
+
+            # query
+            else
+              relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
+
+        else if key is '$select'
+          queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
+
+        # full_name:      'name'
+        else if _.isString(args)
+          queue.defer (callback) -> JSONUtils.renderKey model, args, options, (err, json) -> result[key] = json; callback(err)
+
+        # can_delete: (photo, options, callback) ->
+        else if _.isFunction(args)
+          queue.defer (callback) -> args model, options, (err, json) -> result[key] = json; callback(err)
+
+        # is_great: {method: 'isGreatFor', args: [options.user]}
+        else if _.isString(args.method)
+          queue.defer (callback) ->
+            fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
+            fn_args.push((err, json) -> result[key] = json; callback())
+            model[args.method].apply(model, fn_args)
+
+        else
+          console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
+          return callback(new Error "Unknown DSL action: #{key}: #{util.inspect(args)}")
+
+    queue.await (err) ->
+      return callback(err) if err
+      callback(null, result)
+
+  # Render a list of keys from a model to json: ['key', 'key_two', ..]
+  # @private
+  @renderKeys = (model, keys, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    queue = new Queue()
+    result = {}
+    for key in keys
+      do (key) ->
+        queue.defer (callback) ->
+          JSONUtils.renderKey model, key, options, (err, value) ->
+            return callback(err) if err
+            result[key] = value
+            callback()
+
+    queue.await (err) ->
+      return callback(err) if err
+      callback(null, result)
+
+  # Render a single key friom a model to json: model.get('key')
+  # @private
+  @renderKey = (model, key, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 3
+
+    model.get key, (err, value) ->
+      return callback(err) if err
+      # Related models need to be converted to json
+      if model.relation(key)
+        if _.isArray(value)
+          #todo: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
+          value = (val.toJSON() for val in value)
+        else if value and value.toJSON
+          value = value.toJSON()
+      callback(null, value)
+
+  # Render a Model or Collection relationship
+  @renderRelated = (models, attribute_name, template, options, callback) ->
+    (callback = options; options = {}) if arguments.length is 4
+
+    # one
+    unless _.isArray(models)
+      models.get attribute_name, (err, related_models) ->
+        callback(err) if err
+        JSONUtils.renderTemplate related_models, template, options, callback
 
     # many
     else
@@ -74,33 +212,13 @@ module.exports = class JSONUtils
       for model in models
         do (model) ->
           queue.defer (callback) ->
-            JSONUtils.renderJSON model, template, options, (err, related_json) ->
-              return callback(err) if err
-              result.push(related_json)
-              callback()
+            model.get attribute_name, (err, related_models) ->
+              callback(err) if err
+              JSONUtils.renderTemplate related_models, template, options, (err, related_json) ->
+                return callback(err) if err
+                result.push(related_json)
+                callback()
 
       queue.await (err) ->
         return callback(err) if err
         callback(null, result)
-
-  @appendJSON = (json, related_model, attribute_name, template, options, callback) ->
-    (callback = options; options = {}) if arguments.length is 5
-
-    # empty
-    (json[attribute_name] = null; return callback()) unless related_model
-
-    JSONUtils.renderJSON related_model, template, options, (err, model_json) ->
-      return callback(err) if err
-      json[attribute_name] = model_json
-      callback()
-
-  @appendRelatedJSON = (json, model, attribute_name, template, options, callback) ->
-    (callback = options; options = {}) if arguments.length is 5
-
-    model.get attribute_name, (err, related_models) ->
-      callback(err) if err
-
-      JSONUtils.renderJSON related_models, template, options, (err, related_json) ->
-        return callback(err) if err
-        json[attribute_name] = related_json
-        callback()

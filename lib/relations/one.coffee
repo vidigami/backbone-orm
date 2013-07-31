@@ -5,14 +5,24 @@ inflection = require 'inflection'
 
 Utils = require '../utils'
 
+# @private
 module.exports = class One
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor = "#{@key}_id"
-    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else @model_type.model_name) unless @foreign_key
+    @ids_accessor or= "#{@key}_id"
+    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+    if @as
+      @reverse_relation = @reverse_model_type.relation(@as)
+#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
+      if @reverse_relation
+        @reverse_relation.foreign_key = @foreign_key
+        @reverse_relation.reverse_relation = @
+    else
+      # May have been set already if `as` was specified on the reverse relation
+      @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
     # check for reverse since they need to store the foreign key
@@ -21,7 +31,7 @@ module.exports = class One
         @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
       reverse_schema = @reverse_model_type.schema()
       reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
+      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 
@@ -30,10 +40,6 @@ module.exports = class One
     throw new Error "One::set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
-    if @type is 'belongsTo' and key is @foreign_key
-      model._orm_lookups or= {}
-      model._orm_lookups[@foreign_key] = value
-      return @
     related_model = model.attributes[@key]
     if @has(model, @key, value)
       return @ unless related_model # null
@@ -47,10 +53,10 @@ module.exports = class One
         related_model.set(value)
         delete related_model._orm_needs_load
 
-      cache.update(@model_type.model_name, related_model) if related_model.get('id') and (cache = @model_type.cache()) and not related_model._orm_needs_load
+      cache.update(@model_type.model_name, related_model) if related_model.id and (cache = @model_type.cache()) and not related_model._orm_needs_load
       return @
 
-    related_model = if value then @reverse_model_type.findOrCreate(value) else null
+    related_model = if value then @reverse_model_type.findOrNew(value) else null
     Backbone.Model::set.call(model, @key, related_model, options)
     return @
 
@@ -59,13 +65,13 @@ module.exports = class One
 
     returnValue = =>
       return null unless related_model = model.attributes[@key]
-      return if key is @ids_accessor then related_model.get('id') else related_model
+      return if key is @ids_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
-    unless @manual_fetch
+    if not @manual_fetch and callback
       is_loaded = @_fetchRelated model, key, (err) =>
-        return (if callback then callback(err) else console.error "One: unhandled error: #{err}. Please supply a callback") if err
-        callback(null, returnValue()) if callback
+        return callback(err) if err
+        callback(null, returnValue())
 
     # synchronous path
     result = returnValue()
@@ -77,7 +83,7 @@ module.exports = class One
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
-      unless related_model.get('id')
+      unless related_model.id
         return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
           model.save {}, Utils.bbCallback callback
@@ -85,7 +91,7 @@ module.exports = class One
       return callback()
 
     else if @reverse_relation.type is 'belongsTo'
-      return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+      return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
 
     else # hasMany
       # nothing to do?
@@ -98,11 +104,11 @@ module.exports = class One
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]
     return json[json_key] = related_model.toJSON() if @embed
-    return json[json_key] = related_model.get('id') if @type is 'belongsTo'
+    return json[json_key] = related_model.id if @type is 'belongsTo'
 
   has: (model, key, data) ->
     return data is current_related_model if not current_related_model = model.attributes[@key]
-    return current_related_model.get('id') is Utils.dataId(data)
+    return current_related_model.id is Utils.dataId(data)
 
   # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -128,20 +134,15 @@ module.exports = class One
 
     # not loaded but we have the id, create a model
     if @type is 'belongsTo'
-      if key is @ids_accessor
-        model.set(@key, @reverse_model_type.findOrCreate({id: model._orm_lookups[@foreign_key]}))
-        return true
-      # nothing to fetch
-      else if not (model._orm_lookups and model._orm_lookups[@foreign_key]) and not model.attributes[@key]
-        return true
+      return true if not model.attributes[@key]
 
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Model not found. Id #{util.inspect(@query(model, key))}") if not json
-      model.set(@key, related_model = if json then @reverse_model_type.findOrCreate(json) else null)
-      delete related_model._orm_needs_load
-      cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
+      model.set(@key, related_model = if json then @reverse_model_type.findOrNew(json) else null)
+      if related_model
+        delete related_model._orm_needs_load
+        cache.update(@reverse_model_type.model_name, related_model) if cache = @reverse_model_type.cache()
       callback(null, related_model)
 
     return false
@@ -169,10 +170,8 @@ module.exports = class One
     query = _.extend(_query or {}, {$one:true})
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
-        if model._orm_lookups and (related_id = model._orm_lookups[@foreign_key])
-          query.id = related_id
-        else if related_model = related_model = model.attributes[@key]
-          query.id = related_model.get('id')
+        if related_model = related_model = model.attributes[@key]
+          query.id = related_model.id
       else
         query[@foreign_key] = model.attributes.id
     else

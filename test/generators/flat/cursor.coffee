@@ -52,7 +52,7 @@ runTests = (options, cache) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        Flat.cursor({id: test_model.get('id')}).toJSON (err, json) ->
+        Flat.cursor({id: test_model.id}).toJSON (err, json) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(json, 'cursor toJSON gives us json')
           assert.ok(json.length, 'json is an array with a length')
@@ -72,7 +72,8 @@ runTests = (options, cache) ->
 
     it 'Cursor can chain limit', (done) ->
       ALBUM_NAME = 'Test1'
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         limit = 3
@@ -82,9 +83,12 @@ runTests = (options, cache) ->
           assert.equal(models.length, limit, 'found models')
           done()
 
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+
     it 'Cursor can chain limit and offset', (done) ->
       ALBUM_NAME = 'Test2'
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         limit = 2; offset = 1
@@ -94,11 +98,13 @@ runTests = (options, cache) ->
           assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
 
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+
     it 'Cursor can select fields', (done) ->
       ALBUM_NAME = 'Test3'
       FIELD_NAMES = ['id', 'name']
 
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
@@ -108,10 +114,13 @@ runTests = (options, cache) ->
             assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
           done()
 
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         Flat.cursor({name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, values) ->
@@ -122,12 +131,14 @@ runTests = (options, cache) ->
             assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
           done()
 
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+
     it 'Cursor can select the intersection of a whitelist and fields', (done) ->
       ALBUM_NAME = 'Test3'
       WHITE_LIST = ['name']
       FIELD_NAMES = ['id', 'name']
 
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         Flat.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
@@ -139,11 +150,14 @@ runTests = (options, cache) ->
             assert.equal(json['name'], ALBUM_NAME, 'gets the correct value')
           done()
 
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+
     it 'Cursor can select the intersection of a whitelist and values', (done) ->
       ALBUM_NAME = 'Test4'
       WHITE_LIST = ['name']
       FIELD_NAMES = ['id', 'name']
-      Utils.setAllNames Flat, ALBUM_NAME, (err) ->
+
+      runTest = (err) ->
         assert.ok(!err, "No errors: #{err}")
 
         Flat.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
@@ -154,6 +168,8 @@ runTests = (options, cache) ->
             assert.equal(json.length, WHITE_LIST.length, 'gets only the requested values')
             assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
           done()
+
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
 
     it 'Cursor can perform an $in query', (done) ->
       Flat.findOne (err, test_model) ->

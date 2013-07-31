@@ -7,15 +7,25 @@ Queue = require 'queue-async'
 Utils = require '../utils'
 One = require './one'
 
+# @private
 module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor = "#{inflection.singularize(@key)}_ids"
-    @foreign_key = inflection.foreign_key(@model_type.model_name) unless @foreign_key
+    @ids_accessor or= "#{inflection.singularize(@key)}_ids"
+    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
-    @reverse_relation = Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+    if @as
+      @reverse_relation = @reverse_model_type.relation(@as)
+#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
+      if @reverse_relation
+        @reverse_relation.foreign_key = @foreign_key
+        @reverse_relation.reverse_relation = @
+    else
+      # May have been set already if `as` was specified on the reverse relation
+      @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
+
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
     # The reverse of a hasMany relation should be `belongsTo`, not `hasOne`
@@ -26,7 +36,7 @@ module.exports = class Many
         @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
       reverse_schema = @reverse_model_type.schema()
       reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type}))
+      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
 
     # check for join table
     if @reverse_relation.type is 'hasMany' and not @join_table
@@ -54,7 +64,7 @@ module.exports = class Many
         else if _.isObject(data)
           model.set(data)
       else
-        model = @reverse_model_type.findOrCreate(data)
+        model = @reverse_model_type.findOrNew(data)
       models.push(model)
     collection._orm_loaded = @_checkLoaded(models)
     collection.reset(models)
@@ -64,14 +74,14 @@ module.exports = class Many
     throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     returnValue = =>
       collection = @_ensureCollection(model)
-      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.get('id')) else collection
+      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
 
     # asynchronous path, needs load
-    unless @manual_fetch
+    if not @manual_fetch and callback
       is_loaded = @_fetchRelated model, key, (err) =>
-        return (if callback then callback(err) else console.log "Many: unhandled error: #{err}. Please supply a callback") if err
+        return callback(err) if err
         result = returnValue()
-        callback(null, if result.models then result.models else result) if callback
+        callback(null, if result.models then result.models else result)
 
     # synchronous path
     result = returnValue()
@@ -83,7 +93,7 @@ module.exports = class Many
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
-      unless related_model.get('id')
+      unless related_model.id
         return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
           model.save {}, Utils.bbCallback callback
@@ -96,14 +106,14 @@ module.exports = class Many
       if related_models = related_model.models
         queue = new Queue(1) # TODO: parallelism
 
-        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.get('id'))
+        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
           do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
         return queue.await callback
 
       # model
       else
-        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.get('id')
+        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
 
     # hasMany
     else
@@ -116,7 +126,7 @@ module.exports = class Many
       @join_table.cursor(query).toJSON (err, json) =>
         return callback(err) if err
 
-        related_ids = _.map(collection.models, (test) -> test.get('id'))
+        related_ids = _.map(collection.models, (test) -> test.id)
         changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
         added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
 
@@ -165,17 +175,17 @@ module.exports = class Many
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
-    current_related_model = collection.get(related_model.get('id'))
+    current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
     throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model
     collection.add(related_model)
 
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
-    current_related_model = collection.get(related_model.get('id'))
+    current_related_model = collection.get(related_model.id)
     throw new Error "Model removed but still exists: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt related_model
     return unless current_related_model
-    collection.remove(related_model.get('id'))
+    collection.remove(related_model.id)
 
     # TODO: check which objects are already loaded in cache and ignore ids
   batchLoadRelated: (models_json, callback) ->
@@ -209,8 +219,8 @@ module.exports = class Many
       current_models = collection.models
       previous_models = options.previousModels or []
 
-      changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.get('id') is test.get('id')) then 'kept' else 'removed')
-      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.get('id') is test.get('id'))) else current_models
+      changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
+      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 
       # update back links
       (collection._orm_bindings.remove(related_model) for related_model in changes.removed) if changes.removed
@@ -241,12 +251,14 @@ module.exports = class Many
       query = {$values: @reverse_relation.foreign_key}
       query[@foreign_key] = model.attributes.id
       @join_table.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+
         collection._orm_loaded = true
         return callback(err) if err
         for related_id in json
           # skip existing
           continue if related_model = collection.get(related_id)
-          collection.add(related_model = @reverse_model_type.findOrCreate(related_id))
+          collection.add(related_model = @reverse_model_type.findOrNew(related_id))
 
         callback(null, collection.models)
     else
@@ -273,7 +285,7 @@ module.exports = class Many
 #    load_ids = []
 #    for related_model in collection.models
 #      continue unless related_model._orm_needs_load
-#      throw new Error "Missing id for load" unless id = related_model.get('id')
+#      throw new Error "Missing id for load" unless id = related_model.id
 #      load_ids.push(id)
 
     # loaded
@@ -298,14 +310,14 @@ module.exports = class Many
 
         # create new
         else
-          collection.add(related_model = @reverse_model_type.findOrCreate(model_json))
+          collection.add(related_model = @reverse_model_type.findOrNew(model_json))
 
       cache.update(@reverse_model_type.model_name, collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
 
   cursor: (model, key, query) ->
     json = if model instanceof Backbone.Model then model.attributes else model
-    query = {}
+    query or= {}
     query[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
     return @reverse_model_type.cursor(query)

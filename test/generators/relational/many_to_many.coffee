@@ -81,25 +81,25 @@ runTests = (options, cache, embed) ->
           if test_model.relationIsEmbedded('reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), "Serialized embedded. Expected: #{test_model.toJSON().reverses}. Actual: #{reverses[0].toJSON()}")
           else
-            assert.deepEqual(test_model.get('reverse_ids')[0], reverses[0].get('id'), "Serialized id only. Expected: #{test_model.get('reverse_ids')[0]}. Actual: #{reverses[0].get('id')}")
+            assert.deepEqual(test_model.get('reverse_ids')[0], reverses[0].id, "Serialized id only. Expected: #{test_model.get('reverse_ids')[0]}. Actual: #{reverses[0].id}")
           reverse = reverses[0]
 
           reverse.get 'owners', (err, owners) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owners.length, 'found related models')
 
-            owner = _.find(owners, (test) -> test_model.get('id') is test.get('id'))
+            owner = _.find(owners, (test) -> test_model.id is test.id)
             owner_index = _.indexOf(owners, owner)
             if reverse.relationIsEmbedded('owners')
-              assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.get('id'), "Serialized embedded. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.get('id')}")
+              assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.id, "Serialized embedded. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.id}")
             else
-              assert.deepEqual(reverse.get('owner_ids')[owner_index], owner.get('id'), "Serialized id only. Expected: #{reverse.get('owner_ids')[owner_index]}. Actual: #{owner.get('id')}")
+              assert.deepEqual(reverse.get('owner_ids')[owner_index], owner.id, "Serialized id only. Expected: #{reverse.get('owner_ids')[owner_index]}. Actual: #{owner.id}")
             assert.ok(!!owner, 'found owner')
 
             if Owner.cache()
               assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
-              assert.equal(test_model.get('id'), owner.get('id'), "\nExpected: #{test_model.get('id')}\nActual: #{owner.get('id')}")
+              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
 # TODO: explain required set up

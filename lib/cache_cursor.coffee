@@ -5,6 +5,7 @@ Queue = require 'queue-async'
 Utils = require './utils'
 Cursor = require './cursor'
 
+# @private
 module.exports = class CacheCursor extends Cursor
   toJSON: (callback, count) ->
     # build query

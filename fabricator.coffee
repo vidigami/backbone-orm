@@ -5,8 +5,15 @@ Queue = require 'queue-async'
 
 Utils = require './lib/utils'
 
+# Fabricator to generate test data.
+#
 module.exports = class Fabricator
 
+  # Create new models without saving them.
+  #
+  # @example
+  #   Fabricator.create(Thing, 200, {name: Fabricator.uniqueId('thing_'), created_at: Fabricator.date}, (err, models) -> # do something
+  #
   @new: (model_type, count, attributes_info) ->
     results = []
     while(count-- > 0)
@@ -15,6 +22,8 @@ module.exports = class Fabricator
       results.push(new model_type(attributes))
     return results
 
+  # Create new models and save them.
+  #
   @create: (model_type, count, attributes_info, callback) ->
     models = Fabricator.new(model_type, count, attributes_info)
     queue = new Queue()
@@ -22,30 +31,42 @@ module.exports = class Fabricator
       do (model) -> queue.defer (callback) -> model.save {}, Utils.bbCallback(callback)
     queue.await (err) -> callback(err, models)
 
-  # One forms
-  # 1) Fabricator.value: a fixed value
+  # Return the same fixed value for each fabricated model
+  #
   @value: (value) ->
     return undefined if arguments.length is 0
     return -> value
 
-  # Two forms
-  # 1) Fabricator.uniqueId: no prefix
-  # 2) Fabricator.uniqueId(prefix): with prefix
+  # Return a unique string value for each fabricated model
+  #
+  # @overload uniqueId()
+  #   Creates a unique id without a prefix
+  #
+  # @overload uniqueId(prefix)
+  #   Creates a unique id with a prefix
+  #
   @uniqueId: (prefix) ->
     return _.uniqueId() if arguments.length is 0
     return -> _.uniqueId(prefix)
-  @uniqueString: @uniqueId # alias
 
-  # Two forms
-  # 1) Fabricator.date: the current date
-  # 1) Fabricator.date(step_ms): step in milliseconds from now
-  # 1) Fabricator.date(start, step_ms): step in milliseconds from start
+  # Alias for uniqueId
+  #
+  @uniqueString: @uniqueId
+
+  # Return a date for each fabricated model
+  #
+  # @overload date()
+  #   The current date/time
+  #
+  # @overload date(step_ms)
+  #   Creates a new date/time for each call in fixed milliseconds from the date/time at the first call
+  #
+  # @overload date(start, step_ms)
+  #   Creates a new date/time for each call in fixed milliseconds from a specified date/time
   @date: (start, step_ms) ->
-    _normalize = (_date) -> _date.millisecond(0); return _date.toDate()
+    return moment.utc().toDate() if arguments.length is 0
 
-    # drop milliseconds for mysql DATETIME. TODO: determine whether this is necessary
-    return _normalize(moment.utc()) if arguments.length is 0
-    [start, step_ms] = [moment.utc(), start] if arguments.length is 1
+    [start, step_ms] = [moment.utc().toDate(), start] if arguments.length is 1
     current_ms = start.valueOf()
     return ->
       current = new Date(current_ms)

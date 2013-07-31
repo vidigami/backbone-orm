@@ -6,6 +6,7 @@ Utils = require './utils'
 
 MAX_CACHE_MS = 500*1000*1000 # TODO: determine the best amount
 
+# @private
 class Cache
   constructor: ->
     @store = {}
@@ -21,7 +22,7 @@ class Cache
     results.push(model) for data in data when (model = @_getOrInvalidateModel(model_store, data, now))
     return results
 
-  findOrCreate: (model_name, model_type, data) ->
+  findOrNew: (model_name, model_type, data) ->
     (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
 
     now = (new Date()).valueOf()

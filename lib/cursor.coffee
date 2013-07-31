@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 
 module.exports = class Cursor
+  # @private
   constructor: (query, options) ->
     @[key] = value for key, value of options
     parsed_query = Cursor.parseQuery(query)
@@ -10,6 +11,7 @@ module.exports = class Cursor
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
+  # @private
   @parseQuery: (query) ->
     if not query
       return {find: {}, cursor: {}}
@@ -25,6 +27,7 @@ module.exports = class Cursor
 
   offset: (offset) -> @_cursor.$offset = offset; return @
   limit: (limit) -> @_cursor.$limit = limit; return @
+  sort: (sort) -> @_cursor.$sort = sort; return @
 
   whiteList: (keys) ->
     keys = [keys] unless _.isArray(keys)
@@ -54,14 +57,14 @@ module.exports = class Cursor
   # Execution of the Query
   ##############################################
 
-  # TEMPLATE METHOD
-  # toJSON: (callback) ->
+  count: (callback) -> return @toJSON(callback, true)
 
   toModels: (callback) ->
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(new Error "Cannot call toModels on cursor with values. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
-      return callback(null, if json then @model_type.findOrCreate(@model_type::parse(json)) else null) if @_cursor.$one
-      callback(null, (@model_type.findOrCreate(@model_type::parse(attributes)) for attributes in json))
+      return callback(null, if json then @model_type.findOrNew(@model_type::parse(json)) else null) if @_cursor.$one
+      callback(null, (@model_type.findOrNew(@model_type::parse(attributes)) for attributes in json))
 
-  count: (callback) -> return @toJSON(callback, true)
+  # @abstract Provided by a concrete cursor for a Backbone Sync type
+  toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
