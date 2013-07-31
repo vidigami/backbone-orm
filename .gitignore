@@ -4,3 +4,4 @@ _build/
 .DS_Store
 *.js
 *.map
+_docs/
