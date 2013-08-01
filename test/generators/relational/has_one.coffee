@@ -12,11 +12,13 @@ runTests = (options, cache, embed) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 2
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    @schema: _.defaults({
+      owner: -> ['hasOne', Owner]
+    }, BASE_SCHEMA)
     sync: SYNC(Flat, cache)
 
   class Reverse extends Backbone.Model
@@ -234,22 +236,84 @@ runTests = (options, cache, embed) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-#    it 'Can include a related (belongsTo) model', (done) ->
-#      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, "found model")
-#        assert.ok(test_model.flat, "Has a related flat")
-#        assert.ok(test_model.flat.id, "Related model has an id")
-#        done()
-#
-#    it 'Can include a related (hasOne) model', (done) ->
-#      Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, "found model")
-#        assert.ok(test_model.reverse, "Has a related reverse")
-#        assert.ok(test_model.reverse.id, "Related model has an id")
-#        done()
+    it 'Can include a related (belongsTo) model', (done) ->
+      Owner.cursor({$one: true}).include('flat').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, "found model")
+        assert.ok(json.flat, "Has a related flat")
+        assert.ok(json.flat.id, "Related model has an id")
+        assert.equal(json.flat_id, json.flat.id, "\nRelated model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+        done()
 
+    it 'Can include a related (hasOne) model', (done) ->
+      Owner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, "found model")
+        assert.ok(json.reverse, "Has a related reverse")
+        assert.ok(json.reverse.id, "Related model has an id")
+        assert.equal(json.id, json.reverse.owner_id, "\nRelated model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+        done()
+
+    it 'Can include multiple related models', (done) ->
+      Owner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, "found model")
+        assert.ok(json.reverse, "Has a related reverse")
+        assert.ok(json.reverse.id, "Related model has an id")
+        assert.ok(json.flat, "Has a related flat")
+        assert.ok(json.flat.id, "Included model has an id")
+        assert.equal(json.flat_id, json.flat.id, "\nIncluded model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+        assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+        done()
+
+    it 'Can query on a related (belongsTo) model propery', (done) ->
+      Flat.cursor({$one: true}).toJSON (err, flat) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(flat, "found model")
+        console.log flat.id
+        Owner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, "found model")
+          assert.equal(flat.id, owner.flat_id, "\nRelated model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat_id}")
+          done()
+
+    it 'Can query on a related (belongsTo) model property when the relation is included', (done) ->
+      Flat.cursor({$one: true}).toJSON (err, flat) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(flat, "found model")
+        Owner.cursor({$one: true, 'flat.name': flat.name}).include('flat').toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, "found model")
+          assert.ok(owner.flat, "Has a related flat")
+          assert.ok(owner.flat.id, "Included model has an id")
+          assert.equal(flat.id, owner.flat.id, "\nIncluded model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat.id}")
+          assert.equal(flat.name, owner.flat.name, "\nIncluded model has the correct name: Expected: #{flat.name}\nActual: #{owner.flat.name}")
+          done()
+
+    it 'Can query on a related (hasOne) model', (done) ->
+      Reverse.cursor({$one: true}).toJSON (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, "found model")
+        Owner.cursor({$one: true, 'reverse.name': reverse.name}).toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, "found model")
+          assert.equal(reverse.owner_id, owner.id, "\nRelated model has the correct id: Expected: #{reverse.owner_id}\nActual: #{owner.id}")
+          done()
+
+    it 'Can query on a related (hasOne) model property when the relation is included', (done) ->
+      Reverse.cursor({$one: true}).toJSON (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, "found model")
+        Owner.cursor({'reverse.name': reverse.name}).include('reverse').toJSON (err, json) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(json, "found json")
+          assert.equal(json.length, 1, "json has the correct number or results")
+          owner = json[0]
+          assert.ok(owner.reverse, "Has a related reverse")
+          assert.ok(owner.reverse.id, "Related model has an id")
+          assert.equal(reverse.owner_id, owner.id, "\nRelated model has the correct id: Expected: #{reverse.owner_id}\nActual: #{owner.id}")
+          assert.equal(reverse.name, owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.name}\nActual: #{owner.reverse.name}")
+          done()
 
 # TODO: explain required set up
 
