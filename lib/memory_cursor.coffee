@@ -7,7 +7,8 @@ Utils = require './utils'
 Cursor = require './cursor'
 
 IS_MATCH_FNS =
-  $ne: (mv, tv) -> not _.isEqual(mv, tv)
+  $ne: (mv, tv) -> return not _.isEqual(mv, tv)
+
   $lt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
     return (if _.isDate(tv) then moment(mv).isBefore(tv) else mv < tv)
@@ -35,13 +36,13 @@ IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @private
 module.exports = class MemoryCursor extends Cursor
-  toJSON: (callback, count) ->
+  toJSON: (callback, options) ->
     @_in = {}
     (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value?.$in
     keys = _.keys(@_find)
 
     # only the count
-    if count or @_cursor.$count
+    if count = (@_cursor.$count or (options and options.$count))
       json_count = @_count(keys)
       start_index = @_cursor.$offset or 0
       if @_cursor.$one
@@ -76,9 +77,7 @@ module.exports = class MemoryCursor extends Cursor
           json.push(model_json) if is_match
 
         if _.keys(@_in).length
-          json = _.filter json, (model_json) =>
-            for key, values of @_in
-              return true if model_json[key] in values
+          json = _.filter json, (model_json) => return true for key, values of @_in when model_json[key] in values
 
     else
       # filter by ids
@@ -87,6 +86,10 @@ module.exports = class MemoryCursor extends Cursor
         json.push(model_json) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
       else
         json = (model_json for id, model_json of @store)
+
+    # TODO: pull this forward before processing data
+    if @_cursor.$exists or (options and options.$exists)
+      return callback(null, (if _.isArray(json) then !!json.length else json))
 
     if @_cursor.$sort and _.isArray(json)
       $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
@@ -103,7 +106,7 @@ module.exports = class MemoryCursor extends Cursor
     else if @_cursor.$limit
       json = json.splice(0, Math.min(json.length, @_cursor.$limit))
 
-    return callback(null, json.length) if count or @_cursor.$count # only the count
+    return callback(null, json.length) if count # only the count
 
     queue = new Queue(1)
 
@@ -150,7 +153,7 @@ module.exports = class MemoryCursor extends Cursor
       else if @_cursor.$white_list
         json = _.map(json, (data) => _.pick(data, @_cursor.$white_list))
 
-      if @_cursor.$page or @_cursor.$page is ''
+      if @_cursor.$page or (@_cursor.$page is '')
         json =
           offset: @_cursor.$offset
           total_rows: @_count(keys)

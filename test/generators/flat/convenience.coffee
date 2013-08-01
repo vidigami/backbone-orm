@@ -3,6 +3,7 @@ assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
+moment = require 'moment'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
@@ -104,6 +105,35 @@ runTests = (options, cache) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(models.length, MODELS_JSON.length, 'counted expected number of albums')
           done()
+
+    describe 'exists', ->
+      it 'Handles an exist with no query', (done) ->
+        Flat.exists (err, exists) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(exists, 'something exists')
+          done()
+
+      it 'Handles an exist query', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'found a model')
+
+          Flat.exists {name: model.get('name')}, (err, exists) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(exists, 'the model exists by name')
+
+            Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!exists, 'the model does not exist by bad name')
+
+              Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(exists, 'the model exists by created_at')
+
+                Flat.exists {created_at: moment('01/01/2001')}, (err, exists) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(!exists, 'the model doesn exist by bad created_at')
+                  done()
 
 # TODO: explain required set up
 

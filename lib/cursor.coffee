@@ -57,7 +57,8 @@ module.exports = class Cursor
   # Execution of the Query
   ##############################################
 
-  count: (callback) -> return @toJSON(callback, true)
+  count: (callback) -> return @toJSON(callback, {$count: true})
+  exists: (callback) -> return @toJSON(callback, {$exists: true})
 
   toModels: (callback) ->
     @toJSON (err, json) =>
