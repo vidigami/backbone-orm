@@ -6,6 +6,33 @@ moment = require 'moment'
 Utils = require './utils'
 Cursor = require './cursor'
 
+IS_MATCH_FNS =
+  $ne: (mv, tv) -> not _.isEqual(mv, tv)
+  $lt: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return (if _.isDate(tv) then moment(mv).isBefore(tv) else mv < tv)
+
+  $lte: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    if _.isDate(tv)
+      mvm = moment(mv)
+      return mvm.isBefore(tv) or mvm.isSame(tv)
+    else
+      return (mv < tv) or _.isEqual(mv, tv)
+
+  $gt: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return (if _.isDate(tv) then moment(mv).isAfter(tv) else mv > tv)
+
+  $gte: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    if _.isDate(tv)
+      mvm = moment(mv)
+      return mvm.isAfter(tv) or mvm.isSame(tv)
+    else
+      return (mv > tv) or _.isEqual(mv, tv)
+IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
+
 # @private
 module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, count) ->
@@ -33,36 +60,26 @@ module.exports = class MemoryCursor extends Cursor
         for id, model_json of @store
           is_match = true
           for key, value of @_find
+            was_handled = false
+            model_value = model_json[key]
+
+            # an object might specify $lt, $lte, $gt, $gte, $ne
             if _.isObject(value)
-              if (value.$lt or value.$lte or value.$gt or value.$gte)
-                model_date = moment(model_json[key])
+              for operator in IS_MATCH_OPERATORS when value.hasOwnProperty(operator)
+                # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(value[operator])} result: #{IS_MATCH_FNS[operator](model_value, value[operator])}"
+                was_handled = true
+                break if not is_match = IS_MATCH_FNS[operator](model_value, value[operator])
 
-                if value.$lt
-                  break unless is_match = (if _.isDate(value.$lt) then model_date.isBefore(value.$lt) else (model_json[key] < value.$lt))
+            continue if was_handled and is_match
+            break unless is_match = _.isEqual(model_value, value) unless was_handled
 
-                else if value.$lte
-                  break unless is_match = (if _.isDate(value.$lte) then (model_date.isBefore(value.$lte) or model_date.isSame(value.$lte)) else (model_json[key] <= value.$lte) or _.isEqual(model_json[key], value.$lte))
-
-                if value.$gt
-                  break unless is_match = (if _.isDate(value.$gt) then model_date.isAfter(value.$gt) else model_json[key] > value.$gt)
-
-                else if value.$gte
-                  break unless is_match = (if _.isDate(value.$gte) then (model_date.isAfter(value.$gte) or model_date.isSame(value.$gte)) else (model_json[key] >= value.$gte) or _.isEqual(model_json[key], value.$gte))
-                continue
-
-              else if value.$not
-                model_date = moment(model_json[key])
-
-                break unless is_match = (if _.isDate(value.$not) then not model_date.isSame(value.$not) else (model_json[key] isnt value.$not))
-                continue
-
-            break unless is_match = _.isEqual(model_json[key], value)
           json.push(model_json) if is_match
 
         if _.keys(@_in).length
           json = _.filter json, (model_json) =>
             for key, values of @_in
               return true if model_json[key] in values
+
     else
       # filter by ids
       if @_cursor.$ids

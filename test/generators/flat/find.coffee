@@ -15,7 +15,7 @@ runTests = (options, cache) ->
   SYNC = options.sync
   BASE_COUNT = 5
   MODELS_JSON = null
-  DATE_INTERVAL_MS = 100
+  DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
   END_DATE = moment(START_DATE).add('milliseconds', (BASE_COUNT - 1) * DATE_INTERVAL_MS).toDate()
 
@@ -120,6 +120,115 @@ runTests = (options, cache) ->
         assert.deepEqual(true, test_model.get('boolean'), "Bool matches:\nExpected: #{true}, Actual: #{test_model.get('boolean')}")
         done()
 
+    it 'Handles null finds', (done) ->
+      NAME = 'Bob'
+
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(!!test_model, 'test model found')
+        test_model.save {name: null}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Flat.find {name: null}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, 1, 'null name found')
+            assert.ok(_.isNull(models[0].get('name')), 'name is null')
+            done()
+
+    it 'Handles $ne for strings', (done) ->
+      NAME = 'Bob'
+
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(!!test_model, 'test model found')
+        test_model.save {name: NAME}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Flat.find {name: {$ne: NAME}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            assert.equal(models.length, BASE_COUNT-1, 'all but NAME found')
+            for model in models
+              assert.ok(model.get('name') isnt NAME, 'not name attribute')
+
+            Flat.find {name: {$ne: null}}, (err, models) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(models.length, BASE_COUNT, 'all models found')
+              for model in models
+                assert.ok(!_.isNull(model.get('name')), 'name attributes')
+
+              Flat.find {name: null}, (err, models) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(models.length, 0, 'not name null found')
+                done()
+
+    it 'Handles $ne with null for strings', (done) ->
+      NAME = 'Bob'
+
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(!!test_model, 'test model found')
+        test_model.save {name: null}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Flat.find {name: {$ne: NAME}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, BASE_COUNT, 'all found')
+
+            Flat.find {name: {$ne: null}}, (err, models) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(models.length, BASE_COUNT-1, 'all models but found null found')
+              for model in models
+                assert.ok(!_.isNull(model.get('name')), 'name null attribute')
+
+              Flat.find {name: null}, (err, models) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(models.length, 1, 'name null found')
+                assert.ok(_.isNull(models[0].get('name')), 'name null attribute')
+                done()
+
+    it 'Handles $ne for dates', (done) ->
+      Flat.find {created_at: {$ne: START_DATE}}, (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+
+        assert.equal(models.length, BASE_COUNT-1, 'all but NAME found')
+        for model in models
+          assert.ok(!_.isEqual(model.get('created_at'), START_DATE), 'not created_at attribute')
+
+        Flat.find {created_at: {$ne: null}}, (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(models.length, BASE_COUNT, 'all models found')
+          for model in models
+            assert.ok(!_.isNull(model.get('created_at')), 'created_at attributes')
+
+          Flat.find {created_at: null}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, 0, 'not created_at null found')
+            done()
+
+    it 'Handles $ne with null for dates', (done) ->
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(!!test_model, 'test model found')
+        test_model.save {created_at: null}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Flat.find {created_at: {$ne: END_DATE}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, BASE_COUNT, 'all found')
+
+            Flat.find {created_at: {$ne: null}}, (err, models) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(models.length, BASE_COUNT-1, 'all models but found null found')
+              for model in models
+                assert.ok(!_.isNull(model.get('created_at')), 'created_at null attribute')
+
+              Flat.find {created_at: null}, (err, models) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(models.length, 1, 'created_at null found')
+                assert.ok(_.isNull(models[0].get('created_at')), 'created_at null attribute')
+                done()
+
     it 'Handles $lt and $lte boundary conditions', (done) ->
       Flat.find {created_at: {$lt: START_DATE}}, (err, models) ->
         assert.ok(!err, "No errors: #{err}")
@@ -145,7 +254,7 @@ runTests = (options, cache) ->
     it 'Handles $lt and $lte with find equal', (done) ->
       NAME = 'Bob'
 
-      Flat.findOne {$sort: 'id'}, (err, test_model) ->
+      Flat.findOne {$sort: 'created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
         test_model.save {name: NAME}, bbCallback (err) ->
@@ -155,25 +264,34 @@ runTests = (options, cache) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(models.length, 1, 'found one model')
 
+            for model in models
+              assert.ok(model.get('name') is NAME, 'matching name attribute')
+
             Flat.find {name: NAME, created_at: {$lte: END_DATE}}, (err, models) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, 1, 'found one model')
+
+            for model in models
+              assert.ok(model.get('name') is NAME, 'matching name attribute')
               done()
+
 
     it 'Handles $lt and $lte with find not equal', (done) ->
       NAME = 'Bob'
 
-      Flat.findOne {$sort: 'id'}, (err, test_model) ->
+      Flat.findOne {$sort: 'created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
         test_model.save {name: NAME}, bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
 
-          Flat.find {name: {$not: NAME}, created_at: {$lt: END_DATE}}, (err, models) ->
+          Flat.find {name: {$ne: NAME}, created_at: {$lt: END_DATE}}, (err, models) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(models.length, BASE_COUNT-2, 'all models except Bob and last')
+            for model in models
+              assert.ok(model.get('name') isnt NAME, 'not name attribute')
 
-            Flat.find {name: {$not: NAME}, created_at: {$lte: END_DATE}}, (err, models) ->
+            Flat.find {name: {$ne: NAME}, created_at: {$lte: END_DATE}}, (err, models) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, BASE_COUNT-1, 'all models except Bob')
               done()
@@ -203,7 +321,7 @@ runTests = (options, cache) ->
     it 'Handles $gt and $gte with find equal', (done) ->
       NAME = 'Bob'
 
-      Flat.findOne {$sort: '-id'}, (err, test_model) ->
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
         test_model.save {name: NAME}, bbCallback (err) ->
@@ -213,27 +331,37 @@ runTests = (options, cache) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(models.length, 1, 'found one model')
 
+            for model in models
+              assert.ok(model.get('name') is NAME, 'matching name attribute')
+
             Flat.find {name: NAME, created_at: {$gte: START_DATE}}, (err, models) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, 1, 'found one model')
+
+            for model in models
+              assert.ok(model.get('name') is NAME, 'matching name attribute')
               done()
 
     it 'Handles $gt and $gte with find not equal', (done) ->
       NAME = 'Bob'
 
-      Flat.findOne {$sort: '-id'}, (err, test_model) ->
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
         test_model.save {name: NAME}, bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
 
-          Flat.find {name: {$not: NAME}, created_at: {$gt: START_DATE}}, (err, models) ->
+          Flat.find {name: {$ne: NAME}, created_at: {$gt: START_DATE}}, (err, models) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(models.length, BASE_COUNT-2, 'all models except Bob and first')
+            for model in models
+              assert.ok(model.get('name') isnt NAME, 'not name attribute')
 
-            Flat.find {name: {$not: NAME}, created_at: {$gte: START_DATE}}, (err, models) ->
+            Flat.find {name: {$ne: NAME}, created_at: {$gte: START_DATE}}, (err, models) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, BASE_COUNT-1, 'all models except Bob')
+              for model in models
+                assert.ok(model.get('name') isnt NAME, 'not name attribute')
               done()
 
 # TODO: explain required set up
