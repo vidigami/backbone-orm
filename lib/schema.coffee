@@ -43,6 +43,12 @@ module.exports = class Schema
   initializeModel: (model) ->
     relation.initializeModel(model, key) for key, relation of @relations
 
+  allColumns: ->
+    columns = _.keys(@fields)
+    for name, relation of @relations
+      columns.push(relation.foreign_key) if relation.type is 'belongsTo'
+    return columns
+
   #################################
   # Internal
   #################################

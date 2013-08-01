@@ -29,23 +29,23 @@ module.exports = class Cursor
   limit: (limit) -> @_cursor.$limit = limit; return @
   sort: (sort) -> @_cursor.$sort = sort; return @
 
-  whiteList: (keys) ->
-    keys = [keys] unless _.isArray(keys)
+  whiteList: (args) ->
+    keys = _.flatten(arguments)
     @_cursor.$white_list = if @_cursor.$white_list then _.intersection(@_cursor.$white_list, keys) else keys
     return @
 
-  select: (keys) ->
-    keys = [keys] unless _.isArray(keys)
+  select: (args) ->
+    keys = _.flatten(arguments)
     @_cursor.$select = if @_cursor.$select then _.intersection(@_cursor.$select, keys) else keys
     return @
 
-  include: (keys) ->
-    keys = [keys] unless _.isArray(keys)
+  include: (args) ->
+    keys = _.flatten(arguments)
     @_cursor.$include = if @_cursor.$include then _.intersection(@_cursor.$include, keys) else keys
     return @
 
-  values: (keys) ->
-    keys = [keys] unless _.isArray(keys)
+  values: (args) ->
+    keys = _.flatten(arguments)
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
     return @
 
