@@ -16,6 +16,9 @@ module.exports = (model_type) ->
   # @method .destroy(query, callback)
   #   Destroy a batch of models by query.
   #
+  # @method .exists(query, callback)
+  #   Helper method to check if at least one model exists that matches the query (or with no query, if there is at least one model).
+  #
   # @method .count(query, callback)
   #   Helper method for counting Models matching a query.
   #
@@ -73,6 +76,10 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
+
+  model_type.exists = (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    model_type::sync('cursor', query).exists(callback)
 
   model_type.count = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
