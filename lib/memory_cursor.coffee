@@ -1,6 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 Queue = require 'queue-async'
+moment = require 'moment'
 
 Utils = require './utils'
 Cursor = require './cursor'
@@ -32,22 +33,30 @@ module.exports = class MemoryCursor extends Cursor
         for id, model_json of @store
           is_match = true
           for key, value of @_find
-            if _.isObject(value) and (value.$lt or value.$lte or value.$gt or value.$gte)
-              if value.$lt
-                break unless is_match = model_json[key] < value.$lt
+            if _.isObject(value)
+              if (value.$lt or value.$lte or value.$gt or value.$gte)
+                model_date = moment(model_json[key])
 
-              else if value.$lte
-                break unless is_match = (model_json[key] <= value.$lte) or _.isEqual(model_json[key], value.$lte)
+                if value.$lt
+                  break unless is_match = (if _.isDate(value.$lt) then model_date.isBefore(value.$lt) else (model_json[key] < value.$lt))
 
-              if value.$gt
-                break unless is_match = model_json[key] > value.$gt
+                else if value.$lte
+                  break unless is_match = (if _.isDate(value.$lte) then (model_date.isBefore(value.$lte) or model_date.isSame(value.$lte)) else (model_json[key] <= value.$lte) or _.isEqual(model_json[key], value.$lte))
 
-              else if value.$gte
-                break unless is_match = (model_json[key] >= value.$gte) or _.isEqual(model_json[key], value.$gte)
-              continue
+                if value.$gt
+                  break unless is_match = (if _.isDate(value.$gt) then model_date.isAfter(value.$gt) else model_json[key] > value.$gt)
+
+                else if value.$gte
+                  break unless is_match = (if _.isDate(value.$gte) then (model_date.isAfter(value.$gte) or model_date.isSame(value.$gte)) else (model_json[key] >= value.$gte) or _.isEqual(model_json[key], value.$gte))
+                continue
+
+              else if value.$not
+                model_date = moment(model_json[key])
+
+                break unless is_match = (if _.isDate(value.$not) then not model_date.isSame(value.$not) else (model_json[key] isnt value.$not))
+                continue
 
             break unless is_match = _.isEqual(model_json[key], value)
-
           json.push(model_json) if is_match
 
         if _.keys(@_in).length
