@@ -10,7 +10,7 @@ module.exports = (model_type) ->
 
   # Extensions to the base Backbone.Model class
   #
-  # @method .resetSchema(callback)
+  # @method .resetSchema(options, callback)
   #   Create the database collections or tables while deleting all existing data.
   #
   # @method .cursor(query={})
@@ -69,7 +69,9 @@ module.exports = (model_type) ->
   # Backbone ORM - Class Extensions
   ###################################
 
-  model_type.resetSchema = (callback) -> model_type::sync('resetSchema', callback)
+  model_type.resetSchema = (options, callback) ->
+    [options, callback] = [{}, options] if arguments.length is 1
+    model_type::sync('resetSchema', options, callback)
 
   model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 

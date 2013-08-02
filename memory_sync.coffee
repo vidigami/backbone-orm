@@ -59,7 +59,7 @@ class MemorySync
   ###################################
 
   # @private
-  resetSchema: (callback) -> @store = {}; callback()
+  resetSchema: (options, callback) -> @store = {}; callback()
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))

@@ -124,6 +124,17 @@ module.exports = class Utils
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
 
   ##############################
+  # Schema
+  ##############################
+  @resetSchemas: (model_types, options, callback) ->
+    [options, callback] = [{}, options] if arguments.length is 2
+
+    queue = new Queue()
+    for model_type in model_types
+      do (model_type) -> queue.defer (callback) -> model_type.resetSchema(options, callback)
+    queue.await callback
+
+  ##############################
   # Batch
   ##############################
   # @private
