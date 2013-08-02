@@ -126,10 +126,15 @@ module.exports = class MemoryCursor extends Cursor
           for key in $include_keys
             continue if @model_type.relationIsEmbedded(key)
 
+            # console.log "key: #{key}"
+
             # Load the included models
             for model_json in json
               do (key, model_json) => load_queue.defer (callback) =>
                 @model_type.relation(key).cursor(model_json, key).toJSON (err, related_json) ->
+
+                  # console.log "\nmodel_json: #{util.inspect(model_json)}\nrelated_json: #{util.inspect(related_json)}"
+
                   model_json[key] = related_json
                   callback()
 
@@ -195,7 +200,8 @@ module.exports = class MemoryCursor extends Cursor
         models_json = [models_json] unless _.isArray(models_json)
         for model_json in models_json
           model_value = model_json[key]
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}, model_json: #{util.inspect(model_json)}"
+          # schema = model_type.schema()
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}\nmodel_json: #{util.inspect(model_json)}\schema: #{util.inspect(schema)}"
 
           # an object might specify $lt, $lte, $gt, $gte, $ne
           if _.isObject(find_value)
