@@ -183,32 +183,39 @@ module.exports = class MemoryCursor extends Cursor
     key_components = key_path.split('.')
     model_type = @model_type
 
-    next = (err, model_json) =>
+    next = (err, models_json) =>
       return callback(err) if err
       key = key_components.shift()
 
       # done conditions
       unless key_components.length
         was_handled = false
-        model_value = model_json[key]
-        find_value = @_find[key]
+        find_value = @_find[key_path]
 
-        # an object might specify $lt, $lte, $gt, $gte, $ne
-        if _.isObject(find_value)
-          for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
-            # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
-            was_handled = true
-            break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
+        models_json = [models_json] unless _.isArray(models_json)
+        for model_json in models_json
+          model_value = model_json[key]
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}, model_json: #{util.inspect(model_json)}"
 
-        return callback(null, is_match) if was_handled
-        return callback(null, _.isEqual(model_value, find_value))
+          # an object might specify $lt, $lte, $gt, $gte, $ne
+          if _.isObject(find_value)
+            for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
+              # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+              was_handled = true
+              break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
 
-      # console.log "Next model (#{key_path}): #{key} model_json: #{util.inspect(model_json)}"
+          if was_handled
+            return callback(null, is_match) if is_match
+          else if is_match = _.isEqual(model_value, find_value)
+            return callback(null, is_match)
 
-      # still looking for actual model
-      if relation = model_type.relation(key)
-        relation.cursor(model_json, key).toJSON(next)
-      else
-        next(null, model_json[key])
+        # checked all models and none were a match
+        return callback(null, false)
+
+      # console.log "\nNext model (#{key_path}): #{key} model_json: #{util.inspect(model_json)}"
+
+      # fetch relation
+      return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
+      next(null, model_json[key])
 
     next(null, model_json) # start checking
