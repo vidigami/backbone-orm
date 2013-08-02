@@ -59,17 +59,19 @@ class MemorySync
   ###################################
 
   # @private
+  resetSchema: (callback) -> @store = {}; callback()
+
+  # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    if (keys = _.keys(query)).length
-      for id, model_json of @store
-        delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
-    else
-      @store = {}
-    return callback()
+    return @resetSchema(callback) unless (keys = _.keys(query)).length
 
+    # destroy specific records
+    for id, model_json of @store
+      delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
+    callback()
 
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)

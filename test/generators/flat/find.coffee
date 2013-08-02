@@ -31,7 +31,7 @@ runTests = (options, cache) ->
     beforeEach (done) ->
       queue = new Queue(1)
 
-      queue.defer (callback) -> Flat.destroy callback
+      queue.defer (callback) -> Flat.resetSchema(callback)
 
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
