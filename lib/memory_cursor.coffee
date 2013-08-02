@@ -39,13 +39,13 @@ module.exports = class MemoryCursor extends Cursor
   toJSON: (callback, options) ->
     count = (@_cursor.$count or (options and options.$count))
     exists = @_cursor.$exists or (options and options.$exists)
-
-    json = null
-    queue = new Queue(1)
-
-    @_in = {}
-    (delete @_find[key]; @_in[key] = value.$in) for key, value of @_find when value?.$in
+    ins = {}
+    (delete @_find[key]; ins[key] = value.$in) for key, value of @_find when value?.$in
     keys = _.keys(@_find)
+    ins_size = _.size(ins)
+
+    json = []
+    queue = new Queue(1)
 
     # only the count
     if count
@@ -58,40 +58,42 @@ module.exports = class MemoryCursor extends Cursor
       return callback(null, json_count)
 
     queue.defer (callback) =>
+
       # use find
-      if keys.length or _.keys(@_in).length
-        json = []
+      if keys.length or ins_size
         if @_cursor.$ids
           for id, model_json of @store
             json.push(model_json) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), @_find)
+          callback()
+
         else
+          find_queue = new Queue()
+
           for id, model_json of @store
-            is_match = true
-            for key, value of @_find
-              was_handled = false
-              model_value = model_json[key]
+            do (model_json) => find_queue.defer (callback) =>
+              find_keys = _.keys(@_find)
+              next = (err, is_match) =>
+                # done conditions
+                return callback(err) if err
+                return callback() unless is_match
+                if not find_keys.length or (exists and (keys.length isnt find_keys.length)) # exists only needs one result
+                  json.push(model_json)
+                  return callback()
 
-              # an object might specify $lt, $lte, $gt, $gte, $ne
-              if _.isObject(value)
-                for operator in IS_MATCH_OPERATORS when value.hasOwnProperty(operator)
-                  # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(value[operator])} result: #{IS_MATCH_FNS[operator](model_value, value[operator])}"
-                  was_handled = true
-                  break if not is_match = IS_MATCH_FNS[operator](model_value, value[operator])
+                # check next key
+                @_valueIsMatch find_keys.pop(), model_json, next
 
-              continue if was_handled and is_match
-              break unless is_match = _.isEqual(model_value, value) unless was_handled
+              next(null, true) # start checking
 
-            json.push(model_json) if is_match
-
-          if _.keys(@_in).length
-            json = _.filter json, (model_json) => return true for key, values of @_in when model_json[key] in values
-
-        callback()
+          find_queue.await (err) =>
+            return callback(err) if err
+            if ins_size
+              json = _.filter json, (model_json) => return true for key, values of ins when model_json[key] in values
+            callback()
 
       else
         # filter by ids
         if @_cursor.$ids
-          json = []
           json.push(model_json) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
         else
           json = (model_json for id, model_json of @store)
@@ -99,7 +101,7 @@ module.exports = class MemoryCursor extends Cursor
 
     if not (count or exists)
       queue.defer (callback) =>
-        if @_cursor.$sort and _.isArray(json)
+        if @_cursor.$sort
           $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
           json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
@@ -134,7 +136,6 @@ module.exports = class MemoryCursor extends Cursor
           load_queue.await callback
 
     queue.await =>
-      # TODO: OPTIMIZATION: pull this forward before processing data
       return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
       return callback(null, json.length) if count # only the count
 
@@ -172,8 +173,42 @@ module.exports = class MemoryCursor extends Cursor
       callback(null, json)
     return # terminating
 
-  _count: (keys) =>
+  _count: (keys) ->
     if keys.length
       return _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), @_find) then memo + 1 else memo), 0)
     else
       return _.size(@store)
+
+  _valueIsMatch: (key_path, model_json, callback) ->
+    key_components = key_path.split('.')
+    model_type = @model_type
+
+    next = (err, model_json) =>
+      return callback(err) if err
+      key = key_components.shift()
+
+      # done conditions
+      unless key_components.length
+        was_handled = false
+        model_value = model_json[key]
+        find_value = @_find[key]
+
+        # an object might specify $lt, $lte, $gt, $gte, $ne
+        if _.isObject(find_value)
+          for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
+            # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+            was_handled = true
+            break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
+
+        return callback(null, is_match) if was_handled
+        return callback(null, _.isEqual(model_value, find_value))
+
+      # console.log "Next model (#{key_path}): #{key} model_json: #{util.inspect(model_json)}"
+
+      # still looking for actual model
+      if relation = model_type.relation(key)
+        relation.cursor(model_json, key).toJSON(next)
+      else
+        next(null, model_json[key])
+
+    next(null, model_json) # start checking
