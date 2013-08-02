@@ -129,10 +129,18 @@ module.exports = class Utils
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
 
+    count = 0
     queue = new Queue()
     for model_type in model_types
-      do (model_type) -> queue.defer (callback) -> model_type.resetSchema(options, callback)
-    queue.await callback
+      do (model_type) -> queue.defer (callback) -> model_type.resetSchema options, (err) ->
+        if err
+          console.log "Error when dropping schema for #{model_type.model_name}. #{err}" if options.verbose
+        else
+          count++
+        callback()
+    queue.await (err) ->
+      console.log "#{count} schemas dropped." if options.verbose
+      callback(err)
 
   ##############################
   # Batch
