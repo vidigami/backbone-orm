@@ -13,7 +13,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
-  MODELS_JSON = null
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -31,11 +30,7 @@ runTests = (options, cache) ->
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 
@@ -43,7 +38,7 @@ runTests = (options, cache) ->
       it 'Handles a count query', (done) ->
         Flat.count (err, count) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(count, MODELS_JSON.length, "Expected: #{count}. Actual: #{MODELS_JSON.length}")
+          assert.equal(count, BASE_COUNT, "Expected: #{count}. Actual: #{BASE_COUNT}")
           done()
 
       it 'counts by query', (done) ->
@@ -103,7 +98,7 @@ runTests = (options, cache) ->
       it 'Handles an all query', (done) ->
         Flat.all (err, models) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(models.length, MODELS_JSON.length, 'counted expected number of albums')
+          assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
           done()
 
     describe 'exists', ->

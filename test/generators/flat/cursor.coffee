@@ -12,7 +12,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  MODELS_JSON = null
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -33,18 +32,14 @@ runTests = (options, cache) ->
         created_at: Fabricator.date
         updated_at: Fabricator.date
         boolean: true
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 
     it 'Handles a count query to json', (done) ->
       Flat.cursor({$count: true}).toJSON (err, count) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length, count, "\nExpected: #{MODELS_JSON.length}\nActual: #{count}")
+        assert.equal(BASE_COUNT, count, "\nExpected: #{BASE_COUNT}\nActual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->

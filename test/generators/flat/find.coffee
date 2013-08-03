@@ -14,7 +14,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  MODELS_JSON = null
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
   END_DATE = moment(START_DATE).add('milliseconds', (BASE_COUNT - 1) * DATE_INTERVAL_MS).toDate()
@@ -38,11 +37,7 @@ runTests = (options, cache) ->
         created_at: Fabricator.date(START_DATE, DATE_INTERVAL_MS)
         updated_at: Fabricator.date
         boolean: true
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 

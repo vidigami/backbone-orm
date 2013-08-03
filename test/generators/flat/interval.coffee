@@ -13,7 +13,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 20
-  MODELS_JSON = null
 
   DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
   DATE_STEP_MS = 1000
@@ -34,11 +33,7 @@ runTests = (options, cache) ->
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date(DATE_START, DATE_STEP_MS)
         updated_at: Fabricator.date
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 
@@ -54,7 +49,7 @@ runTests = (options, cache) ->
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
     it 'callback for all models (model)', (done) ->
@@ -78,8 +73,8 @@ runTests = (options, cache) ->
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length/2, interval_count, "Interval count. Expected: #{MODELS_JSON.length/2}\nActual: #{interval_count}")
-        assert.equal(MODELS_JSON.length, processed_count, "Processed count. Expected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
+        assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
     it 'callback for all models (model and no range)', (done) ->
@@ -102,8 +97,8 @@ runTests = (options, cache) ->
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length/2, interval_count, "Interval count. Expected: #{MODELS_JSON.length/2}\nActual: #{interval_count}")
-        assert.equal(MODELS_JSON.length, processed_count, "Processed count. Expected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
+        assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
 # TODO: explain required set up

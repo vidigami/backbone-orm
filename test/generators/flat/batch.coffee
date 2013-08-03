@@ -12,7 +12,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
-  MODELS_JSON = null
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -30,11 +29,7 @@ runTests = (options, cache) ->
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 
@@ -50,7 +45,7 @@ runTests = (options, cache) ->
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
     it 'callback for all models (model)', (done) ->
@@ -65,7 +60,7 @@ runTests = (options, cache) ->
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(MODELS_JSON.length, processed_count, "\nExpected: #{MODELS_JSON.length}\nActual: #{processed_count}")
+        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
 # TODO: explain required set up
