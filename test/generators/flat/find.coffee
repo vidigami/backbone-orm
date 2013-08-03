@@ -191,7 +191,7 @@ runTests = (options, cache) ->
       Flat.find {created_at: {$ne: START_DATE}}, (err, models) ->
         assert.ok(!err, "No errors: #{err}")
 
-        assert.equal(models.length, BASE_COUNT-1, 'all but NAME found')
+        assert.equal(models.length, BASE_COUNT-1, 'all but START DATE found')
         for model in models
           assert.ok(!_.isEqual(model.get('created_at'), START_DATE), 'not created_at attribute')
 
