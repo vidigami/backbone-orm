@@ -130,9 +130,9 @@ runTests = (options, cache) ->
                 assert.ok(!err, "No errors: #{err}")
                 assert.ok(exists, 'the model exists by created_at')
 
-                Flat.exists {created_at: moment('01/01/2001')}, (err, exists) ->
+                Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!exists, 'the model doesn exist by bad created_at')
+                  assert.ok(!exists, 'the model does not exist by bad created_at')
                   done()
 
 # TODO: explain required set up

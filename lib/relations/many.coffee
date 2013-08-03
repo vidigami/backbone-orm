@@ -282,21 +282,11 @@ module.exports = class Many
     collection = @_ensureCollection(model)
 
     # TODO: check which objects are already loaded in cache and ignore ids
-#    load_ids = []
-#    for related_model in collection.models
-#      continue unless related_model._orm_needs_load
-#      throw new Error "Missing id for load" unless id = related_model.id
-#      load_ids.push(id)
-
-    # loaded
-#    unless load_ids.length
-#      collection._orm_loaded = true
-#      return callback(null, collection.models)
 
     # fetch
     query = {}
     query[@foreign_key] = model.attributes.id
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
+    (if @join_table then @join_table else @reverse_model_type).cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
       # process the found models
