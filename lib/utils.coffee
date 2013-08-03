@@ -130,6 +130,9 @@ module.exports = class Utils
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
 
+    # ensure all models all initialized (reverse relationships may be initialized in a dependent model)
+    model_type.schema() for model_type in model_types
+
     failed_schemas = []
     queue = new Queue(1)
     for model_type in model_types
