@@ -188,7 +188,7 @@ module.exports = class JSONUtils
       # Related models need to be converted to json
       if model.relation(key)
         if _.isArray(value)
-          #todo: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
+          # TODO: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
           value = (val.toJSON() for val in value)
         else if value and value.toJSON
           value = value.toJSON()

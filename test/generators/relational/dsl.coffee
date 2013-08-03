@@ -435,7 +435,7 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    #todo
+    # TODO
     # a_flat: {key: 'flat', template: (model, options, callback) -> }
     it 'Handles rendering a related models template function in the dsl', (done) ->
       FIELD = 'flat'
@@ -503,4 +503,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-#  runTests(options, true)
+  # runTests(options, true)

@@ -43,7 +43,7 @@ module.exports = class Many
       if @reverse_relation.join_table
         @join_table = @reverse_relation.join_table
       else
-        @join_table = Utils.createJoinTableModel(@, @reverse_relation)
+        @join_table = Utils.createJoinTableModel(@)
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 

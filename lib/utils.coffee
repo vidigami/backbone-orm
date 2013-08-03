@@ -64,21 +64,22 @@ module.exports = class Utils
       return data.id
     return data
 
-  # @private
-  @createJoinTableModel: (relation1, relation2) ->
-    model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))
-    model_name2 = inflection.pluralize(inflection.underscore(relation2.model_type.model_name))
-    table = if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+  @joinTableName: (relation) ->
+    model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
+    model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))
+    return if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
 
+  # @private
+  @createJoinTableModel: (relation) ->
     schema = {}
-    schema[relation1.foreign_key] = ['Integer', indexed: true]
-    schema[relation2.foreign_key] = ['Integer', indexed: true]
+    schema[relation.foreign_key] = ['Integer', indexed: true]
+    schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
 
     # @private
     class JoinTable extends Backbone.Model
-      urlRoot: "#{Utils.parseUrl(_.result(relation1.model_type.prototype, 'url')).database_path}/#{table}"
+      urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{Utils.joinTableName(relation)}"
       @schema: schema
-      sync: relation1.model_type.createSync(JoinTable)
+      sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable
 
