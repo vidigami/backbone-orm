@@ -100,7 +100,8 @@ module.exports = (model_type) ->
 
   model_type.findOne = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    model_type::sync('cursor', _.extend({$one: true}, query)).toModels(callback)
+    query = if _.isObject(query) then _.extend({$one: true}, query) else {id: query, $one: true}
+    model_type::sync('cursor', query).toModels(callback)
 
   model_type.findOrCreate = (data, callback) ->
     throw 'findOrCreate requires object data' if not _.isObject(data) or (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)

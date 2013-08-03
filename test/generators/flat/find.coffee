@@ -57,6 +57,16 @@ runTests = (options, cache) ->
           assert.equal(model.id, test_model.id, 'model has the correct id')
           done()
 
+    it 'Handles a findOne query by id', (done) ->
+      Flat.findOne {$sort: '-name'}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        Flat.findOne test_model.id, (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'gets a model')
+          assert.equal(model.id, test_model.id, 'model has the correct id')
+          done()
+
 
     it 'Handles another find id query', (done) ->
       Flat.findOne (err, test_model) ->
