@@ -225,17 +225,14 @@ module.exports = (model_type) ->
     json = {}
     attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
     for key, value of attributes
-      if value instanceof Backbone.Collection
-        if not options.relations and schema and (relation = schema.relation(key))
-          relation.appendJSON(json, @, key)
-        else
-          json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
+      if schema and (relation = schema.relation(key))
+        relation.appendJSON(json, @, key)
+
+      else if value instanceof Backbone.Collection
+        json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
 
       else if value instanceof Backbone.Model
-        if not options.relations and schema and (relation = schema.relation(key))
-          relation.appendJSON(json, @, key)
-        else
-          json[key] = value.toJSON(options)
+        json[key] = value.toJSON(options)
 
       else
         json[key] = value
