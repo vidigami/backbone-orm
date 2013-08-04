@@ -36,9 +36,8 @@ IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @private
 module.exports = class MemoryCursor extends Cursor
-  toJSON: (callback, options) ->
-    count = (@_cursor.$count or (options and options.$count))
-    exists = @_cursor.$exists or (options and options.$exists)
+  toJSON: (callback) ->
+    exists = @hasCursorQuery('$exists')
 
     @buildFindQuery (err, find_query) =>
       keys = _.keys(find_query)
@@ -46,7 +45,7 @@ module.exports = class MemoryCursor extends Cursor
       queue = new Queue(1)
 
       # only the count
-      if count
+      if @hasCursorQuery('$count')
         json_count = @_count(find_query, keys)
         start_index = @_cursor.$offset or 0
         if @_cursor.$one
@@ -126,7 +125,7 @@ module.exports = class MemoryCursor extends Cursor
         return callback(null, if json.length then json[0] else null) if @_cursor.$one
 
         json = @selectResults(json, callback)
-        if @_cursor.$page or (@_cursor.$page is '')
+        if @hasCursorQuery('$page')
           callback(null, {
             offset: @_cursor.$offset
             total_rows: @_count(find_query, keys)

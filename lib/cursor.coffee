@@ -56,9 +56,15 @@ module.exports = class Cursor
   ##############################################
   # Execution of the Query
   ##############################################
-
-  count: (callback) -> return @toJSON(callback, {$count: true})
-  exists: (callback) -> return @toJSON(callback, {$exists: true})
+  count: (callback) -> @execWithCursorQuery('$count', callback)
+  exists: (callback) -> @execWithCursorQuery('$count', callback)
+  execWithCursorQuery: (key, callback) ->
+    value = @_cursor[key]
+    @_cursor[key] = true
+    @toJSON (err, json) =>
+      if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
+      callback(err, json)
+  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
     @toJSON (err, json) =>

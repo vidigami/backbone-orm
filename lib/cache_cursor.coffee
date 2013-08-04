@@ -7,9 +7,9 @@ Cursor = require './cursor'
 
 # @private
 module.exports = class CacheCursor extends Cursor
-  toJSON: (callback, options) ->
+  toJSON: (callback) ->
     # build query
     query = _.extend(_.extend({}, @_find), @_cursor)
 
     # TODO: invalidate the cache
-    @wrapped_sync_fn('cursor', query).toJSON(callback, options)
+    @wrapped_sync_fn('cursor', query).toJSON(callback)
