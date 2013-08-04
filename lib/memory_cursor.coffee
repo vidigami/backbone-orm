@@ -40,12 +40,8 @@ module.exports = class MemoryCursor extends Cursor
     count = (@_cursor.$count or (options and options.$count))
     exists = @_cursor.$exists or (options and options.$exists)
 
-    @_buildFindQuery (err, find_query) =>
-      ins = {}
-      (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
+    @buildFindQuery (err, find_query) =>
       keys = _.keys(find_query)
-      ins_size = _.size(ins)
-
       json = []
       queue = new Queue(1)
 
@@ -60,6 +56,9 @@ module.exports = class MemoryCursor extends Cursor
         return callback(null, json_count)
 
       queue.defer (callback) =>
+        ins = {}
+        (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
+        ins_size = _.size(ins)
 
         # use find
         if keys.length or ins_size
@@ -102,7 +101,7 @@ module.exports = class MemoryCursor extends Cursor
             json = (model_json for id, model_json of @store)
           callback()
 
-      if not (count or exists)
+      if not exists
         queue.defer (callback) =>
           if @_cursor.$sort
             $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
@@ -120,93 +119,25 @@ module.exports = class MemoryCursor extends Cursor
             json = json.splice(0, Math.min(json.length, @_cursor.$limit))
           callback()
 
-        queue.defer (callback) => @_fetchIncludes(json, callback)
+        queue.defer (callback) => @fetchIncludes(json, callback)
 
       queue.await =>
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
-
-        # only select specific fields
-        if @_cursor.$values
-          $fields = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-        else if @_cursor.$select
-          $fields = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-        else if @_cursor.$white_list
-          $fields = @_cursor.$white_list
-        json = _.map(json, (data) -> _.pick(data, $fields)) if $fields
-
         return callback(null, if json.length then json[0] else null) if @_cursor.$one
 
-        # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
-        if @_cursor.$values
-          $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-          if @_cursor.$values.length is 1
-            key = @_cursor.$values[0]
-            json = if $values.length then ((if data.hasOwnProperty(key) then data[key] else null) for data in json) else _.map(json, -> null)
-          else
-            json = (((data[key] for key in $values when data.hasOwnProperty(key))) for data in json)
-        else if @_cursor.$select
-          $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-          json = _.map(json, (data) => _.pick(data, $select))
-        else if @_cursor.$white_list
-          json = _.map(json, (data) => _.pick(data, @_cursor.$white_list))
-
+        json = @selectResults(json, callback)
         if @_cursor.$page or (@_cursor.$page is '')
-          json =
+          callback(null, {
             offset: @_cursor.$offset
             total_rows: @_count(find_query, keys)
             rows: json
+          })
+        else
+          callback(null, json)
 
-        callback(null, json)
       return # terminating
 
-  _count: (find_query, keys) ->
-    if keys.length
-      return _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), find_query) then memo + 1 else memo), 0)
-    else
-      return _.size(@store)
-
-  _valueIsMatch: (find_query, key_path, model_json, callback) ->
-    key_components = key_path.split('.')
-    model_type = @model_type
-
-    next = (err, models_json) =>
-      return callback(err) if err
-      key = key_components.shift()
-
-      # done conditions
-      unless key_components.length
-        was_handled = false
-        find_value = find_query[key_path]
-
-        models_json = [models_json] unless _.isArray(models_json)
-        for model_json in models_json
-          model_value = model_json[key]
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}\nmodel_json: #{util.inspect(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
-
-          # an object might specify $lt, $lte, $gt, $gte, $ne
-          if _.isObject(find_value)
-            for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
-              # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
-              was_handled = true
-              break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
-
-          if was_handled
-            return callback(null, is_match) if is_match
-          else if is_match = _.isEqual(model_value, find_value)
-            return callback(null, is_match)
-
-        # checked all models and none were a match
-        return callback(null, false)
-
-      # console.log "\nNext model (#{key_path}): #{key} model_json: #{util.inspect(model_json)}"
-
-      # fetch relation
-      return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
-      next(null, model_json[key])
-
-    next(null, model_json) # start checking
-
-  _buildFindQuery: (callback) ->
+  buildFindQuery: (callback) ->
     queue = new Queue()
 
     find_query = {}
@@ -252,7 +183,7 @@ module.exports = class MemoryCursor extends Cursor
       # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{util.inspect(find_query)}"
       callback(err, find_query)
 
-  _fetchIncludes: (json, callback) ->
+  fetchIncludes: (json, callback) ->
     # TODO: $select/$values = 'relation.field'
     return callback() unless @_cursor.$include
 
@@ -274,3 +205,70 @@ module.exports = class MemoryCursor extends Cursor
             callback()
 
     load_queue.await callback
+
+  selectResults: (json, callback) ->
+    # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
+    if @_cursor.$values
+      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
+      if @_cursor.$values.length is 1
+        key = @_cursor.$values[0]
+        json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
+      else
+        json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+    else if @_cursor.$select
+      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      json = _.map(json, (item) => _.pick(item, $select))
+
+    else if @_cursor.$white_list
+      json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+    return json
+
+  ##########################################
+  # Internal
+  ##########################################
+  _count: (find_query, keys) ->
+    if keys.length
+      json_count = _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), find_query) then memo + 1 else memo), 0)
+    else
+      json_count = _.size(@store)
+
+  _valueIsMatch: (find_query, key_path, model_json, callback) ->
+    key_components = key_path.split('.')
+    model_type = @model_type
+
+    next = (err, models_json) =>
+      return callback(err) if err
+      key = key_components.shift()
+
+      # done conditions
+      unless key_components.length
+        was_handled = false
+        find_value = find_query[key_path]
+
+        models_json = [models_json] unless _.isArray(models_json)
+        for model_json in models_json
+          model_value = model_json[key]
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}\nmodel_json: #{util.inspect(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
+
+          # an object might specify $lt, $lte, $gt, $gte, $ne
+          if _.isObject(find_value)
+            for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
+              # console.log "Testing operator: #{operator}, model_value: #{util.inspect(model_value)}, test_value: #{util.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+              was_handled = true
+              break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
+
+          if was_handled
+            return callback(null, is_match) if is_match
+          else if is_match = _.isEqual(model_value, find_value)
+            return callback(null, is_match)
+
+        # checked all models and none were a match
+        return callback(null, false)
+
+      # console.log "\nNext model (#{key_path}): #{key} model_json: #{util.inspect(model_json)}"
+
+      # fetch relation
+      return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
+      next(null, model_json[key])
+
+    next(null, model_json) # start checking
