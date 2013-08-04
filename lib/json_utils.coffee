@@ -30,6 +30,22 @@ module.exports = class JSONUtils
         catch err
     return values
 
+  # Serialze json to a toQuery format.
+  #
+  # @example
+  #   query = JSONUtils.toQuery(json)
+  #
+  @toQuery: (values) ->
+    if _.isArray(values)
+      return JSON.stringify(values)
+    else if _.isObject(values)
+      result = {}
+      result[key] = JSON.stringify(value) for key, value of values
+      return result
+    else if values.toJSON
+      return values.toJSON()
+    return values
+
   # Render a template that can be a key, keys, DSL object, or function.
   #
   # @example: render a key

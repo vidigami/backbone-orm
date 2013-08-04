@@ -11,7 +11,7 @@ runTests = (options, cache) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 5
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"

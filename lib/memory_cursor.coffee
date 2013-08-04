@@ -200,8 +200,7 @@ module.exports = class MemoryCursor extends Cursor
         models_json = [models_json] unless _.isArray(models_json)
         for model_json in models_json
           model_value = model_json[key]
-          # schema = model_type.schema()
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}\nmodel_json: #{util.inspect(model_json)}\schema: #{util.inspect(schema)}"
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{util.inspect(find_value)}, model_value: #{util.inspect(model_value)}\nmodel_json: #{util.inspect(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
 
           # an object might specify $lt, $lte, $gt, $gte, $ne
           if _.isObject(find_value)
