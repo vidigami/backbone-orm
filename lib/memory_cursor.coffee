@@ -70,6 +70,7 @@ module.exports = class MemoryCursor extends Cursor
 
           else
             find_queue = new Queue()
+            # console.log "\nmodel: #{@model_type.model_name} find_query: #{util.inspect(find_query)} @store: #{util.inspect(@store)}"
 
             for id, model_json of @store
               do (model_json) => find_queue.defer (callback) =>
@@ -248,8 +249,8 @@ module.exports = class MemoryCursor extends Cursor
           relation.reverse_relation.model_type.cursor(related_query).toJSON (err, related_ids) =>
             return callback(err) if err
             if relation.join_table
-              (join_query = {})[relation.foreign_key] = {$in: related_ids}
-              join_query.$values = relation.reverse_relation.foriegn_key
+              (join_query = {})[relation.reverse_relation.foreign_key] = {$in: related_ids}
+              join_query.$values = relation.foreign_key
               relation.join_table.cursor(join_query).toJSON (err, model_ids) =>
                 return callback(err) if err
                 find_query.id = {$in: model_ids}
@@ -268,5 +269,5 @@ module.exports = class MemoryCursor extends Cursor
             callback()
 
     queue.await (err) =>
-      console.log "\nmodel_name: #{@model_type.model_name} find_query: #{util.inspect(find_query)}"
+      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{util.inspect(find_query)}"
       callback(err, find_query)

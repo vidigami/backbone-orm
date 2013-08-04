@@ -97,9 +97,6 @@ runTests = (options, cache, embed) ->
             done()
 
     it 'Can include related (two-way hasMany) models', (done) ->
-      # TODO: TO DISCUSS
-      return done() if SYNC is require('../../../memory_sync')
-
       Owner.cursor({$one: true}).include('reverses').toJSON (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -108,9 +105,6 @@ runTests = (options, cache, embed) ->
         done()
 
     it 'Can query on related (two-way hasMany) models', (done) ->
-      # TODO: TO DISCUSS
-      return done() if SYNC is require('../../../memory_sync')
-
       Reverse.findOne (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'found model')
@@ -122,9 +116,6 @@ runTests = (options, cache, embed) ->
           done()
 
     it 'Can query on related (two-way hasMany) models with included relations', (done) ->
-      # TODO: TO DISCUSS
-      return done() if SYNC is require('../../../memory_sync')
-
       Reverse.findOne (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'found model')
@@ -133,10 +124,7 @@ runTests = (options, cache, embed) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(test_model, 'found model')
           assert.ok(test_model.reverses, 'Has related reverses')
-
-          # TODO: TO DISCUSS
-          # assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
-
+          assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
           done()
 
 # TODO: explain required set up
