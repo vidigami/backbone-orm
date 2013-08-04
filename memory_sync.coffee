@@ -66,7 +66,7 @@ class MemorySync
 
   # @private
   destroy: (query, callback) ->
-    return @resetSchema(callback) unless (keys = _.keys(query)).length
+    return @resetSchema({}, callback) unless (keys = _.keys(query)).length
 
     # destroy specific records
     for id, model_json of @store
