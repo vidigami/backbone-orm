@@ -120,27 +120,7 @@ module.exports = class MemoryCursor extends Cursor
             json = json.splice(0, Math.min(json.length, @_cursor.$limit))
           callback()
 
-        # TODO: $select/$values = 'relation.field'
-        if @_cursor.$include
-          queue.defer (callback) =>
-            load_queue = new Queue(1)
-
-            $include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
-            for key in $include_keys
-              continue if @model_type.relationIsEmbedded(key)
-              return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
-
-              # Load the included models
-              for model_json in json
-                do (key, model_json) => load_queue.defer (callback) =>
-                  relation.cursor(model_json, key).toJSON (err, related_json) ->
-                    return calback(err) if err
-                    # console.log "\nkey: #{key}, model_json: #{util.inspect(model_json)}\nrelated_json: #{util.inspect(related_json)}"
-                    delete model_json[relation.foriegn_key]
-                    model_json[key] = related_json
-                    callback()
-
-            load_queue.await callback
+        queue.defer (callback) => @_fetchIncludes(json, callback)
 
       queue.await =>
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
@@ -271,3 +251,26 @@ module.exports = class MemoryCursor extends Cursor
     queue.await (err) =>
       # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{util.inspect(find_query)}"
       callback(err, find_query)
+
+  _fetchIncludes: (json, callback) ->
+    # TODO: $select/$values = 'relation.field'
+    return callback() unless @_cursor.$include
+
+    load_queue = new Queue(1)
+
+    $include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
+    for key in $include_keys
+      continue if @model_type.relationIsEmbedded(key)
+      return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
+
+      # Load the included models
+      for model_json in json
+        do (key, model_json) => load_queue.defer (callback) =>
+          relation.cursor(model_json, key).toJSON (err, related_json) ->
+            return calback(err) if err
+            # console.log "\nkey: #{key}, model_json: #{util.inspect(model_json)}\nrelated_json: #{util.inspect(related_json)}"
+            delete model_json[relation.foriegn_key]
+            model_json[key] = related_json
+            callback()
+
+    load_queue.await callback
