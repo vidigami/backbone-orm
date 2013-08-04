@@ -286,7 +286,7 @@ module.exports = class Many
     # fetch
     query = {}
     query[@foreign_key] = model.attributes.id
-    (if @join_table then @join_table else @reverse_model_type).cursor(query).toJSON (err, json) =>
+    (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
       # process the found models
@@ -310,4 +310,4 @@ module.exports = class Many
     query or= {}
     query[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
-    return @reverse_model_type.cursor(query)
+    return (@join_table or @reverse_model_type).cursor(query)
