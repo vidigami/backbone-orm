@@ -117,7 +117,7 @@ module.exports = class MemoryCursor extends Cursor
           json = json.splice(0, Math.min(json.length, @_cursor.$limit))
         callback()
 
-      # todo: $select/$values = 'relation.field'
+      # TODO: $select/$values = 'relation.field'
       if @_cursor.$include
         queue.defer (callback) =>
           load_queue = new Queue(1)
@@ -125,14 +125,15 @@ module.exports = class MemoryCursor extends Cursor
           $include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
           for key in $include_keys
             continue if @model_type.relationIsEmbedded(key)
+            return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
 
             # Load the included models
             for model_json in json
               do (key, model_json) => load_queue.defer (callback) =>
-                return callback(new Error "Missing included relation '#{key}'") unless relation = @model_type.relation(key)
-
                 relation.cursor(model_json, key).toJSON (err, related_json) ->
+                  return calback(err) if err
                   # console.log "\nmodel_json: #{util.inspect(model_json)}\nrelated_json: #{util.inspect(related_json)}"
+                  delete model_json[relation.foriegn_key]
                   model_json[key] = related_json
                   callback()
 
