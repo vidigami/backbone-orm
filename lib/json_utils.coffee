@@ -134,7 +134,10 @@ module.exports = class JSONUtils
               relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
-          queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
+          if _.isString(args)
+            queue.defer (callback) -> JSONUtils.renderKey model, args, options, (err, json) -> result[args] = json; callback(err)
+          else
+            queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
 
         # full_name:      'name'
         else if _.isString(args)

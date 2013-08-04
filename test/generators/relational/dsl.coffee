@@ -128,6 +128,7 @@ runTests = (options, cache) ->
 
     # DSL example
     # {
+    #   $select:       'id'
     #   $select:       ['id', 'taken_at', 'rotation', 'width', 'height', 'image_id']
     #   name:          'source_file_name'
     #   album:         {$select: ['id', 'name']}
@@ -138,6 +139,20 @@ runTests = (options, cache) ->
     #   can_delete:    (photo, options, callback) ->
     # }
     #
+
+    # $select: 'id'
+    it 'Handles rendering $select for single string with dsl', (done) ->
+      FIELD = 'id'
+      TEMPLATE =
+        $select: FIELD
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.equal(test_model.get(FIELD), json[FIELD], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD]}")
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
 
     # $select: ['created_at', 'name']
     it 'Handles rendering $select with dsl', (done) ->
