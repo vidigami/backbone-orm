@@ -126,15 +126,13 @@ module.exports = class MemoryCursor extends Cursor
           for key in $include_keys
             continue if @model_type.relationIsEmbedded(key)
 
-            # console.log "key: #{key}"
-
             # Load the included models
             for model_json in json
               do (key, model_json) => load_queue.defer (callback) =>
-                @model_type.relation(key).cursor(model_json, key).toJSON (err, related_json) ->
+                return callback(new Error "Missing included relation '#{key}'") unless relation = @model_type.relation(key)
 
+                relation.cursor(model_json, key).toJSON (err, related_json) ->
                   # console.log "\nmodel_json: #{util.inspect(model_json)}\nrelated_json: #{util.inspect(related_json)}"
-
                   model_json[key] = related_json
                   callback()
 
