@@ -34,7 +34,7 @@ class Cache
     return @
 
   configureSync: (model_type, sync_fn) ->
-    return if @findOrCreateCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
+    return if @findOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
 
   reset: (model_name, ids) ->
     # clear the full cache
@@ -55,16 +55,22 @@ class Cache
 
   get: (model_name, data) ->
     return undefined unless model_cache = @caches[model_name] # no caching
-    return if _.isArray(data) then (model_cache.get(item.id) for item in data) else model_cache.get(data.id)
+    return (model_cache.get(item.id) for item in data) if _.isArray(data)
+    return model_cache.get(if data.id then data.id else data)
 
   getOrCreate: (model_name, model_type, data) ->
-    model_cache = @caches[model_name] # no caching
+    model_cache = @findOrCreateModelCache(model_name)
     data = [data] unless many = _.isArray(data)
-    models = ((model_cache and @get(item)) or Utils.dataToModel(model_type, item) for item in data)
+    models = []
+    for item in data
+      unless model = (if model_cache then model_cache.get(if item.id then item.id else item) else null)
+        model = Utils.dataToModel(model_type, item)
+      model_cache.set(model.id, model) if model_cache
+      models.push(model)
     return if many then models else models[0]
 
   set: (model_name, model_type, data) ->
-    return @ unless model_cache = @findOrCreateCache(model_name) # no caching
+    return @ unless model_cache = @findOrCreateModelCache(model_name) # no caching
 
     data = [data] unless _.isArray(data)
     for item in data
@@ -85,7 +91,7 @@ class Cache
     model_cache.del(id) for id in ids
     return @
 
-  findOrCreateCache: (model_name) ->
+  findOrCreateModelCache: (model_name) ->
     return model_cache if model_cache = @caches[model_name]
 
     # there are options

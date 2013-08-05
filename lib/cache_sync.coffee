@@ -22,18 +22,20 @@ class CacheSync
   read: (model, options) ->
     if (cached_model = Cache.get(@model_type.model_name, model.attributes.id)) # use cached
       return options.success(cached_model.toJSON())
+
+    model_cache = Cache.findOrCreateModelCache(@model_type.model_name)
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.getOrCreate(@model_type.model_name, @model_type, json) # add to the cache
+      Cache.getOrCreate(@model_type.model_name, @model_type, json) # update cache
       options.success(json)
 
   update: (model, options) ->
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.set(@model_type.model_name, json)
+      Cache.getOrCreate(@model_type.model_name, @model_type, json) # update cache
       options.success(json)
 
   delete: (model, options) ->
