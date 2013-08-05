@@ -139,7 +139,7 @@ module.exports = class Utils
       do (model_type) -> queue.defer (callback) -> model_type.resetSchema options, (err) ->
         if err
           failed_schemas.push(model_type.model_name)
-          console.log "Error when dropping schema for #{model_type.model_name}. #{err}" if options.verbose
+          console.log "Error when dropping schema for #{model_type.model_name}. #{err}"
         callback()
     queue.await (err) ->
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
