@@ -278,7 +278,7 @@ runTests = (options, cache) ->
 
               for model in models
                 assert.ok(model.get('name') is NAME, 'matching name attribute')
-                done()
+              done()
 
 
     it 'Handles $lt and $lte with find not equal', (done) ->
@@ -345,7 +345,7 @@ runTests = (options, cache) ->
 
               for model in models
                 assert.ok(model.get('name') is NAME, 'matching name attribute')
-                done()
+              done()
 
     it 'Handles $gt and $gte with find not equal', (done) ->
       NAME = 'Bob'
