@@ -20,10 +20,8 @@ class CacheSync
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
-    if (cached_model = Cache.get(@model_type.model_name, model.attributes.id)) # use cached
+    if (cached_model = Cache.get(@model_type.model_name, model.id)) # use cached
       return options.success(cached_model.toJSON())
-
-    model_cache = Cache.findOrCreateModelCache(@model_type.model_name)
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->

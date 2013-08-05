@@ -11,6 +11,8 @@ class Cache
   constructor: ->
     @caches = {}
     @options = {modelTypes: {}}
+    @verbose = false
+    # @verbose = true
 
   # Configure the cache singleton
   #
@@ -56,15 +58,18 @@ class Cache
   get: (model_name, data) ->
     return undefined unless model_cache = @caches[model_name] # no caching
     return (model_cache.get(item.id) for item in data) if _.isArray(data)
-    return model_cache.get(if data.id then data.id else data)
+    model = model_cache.get(if data.id then data.id else data)
+    console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{if data.id then data.id else data}" if @verbose
+    return model
 
   getOrCreate: (model_name, model_type, data) ->
     model_cache = @findOrCreateModelCache(model_name)
     data = [data] unless many = _.isArray(data)
     models = []
     for item in data
-      unless model = (if model_cache then model_cache.get(if item.id then item.id else item) else null)
-        model = Utils.dataToModel(model_type, item)
+      model = (if model_cache then model_cache.get(if item.id then item.id else item) else null)
+      console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{if item.id then item.id else item}" if @verbose
+      model = Utils.dataToModel(model_type, item) unless model
       model_cache.set(model.id, model) if model_cache
       models.push(model)
     return if many then models else models[0]
