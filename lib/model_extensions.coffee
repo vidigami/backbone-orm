@@ -63,7 +63,7 @@ module.exports = (model_type) ->
   # Backbone ORM - Sync Accessors
   ###################################
 
-  model_type.createSync = (target_model_type, cache) -> model_type::sync('createSync', target_model_type, cache)
+  model_type.createSync = (target_model_type) -> model_type::sync('createSync', target_model_type)
 
   ###################################
   # Backbone ORM - Class Extensions

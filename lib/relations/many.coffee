@@ -261,6 +261,6 @@ module.exports = class Many
         else
           collection.add(related_model = @reverse_model_type.findOrNew(model_json))
 
-      cache.set(@reverse_model_type.model_name, collection.models) if cache = @reverse_model_type.cache()
+      cache.set(@reverse_model_type.model_name, @reverse_model_type, collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
     return false

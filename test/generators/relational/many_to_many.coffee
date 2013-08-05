@@ -12,24 +12,26 @@ runTests = (options, cache, embed) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
+  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
-    sync: SYNC(Reverse, cache)
+    sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
-    sync: SYNC(Owner, cache)
+    sync: SYNC(Owner)
 
   describe "Many to Many (cache: #{cache} embed: #{embed})", ->
 
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       MODELS = {}
 
       queue = new Queue(1)

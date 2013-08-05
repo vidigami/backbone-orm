@@ -13,18 +13,19 @@ runTests = (options, cache, embed) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
+  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
     @schema: BASE_SCHEMA
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owner: -> ['belongs_to', Owner]
     }, BASE_SCHEMA)
-    sync: SYNC(Reverse, cache)
+    sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
@@ -32,11 +33,12 @@ runTests = (options, cache, embed) ->
       flat: -> ['BelongsTo', Flat, embed: embed]
       reverse: -> ['has_one', Reverse, embed: embed]
     }, BASE_SCHEMA)
-    sync: SYNC(Owner, cache)
+    sync: SYNC(Owner)
 
   describe "hasOne (cache: #{cache} embed: #{embed})", ->
 
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       MODELS = {}
       queue = new Queue(1)
 
@@ -192,3 +194,4 @@ runTests = (options, cache, embed) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
+  runTests(options, true, false)

@@ -13,6 +13,7 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 20
+  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
 
   DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
   DATE_STEP_MS = 1000
@@ -20,11 +21,12 @@ runTests = (options, cache) ->
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
     @schema: BASE_SCHEMA
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   describe "Utils.interval (cache: #{cache})", ->
 
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       queue = new Queue(1)
 
       queue.defer (callback) -> Flat.resetSchema(callback)

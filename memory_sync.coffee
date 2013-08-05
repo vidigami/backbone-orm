@@ -73,7 +73,7 @@ class MemorySync
       delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
     callback()
 
-module.exports = (model_type, cache) ->
+module.exports = (model_type) ->
   sync = new MemorySync(model_type)
 
   model_type::sync = sync_fn = (method, model, options={}) -> # save for access by model extensions
@@ -84,4 +84,4 @@ module.exports = (model_type, cache) ->
     if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else return undefined
 
   require('./lib/model_extensions')(model_type) # mixin extensions
-  return if cache then require('./lib/cache_sync')(model_type, sync_fn) else sync_fn
+  return require('./lib/cache').configureSync(model_type, sync_fn)

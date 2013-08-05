@@ -13,6 +13,7 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
+  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -20,14 +21,14 @@ runTests = (options, cache) ->
       owner: -> ['hasOne', Owner]
     }, BASE_SCHEMA)
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owner: -> ['belongsTo', Owner]
     }, BASE_SCHEMA)
-    sync: SYNC(Reverse, cache)
+    sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
@@ -36,11 +37,12 @@ runTests = (options, cache) ->
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
-    sync: SYNC(Owner, cache)
+    sync: SYNC(Owner)
 
   describe "JSONUtils.renderTemplate (cache: #{cache})", ->
 
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       MODELS = {}
 
       queue = new Queue(1)

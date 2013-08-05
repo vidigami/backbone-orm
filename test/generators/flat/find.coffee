@@ -14,6 +14,8 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
+  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
+
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
   END_DATE = moment(START_DATE).add('milliseconds', (BASE_COUNT - 1) * DATE_INTERVAL_MS).toDate()
@@ -23,11 +25,12 @@ runTests = (options, cache) ->
     @schema: _.defaults({
       boolean: 'Boolean'
     }, BASE_SCHEMA)
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   describe "Model.find (cache: #{cache})", ->
 
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       queue = new Queue(1)
 
       queue.defer (callback) -> Flat.resetSchema(callback)
