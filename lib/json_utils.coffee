@@ -12,9 +12,9 @@ module.exports = class JSONUtils
   #     query = JSONUtils.parse(req.query)
   #
   @parse: (values) ->
-    if _.isArray(values)
-      return _.map(values, JSONUtils.parse)
-    else if _.isObject(values)
+    return values if _.isDate(values)
+    return _.map(values, JSONUtils.parse) if _.isArray(values)
+    if _.isObject(values)
       result = {}
       result[key] = JSONUtils.parse(value) for key, value of values
       return result

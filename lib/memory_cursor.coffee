@@ -188,8 +188,8 @@ module.exports = class MemoryCursor extends Cursor
 
     load_queue = new Queue(1)
 
-    $include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
-    for key in $include_keys
+    include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
+    for key in include_keys
       continue if @model_type.relationIsEmbedded(key)
       return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
 
