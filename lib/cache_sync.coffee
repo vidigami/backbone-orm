@@ -63,7 +63,7 @@ class CacheSync
     Cache.clear(@model_type.model_name)
     @wrapped_sync_fn('connect')
 
-  cache: -> Cache
+  cache: -> Cache.findOrCreateModelCache(@model_type.model_name)
 
 module.exports = (model_type, wrapped_sync_fn) ->
   sync = new CacheSync(model_type, wrapped_sync_fn)

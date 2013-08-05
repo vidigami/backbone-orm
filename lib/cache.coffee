@@ -58,8 +58,8 @@ class Cache
   get: (model_name, data) ->
     return undefined unless model_cache = @caches[model_name] # no caching
     return (model_cache.get(item.id) for item in data) if _.isArray(data)
-    model = model_cache.get(if data.id then data.id else data)
-    console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{if data.id then data.id else data}" if @verbose
+    model = model_cache.get(Utils.dataId(data))
+    console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
     return model
 
   getOrCreate: (model_name, model_type, data) ->
@@ -67,10 +67,13 @@ class Cache
     data = [data] unless many = _.isArray(data)
     models = []
     for item in data
-      model = (if model_cache then model_cache.get(if item.id then item.id else item) else null)
-      console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{if item.id then item.id else item}" if @verbose
-      model = Utils.dataToModel(model_type, item) unless model
-      model_cache.set(model.id, model) if model_cache
+      model = null
+      if model_cache and model = model_cache.get(Utils.dataId(item))
+        @updateModel(model, item)
+      else
+        model = Utils.dataToModel(model_type, item)
+      console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(item)}" if @verbose
+      model_cache.set(model.id, model) if model_cache and not model._orm_needs_load
       models.push(model)
     return if many then models else models[0]
 
@@ -82,10 +85,7 @@ class Cache
       continue unless (item and item.id)
       if cached_model = model_cache.get(item.id) # update existing
         cached_json = cached_model.toJSON()
-        if item instanceof Backbone.Model
-          cached_model.set(item_json) if (cached_model isnt item) and not _.isEqual(cached_json, item_json = item.toJSON())
-        else if _.isObject(item)
-          cached_model.set(item) if not _.isEqual(cached_json, item)
+
       model_cache.set(item.id, (cached_model or Utils.dataToModel(model_type, item)))
     return @
 
@@ -113,6 +113,14 @@ class Cache
     key = inflection.underscore(key)
     return key.toLowerCase() if key.indexOf('_') < 0
     return inflection.camelize(key)
+
+  updateModel: (model, data) ->
+    return if model is data
+    model_json = model.toJSON()
+    if data instanceof Backbone.Model
+      model.set(data_json) if not _.isEqual(model_json, data_json = data.toJSON())
+    else if _.isObject(data)
+      model.set(data) if not _.isEqual(model_json, data)
 
 # singleton
 module.exports = new Cache()

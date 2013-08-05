@@ -220,7 +220,6 @@ runTests = (options, cache, embed) ->
           test_model = json[0]
           assert.ok(!err, "No errors: #{err}")
           assert.ok(test_model, 'found model')
-
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           done()
 

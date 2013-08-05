@@ -5,6 +5,7 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './utils'
+Cache = require './cache'
 
 module.exports = (model_type) ->
 
@@ -113,16 +114,13 @@ module.exports = (model_type) ->
       model = new model_type(data)
       model.save {}, (err) ->
         return callback(err) if err
-        cache.add(model_type.model_name, model) if cache = model_type.cache()
+        cache.add(model.id, model) if cache = model_type.cache()
         callback(null, model)
 
   model_type.findOrNew = (data) ->
     throw 'findOrNew requires data' unless data
     return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
-
-    if cache = model_type.cache()
-      return model if model = cache.getOrCreate(model_type.model_name, model_type, data)
-    return Utils.dataToModel(model_type, data)
+    return Cache.getOrCreate(model_type.model_name, model_type, data)
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key
@@ -257,7 +255,7 @@ module.exports = (model_type) ->
     options.success = (model, resp, options) =>
       delete @_orm_save if --@_orm_save is 0
 
-      queue = new Queue(1) # TODO: in parallel?
+      queue = new Queue()
 
       # now save relations
       for key, relation of schema.relations
