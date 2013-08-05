@@ -8,7 +8,7 @@ inflection = require 'inflection'
 # @private
 module.exports = class Schema
   constructor: (@model_type) ->
-
+    @raw = _.result(@model_type, 'schema') or {}
     @fields ={}; @relations ={}; @ids_accessor = {}
     @_parse()
 
@@ -78,9 +78,7 @@ module.exports = class Schema
     return result
 
   _parse: ->
-    schema = _.result(@model_type, 'schema') or {}
-
-    for key, options of schema
+    for key, options of @raw
       options = @_parseFieldOptions(options)
 
       # a relationship (defered parse)
