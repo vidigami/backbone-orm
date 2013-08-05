@@ -12,7 +12,7 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
-  require('../../../lib/cache').configure(if cache then {max: BASE_COUNT} else null) # configure caching
+  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"

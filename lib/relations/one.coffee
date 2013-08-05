@@ -117,7 +117,7 @@ module.exports = class One
         if related_model = related_model = model.attributes[@key]
           query.id = related_model.id
       else
-        query[@foreign_key] = model.attributes.id
+        query[@foreign_key] = model.id
     else
       # json
       if @type is 'belongsTo'
@@ -143,11 +143,10 @@ module.exports = class One
     return true if @_isLoaded(model, key) # already loaded
 
     # nothing to load
-    return true unless model.attributes.id
+    return true unless model.id
 
     # not loaded but we have the id, create a model
-    if @type is 'belongsTo'
-      return true if not model.attributes[@key]
+    return true if not model.attributes[@key] if @type is 'belongsTo'
 
     # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>

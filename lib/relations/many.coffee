@@ -122,7 +122,7 @@ module.exports = class Many
 
       # TODO: optimize
       query = {$values: @foreign_key}
-      query[@foreign_key] = model.attributes.id
+      query[@foreign_key] = model.id
       @join_table.cursor(query).toJSON (err, json) =>
         return callback(err) if err
 
@@ -144,7 +144,7 @@ module.exports = class Many
         for related_id in added
           do (related_id) => queue.defer (callback) =>
             attributes = {}
-            attributes[@foreign_key] = model.attributes.id
+            attributes[@foreign_key] = model.id
             attributes[@reverse_relation.foreign_key] = related_id
             # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
             join = new @join_table(attributes)
@@ -244,7 +244,7 @@ module.exports = class Many
     # TODO: check which objects are already loaded in cache and ignore ids
 
     # fetch
-    (query = {})[@foreign_key] = model.attributes.id
+    (query = {})[@foreign_key] = model.id
     (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
