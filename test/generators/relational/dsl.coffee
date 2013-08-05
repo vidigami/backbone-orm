@@ -214,22 +214,26 @@ runTests = (options, cache) ->
           done()
 
     # owner: {$select: ['name', 'flat']}
-    it 'Handles rendering a related fields related field with $select', (done) ->
+    it 'Handles rendering a related fields with $select', (done) ->
       FIELD = 'name'
       RELATED_FIELD = 'owner'
-      SECOND_RELATED_FIELD = 'flat'
+      SECOND_RELATED_FIELD = 'reverses'
       TEMPLATE = {}
       TEMPLATE[RELATED_FIELD] = {$select: [FIELD, SECOND_RELATED_FIELD]}
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
+
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
           assertRelated = (model_json) ->
             assert.ok(model_json, 'Returned related model')
             assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
-            assert.ok(model_json.name, 'Related model has data')
+            if _.isArray(model_json)
+              assert.ok(item_json.name, 'Related model has data') for item_json in model_json
+            else
+              assert.ok(model_json.name, 'Related model has data')
 
           assertRelated(json[RELATED_FIELD])
           assertRelated(json[RELATED_FIELD][SECOND_RELATED_FIELD])
@@ -518,4 +522,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-  # runTests(options, true)
+  runTests(options, true)

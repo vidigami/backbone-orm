@@ -205,9 +205,6 @@ runTests = (options, cache, embed) ->
         done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation as "as" fields', (done) ->
-      # TODO: TO DISCUSS
-      return done() if embed
-
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -218,7 +215,7 @@ runTests = (options, cache, embed) ->
           assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
           if test_model.relationIsEmbedded('reverse_as')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
 
           reverse.get 'owner_as', (err, owner) ->
@@ -326,6 +323,6 @@ runTests = (options, cache, embed) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
-  # runTests(options, true, false)
+  runTests(options, true, false)
   runTests(options, false, true) if options.embed
-  # runTests(options, true, true) if options.embed
+  runTests(options, true, true) if options.embed
