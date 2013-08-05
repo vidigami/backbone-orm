@@ -164,14 +164,7 @@ module.exports = class Many
     return json[json_key] = collection.toJSON() if @embed
 
   # TODO: review for multiple instances, eg. same id
-  has: (model, key, data) ->
-    collection = @_ensureCollection(model)
-    if data instanceof Backbone.Model
-      current_related_model = collection.get(Utils.dataId(data))
-      throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt data
-      return !!current_related_model
-    else
-      return !!collection.get(Utils.dataId(data))
+  has: (model, key, data) -> return !!@_ensureCollection(model).get(Utils.dataId(data))
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)

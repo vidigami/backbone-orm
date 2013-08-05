@@ -276,9 +276,9 @@ runTests = (options, cache) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, 1, 'found one model')
 
-            for model in models
-              assert.ok(model.get('name') is NAME, 'matching name attribute')
-              done()
+              for model in models
+                assert.ok(model.get('name') is NAME, 'matching name attribute')
+                done()
 
 
     it 'Handles $lt and $lte with find not equal', (done) ->
@@ -343,9 +343,9 @@ runTests = (options, cache) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(models.length, 1, 'found one model')
 
-            for model in models
-              assert.ok(model.get('name') is NAME, 'matching name attribute')
-              done()
+              for model in models
+                assert.ok(model.get('name') is NAME, 'matching name attribute')
+                done()
 
     it 'Handles $gt and $gte with find not equal', (done) ->
       NAME = 'Bob'
