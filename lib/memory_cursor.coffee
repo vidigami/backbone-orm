@@ -205,23 +205,6 @@ module.exports = class MemoryCursor extends Cursor
 
     load_queue.await callback
 
-  selectResults: (json, callback) ->
-    # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
-    if @_cursor.$values
-      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-      if @_cursor.$values.length is 1
-        key = @_cursor.$values[0]
-        json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
-      else
-        json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
-    else if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      json = _.map(json, (item) => _.pick(item, $select))
-
-    else if @_cursor.$white_list
-      json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
-    return json
-
   ##########################################
   # Internal
   ##########################################
