@@ -46,14 +46,7 @@ runTests = (options, cache) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) ->
-        destroy_queue = new Queue()
-
-        destroy_queue.defer (callback) -> Flat.destroy callback
-        destroy_queue.defer (callback) -> Reverse.destroy callback
-        destroy_queue.defer (callback) -> Owner.destroy callback
-
-        destroy_queue.await callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
@@ -135,6 +128,7 @@ runTests = (options, cache) ->
 
     # DSL example
     # {
+    #   $select:       'id'
     #   $select:       ['id', 'taken_at', 'rotation', 'width', 'height', 'image_id']
     #   name:          'source_file_name'
     #   album:         {$select: ['id', 'name']}
@@ -145,6 +139,20 @@ runTests = (options, cache) ->
     #   can_delete:    (photo, options, callback) ->
     # }
     #
+
+    # $select: 'id'
+    it 'Handles rendering $select for single string with dsl', (done) ->
+      FIELD = 'id'
+      TEMPLATE =
+        $select: FIELD
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
+          assert.ok(json, 'Returned json')
+          assert.equal(test_model.get(FIELD), json[FIELD], "Returned the correct value:\nExpected: #{test_model.get(FIELD)}, Actual: #{json[FIELD]}")
+          assert.ok(!json.updated_at, 'Does not have an excluded field')
+          done()
 
     # $select: ['created_at', 'name']
     it 'Handles rendering $select with dsl', (done) ->
@@ -206,22 +214,26 @@ runTests = (options, cache) ->
           done()
 
     # owner: {$select: ['name', 'flat']}
-    it 'Handles rendering a related fields related field with $select', (done) ->
+    it 'Handles rendering a related fields with $select', (done) ->
       FIELD = 'name'
       RELATED_FIELD = 'owner'
-      SECOND_RELATED_FIELD = 'flat'
+      SECOND_RELATED_FIELD = 'reverses'
       TEMPLATE = {}
       TEMPLATE[RELATED_FIELD] = {$select: [FIELD, SECOND_RELATED_FIELD]}
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
+
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
           assertRelated = (model_json) ->
             assert.ok(model_json, 'Returned related model')
             assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
-            assert.ok(model_json.name, 'Related model has data')
+            if _.isArray(model_json)
+              assert.ok(item_json.name, 'Related model has data') for item_json in model_json
+            else
+              assert.ok(model_json.name, 'Related model has data')
 
           assertRelated(json[RELATED_FIELD])
           assertRelated(json[RELATED_FIELD][SECOND_RELATED_FIELD])
@@ -442,7 +454,7 @@ runTests = (options, cache) ->
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
-    #todo
+    # TODO
     # a_flat: {key: 'flat', template: (model, options, callback) -> }
     it 'Handles rendering a related models template function in the dsl', (done) ->
       FIELD = 'flat'
@@ -510,4 +522,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-#  runTests(options, true)
+  # runTests(options, true)

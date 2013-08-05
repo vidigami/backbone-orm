@@ -44,14 +44,7 @@ runTests = (options, cache, embed) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) ->
-        destroy_queue = new Queue()
-
-        destroy_queue.defer (callback) -> Flat.destroy callback
-        destroy_queue.defer (callback) -> Reverse.destroy callback
-        destroy_queue.defer (callback) -> Owner.destroy callback
-
-        destroy_queue.await callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
@@ -193,13 +186,64 @@ runTests = (options, cache, embed) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-#    it 'Can include related (one-way hasMany) models', (done) ->
-#      Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, "found model")
-#        assert.ok(test_model.flats, "Has related flats")
-#        assert.ok(test_model.flats.length, "Has related flats")
-#        done()
+    it 'Can include related (one-way hasMany) models', (done) ->
+      Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.flats, 'Has related flats')
+        assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
+        done()
+
+    it 'Can include multiple related (one-way hasMany) models', (done) ->
+      Owner.cursor({$one: true}).include('flats', 'reverses').toJSON (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        assert.ok(test_model.flats, 'Has related flats')
+        assert.ok(test_model.reverses, 'Has related reverses')
+        assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
+        assert.equal(test_model.reverses.length, 2*BASE_COUNT, "Has the correct number of related reverses \nExpected: #{test_model.reverses.length}\nActual: #{test_model.reverses.length}")
+
+        for flat in test_model.flats
+          assert.equal(test_model.id, flat.owner_id, "\nExpected: #{test_model.id}\nActual: #{flat.owner_id}")
+        for reverse in test_model.reverses
+          assert.equal(test_model.id, reverse.owner_id, "\nExpected: #{test_model.id}\nActual: #{reverse.owner_id}")
+        done()
+
+    it 'Can query on related (one-way hasMany) models', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+        Owner.cursor({'reverses.name': reverse.get('name')}).toJSON (err, json) ->
+          test_model = json[0]
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(test_model, 'found model')
+
+          assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
+          done()
+
+    it 'Can query on related (one-way hasMany) models with included relations', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+
+        Owner.cursor({'reverses.name': reverse.get('name')}).include('flats', 'reverses').toJSON (err, json) ->
+          test_model = json[0]
+
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(test_model, 'found model')
+
+          assert.ok(test_model.flats, 'Has related flats')
+          assert.ok(test_model.reverses, 'Has related reverses')
+
+          assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
+          assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
+
+          for flat in test_model.flats
+            assert.equal(test_model.id, flat.owner_id, "\nExpected: #{test_model.id}\nActual: #{flat.owner_id}")
+          for reverse in test_model.reverses
+            assert.equal(test_model.id, reverse.owner_id, "\nExpected: #{test_model.id}\nActual: #{reverse.owner_id}")
+          done()
 
 # TODO: explain required set up
 

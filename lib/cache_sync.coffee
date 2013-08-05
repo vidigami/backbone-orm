@@ -53,6 +53,10 @@ class CacheSync
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
+  resetSchema: (options, callback) ->
+    Cache.clear(@model_type.model_name)
+    @wrapped_sync_fn('resetSchema', options, callback)
+
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 
   destroy: (query, callback) ->

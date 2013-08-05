@@ -35,13 +35,7 @@ runTests = (options, cache, embed) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) ->
-        destroy_queue = new Queue()
-
-        destroy_queue.defer (callback) -> Reverse.destroy callback
-        destroy_queue.defer (callback) -> Owner.destroy callback
-
-        destroy_queue.await callback
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->

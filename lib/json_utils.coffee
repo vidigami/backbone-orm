@@ -12,9 +12,9 @@ module.exports = class JSONUtils
   #     query = JSONUtils.parse(req.query)
   #
   @parse: (values) ->
-    if _.isArray(values)
-      return _.map(values, JSONUtils.parse)
-    else if _.isObject(values)
+    return values if _.isDate(values)
+    return _.map(values, JSONUtils.parse) if _.isArray(values)
+    if _.isObject(values)
       result = {}
       result[key] = JSONUtils.parse(value) for key, value of values
       return result
@@ -28,6 +28,22 @@ module.exports = class JSONUtils
         try
           return JSONUtils.parse(values) if values = JSON.parse(values)
         catch err
+    return values
+
+  # Serialze json to a toQuery format.
+  #
+  # @example
+  #   query = JSONUtils.toQuery(json)
+  #
+  @toQuery: (values) ->
+    if _.isArray(values)
+      return JSON.stringify(values)
+    else if _.isObject(values)
+      result = {}
+      result[key] = JSON.stringify(value) for key, value of values
+      return result
+    else if values.toJSON
+      return values.toJSON()
     return values
 
   # Render a template that can be a key, keys, DSL object, or function.
@@ -134,7 +150,10 @@ module.exports = class JSONUtils
               relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
         else if key is '$select'
-          queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
+          if _.isString(args)
+            queue.defer (callback) -> JSONUtils.renderKey model, args, options, (err, json) -> result[args] = json; callback(err)
+          else
+            queue.defer (callback) -> JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
 
         # full_name:      'name'
         else if _.isString(args)
@@ -188,7 +207,7 @@ module.exports = class JSONUtils
       # Related models need to be converted to json
       if model.relation(key)
         if _.isArray(value)
-          #todo: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
+          # TODO: check bug, incorrect models are being returned, they contain themselves? {0:model, 1: model, <correct model fields are here>}
           value = (val.toJSON() for val in value)
         else if value and value.toJSON
           value = value.toJSON()

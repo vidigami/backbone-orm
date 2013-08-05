@@ -43,7 +43,7 @@ module.exports = class Many
       if @reverse_relation.join_table
         @join_table = @reverse_relation.join_table
       else
-        @join_table = Utils.createJoinTableModel(@, @reverse_relation)
+        @join_table = Utils.createJoinTableModel(@)
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 
@@ -164,14 +164,7 @@ module.exports = class Many
     return json[json_key] = collection.toJSON() if @embed
 
   # TODO: review for multiple instances, eg. same id
-  has: (model, key, data) ->
-    collection = @_ensureCollection(model)
-    if data instanceof Backbone.Model
-      current_related_model = collection.get(Utils.dataId(data))
-      throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt data
-      return !!current_related_model
-    else
-      return !!collection.get(Utils.dataId(data))
+  has: (model, key, data) -> return !!@_ensureCollection(model).get(Utils.dataId(data))
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
@@ -187,11 +180,15 @@ module.exports = class Many
     return unless current_related_model
     collection.remove(related_model.id)
 
-    # TODO: check which objects are already loaded in cache and ignore ids
-  batchLoadRelated: (models_json, callback) ->
-    query = {}
-    query[@foreign_key] = {$in: (json.id for json in models_json)}
-    @reverse_model_type.cursor(query).toJSON callback
+  cursor: (model, key, query) ->
+    json = if model instanceof Backbone.Model then model.attributes else model
+    (query = _.clone(query or {}))[@foreign_key] = json.id
+    (query.$values or= []).push('id') if key is @ids_accessor
+    return (@join_table or @reverse_model_type).cursor(query)
+
+  ####################################
+  # Internal
+  ####################################
 
   # TODO: ensure initialize is called only once and only from initializeModel
   _ensureCollection: (model) -> @_bindBacklinks(model)
@@ -239,64 +236,16 @@ module.exports = class Many
     return false unless collection._orm_loaded
     return @_checkLoaded(collection.models)
 
-  # TODO: check which objects are already loaded in cache and ignore ids
-  _fetchPlaceholders: (model, key, callback) ->
-    # nothing to load
-    return callback(null, []) unless model.attributes.id
-
-    if @reverse_relation.type is 'hasMany'
-      collection = @_ensureCollection(model)
-      return callback(null, collection.models) if collection._orm_loaded
-
-      query = {$values: @reverse_relation.foreign_key}
-      query[@foreign_key] = model.attributes.id
-      @join_table.cursor(query).toJSON (err, json) =>
-        return callback(err) if err
-
-        collection._orm_loaded = true
-        return callback(err) if err
-        for related_id in json
-          # skip existing
-          continue if related_model = collection.get(related_id)
-          collection.add(related_model = @reverse_model_type.findOrNew(related_id))
-
-        callback(null, collection.models)
-    else
-      @_loadModels(model, key, callback)
-
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
     return true if @_isLoaded(model, key) # already loaded
-
-    # load placeholders with ids
-    @_fetchPlaceholders model, key, (err, related_models) =>
-      return callback(err) if err
-      return callback(null, []) unless related_models.length # no relations
-
-      return callback(null, related_models) if key is @ids_accessor # ids only, no need to fetch the models
-      @_loadModels(model, key, callback)
-
-    return false
-
-  _loadModels: (model, key, callback) ->
     collection = @_ensureCollection(model)
 
     # TODO: check which objects are already loaded in cache and ignore ids
-#    load_ids = []
-#    for related_model in collection.models
-#      continue unless related_model._orm_needs_load
-#      throw new Error "Missing id for load" unless id = related_model.id
-#      load_ids.push(id)
-
-    # loaded
-#    unless load_ids.length
-#      collection._orm_loaded = true
-#      return callback(null, collection.models)
 
     # fetch
-    query = {}
-    query[@foreign_key] = model.attributes.id
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
+    (query = {})[@foreign_key] = model.attributes.id
+    (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
       # process the found models
@@ -305,7 +254,7 @@ module.exports = class Many
 
         # update existing
         if related_model = collection.get(model_json.id)
-          related_model.set(json)
+          related_model.set(model_json)
           delete related_model._orm_needs_load
 
         # create new
@@ -314,10 +263,4 @@ module.exports = class Many
 
       cache.update(@reverse_model_type.model_name, collection.models) if cache = @reverse_model_type.cache()
       callback(null, collection.models)
-
-  cursor: (model, key, query) ->
-    json = if model instanceof Backbone.Model then model.attributes else model
-    query or= {}
-    query[@foreign_key] = json.id
-    (query.$values or= []).push('id') if key is @ids_accessor
-    return @reverse_model_type.cursor(query)
+    return false

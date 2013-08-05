@@ -64,21 +64,22 @@ module.exports = class Utils
       return data.id
     return data
 
-  # @private
-  @createJoinTableModel: (relation1, relation2) ->
-    model_name1 = inflection.pluralize(inflection.underscore(relation1.model_type.model_name))
-    model_name2 = inflection.pluralize(inflection.underscore(relation2.model_type.model_name))
-    table = if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+  @joinTableName: (relation) ->
+    model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
+    model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))
+    return if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
 
+  # @private
+  @createJoinTableModel: (relation) ->
     schema = {}
-    schema[relation1.foreign_key] = ['Integer', indexed: true]
-    schema[relation2.foreign_key] = ['Integer', indexed: true]
+    schema[relation.foreign_key] = ['Integer', indexed: true]
+    schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
 
     # @private
     class JoinTable extends Backbone.Model
-      urlRoot: "#{Utils.parseUrl(_.result(relation1.model_type.prototype, 'url')).database_path}/#{table}"
+      urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{Utils.joinTableName(relation)}"
       @schema: schema
-      sync: relation1.model_type.createSync(JoinTable)
+      sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable
 
@@ -122,6 +123,28 @@ module.exports = class Utils
       return if JSON.stringify(model[field]) < JSON.stringify(other_model[field]) then 1 else -1
     else
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
+
+  ##############################
+  # Schema
+  ##############################
+  @resetSchemas: (model_types, options, callback) ->
+    [options, callback] = [{}, options] if arguments.length is 2
+
+    # ensure all models all initialized (reverse relationships may be initialized in a dependent model)
+    model_type.schema() for model_type in model_types
+
+    failed_schemas = []
+    queue = new Queue(1)
+    for model_type in model_types
+      do (model_type) -> queue.defer (callback) -> model_type.resetSchema options, (err) ->
+        if err
+          failed_schemas.push(model_type.model_name)
+          console.log "Error when dropping schema for #{model_type.model_name}. #{err}"
+        callback()
+    queue.await (err) ->
+      console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
+      return callback(new Error("Failed to migrate schemas: #{failed_schemas.join(', ')}")) if failed_schemas.length
+      callback()
 
   ##############################
   # Batch

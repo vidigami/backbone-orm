@@ -12,11 +12,13 @@ runTests = (options, cache, embed) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 2
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    @schema: _.defaults({
+      owner: -> ['hasOne', Owner]
+    }, BASE_SCHEMA)
     sync: SYNC(Flat, cache)
 
   class Reverse extends Backbone.Model
@@ -43,14 +45,7 @@ runTests = (options, cache, embed) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) ->
-        destroy_queue = new Queue()
-
-        destroy_queue.defer (callback) -> Flat.destroy callback
-        destroy_queue.defer (callback) -> Reverse.destroy callback
-        destroy_queue.defer (callback) -> Owner.destroy callback
-
-        destroy_queue.await callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
@@ -220,7 +215,7 @@ runTests = (options, cache, embed) ->
           assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
           if test_model.relationIsEmbedded('reverse_as')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
 
           reverse.get 'owner_as', (err, owner) ->
@@ -234,22 +229,93 @@ runTests = (options, cache, embed) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-#    it 'Can include a related (belongsTo) model', (done) ->
-#      Owner.cursor({$one: true}).include('flat').toJSON (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, "found model")
-#        assert.ok(test_model.flat, "Has a related flat")
-#        assert.ok(test_model.flat.id, "Related model has an id")
-#        done()
-#
-#    it 'Can include a related (hasOne) model', (done) ->
-#      Owner.cursor({$one: true}).include('reverse').toJSON (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, "found model")
-#        assert.ok(test_model.reverse, "Has a related reverse")
-#        assert.ok(test_model.reverse.id, "Related model has an id")
-#        done()
+    it 'Can include a related (belongsTo) model', (done) ->
+      Owner.cursor({$one: true}).include('flat').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, 'found model')
+        assert.ok(json.flat, "Has a related flat")
+        assert.ok(json.flat.id, "Related model has an id")
 
+        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+          assert.equal(json.flat_id, json.flat.id, "\nRelated model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+        done()
+
+    it 'Can include a related (hasOne) model', (done) ->
+      Owner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, 'found model')
+        assert.ok(json.reverse, "Has a related reverse")
+        assert.ok(json.reverse.id, "Related model has an id")
+        assert.equal(json.id, json.reverse.owner_id, "\nRelated model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+        done()
+
+    it 'Can include multiple related models', (done) ->
+      Owner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(json, 'found model')
+        assert.ok(json.reverse, "Has a related reverse")
+        assert.ok(json.reverse.id, "Related model has an id")
+        assert.ok(json.flat, "Has a related flat")
+        assert.ok(json.flat.id, "Included model has an id")
+
+        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+          assert.equal(json.flat_id, json.flat.id, "\nIncluded model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+        assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+        done()
+
+    it 'Can query on a related (belongsTo) model propery', (done) ->
+      Flat.findOne (err, flat) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(flat, 'found model')
+
+        Owner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found model')
+          unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+            assert.equal(flat.id, owner.flat_id, "\nRelated model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat_id}")
+          done()
+
+    it 'Can query on a related (belongsTo) model property when the relation is included', (done) ->
+      Flat.findOne (err, flat) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(flat, 'found model')
+        Owner.cursor({$one: true, 'flat.name': flat.get('name')}).include('flat').toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found model')
+          assert.ok(owner.flat, "Has a related flat")
+          assert.ok(owner.flat.id, "Included model has an id")
+          assert.equal(flat.id, owner.flat.id, "\nIncluded model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat.id}")
+          assert.equal(flat.get('name'), owner.flat.name, "\nIncluded model has the correct name: Expected: #{flat.get('name')}\nActual: #{owner.flat.name}")
+          done()
+
+    it 'Can query on a related (hasOne) model', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+        Owner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found model')
+
+          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
+          done()
+
+    it 'Can query on a related (hasOne) model property when the relation is included', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+        Owner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(json, "found json")
+          assert.equal(json.length, 1, "json has the correct number or results")
+          owner = json[0]
+          assert.ok(owner.reverse, "Has a related reverse")
+          assert.ok(owner.reverse.id, "Related model has an id")
+
+          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
+          assert.equal(reverse.get('name'), owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.get('name')}\nActual: #{owner.reverse.name}")
+          done()
 
 # TODO: explain required set up
 
@@ -257,6 +323,6 @@ runTests = (options, cache, embed) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
-  runTests(options, true, false)
+  # runTests(options, true, false)
   runTests(options, false, true) if options.embed
   runTests(options, true, true) if options.embed

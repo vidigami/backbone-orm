@@ -49,15 +49,20 @@ module.exports = class Cursor
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
     return @
 
-  ids: ->
-    @_cursor.$values = ['id']
-    return @
+  ids: -> @_cursor.$values = ['id']; return @
 
   ##############################################
   # Execution of the Query
   ##############################################
-
-  count: (callback) -> return @toJSON(callback, true)
+  count: (callback) -> @execWithCursorQuery('$count', callback)
+  exists: (callback) -> @execWithCursorQuery('$count', callback)
+  execWithCursorQuery: (key, callback) ->
+    value = @_cursor[key]
+    @_cursor[key] = true
+    @toJSON (err, json) =>
+      if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
+      callback(err, json)
+  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
     @toJSON (err, json) =>
@@ -68,3 +73,23 @@ module.exports = class Cursor
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
+
+  ##############################################
+  # Helpers
+  ##############################################
+  selectResults: (json, callback) ->
+    # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
+    if @_cursor.$values
+      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
+      if @_cursor.$values.length is 1
+        key = @_cursor.$values[0]
+        json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
+      else
+        json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+    else if @_cursor.$select
+      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      json = _.map(json, (item) => _.pick(item, $select))
+
+    else if @_cursor.$white_list
+      json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+    return json

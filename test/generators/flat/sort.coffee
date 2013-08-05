@@ -12,7 +12,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  MODELS_JSON = null
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -24,17 +23,13 @@ runTests = (options, cache) ->
     beforeEach (done) ->
       queue = new Queue(1)
 
-      queue.defer (callback) -> Flat.destroy callback
+      queue.defer (callback) -> Flat.resetSchema(callback)
 
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 

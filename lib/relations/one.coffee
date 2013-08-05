@@ -110,14 +110,27 @@ module.exports = class One
     return data is current_related_model if not current_related_model = model.attributes[@key]
     return current_related_model.id is Utils.dataId(data)
 
-  # TODO: check which objects are already loaded in cache and ignore ids
-  batchLoadRelated: (models_json, callback) ->
-    query = {}
-    if @type is 'belongsTo'
-      query.id = {$in: (json[@foreign_key] for json in models_json)}
+  cursor: (model, key, query) ->
+    query = _.extend({$one:true}, query or {})
+    if model instanceof Backbone.Model
+      if @type is 'belongsTo'
+        if related_model = related_model = model.attributes[@key]
+          query.id = related_model.id
+      else
+        query[@foreign_key] = model.attributes.id
     else
-      query[@foreign_key] = {$in: (json.id for json in models_json)}
-    @reverse_model_type.cursor(query).toJSON callback
+      # json
+      if @type is 'belongsTo'
+        query.id = model[@foreign_key]
+      else
+        query[@foreign_key] = model.id
+
+    query.$values = ['id'] if key is @ids_accessor
+    return @reverse_model_type.cursor(query)
+
+  ####################################
+  # Internal
+  ####################################
 
   # TODO: optimize so don't need to check each time
   _isLoaded: (model, key) ->
@@ -162,24 +175,3 @@ module.exports = class One
 
     model.on("change:#{@key}", model._orm_bindings.change)
     return model
-
-  cursor: (model, key, query) ->
-    return @reverse_model_type.cursor(@query(model, key, query))
-
-  query: (model, key, _query) ->
-    query = _.extend(_query or {}, {$one:true})
-    if model instanceof Backbone.Model
-      if @type is 'belongsTo'
-        if related_model = related_model = model.attributes[@key]
-          query.id = related_model.id
-      else
-        query[@foreign_key] = model.attributes.id
-    else
-      # json
-      if @type is 'belongsTo'
-        query.id = model[@foreign_key]
-      else
-        query[@foreign_key] = model.id
-
-    query.$values = ['id'] if key is @ids_accessor
-    return query

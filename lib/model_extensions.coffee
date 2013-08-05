@@ -10,11 +10,17 @@ module.exports = (model_type) ->
 
   # Extensions to the base Backbone.Model class
   #
+  # @method .resetSchema(options, callback)
+  #   Create the database collections or tables while deleting all existing data.
+  #
   # @method .cursor(query={})
   #   Create a cursor for iterating over models or JSON.
   #
   # @method .destroy(query, callback)
   #   Destroy a batch of models by query.
+  #
+  # @method .exists(query, callback)
+  #   Helper method to check if at least one model exists that matches the query (or with no query, if there is at least one model).
   #
   # @method .count(query, callback)
   #   Helper method for counting Models matching a query.
@@ -63,6 +69,10 @@ module.exports = (model_type) ->
   # Backbone ORM - Class Extensions
   ###################################
 
+  model_type.resetSchema = (options, callback) ->
+    [options, callback] = [{}, options] if arguments.length is 1
+    model_type::sync('resetSchema', options, callback)
+
   model_type.cursor = (query={}) -> model_type::sync('cursor', query)
 
   model_type.destroy = (query, callback) ->
@@ -73,6 +83,10 @@ module.exports = (model_type) ->
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
+
+  model_type.exists = (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+    model_type::sync('cursor', query).exists(callback)
 
   model_type.count = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
@@ -86,7 +100,7 @@ module.exports = (model_type) ->
 
   model_type.findOne = (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
-    query.$one = true
+    query = if _.isObject(query) then _.extend({$one: true}, query) else {id: query, $one: true}
     model_type::sync('cursor', query).toModels(callback)
 
   model_type.findOrCreate = (data, callback) ->
@@ -211,22 +225,17 @@ module.exports = (model_type) ->
     json = {}
     attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
     for key, value of attributes
-      if value instanceof Backbone.Collection
-        if not options.relations and schema and (relation = schema.relation(key))
-          relation.appendJSON(json, @, key)
-        else
-          json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
+      if schema and (relation = schema.relation(key))
+        relation.appendJSON(json, @, key)
+
+      else if value instanceof Backbone.Collection
+        json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
 
       else if value instanceof Backbone.Model
-        if not options.relations and schema and (relation = schema.relation(key))
-          relation.appendJSON(json, @, key)
-        else
-          json[key] = value.toJSON(options)
+        json[key] = value.toJSON(options)
 
       else
-        #todo: ensure that relation fields are not null when given to sequelize
-        unless schema and (relation = schema.relation(key))
-          json[key] = value
+        json[key] = value
 
     delete @_orm_json if --@_orm_json is 0
     return json

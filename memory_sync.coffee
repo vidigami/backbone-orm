@@ -20,7 +20,7 @@ Utils = require './lib/utils'
 class MemorySync
   # @private
   constructor: (@model_type) ->
-    @store = {}
+    @model_type.store = @store = {}
 
     unless @model_type.model_name # model_name will come from the url
       throw new Error('Missing url for model') unless url = _.result(@model_type.prototype, 'url')
@@ -59,17 +59,19 @@ class MemorySync
   ###################################
 
   # @private
+  resetSchema: (options, callback) -> @store = {}; callback()
+
+  # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    if (keys = _.keys(query)).length
-      for id, model_json of @store
-        delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
-    else
-      @store = {}
-    return callback()
+    return @resetSchema({}, callback) unless (keys = _.keys(query)).length
 
+    # destroy specific records
+    for id, model_json of @store
+      delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
+    callback()
 
 module.exports = (model_type, cache) ->
   sync = new MemorySync(model_type)

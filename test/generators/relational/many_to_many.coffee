@@ -35,13 +35,7 @@ runTests = (options, cache, embed) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) ->
-        destroy_queue = new Queue()
-
-        destroy_queue.defer (callback) -> Reverse.destroy callback
-        destroy_queue.defer (callback) -> Owner.destroy callback
-
-        destroy_queue.await callback
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
@@ -101,6 +95,37 @@ runTests = (options, cache, embed) ->
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
+
+    it 'Can include related (two-way hasMany) models', (done) ->
+      Owner.cursor({$one: true}).include('reverses').toJSON (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        assert.ok(test_model.reverses, 'Has related reverses')
+        assert.equal(test_model.reverses.length, 2*BASE_COUNT, "Has the correct number of related reverses \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.reverses.length}")
+        done()
+
+    it 'Can query on related (two-way hasMany) models', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+        Owner.cursor({'reverses.name': reverse.get('name')}).toJSON (err, json) ->
+          test_model = json[0]
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(test_model, 'found model')
+          assert.equal(json.length, 1, "Found the correct number of owners \nExpected: #{1}\nActual: #{json.length}")
+          done()
+
+    it 'Can query on related (two-way hasMany) models with included relations', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found model')
+        Owner.cursor({'reverses.name': reverse.get('name')}).include('reverses').toJSON (err, json) ->
+          test_model = json[0]
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(test_model, 'found model')
+          assert.ok(test_model.reverses, 'Has related reverses')
+          assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
+          done()
 
 # TODO: explain required set up
 

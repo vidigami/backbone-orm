@@ -3,6 +3,7 @@ assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
+moment = require 'moment'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
@@ -12,7 +13,6 @@ runTests = (options, cache) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
-  MODELS_JSON = null
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -24,17 +24,13 @@ runTests = (options, cache) ->
     beforeEach (done) ->
       queue = new Queue(1)
 
-      queue.defer (callback) -> Flat.destroy callback
+      queue.defer (callback) -> Flat.resetSchema(callback)
 
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
-      }, (err, models) ->
-        return callback(err) if err
-        MODELS_JSON = _.map(models, (test) -> test.toJSON())
-        callback()
-      )
+      }, callback)
 
       queue.await done
 
@@ -42,7 +38,7 @@ runTests = (options, cache) ->
       it 'Handles a count query', (done) ->
         Flat.count (err, count) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(count, MODELS_JSON.length, "Expected: #{count}. Actual: #{MODELS_JSON.length}")
+          assert.equal(count, BASE_COUNT, "Expected: #{count}. Actual: #{BASE_COUNT}")
           done()
 
       it 'counts by query', (done) ->
@@ -102,8 +98,37 @@ runTests = (options, cache) ->
       it 'Handles an all query', (done) ->
         Flat.all (err, models) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(models.length, MODELS_JSON.length, 'counted expected number of albums')
+          assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
           done()
+
+    describe 'exists', ->
+      it 'Handles an exist with no query', (done) ->
+        Flat.exists (err, exists) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(exists, 'something exists')
+          done()
+
+      it 'Handles an exist query', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'found a model')
+
+          Flat.exists {name: model.get('name')}, (err, exists) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(exists, 'the model exists by name')
+
+            Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!exists, 'the model does not exist by bad name')
+
+              Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(exists, 'the model exists by created_at')
+
+                Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(!exists, 'the model does not exist by bad created_at')
+                  done()
 
 # TODO: explain required set up
 
