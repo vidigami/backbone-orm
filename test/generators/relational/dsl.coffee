@@ -522,4 +522,4 @@ runTests = (options, cache) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false)
-  # runTests(options, true)
+  runTests(options, true)

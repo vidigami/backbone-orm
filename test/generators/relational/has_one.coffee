@@ -323,6 +323,6 @@ runTests = (options, cache, embed) ->
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
   runTests(options, false, false)
-  # runTests(options, true, false)
+  runTests(options, true, false)
   runTests(options, false, true) if options.embed
   runTests(options, true, true) if options.embed
