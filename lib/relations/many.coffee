@@ -272,7 +272,6 @@ module.exports = class Many
     @_fetchPlaceholders model, key, (err, related_models) =>
       return callback(err) if err
       return callback(null, []) unless related_models.length # no relations
-
       return callback(null, related_models) if key is @ids_accessor # ids only, no need to fetch the models
       @_loadModels(model, key, callback)
 
@@ -295,7 +294,7 @@ module.exports = class Many
 
         # update existing
         if related_model = collection.get(model_json.id)
-          related_model.set(json)
+          related_model.set(model_json)
           delete related_model._orm_needs_load
 
         # create new
