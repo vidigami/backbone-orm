@@ -64,6 +64,16 @@ module.exports = class Utils
       return data.id
     return data
 
+  # @private
+  @dataToModel: (model_type, data) ->
+    return data if data instanceof Backbone.Model
+    return data.models if data instanceof Backbone.Collection
+    return (Utils.dataToModel(model_type, item) for item in data) if _.isArray(data)
+    return new model_type(model_type::parse(data)) if _.isObject(data)
+    related_model = new model_type({id: data})
+    related_model._orm_needs_load = true
+    return related_model
+
   @joinTableURL: (relation) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
     model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))

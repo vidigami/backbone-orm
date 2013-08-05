@@ -121,13 +121,8 @@ module.exports = (model_type) ->
     return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
 
     if cache = model_type.cache()
-      return cache.findOrNew(model_type.model_name, model_type, data)
-    else
-      return (model_type.findOrNew(item) for item in data) if _.isArray(data)
-      return new model_type(model_type::parse(data)) if _.isObject(data)
-      related_model = new model_type({id: data})
-      related_model._orm_needs_load = true
-      return related_model
+      return model if model = cache.getOrCreate(model_type.model_name, model_type, data)
+    return Utils.dataToModel(model_type, data)
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key

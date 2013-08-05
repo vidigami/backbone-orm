@@ -20,32 +20,24 @@ class CacheSync
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
-    if model.models
-      # cached_models = Cache.findAll(@model_type.model_name)
-    else
-      if (cached_model = Cache.find(@model_type.model_name, model.attributes.id)) # use cached
-        # console.log "CACHE: read found #{@model_type.model_name} id: #{cached_model.id}"
-        return options.success(cached_model.toJSON())
+    if (cached_model = Cache.get(@model_type.model_name, model.attributes.id)) # use cached
+      return options.success(cached_model.toJSON())
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.findOrNew(@model_type.model_name, @model_type, json) # add to the cache
+      Cache.getOrCreate(@model_type.model_name, @model_type, json) # add to the cache
       options.success(json)
 
   update: (model, options) ->
-    if (cached_model = Cache.find(@model_type.model_name, model.attributes.id))
-      # console.log "CACHE: update found #{@model_type.model_name} id: #{cached_model.id}"
-      cached_model.set(model.toJSON, options) if cached_model isnt model # update cache
-
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
+      Cache.set(@model_type.model_name, json)
       options.success(json)
 
   delete: (model, options) ->
-    Cache.remove(@model_type.model_name, model.id) # remove from the cache
-
+    Cache.del(@model_type.model_name, model.id) # remove from the cache
     @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
@@ -54,7 +46,7 @@ class CacheSync
   # Backbone ORM - Class Extensions
   ###################################
   resetSchema: (options, callback) ->
-    Cache.clear(@model_type.model_name)
+    Cache.reset(@model_type.model_name)
     @wrapped_sync_fn('resetSchema', options, callback)
 
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
