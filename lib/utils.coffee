@@ -74,7 +74,7 @@ module.exports = class Utils
     return if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
     if _.isObject(data)
-      model.set(data) unless _.isEqual(model.toJSON(), data)
+      model.set(data)
       delete model._orm_needs_load
     return model
 

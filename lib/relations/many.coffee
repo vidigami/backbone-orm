@@ -228,14 +228,14 @@ module.exports = class Many
     return false for related_model in models when related_model._orm_needs_load
     return true
 
-  _isLoaded: (model, key) ->
+  _isLoaded: (model) ->
     collection = @_ensureCollection(model)
     return false unless collection._orm_loaded
     return @_checkLoaded(collection.models)
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-    return true if @_isLoaded(model, key) # already loaded
+    return true if @_isLoaded(model) # already loaded
     collection = @_ensureCollection(model)
 
     # TODO: check which objects are already loaded in cache and ignore ids

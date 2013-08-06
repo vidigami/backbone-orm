@@ -126,24 +126,18 @@ module.exports = class One
   ####################################
 
   # TODO: optimize so don't need to check each time
-  _isLoaded: (model, key) ->
+  _isLoaded: (model) ->
     related_model = model.attributes[@key]
     return !!(related_model and not related_model._orm_needs_load)
 
   # TODO: optimize so don't need to check each time
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchRelated: (model, key, callback) ->
-    return true if @_isLoaded(model, key) # already loaded
+    return true if @_isLoaded(model) or not model.id # already loaded or not loadable
 
-    # nothing to load
-    return true unless model.id
-
-    # not loaded but we have the id, create a model
-    return true if not model.attributes[@key] if @type is 'belongsTo'
-
-    # Will only load ids if key is @ids_accessor
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
+
       model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
       callback(null, related_model)
 
