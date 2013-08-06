@@ -13,20 +13,8 @@ module.exports = class One
     @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
-    if @as
-      @reverse_relation = @reverse_model_type.relation(@as)
-#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
-      if @reverse_relation
-        @reverse_relation.foreign_key = @foreign_key
-        @reverse_relation.reverse_relation = @
-    else
-      # May have been set already if `as` was specified on the reverse relation
-      @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
-
+    @reverse_relation = Utils.findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
-
-    # check for reverse since they need to store the foreign key
-    @reverse_relation = Utils.generateBelongsTo(@reverse_model_type, @model_type) if not @reverse_relation and @type is 'hasOne'
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 

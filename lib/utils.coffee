@@ -48,6 +48,26 @@ module.exports = class Utils
   # Relational
   ##############################
   # @private
+  @findOrGenerateReverseRelation: (relation) ->
+    model_type = relation.model_type
+    reverse_model_type = relation.reverse_model_type
+
+    if relation.as
+      reverse_relation = reverse_model_type.relation(relation.as)
+#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
+      if reverse_relation
+        reverse_relation.foreign_key = relation.foreign_key
+        reverse_relation.reverse_relation = relation
+    else
+      # May have been set already if `as` was specified on the reverse relation
+      reverse_relation = Utils.reverseRelation(reverse_model_type, model_type.model_name) # if @model_type.model_name
+
+    # check for reverse since they need to store the foreign key
+    if not reverse_relation and (relation.type is 'hasOne' or relation.type is 'hasMany')
+      reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
+      reverse_relation =  reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
+    return reverse_relation
+
   @reverseRelation: (model_type, owning_model_name) ->
     return null unless model_type.relation
     reverse_key = inflection.underscore(owning_model_name)
@@ -111,11 +131,6 @@ module.exports = class Utils
         sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable
-
-  # @private
-  @generateBelongsTo: (model_type, reverse_model_type) ->
-    model_type.sync = reverse_model_type.createSync(model_type) unless _.isFunction(model_type.schema) # not a relational model
-    return model_type.schema().generateBelongsTo(model_type, reverse_model_type)
 
   ##############################
   # Sorting
