@@ -27,13 +27,13 @@ class CacheSync
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.getOrCreate(@model_type.model_name, @model_type, json) # update cache
+      Utils.updateOrNew(json, @model_type)
       options.success(json)
 
   update: (model, options) ->
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.getOrCreate(@model_type.model_name, @model_type, json) # update cache
+      Utils.updateOrNew(json, @model_type)
       options.success(json)
 
   delete: (model, options) ->

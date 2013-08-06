@@ -64,7 +64,7 @@ module.exports = class Many
         else if _.isObject(data)
           model.set(data)
       else
-        model = @reverse_model_type.findOrNew(data)
+        model = Utils.updateOrNew(data, @reverse_model_type)
       models.push(model)
     collection._orm_loaded = @_checkLoaded(models)
     collection.reset(models)
@@ -259,7 +259,7 @@ module.exports = class Many
 
         # create new
         else
-          collection.add(related_model = @reverse_model_type.findOrNew(model_json))
+          collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
 
       if cache = @reverse_model_type.cache()
         cache.set(model.id, model) for model in collection.models

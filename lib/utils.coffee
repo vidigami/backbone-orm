@@ -6,8 +6,6 @@ moment = require 'moment'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
-Cursor = require './cursor'
-
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
 BATCH_DEFAULT_LIMIT = 1500
@@ -65,14 +63,31 @@ module.exports = class Utils
     return data
 
   # @private
-  @dataToModel: (model_type, data) ->
-    return data if data instanceof Backbone.Model
-    return data.models if data instanceof Backbone.Collection
-    return (Utils.dataToModel(model_type, item) for item in data) if _.isArray(data)
-    return new model_type(model_type::parse(data)) if _.isObject(data)
-    related_model = new model_type({id: data})
-    related_model._orm_needs_load = true
-    return related_model
+  @dataToModel: (data, model_type) ->
+    return null unless data
+    return (Utils.dataToModel(item) for item in data) if _.isArray(data)
+    if data instanceof Backbone.Model
+      model = data
+    else if _.isObject(data)
+      model = new model_type(model_type::parse(data))
+    else
+      model = new model_type({id: data})
+      model._orm_needs_load = true
+    return model
+
+  @updateOrNew: (data, model_type) ->
+    id = Utils.dataId(data)
+    if cache = model_type.cache()
+      if model = cache.get(id)
+        return model if id is data
+        if data instanceof Backbone.Model
+          model.set(data.toJSON()) unless data is model
+        else
+          model.set(model_type::parse(data))
+        return model
+    model = Utils.dataToModel(data, model_type)
+    cache.set(model.id, model) if model and cache
+    return model
 
   @joinTableURL: (relation) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
@@ -168,6 +183,8 @@ module.exports = class Utils
   ##############################
   # @private
   @batch: (model_type, query, options, callback, fn) ->
+    Cursor = require './cursor'
+
     [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
     [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
 

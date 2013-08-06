@@ -38,9 +38,6 @@ module.exports = (model_type) ->
   # @method .findOrCreate(data, callback)
   #   Find a model by data (including the id) or create with save if it does not already exist.
   #
-  # @method .findOrNew(data, callback)
-  #   Find a model by data (including the id) or create a new one without save if it does not already exist.
-  #
   # @method .findOneNearestDate(date, options, query, callback)
   #   Find a model near a date. It will search in both directions until a model is found depending on the reverse flag (default is forwards).
   #   @param [Object] options
@@ -116,11 +113,6 @@ module.exports = (model_type) ->
         return callback(err) if err
         cache.add(model.id, model) if cache = model_type.cache()
         callback(null, model)
-
-  model_type.findOrNew = (data) ->
-    throw 'findOrNew requires data' unless data
-    return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
-    return Cache.getOrCreate(model_type.model_name, model_type, data)
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key

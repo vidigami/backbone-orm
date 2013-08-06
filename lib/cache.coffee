@@ -62,31 +62,12 @@ class Cache
     console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
     return model
 
-  getOrCreate: (model_name, model_type, data) ->
-    model_cache = @findOrCreateModelCache(model_name)
-    data = [data] unless many = _.isArray(data)
-    models = []
-    for item in data
-      model = null
-      if model_cache and model = model_cache.get(Utils.dataId(item))
-        @updateModel(model, item)
-      else
-        model = Utils.dataToModel(model_type, item)
-      console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(item)}" if @verbose
-      model_cache.set(model.id, model) if model_cache and not model._orm_needs_load
-      models.push(model)
-    return if many then models else models[0]
-
-  set: (model_name, model_type, data) ->
+  set: (model_name, model) ->
     return @ unless model_cache = @findOrCreateModelCache(model_name) # no caching
-
-    data = [data] unless _.isArray(data)
-    for item in data
-      continue unless (item and item.id)
-      if cached_model = model_cache.get(item.id) # update existing
-        cached_json = cached_model.toJSON()
-
-      model_cache.set(item.id, (cached_model or Utils.dataToModel(model_type, item)))
+    if current_model = model_cache.get(model.id)
+      @updateModel(current_model, model)
+    else
+      model_cache.set(model.id, model)
     return @
 
   del: (model_name, ids) ->
