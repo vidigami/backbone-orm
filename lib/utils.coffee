@@ -60,8 +60,9 @@ module.exports = class Utils
         reverse_relation.foreign_key = relation.foreign_key
         reverse_relation.reverse_relation = relation
     else
-      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.underscore(model_type.model_name)) # singular
-        reverse_relation = reverse_model_type.relation(inflection.pluralize(reverse_key)) # plural
+      key_root = inflection.underscore(model_type.model_name)
+      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.singularize(key_root)) # singular
+        reverse_relation = reverse_model_type.relation(reverse_key = inflection.pluralize(key_root)) # plural
 
     # check for reverse since they need to store the foreign key
     if not reverse_relation and (relation.type is 'hasOne' or relation.type is 'hasMany')

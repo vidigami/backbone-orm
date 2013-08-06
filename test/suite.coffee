@@ -1,6 +1,8 @@
-#require './unit/cursor' # TODO
-#require './unit/cache' # TODO
+Queue = require 'queue-async'
 
-require './unit/fabricator'
-
-require './unit/all_generators'
+queue = new Queue(1)
+queue.defer (callback) -> require('./unit/cursor')({}, callback) # TODO
+queue.defer (callback) -> require('./unit/cache')({}, callback) # TODO
+queue.defer (callback) -> require('./unit/fabricator')({}, callback)
+queue.defer (callback) -> require('./unit/all_generators')({}, callback)
+queue.await (err) -> console.log "ORM: Completed tests"

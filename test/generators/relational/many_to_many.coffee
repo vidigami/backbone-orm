@@ -7,7 +7,7 @@ Queue = require 'queue-async'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 
-runTests = (options, cache, embed) ->
+runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -30,6 +30,8 @@ runTests = (options, cache, embed) ->
 
   describe "Many to Many (cache: #{cache} embed: #{embed})", ->
 
+    before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
+    after (done) -> callback(); done()
     beforeEach (done) ->
       require('../../../lib/cache').reset() # reset cache
       MODELS = {}
@@ -133,8 +135,10 @@ runTests = (options, cache, embed) ->
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  runTests(options, false, false)
-  runTests(options, true, false)
-  runTests(options, false, true) if options.embed
-  runTests(options, true, true) if options.embed
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> runTests(options, false, false, callback)
+  queue.defer (callback) -> runTests(options, true, false, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
+  queue.await callback

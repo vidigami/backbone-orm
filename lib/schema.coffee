@@ -8,15 +8,14 @@ inflection = require 'inflection'
 # @private
 module.exports = class Schema
   constructor: (@model_type) ->
-    @raw = _.result(@model_type, 'schema') or {}
+    @raw = _.clone(_.result(@model_type, 'schema') or {})
     @fields ={}; @relations ={}; @ids_accessor = {}
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
 
-    @_parseField(key, info) for key, info of @raw
-
     # initalize in two steps to break circular dependencies
+    @_parseField(key, info) for key, info of @raw
     relation.initialize() for key, relation of @relations
     return
 
