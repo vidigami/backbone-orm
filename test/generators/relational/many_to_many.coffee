@@ -142,7 +142,6 @@ runTests = (options, cache, embed, callback) ->
           owner.destroy Utils.bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
 
-            console.log Owner.relation('reverses').join_table
             Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')

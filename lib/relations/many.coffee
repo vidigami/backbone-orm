@@ -50,10 +50,9 @@ module.exports = class Many
     if @reverse_relation.type is 'belongsTo'
       for related_model in collection.models when related_model.id not in _.pluck(models, 'id')
         related_model.set(@foreign_key, null)
-
+        #todo: is this necessary?
         if cache = @reverse_model_type.cache()
           cache.set(related_model.id, related_model)
-
         @_queueDependentSave(model, related_model.id)
 
     collection.reset(models)
@@ -108,7 +107,7 @@ module.exports = class Many
     # hasMany
     else
       collection = @_ensureCollection(model)
-      return callback() if @_isLoaded(model) # not loaded
+      return callback() unless @_isLoaded(model) # not loaded
 
       # TODO: optimize
       query = {$values: @foreign_key}
@@ -241,7 +240,6 @@ module.exports = class Many
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-
     return true if @_isLoaded(model, key) # already loaded
     collection = @_ensureCollection(model)
 
@@ -250,10 +248,10 @@ module.exports = class Many
     # fetch
     (query = {})[@foreign_key] = model.id
     (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
+
       return callback(err) if err
 
       # process the found models
-      @_setLoaded(model, true)
       for model_json in json
 
         # update existing
@@ -266,6 +264,8 @@ module.exports = class Many
 
       if cache = @reverse_model_type.cache()
         cache.set(model.id, model) for model in collection.models
+
+      @_setLoaded(model, true)
 
       callback(null, collection.models)
     return false

@@ -329,6 +329,6 @@ module.exports = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> runTests(options, false, false, callback)
   queue.defer (callback) -> runTests(options, true, false, callback)
-#  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
-#  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
   queue.await callback
