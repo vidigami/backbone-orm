@@ -16,6 +16,7 @@ module.exports = class Schema
 
     for key, options of @raw
       options = @_parseFieldOptions(if _.isFunction(options) then options() else options)
+      (@fields[key] = options; continue) unless options.type
 
       type = inflection.camelize(inflection.underscore(options.type), true) # ensure HasOne, hasOne, and has_one resolve to hasOne
       switch type
