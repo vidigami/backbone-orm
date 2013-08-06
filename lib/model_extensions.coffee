@@ -5,7 +5,6 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './utils'
-Cache = require './cache'
 
 module.exports = (model_type) ->
 

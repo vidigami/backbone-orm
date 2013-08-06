@@ -36,7 +36,7 @@ class Cache
     return @
 
   configureSync: (model_type, sync_fn) ->
-    return if @findOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
+    return if @getOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
 
   reset: (model_name, ids) ->
     # clear the full cache
@@ -63,7 +63,7 @@ class Cache
     return model
 
   set: (model_name, model) ->
-    return @ unless model_cache = @findOrCreateModelCache(model_name) # no caching
+    return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
     if current_model = model_cache.get(model.id)
       @updateModel(current_model, model)
     else
@@ -77,7 +77,7 @@ class Cache
     model_cache.del(id) for id in ids
     return @
 
-  findOrCreateModelCache: (model_name) ->
+  getOrCreateModelCache: (model_name) ->
     return model_cache if model_cache = @caches[model_name]
 
     # there are options

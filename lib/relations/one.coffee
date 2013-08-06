@@ -54,7 +54,7 @@ module.exports = class One
         delete related_model._orm_needs_load
 
       if related_model.id and not related_model._orm_needs_load
-        cache.set(related_model.id, related_model) if cache = @model_type.cache()
+        cache.set(related_model.id, related_model) if cache = @reverse_model_type.cache()
       return @
 
     related_model = if value then Utils.updateOrNew(value, @reverse_model_type) else null
