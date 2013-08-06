@@ -288,11 +288,12 @@ module.exports = class Many
     (update = {})[@foreign_key] = null
     queue = new Queue()
     for related_model in related_models
-      do (related_model) =>
-        queue.defer (callback) =>
-          related_model.save update, Utils.bbCallback (err, saved_model) =>
-            callback(err) if err
-            if cache = @reverse_model_type.cache()
-              cache.set(saved_model.id, saved_model)
-            callback()
+      if related_model
+        do (related_model) =>
+          queue.defer (callback) =>
+            related_model.save update, Utils.bbCallback (err, saved_model) =>
+              callback(err) if err
+              if cache = @reverse_model_type.cache()
+                cache.set(saved_model.id, saved_model)
+              callback()
     queue.await callback

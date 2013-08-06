@@ -17,7 +17,7 @@ module.exports = class One
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   initializeModel: (model, key) ->
-    @_setLoaded(model, !!(@embed or @reverse_relation.embed))
+    @_setLoaded(model, !!(@embed or @reverse_relation?.embed))
     @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
@@ -28,7 +28,7 @@ module.exports = class One
     related_model = model.attributes[@key]
 
     # Clear the reverse relation if it's loaded
-    if value is null and @reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo'
+    if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
       unless @embed or @reverse_relation.embed
         if @_isLoaded(model)
           related_model.set(@reverse_relation.key, null) if related_model and related_model.get(@reverse_relation.key)
