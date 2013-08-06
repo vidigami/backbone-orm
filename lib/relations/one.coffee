@@ -43,16 +43,7 @@ module.exports = class One
     related_model = model.attributes[@key]
     if @has(model, @key, value)
       return @ unless related_model # null
-
-      if value instanceof Backbone.Model
-        if (related_model isnt value) and not value._orm_needs_load
-          related_model.set(value.toJSON())
-          delete related_model._orm_needs_load
-
-      else if _.isObject(value)
-        related_model.set(value)
-        delete related_model._orm_needs_load
-
+      Utils.updateModel(related_model, value)
       if related_model.id and not related_model._orm_needs_load
         cache.set(related_model.id, related_model) if cache = @reverse_model_type.cache()
       return @

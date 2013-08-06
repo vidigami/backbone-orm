@@ -57,14 +57,11 @@ module.exports = class Many
 
     # set the collection with found or created models
     models = []
-    for data in value
-      if model = collection.get(Utils.dataId(data))
-        if data instanceof Backbone.Model
-          model.set(data.toJSON())
-        else if _.isObject(data)
-          model.set(data)
+    for item in value
+      if model = collection.get(Utils.dataId(item))
+        Utils.updateModel(model, item)
       else
-        model = Utils.updateOrNew(data, @reverse_model_type)
+        model = Utils.updateOrNew(item, @reverse_model_type)
       models.push(model)
     collection._orm_loaded = @_checkLoaded(models)
     collection.reset(models)

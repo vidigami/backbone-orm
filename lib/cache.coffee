@@ -65,7 +65,7 @@ class Cache
   set: (model_name, model) ->
     return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
     if current_model = model_cache.get(model.id)
-      @updateModel(current_model, model)
+      Utils.updateModel(current_model, model)
     else
       model_cache.set(model.id, model)
     return @
@@ -94,14 +94,6 @@ class Cache
     key = inflection.underscore(key)
     return key.toLowerCase() if key.indexOf('_') < 0
     return inflection.camelize(key)
-
-  updateModel: (model, data) ->
-    return if model is data
-    model_json = model.toJSON()
-    if data instanceof Backbone.Model
-      model.set(data_json) if not _.isEqual(model_json, data_json = data.toJSON())
-    else if _.isObject(data)
-      model.set(data) if not _.isEqual(model_json, data)
 
 # singleton
 module.exports = new Cache()

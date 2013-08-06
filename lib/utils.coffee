@@ -55,12 +55,7 @@ module.exports = class Utils
     return model_type.relation(inflection.pluralize(reverse_key)) # plural
 
   # @private
-  @dataId: (data) ->
-    if data instanceof Backbone.Model
-      return data.id
-    else if _.isObject(data)
-      return data.id
-    return data
+  @dataId: (data) -> return data.id or data
 
   # @private
   @dataToModel: (data, model_type) ->
@@ -75,18 +70,20 @@ module.exports = class Utils
       model._orm_needs_load = true
     return model
 
+  @updateModel: (model, data) ->
+    return if not data or (model is data) or data._orm_needs_load
+    data = data.toJSON() if data instanceof Backbone.Model
+    if _.isObject(data)
+      model.set(data) unless _.isEqual(model.toJSON(), data)
+      delete model._orm_needs_load
+    return model
+
   @updateOrNew: (data, model_type) ->
-    id = Utils.dataId(data)
     if cache = model_type.cache()
-      if model = cache.get(id)
-        return model if id is data
-        if data instanceof Backbone.Model
-          model.set(data.toJSON()) unless data is model
-        else
-          model.set(model_type::parse(data))
-        return model
-    model = Utils.dataToModel(data, model_type)
-    cache.set(model.id, model) if model and cache
+      Utils.updateModel(model, data) if model = cache.get(Utils.dataId(data))
+    unless model
+      model = Utils.dataToModel(data, model_type)
+      cache.set(model.id, model) if model and cache
     return model
 
   @joinTableURL: (relation) ->
