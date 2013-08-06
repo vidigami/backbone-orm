@@ -16,7 +16,9 @@ module.exports = class One
     @reverse_relation = Utils.findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
-  initializeModel: (model, key) -> @_bindBacklinks(model)
+  initializeModel: (model, key) ->
+    @_setLoaded(model, !!(@embed or @reverse_relation?.embed))
+    @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
     throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
@@ -24,7 +26,16 @@ module.exports = class One
     value = null if _.isUndefined(value) # Backbone clear or reset
 
     related_model = model.attributes[@key]
-    if @has(model, @key, value)
+
+    # Clear the reverse relation if it's loaded
+    if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
+      unless @embed or @reverse_relation.embed
+        if @_isLoaded(model)
+          related_model.set(@reverse_relation.key, null) if related_model and related_model.get(@reverse_relation.key)
+          # Note the model as it needs to be saved to have its foreign key updated
+        @_queueDependentSave(model) if @type is 'hasOne'
+
+    else if @has(model, @key, value)
       return @ unless related_model # null
       Utils.updateModel(related_model, value)
       if related_model.id and not related_model._orm_needs_load
@@ -54,11 +65,12 @@ module.exports = class One
     return result
 
   save: (model, key, callback) ->
-    return callback() if not @reverse_relation or not (related_model = model.attributes[@key])
+    return callback() if not @reverse_relation
+    related_model = model.attributes[@key]
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
-      unless related_model.id
+      if related_model and not related_model.id
         return related_model.save {}, Utils.bbCallback (err) =>
           return callback() if err
           model.save {}, Utils.bbCallback callback
@@ -66,12 +78,20 @@ module.exports = class One
       return callback()
 
     else if @reverse_relation.type is 'belongsTo'
-      if related_model.hasChanged(@reverse_relation.key) or not related_model.id
+      if related_model and (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
         return related_model.save {}, Utils.bbCallback(callback)
+
+      else if @_hasDependentSave(model)
+        return @_clearRelation(model, callback)
 
     else # hasMany
       # nothing to do?
 
+    callback() # nothing to save
+
+  destroy: (model, callback) ->
+    return callback() if not @reverse_relation
+    return @_clearRelation(model, callback) if @type is 'hasOne'
     callback() # nothing to save
 
   appendJSON: (json, model, key) ->
@@ -109,9 +129,22 @@ module.exports = class One
   ####################################
 
   # TODO: optimize so don't need to check each time
-  _isLoaded: (model) ->
-    related_model = model.attributes[@key]
-    return !!(related_model and not related_model._orm_needs_load)
+  _setLoaded: (model, loaded) ->
+    if loaded
+      delete model._orm?.needs_load?[@key]
+    else
+      model._orm or= {}
+      (model._orm.needs_load or= {})[@key] = true
+
+  _isLoaded: (model) -> not model._orm?.needs_load?[@key]
+
+  _queueDependentSave: (model) ->
+    model._orm or= {}
+    (model._orm.dependent_saves or= {})[@key] = true
+
+  _clearDependentSave: (model) -> delete model._orm?.dependent_saves?[@key]
+
+  _hasDependentSave: (model) -> model._orm?.dependent_saves?[@key]
 
   # TODO: optimize so don't need to check each time
   # TODO: check which objects are already loaded in cache and ignore ids
@@ -122,9 +155,22 @@ module.exports = class One
       return callback(err) if err
 
       model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
+
+      @_setLoaded(model, true)
       callback(null, related_model)
 
     return false
+
+  _clearRelation: (model, callback) ->
+    (update = {})[@foreign_key] = null
+    @_clearDependentSave(model)
+    if related_model = model.attributes[@key]
+      related_model.save update, Utils.bbCallback callback
+    else
+      @cursor(model, @key).toModels (err, related_model) =>
+        return callback(err) if err
+        return callback() unless related_model
+        related_model.save update, Utils.bbCallback callback
 
   _bindBacklinks: (model) ->
     return unless @reverse_relation

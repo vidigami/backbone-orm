@@ -21,7 +21,7 @@ module.exports = (grunt) ->
         options:
           sourceMap: true
         expand: true
-        src: ['**/*.coffee', '!_build/**/*', '!node_modules/eco/**/*']
+        src: ['**/*.coffee', '!_build/**/*', '!node_modules/eco/**/*', '!node_modules/codo/**/*']
         dest: '_build'
         ext: '.js'
 

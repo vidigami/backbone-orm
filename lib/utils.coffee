@@ -70,7 +70,7 @@ module.exports = class Utils
     return reverse_relation
 
   # @private
-  @dataId: (data) -> return data.id or data
+  @dataId: (data) -> return data?.id or data
 
   # @private
   @dataToModel: (data, model_type) ->

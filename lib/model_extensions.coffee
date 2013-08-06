@@ -262,6 +262,37 @@ module.exports = (model_type) ->
 
     return _original_save.call(@, attributes, options)
 
+  _original_destroy = model_type::destroy
+  model_type::destroy = (options) ->
+    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm_save > 0
+    @_orm_save or= 0
+    @_orm_save++
+
+    return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
+    original_success = options.success
+    original_error = options.error
+    options = _.clone(options)
+    options.success = (model, resp, options) =>
+      delete @_orm_save if --@_orm_save is 0
+
+      queue = new Queue()
+
+      # now remove relations
+      for key, relation of schema.relations
+        do (relation) => queue.defer (callback) => relation.destroy(@, callback)
+
+      queue.await (err) =>
+        return original_error?(@, new Error "Failed to destroy relations. #{err}") if err
+        original_success?(model, resp, options)
+
+    options.error = (model, resp, options) =>
+      delete @_orm_save if --@_orm_save is 0
+      original_error?(model, resp, options)
+
+    return _original_destroy.call(@, options)
+
   _original_clone = model_type::clone
   model_type::clone = (key, value, options) ->
     return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
