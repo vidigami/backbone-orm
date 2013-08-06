@@ -245,6 +245,78 @@ runTests = (options, cache, embed) ->
             assert.equal(test_model.id, reverse.owner_id, "\nExpected: #{test_model.id}\nActual: #{reverse.owner_id}")
           done()
 
+    it 'Clears its reverse relations on set when the reverse relation is loaded (one-way hasMany)', (done) ->
+      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found models')
+          assert.equal(reverses.length, 2*BASE_COUNT, 'Found reverses')
+          for reverse in reverses
+            assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
+
+          owner.set('reverses', [reverses[0]])
+          assert.equal(owner.get('reverses').length, 1, 'It has the correct number of relations after set')
+
+          assert.equal(reverses[1].get('owner_id'), null, 'Reverse relation has its foreign key set to null')
+
+          owner.get 'reverses', (err, new_reverses) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(new_reverses.length, 1, 'Relations loaded asynchronously have the correct length')
+            done()
+
+    it 'Clears its reverse relations on save (one-way hasMany)', (done) ->
+      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found models')
+          assert.equal(reverses.length, 2*BASE_COUNT, 'Found reverses')
+          for reverse in reverses
+            assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
+
+          owner.set('reverses', [reverses[0]])
+          assert.equal(owner.get('reverses').length, 1, "It has the correct number of relations after set\nExpected: #{1}\nActual: #{owner.get('reverses').length}")
+          assert.equal(reverses[1].get('owner_id'), null, 'Reverse relation has its foreign key set to null')
+
+          owner.save {}, Utils.bbCallback (err, owner) ->
+            Reverse.find {owner_id: owner.id}, (err, new_reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(new_reverses.length, 1, "Relations loaded from store have the correct length\nExpected: #{1}\nActual: #{new_reverses.length}")
+              done()
+
+    it 'Clears its reverse relations on delete when the reverse relation is loaded (one-way hasMany)', (done) ->
+      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found model')
+
+          owner.destroy Utils.bbCallback (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            Reverse.find {owner_id: owner.id}, (err, null_reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
+              done()
+
+    it 'Clears its reverse relations on delete when the reverse relation isnt loaded (one-way hasMany)', (done) ->
+      Owner.cursor({$one: true}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found model')
+
+          owner.destroy Utils.bbCallback (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            Reverse.find {owner_id: owner.id}, (err, null_reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
+              done()
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....

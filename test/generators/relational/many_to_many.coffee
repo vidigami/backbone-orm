@@ -127,6 +127,39 @@ runTests = (options, cache, embed) ->
           assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
           done()
 
+    it 'Clears its reverse relations on delete when the reverse relation is loaded', (done) ->
+      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found model')
+
+          owner.destroy Utils.bbCallback (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            console.log Owner.relation('reverses').join_table
+            Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
+              done()
+
+    it 'Clears its reverse relations on delete when the reverse relation isnt loaded (one-way hasMany)', (done) ->
+      Owner.cursor({$one: true}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found model')
+
+          owner.destroy Utils.bbCallback (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
+              done()
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....

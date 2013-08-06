@@ -80,98 +80,100 @@ runTests = (options, cache, embed) ->
 
       queue.await done
 
-    it 'Handles a get query for a belongsTo relation', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        test_model.get 'flat', (err, flat) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(flat, 'found related model')
-          if test_model.relationIsEmbedded('flat')
-            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().flat)}. Actual: #{util.inspect(flat.toJSON())}")
-          else
-            assert.deepEqual(test_model.toJSON().flat_id, flat.id, "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.id}")
-          assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
-          done()
-
-    it 'Handles a get query for a hasOne relation', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        test_model.get 'reverse', (err, reverse) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, 'found related model')
-          assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
-          assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
-          if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
-          assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
-          done()
-
-    it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        test_model.get 'reverse_id', (err, id) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(id, 'found id')
-          done()
-
-    it 'Can retrieve a belongsTo id synchronously and then a model asynchronously from get methods', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        assert.ok(test_model.get('flat_id'), 'Has the belongsTo id')
-        test_model.get 'flat', (err, flat) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(flat, 'loaded model')
-          assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
-          done()
-
-    it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        test_model.get 'reverse', (err, reverse) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, 'found related model')
-          assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
-          assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
-          if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
-          assert.ok(!test_model.toJSON().reverse_id, 'No reverse_id in owner json')
-
-          reverse.get 'owner', (err, owner) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(owner, 'found original model')
-            assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
-
-            if Owner.cache()
-              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
-            else
-              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
-            done()
-
-    it 'Appends json for a related model', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        JSONUtils.renderRelated test_model, 'reverse', ['id', 'created_at'], (err, related_json) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(related_json.id, "reverse has an id")
-          assert.ok(related_json.created_at, "reverse has a created_at")
-          assert.ok(!related_json.updated_at, "reverse doesn't have updated_at")
-
-          JSONUtils.renderRelated test_model, 'flat', ['id', 'created_at'], (err, related_json) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(related_json.id, "flat has an id")
-#            assert.ok(related_json.created_at, "flat has a created_at")
-            assert.ok(!related_json.updated_at, "flat doesn't have updated_at")
-            done()
+#    it 'Handles a get query for a belongsTo relation', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        test_model.get 'flat', (err, flat) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(flat, 'found related model')
+#          if test_model.relationIsEmbedded('flat')
+#            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().flat)}. Actual: #{util.inspect(flat.toJSON())}")
+#          else
+#            assert.deepEqual(test_model.toJSON().flat_id, flat.id, "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.id}")
+#          assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
+#          done()
+#
+#    it 'Handles a get query for a hasOne relation', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        console.log test_model.attributes.reverse
+#        test_model.get 'reverse', (err, reverse) ->
+#          console.log reverse
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found related model')
+#          assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
+#          assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
+#          if test_model.relationIsEmbedded('reverse')
+#            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+#          assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
+#          done()
+#
+#    it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        test_model.get 'reverse_id', (err, id) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(id, 'found id')
+#          done()
+#
+#    it 'Can retrieve a belongsTo id synchronously and then a model asynchronously from get methods', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        assert.ok(test_model.get('flat_id'), 'Has the belongsTo id')
+#        test_model.get 'flat', (err, flat) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(flat, 'loaded model')
+#          assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
+#          done()
+#
+#    it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        test_model.get 'reverse', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found related model')
+#          assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
+#          assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
+#          if test_model.relationIsEmbedded('reverse')
+#            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+#          assert.ok(!test_model.toJSON().reverse_id, 'No reverse_id in owner json')
+#
+#          reverse.get 'owner', (err, owner) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.ok(owner, 'found original model')
+#            assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
+#
+#            if Owner.cache()
+#              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+#            else
+#              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+#            done()
+#
+#    it 'Appends json for a related model', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        JSONUtils.renderRelated test_model, 'reverse', ['id', 'created_at'], (err, related_json) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(related_json.id, "reverse has an id")
+#          assert.ok(related_json.created_at, "reverse has a created_at")
+#          assert.ok(!related_json.updated_at, "reverse doesn't have updated_at")
+#
+#          JSONUtils.renderRelated test_model, 'flat', ['id', 'created_at'], (err, related_json) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.ok(related_json.id, "flat has an id")
+##            assert.ok(related_json.created_at, "flat has a created_at")
+#            assert.ok(!related_json.updated_at, "flat doesn't have updated_at")
+#            done()
 
     # TODO: delay the returning of memory models related models to test lazy loading properly
     it 'Fetches a relation from the store if not present', (done) ->
@@ -196,133 +198,216 @@ runTests = (options, cache, embed) ->
               done()
     #          assert.equal(reverse, null, 'has not loaded the model initially')
 
-    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-        assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
-        #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
-        done()
-
-    it 'Handles a get query for a hasOne and belongsTo two sided relation as "as" fields', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        test_model.get 'reverse_as', (err, reverse) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, 'found related model')
-          assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
-          assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
-          if test_model.relationIsEmbedded('reverse_as')
-            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
-          assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
-
-          reverse.get 'owner_as', (err, owner) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(owner, 'found original model')
-            assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.id}")
-
-            if Owner.cache()
-              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
-            else
-              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
-            done()
-
-    it 'Can include a related (belongsTo) model', (done) ->
-      Owner.cursor({$one: true}).include('flat').toJSON (err, json) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(json, 'found model')
-        assert.ok(json.flat, "Has a related flat")
-        assert.ok(json.flat.id, "Related model has an id")
-
-        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
-          assert.equal(json.flat_id, json.flat.id, "\nRelated model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
-        done()
-
-    it 'Can include a related (hasOne) model', (done) ->
-      Owner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(json, 'found model')
-        assert.ok(json.reverse, "Has a related reverse")
-        assert.ok(json.reverse.id, "Related model has an id")
-        assert.equal(json.id, json.reverse.owner_id, "\nRelated model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
-        done()
-
-    it 'Can include multiple related models', (done) ->
-      Owner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(json, 'found model')
-        assert.ok(json.reverse, "Has a related reverse")
-        assert.ok(json.reverse.id, "Related model has an id")
-        assert.ok(json.flat, "Has a related flat")
-        assert.ok(json.flat.id, "Included model has an id")
-
-        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
-          assert.equal(json.flat_id, json.flat.id, "\nIncluded model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
-        assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
-        done()
-
-    it 'Can query on a related (belongsTo) model propery', (done) ->
-      Flat.findOne (err, flat) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(flat, 'found model')
-
-        Owner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, 'found model')
-          unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
-            assert.equal(flat.id, owner.flat_id, "\nRelated model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat_id}")
-          done()
-
-    it 'Can query on a related (belongsTo) model property when the relation is included', (done) ->
-      Flat.findOne (err, flat) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(flat, 'found model')
-        Owner.cursor({$one: true, 'flat.name': flat.get('name')}).include('flat').toJSON (err, owner) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, 'found model')
-          assert.ok(owner.flat, "Has a related flat")
-          assert.ok(owner.flat.id, "Included model has an id")
-          assert.equal(flat.id, owner.flat.id, "\nIncluded model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat.id}")
-          assert.equal(flat.get('name'), owner.flat.name, "\nIncluded model has the correct name: Expected: #{flat.get('name')}\nActual: #{owner.flat.name}")
-          done()
-
-    it 'Can query on a related (hasOne) model', (done) ->
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found model')
-        Owner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, 'found model')
-
-          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
-            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
-          done()
-
-    it 'Can query on a related (hasOne) model property when the relation is included', (done) ->
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found model')
-        Owner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(json, "found json")
-          assert.equal(json.length, 1, "json has the correct number or results")
-          owner = json[0]
-          assert.ok(owner.reverse, "Has a related reverse")
-          assert.ok(owner.reverse.id, "Related model has an id")
-
-          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
-            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
-          assert.equal(reverse.get('name'), owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.get('name')}\nActual: #{owner.reverse.name}")
-          done()
+#    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#        assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
+#        #        assert.ok(!test_model.get('reverse_id'), 'hasOne id is not loaded')
+#        done()
+#
+#    it 'Handles a get query for a hasOne and belongsTo two sided relation as "as" fields', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        test_model.get 'reverse_as', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found related model')
+#          assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
+#          assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
+#          if test_model.relationIsEmbedded('reverse_as')
+#            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+#          assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
+#
+#          reverse.get 'owner_as', (err, owner) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.ok(owner, 'found original model')
+#            assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.id}")
+#
+#            if Owner.cache()
+#              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+#            else
+#              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+#            done()
+#
+#    it 'Can include a related (belongsTo) model', (done) ->
+#      Owner.cursor({$one: true}).include('flat').toJSON (err, json) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(json, 'found model')
+#        assert.ok(json.flat, "Has a related flat")
+#        assert.ok(json.flat.id, "Related model has an id")
+#
+#        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+#          assert.equal(json.flat_id, json.flat.id, "\nRelated model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+#        done()
+#
+#    it 'Can include a related (hasOne) model', (done) ->
+#      Owner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(json, 'found model')
+#        assert.ok(json.reverse, "Has a related reverse")
+#        assert.ok(json.reverse.id, "Related model has an id")
+#        assert.equal(json.id, json.reverse.owner_id, "\nRelated model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+#        done()
+#
+#    it 'Can include multiple related models', (done) ->
+#      Owner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(json, 'found model')
+#        assert.ok(json.reverse, "Has a related reverse")
+#        assert.ok(json.reverse.id, "Related model has an id")
+#        assert.ok(json.flat, "Has a related flat")
+#        assert.ok(json.flat.id, "Included model has an id")
+#
+#        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+#          assert.equal(json.flat_id, json.flat.id, "\nIncluded model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
+#        assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
+#        done()
+#
+#    it 'Can query on a related (belongsTo) model propery', (done) ->
+#      Flat.findOne (err, flat) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(flat, 'found model')
+#
+#        Owner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(owner, 'found model')
+#          unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
+#            assert.equal(flat.id, owner.flat_id, "\nRelated model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat_id}")
+#          done()
+#
+#    it 'Can query on a related (belongsTo) model property when the relation is included', (done) ->
+#      Flat.findOne (err, flat) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(flat, 'found model')
+#        Owner.cursor({$one: true, 'flat.name': flat.get('name')}).include('flat').toJSON (err, owner) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(owner, 'found model')
+#          assert.ok(owner.flat, "Has a related flat")
+#          assert.ok(owner.flat.id, "Included model has an id")
+#          assert.equal(flat.id, owner.flat.id, "\nIncluded model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat.id}")
+#          assert.equal(flat.get('name'), owner.flat.name, "\nIncluded model has the correct name: Expected: #{flat.get('name')}\nActual: #{owner.flat.name}")
+#          done()
+#
+#    it 'Can query on a related (hasOne) model', (done) ->
+#      Reverse.findOne (err, reverse) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(reverse, 'found model')
+#        Owner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(owner, 'found model')
+#
+#          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+#            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
+#          done()
+#
+#    it 'Can query on a related (hasOne) model property when the relation is included', (done) ->
+#      Reverse.findOne (err, reverse) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(reverse, 'found model')
+#        Owner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(json, "found json")
+#          assert.equal(json.length, 1, "json has the correct number or results")
+#          owner = json[0]
+#          assert.ok(owner.reverse, "Has a related reverse")
+#          assert.ok(owner.reverse.id, "Related model has an id")
+#
+#          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+#            assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
+#          assert.equal(reverse.get('name'), owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.get('name')}\nActual: #{owner.reverse.name}")
+#          done()
+#
+#    it 'Clears its reverse relation on set when the reverse relation is loaded (hasOne)', (done) ->
+#      Owner.cursor({$one: true, $include: 'reverse'}).toModels (err, owner) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(owner, 'found model')
+#        owner.get 'reverse', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found model')
+#          assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
+#
+#          owner.set('reverse', null)
+#          assert.equal(owner.get('reverse'), null, 'Relation set to null')
+#          assert.equal(owner.get('reverse_id'), null, 'Relation ids_accessor set to null')
+#          assert.equal(reverse.get('owner_id'), null, 'Reverse relation has its foreign key set to null')
+#
+#          owner.get 'reverse', (err, null_reverse) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.equal(null_reverse, null, 'Relation loaded asynchronously is null')
+#            done()
+#
+#    it 'Clears its reverse relation on set when the reverse relation is loaded (belongsTo)', (done) ->
+#      Owner.cursor({$one: true, $include: 'flat'}).toModels (err, owner) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(owner, 'found model')
+#        owner.get 'flat', (err, flat) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(flat, 'found model')
+#          assert.equal(flat.id, owner.get('flat_id'), 'Owner has a flat_id')
+#
+#          owner.set('flat', null)
+#          assert.equal(owner.get('flat'), null, 'Relation set to null')
+#          assert.equal(owner.get('flat_id'), null, 'Relation ids_accessor set to null')
+#          assert.equal(flat.get('owner_id'), null, 'Reverse relation has its foreign key set to null')
+#
+#          owner.get 'flat', (err, null_flat) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.equal(null_flat, null, 'Relation loaded asynchronously is null')
+#            done()
+#
+#    it 'Clears its reverse relation on save when the reverse relation isnt loaded (hasOne)', (done) ->
+#      Owner.cursor({$one: true}).toModels (err, owner) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(owner, 'found model')
+#        owner.get 'reverse', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found model')
+#
+#          owner.set('reverse', null)
+#          owner.save {}, Utils.bbCallback (err, owner) ->
+#            Reverse.findOne {owner_id: owner.id}, (err, null_reverse) ->
+#              assert.ok(!err, "No errors: #{err}")
+#              assert.equal(null_reverse, null, 'No reverse found for this owner after save')
+#              done()
+#
+#    it 'Clears its reverse relation on delete when the reverse relation is loaded (hasOne)', (done) ->
+#      Owner.cursor({$one: true, $include: 'reverse'}).toModels (err, owner) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(owner, 'found model')
+#        owner.get 'reverse', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found model')
+#
+#          owner.destroy Utils.bbCallback (err, owner) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            Reverse.findOne {owner_id: owner.id}, (err, null_reverse) ->
+#              assert.ok(!err, "No errors: #{err}")
+#              assert.equal(null_reverse, null, 'No reverse found for this owner after save')
+#              done()
+#
+#    it 'Clears its reverse relation on delete when the reverse relation isnt loaded (hasOne)', (done) ->
+#      Owner.cursor({$one: true}).toModels (err, owner) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(owner, 'found model')
+#        owner.get 'reverse', (err, reverse) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          assert.ok(reverse, 'found model')
+#
+#          owner.destroy Utils.bbCallback (err, owner) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            Reverse.findOne {owner_id: owner.id}, (err, null_reverse) ->
+#              assert.ok(!err, "No errors: #{err}")
+#              assert.equal(null_reverse, null, 'No reverse found for this owner after save')
+#              done()
 
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
 module.exports = (options) ->
-  runTests(options, false, false)
-  # runTests(options, true, false)
+#  runTests(options, false, false)
+#  runTests(options, true, false)
   runTests(options, false, true) if options.embed
-  runTests(options, true, true) if options.embed
+#  runTests(options, true, true) if options.embed
