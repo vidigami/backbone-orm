@@ -51,6 +51,7 @@ module.exports = class Utils
   @findOrGenerateReverseRelation: (relation) ->
     model_type = relation.model_type
     reverse_model_type = relation.reverse_model_type
+    reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
 
     if relation.as
       reverse_relation = reverse_model_type.relation(relation.as)
@@ -59,20 +60,13 @@ module.exports = class Utils
         reverse_relation.foreign_key = relation.foreign_key
         reverse_relation.reverse_relation = relation
     else
-      # May have been set already if `as` was specified on the reverse relation
-      reverse_relation = Utils.reverseRelation(reverse_model_type, model_type.model_name) # if @model_type.model_name
+      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.underscore(model_type.model_name)) # singular
+        reverse_relation = reverse_model_type.relation(inflection.pluralize(reverse_key)) # plural
 
     # check for reverse since they need to store the foreign key
     if not reverse_relation and (relation.type is 'hasOne' or relation.type is 'hasMany')
-      reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
       reverse_relation =  reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
     return reverse_relation
-
-  @reverseRelation: (model_type, owning_model_name) ->
-    return null unless model_type.relation
-    reverse_key = inflection.underscore(owning_model_name)
-    return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
-    return model_type.relation(inflection.pluralize(reverse_key)) # plural
 
   # @private
   @dataId: (data) -> return data.id or data

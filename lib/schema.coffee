@@ -29,10 +29,6 @@ module.exports = class Schema
     relation.initialize()
     return relation
 
-  @generateBelongsTo: (model_type, reverse_model_type) ->
-    model_type.sync = reverse_model_type.createSync(model_type) unless _.isFunction(model_type.schema) # not a relational model
-    return model_type.schema().generateBelongsTo(model_type, reverse_model_type)
-
   initializeModel: (model) ->
     relation.initializeModel(model, key) for key, relation of @relations
 
