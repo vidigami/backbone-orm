@@ -27,7 +27,7 @@ class CacheSync
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      Cache.set(@model_type.model_name, model)
+      model.set({id: json.id}); Cache.set(@model_type.model_name, model)
       options.success(json)
 
   update: (model, options) ->

@@ -63,6 +63,7 @@ class Cache
     return model
 
   set: (model_name, model) ->
+    throw new Error "Missing id for model: #{model_name}" unless model.id
     return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
     if current_model = model_cache.get(model.id)
       Utils.updateModel(current_model, model)

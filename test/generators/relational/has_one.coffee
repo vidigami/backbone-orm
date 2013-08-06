@@ -309,7 +309,7 @@ runTests = (options, cache, embed) ->
         Owner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(json, "found json")
-          assert.equal(json.length, 1, "json has the correct number or results")
+          assert.equal(json.length, 1, "json has the correct number or results. Expecting: 1. Actual #{json.length}")
           owner = json[0]
           assert.ok(owner.reverse, "Has a related reverse")
           assert.ok(owner.reverse.id, "Related model has an id")
