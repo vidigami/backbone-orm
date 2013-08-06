@@ -59,7 +59,7 @@ class Cache
     return undefined unless model_cache = @caches[model_name] # no caching
     return (model_cache.get(item.id) for item in data) if _.isArray(data)
     model = model_cache.get(Utils.dataId(data))
-    console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
+    console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
     return model
 
   getOrCreate: (model_name, model_type, data) ->
@@ -72,7 +72,7 @@ class Cache
         @updateModel(model, item)
       else
         model = Utils.dataToModel(model_type, item)
-      console.log "Cache (model_name) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(item)}" if @verbose
+      console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(item)}" if @verbose
       model_cache.set(model.id, model) if model_cache and not model._orm_needs_load
       models.push(model)
     return if many then models else models[0]
