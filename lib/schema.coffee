@@ -14,30 +14,24 @@ module.exports = class Schema
   initialize: ->
     return if @is_initialized; @is_initialized = true
 
-    for key, options of @raw
-      options = @_parseFieldOptions(if _.isFunction(options) then options() else options)
-      (@fields[key] = options; continue) unless options.type
-
-      type = inflection.camelize(inflection.underscore(options.type), true) # ensure HasOne, hasOne, and has_one resolve to hasOne
-      switch type
-        when 'hasOne', 'belongsTo', 'hasMany'
-          options.type = type
-          relation = @relations[key] = if (type is 'hasMany') then new Many(@model_type, key, options) else new One(@model_type, key, options)
-          @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
-        else
-          throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
-          @fields[key] = options
+    @_parseField(key, info) for key, info of @raw
 
     # initalize in two steps to break circular dependencies
     relation.initialize() for key, relation of @relations
     return
 
   relation: (key) -> return @relations[key] or @ids_accessor[key]
-  addRelation: (relation) ->
-    @relations[relation.key] = relation
-    @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+
+  generateBelongsTo: (model_type, reverse_model_type) ->
+    key = inflection.underscore(reverse_model_type.model_name)
+    throw "Schema for '#{model_type.model_name}' already has relation '#{key}'" if @raw[key]
+    relation = @_parseField(key, @raw[key] = ['belongsTo', reverse_model_type, manual_fetch: true])
     relation.initialize()
     return relation
+
+  @generateBelongsTo: (model_type, reverse_model_type) ->
+    model_type.sync = reverse_model_type.createSync(model_type) unless _.isFunction(model_type.schema) # not a relational model
+    return model_type.schema().generateBelongsTo(model_type, reverse_model_type)
 
   initializeModel: (model) ->
     relation.initializeModel(model, key) for key, relation of @relations
@@ -52,7 +46,22 @@ module.exports = class Schema
   # Internal
   #################################
 
-  _parseFieldOptions: (options) ->
+  _parseField: (key, info) ->
+    options = @_fieldInfoToOptions(if _.isFunction(info) then info() else info)
+    return @fields[key] = options unless options.type
+
+    type = inflection.camelize(inflection.underscore(options.type), true) # ensure HasOne, hasOne, and has_one resolve to hasOne
+    switch type
+      when 'hasOne', 'belongsTo', 'hasMany'
+        options.type = type
+        relation = @relations[key] = if (type is 'hasMany') then new Many(@model_type, key, options) else new One(@model_type, key, options)
+        @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+        return relation
+      else
+        throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
+        return @fields[key] = options
+
+  _fieldInfoToOptions: (options) ->
     # convert to an object
     return {type: options} if _.isString(options)
     return options unless _.isArray(options)

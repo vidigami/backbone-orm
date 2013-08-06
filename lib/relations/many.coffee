@@ -5,7 +5,6 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
-One = require './one'
 
 # @private
 module.exports = class Many
@@ -31,12 +30,7 @@ module.exports = class Many
     # The reverse of a hasMany relation should be `belongsTo`, not `hasOne`
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
 
-    if not @reverse_relation
-      unless _.isFunction(@reverse_model_type.schema) # not a relational model
-        @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
-      reverse_schema = @reverse_model_type.schema()
-      reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
+    @reverse_relation = Utils.generateBelongsTo(@reverse_model_type, @model_type) if not @reverse_relation
 
     # check for join table
     if @reverse_relation.type is 'hasMany' and not @join_table

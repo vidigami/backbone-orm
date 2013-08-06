@@ -26,12 +26,7 @@ module.exports = class One
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
     # check for reverse since they need to store the foreign key
-    if not @reverse_relation and @type is 'hasOne'
-      unless _.isFunction(@reverse_model_type.schema) # not a relational model
-        @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
-      reverse_schema = @reverse_model_type.schema()
-      reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
+    @reverse_relation = Utils.generateBelongsTo(@reverse_model_type, @model_type) if not @reverse_relation and @type is 'hasOne'
 
   initializeModel: (model, key) -> @_bindBacklinks(model)
 
