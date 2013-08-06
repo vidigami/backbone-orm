@@ -1,11 +1,15 @@
+Queue = require 'queue-async'
+
 # each model should be fabricated with 'id', 'name', 'created_at', 'updated_at'
 # beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  require('./flat/sync')(options)
-  require('./flat/batch')(options)
-  require('./flat/convenience')(options)
-  require('./flat/cursor')(options)
-  require('./flat/find')(options)
-  require('./flat/interval')(options)
-  require('./flat/page')(options)
-  require('./flat/sort')(options)
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> require('./flat/sync')(options, callback)
+  queue.defer (callback) -> require('./flat/batch')(options, callback)
+  queue.defer (callback) -> require('./flat/convenience')(options, callback)
+  queue.defer (callback) -> require('./flat/cursor')(options, callback)
+  queue.defer (callback) -> require('./flat/find')(options, callback)
+  queue.defer (callback) -> require('./flat/interval')(options, callback)
+  queue.defer (callback) -> require('./flat/page')(options, callback)
+  queue.defer (callback) -> require('./flat/sort')(options, callback)
+  queue.await callback

@@ -1,98 +1,100 @@
 util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
+inflection = require 'inflection'
+LRU = require 'lru-cache'
 
 Utils = require './utils'
-
-MAX_CACHE_MS = 500*1000*1000 # TODO: determine the best amount
 
 # @private
 class Cache
   constructor: ->
-    @store = {}
+    @caches = {}
+    @options = {modelTypes: {}}
+    @verbose = false
+    # @verbose = true
 
-  find: (model_name, data) ->
-    (return if _.isArray(data) then [] else null) unless model_store = @store[model_name] # no model store, nothing to find
+  # Configure the cache singleton
+  #
+  # options:
+  #   max: default maximum number of items or max size of the cache
+  #   max_age/maxAge: default maximum number of items or max size of the cache
+  #   model_types/modelTypes: {'ModelName': options}
+  #
+  configure: (options) ->
+    @reset()
+    (@options = {modelTypes: {}}; return @) unless options # clear all options
 
-    now = (new Date()).valueOf()
-    return @_getOrInvalidateModel(model_store, data, now) unless _.isArray(data) # one
-
-    # many
-    results = []
-    results.push(model) for data in data when (model = @_getOrInvalidateModel(model_store, data, now))
-    return results
-
-  findOrNew: (model_name, model_type, data) ->
-    (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
-
-    now = (new Date()).valueOf()
-    unless _.isArray(data) # one
-      return model if model = @_getOrInvalidateModel(model_store, data, now)
-      return @_createModel(model_store, model_type, data, now)
-
-    # many
-    results = []
-    for item in data
-      if model = @_getOrInvalidateModel(model_store, item, now)
-        results.push(model)
+    for key, value of options
+      key = @normalizeKey(key)
+      if _.isObject(value)
+        @options[key] or= {}
+        values = @options[key]
+        values[@normalizeKey(value_key)] = value_value for value_key, value_value of value
       else
-        results.push(@_createModel(model_store, model_type, item, now))
-    return results
-
-  add: (model_name, models) ->
-    (@store[model_name] = model_store = {}) unless model_store = @store[model_name]
-
-    now = (new Date()).valueOf()
-    return @_addModel(model_store, models, now) unless _.isArray(models) # one
-
-    # many
-    @_addModel(model_store, model, now) for model in models
+        @options[key] = value
     return @
 
-  # alias
-  update: (model_name, models) -> @add(model_name, models)
+  configureSync: (model_type, sync_fn) ->
+    return if @getOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
 
-  remove: (model_name, ids) ->
-    if model_store = @store[model_name]
-      if _.isArray(ids) # manya
-        delete model_store[id] for id in ids
-      else # one
-        delete model_store[id]
-    return @
+  reset: (model_name, ids) ->
+    # clear the full cache
+    if arguments.length is 0
+      value.reset() for key, value of @caches
+      @caches = {}
 
-  clear: (model_name, ids) ->
-    (@store[model_name] = {}; return @)
+    # clear a model cache
+    else if arguments.length is 1
+      return @ unless model_cache = @caches[model_name] # no caching
+      model_cache.reset()
 
-  _createModel: (model_store, model_type, data, now) ->
-    if _.isObject(data)
-      return new model_type(data) unless data.id # no id, means just create without caching (embedded) TODO: review
-      @_addModel(model_store, model = new model_type(data), now)
+    # clear specific ids from a model cache
     else
-      @_addModel(model_store, model = new model_type({id: data}), now)
-      model._orm_needs_load = true
-    return model
-
-  _addModel: (model_store, model, now) ->
-    throw new Error "Cannot store a model without an id: #{util.inspect(model.attributes)}" unless model.attributes.id
-    model_store[model.attributes.id] = {model: model, last_used: now}
+      ids = [ids] unless _.isArray(ids)
+      model_cache.del(id) for id in ids
     return @
 
-  _getOrInvalidateModel: (model_store, data, now) ->
-    id = Utils.dataId(data)
-    return null unless model_info = model_store[id] # not found
-
-    # too old
-    (delete model_store[id]; return null) if (now - model_info.last_used) > MAX_CACHE_MS
-
-    # update data, timestamp and return
-    model = model_info.model
-    if data instanceof Backbone.Model # TODO: is this needed?
-      model.set(data.attributes)
-    else if _.isObject(data)
-      model.set(data)
-
-    model_info.last_used = now
+  get: (model_name, data) ->
+    return undefined unless model_cache = @caches[model_name] # no caching
+    return (model_cache.get(Utils.dataId(item)) for item in data) if _.isArray(data)
+    model = model_cache.get(Utils.dataId(data))
+    console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
     return model
+
+  set: (model_name, model) ->
+    throw new Error "Missing id for model: #{model_name}" unless model.id
+    return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
+    if current_model = model_cache.get(model.id)
+      Utils.updateModel(current_model, model)
+    else
+      model_cache.set(model.id, model)
+    return @
+
+  del: (model_name, ids) ->
+    return @ unless model_cache = @caches[model_name] # no caching
+
+    ids = [ids] unless _.isArray(ids)
+    model_cache.del(id) for id in ids
+    return @
+
+  getOrCreateModelCache: (model_name) ->
+    return model_cache if model_cache = @caches[model_name]
+
+    # there are options
+    if options = @options.modelTypes[model_name]
+      return @caches[model_name] = LRU(options)
+
+    # there are global options
+    else if @options.max or @options.maxAge
+      return @caches[model_name] = LRU(_.pick(@options, 'max', 'maxAge', 'length', 'dispose', 'stale'))
+
+    return null
+
+  normalizeKey: (key) ->
+    key = inflection.underscore(key)
+    return key.toLowerCase() if key.indexOf('_') < 0
+    return inflection.camelize(key)
 
 # singleton
 module.exports = new Cache()

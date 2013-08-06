@@ -9,11 +9,13 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-runTests = (options, cache) ->
+runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
+  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
   END_DATE = moment(START_DATE).add('milliseconds', (BASE_COUNT - 1) * DATE_INTERVAL_MS).toDate()
@@ -23,11 +25,14 @@ runTests = (options, cache) ->
     @schema: _.defaults({
       boolean: 'Boolean'
     }, BASE_SCHEMA)
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   describe "Model.find (cache: #{cache})", ->
 
+    before (done) -> return done() unless options.before; options.before([Flat], done)
+    after (done) -> callback(); done()
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       queue = new Queue(1)
 
       queue.defer (callback) -> Flat.resetSchema(callback)
@@ -373,6 +378,8 @@ runTests = (options, cache) ->
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  runTests(options, false)
-  runTests(options, true)
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> runTests(options, false, callback)
+  queue.defer (callback) -> runTests(options, true, callback)
+  queue.await callback

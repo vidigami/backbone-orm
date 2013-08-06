@@ -37,9 +37,6 @@ module.exports = (model_type) ->
   # @method .findOrCreate(data, callback)
   #   Find a model by data (including the id) or create with save if it does not already exist.
   #
-  # @method .findOrNew(data, callback)
-  #   Find a model by data (including the id) or create a new one without save if it does not already exist.
-  #
   # @method .findOneNearestDate(date, options, query, callback)
   #   Find a model near a date. It will search in both directions until a model is found depending on the reverse flag (default is forwards).
   #   @param [Object] options
@@ -63,7 +60,7 @@ module.exports = (model_type) ->
   # Backbone ORM - Sync Accessors
   ###################################
 
-  model_type.createSync = (target_model_type, cache) -> model_type::sync('createSync', target_model_type, cache)
+  model_type.createSync = (target_model_type) -> model_type::sync('createSync', target_model_type)
 
   ###################################
   # Backbone ORM - Class Extensions
@@ -113,22 +110,8 @@ module.exports = (model_type) ->
       model = new model_type(data)
       model.save {}, (err) ->
         return callback(err) if err
-        cache.add(model_type.model_name, model) if cache = model_type.cache()
+        cache.add(model.id, model) if cache = model_type.cache()
         callback(null, model)
-
-  model_type.findOrNew = (data) ->
-    throw 'findOrNew requires data' unless data
-    return data if (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
-
-    if cache = model_type.cache()
-      return cache.findOrNew(model_type.model_name, model_type, data)
-    else
-      return (model_type.findOrNew(item) for item in data) if _.isArray(data)
-      return new model_type(model_type::parse(data)) if _.isObject(data)
-      related_model = new model_type({id: data})
-      #todo: delete, kept for many
-#      related_model._orm_needs_load = true
-      return related_model
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key
@@ -263,7 +246,7 @@ module.exports = (model_type) ->
     options.success = (model, resp, options) =>
       delete @_orm_save if --@_orm_save is 0
 
-      queue = new Queue(1) # TODO: in parallel?
+      queue = new Queue()
 
       # now save relations
       for key, relation of schema.relations
@@ -294,7 +277,7 @@ module.exports = (model_type) ->
     options.success = (model, resp, options) =>
       delete @_orm_save if --@_orm_save is 0
 
-      queue = new Queue(1) # TODO: in parallel?
+      queue = new Queue()
 
       # now remove relations
       for key, relation of schema.relations

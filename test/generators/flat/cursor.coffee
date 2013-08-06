@@ -7,22 +7,26 @@ Queue = require 'queue-async'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 
-runTests = (options, cache) ->
+runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
+  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
     @schema: _.defaults({
       boolean: 'Boolean'
     }, BASE_SCHEMA)
-    sync: SYNC(Flat, cache)
+    sync: SYNC(Flat)
 
   describe "Model.cursor (cache: #{cache})", ->
 
+    before (done) -> return done() unless options.before; options.before([Flat], done)
+    after (done) -> callback(); done()
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       queue = new Queue(1)
 
       queue.defer (callback) -> Flat.resetSchema(callback)
@@ -193,6 +197,8 @@ runTests = (options, cache) ->
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  runTests(options, false)
-  runTests(options, true)
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> runTests(options, false, callback)
+  queue.defer (callback) -> runTests(options, true, callback)
+  queue.await callback

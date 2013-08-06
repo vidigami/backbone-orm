@@ -5,7 +5,6 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
-One = require './one'
 
 # @private
 module.exports = class Many
@@ -16,27 +15,9 @@ module.exports = class Many
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
-    if @as
-      @reverse_relation = @reverse_model_type.relation(@as)
-#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
-      if @reverse_relation
-        @reverse_relation.foreign_key = @foreign_key
-        @reverse_relation.reverse_relation = @
-    else
-      # May have been set already if `as` was specified on the reverse relation
-      @reverse_relation or= Utils.reverseRelation(@reverse_model_type, @model_type.model_name) if @model_type.model_name
-
+    @reverse_relation = Utils.findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
-
-    # The reverse of a hasMany relation should be `belongsTo`, not `hasOne`
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
-
-    if not @reverse_relation
-      unless _.isFunction(@reverse_model_type.schema) # not a relational model
-        @reverse_model_type.sync = @model_type.createSync(@reverse_model_type, !!@model_type.cache())
-      reverse_schema = @reverse_model_type.schema()
-      reverse_key = inflection.underscore(@model_type.model_name)
-      reverse_schema.addRelation(@reverse_relation = new One(@reverse_model_type, reverse_key, {type: 'belongsTo', reverse_model_type: @model_type, manual_fetch: true}))
 
     # check for join table
     if @reverse_relation.type is 'hasMany' and not @join_table
@@ -59,23 +40,25 @@ module.exports = class Many
 
     # set the collection with found or created models
     models = []
-    for data in value
-      if related_model = collection.get(Utils.dataId(data))
-        if data instanceof Backbone.Model
-          related_model.set(data.toJSON())
-        else if _.isObject(data)
-          related_model.set(data)
+    for item in value
+      if related_model = collection.get(Utils.dataId(item))
+        Utils.updateModel(model, item)
       else
-        related_model = @reverse_model_type.findOrNew(data)
+        related_model = Utils.updateOrNew(item, @reverse_model_type)
       models.push(related_model)
-    @_setLoaded(model, true)
 
     if @reverse_relation.type is 'belongsTo'
       for related_model in collection.models when related_model.id not in _.pluck(models, 'id')
         related_model.set(@foreign_key, null)
+
+        if cache = @reverse_model_type.cache()
+          cache.set(related_model.id, related_model)
+
         @_queueDependentSave(model, related_model.id)
 
     collection.reset(models)
+    @_setLoaded(model, true)
+
     return @
 
   get: (model, key, callback) ->
@@ -109,12 +92,12 @@ module.exports = class Many
           do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
         if dependent_ids = model._orm.dependent_saves?[@key]
-          @_clearDependentSaves(model)
           queue.defer (callback) =>
             # Update foreign keys of relations that should no longer point to this model
             (query = {})[@foreign_key] = model.attributes.id
-            @reverse_model_type.cursor(query).toModels (err, attached_models) =>
-              @_clearHasOneRelatedModels(_.filter(attached_models, (test) -> test.id not in dependent_ids), callback)
+            @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
+              @_clearHasOneRelatedModels(attached_models, callback)
+              @_clearDependentSaves(model)
 
         return queue.await callback
 
@@ -125,11 +108,11 @@ module.exports = class Many
     # hasMany
     else
       collection = @_ensureCollection(model)
-      return callback() unless !@_isLoaded(model) # not loaded
+      return callback() if @_isLoaded(model) # not loaded
 
       # TODO: optimize
       query = {$values: @foreign_key}
-      query[@foreign_key] = model.attributes.id
+      query[@foreign_key] = model.id
       @join_table.cursor(query).toJSON (err, json) =>
         return callback(err) if err
 
@@ -151,7 +134,7 @@ module.exports = class Many
         for related_id in added
           do (related_id) => queue.defer (callback) =>
             attributes = {}
-            attributes[@foreign_key] = model.attributes.id
+            attributes[@foreign_key] = model.id
             attributes[@reverse_relation.foreign_key] = related_id
             # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
             join = new @join_table(attributes)
@@ -177,9 +160,10 @@ module.exports = class Many
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
-    throw new Error "Model added twice: #{util.inspect(current_related_model.attributes)}" if current_related_model
+    throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
     collection.add(related_model)
 
+##todo: update isLoaded when adding / removing
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
@@ -257,13 +241,14 @@ module.exports = class Many
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-    return true if @_isLoaded(model) # already loaded
+
+    return true if @_isLoaded(model, key) # already loaded
     collection = @_ensureCollection(model)
 
     # TODO: check which objects are already loaded in cache and ignore ids
 
     # fetch
-    (query = {})[@foreign_key] = model.attributes.id
+    (query = {})[@foreign_key] = model.id
     (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
@@ -277,9 +262,11 @@ module.exports = class Many
 
         # create new
         else
-          collection.add(related_model = @reverse_model_type.findOrNew(model_json))
+          collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
 
-      cache.update(@reverse_model_type.model_name, collection.models) if cache = @reverse_model_type.cache()
+      if cache = @reverse_model_type.cache()
+        cache.set(model.id, model) for model in collection.models
+
       callback(null, collection.models)
     return false
 
@@ -303,5 +290,9 @@ module.exports = class Many
     for related_model in related_models
       do (related_model) =>
         queue.defer (callback) =>
-          related_model.save update, Utils.bbCallback(callback)
+          related_model.save update, Utils.bbCallback (err, saved_model) =>
+            callback(err) if err
+            if cache = @reverse_model_type.cache()
+              cache.set(saved_model.id, saved_model)
+            callback()
     queue.await callback

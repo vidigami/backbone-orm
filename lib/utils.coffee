@@ -6,8 +6,6 @@ moment = require 'moment'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
-Cursor = require './cursor'
-
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
 BATCH_DEFAULT_LIMIT = 1500
@@ -50,24 +48,65 @@ module.exports = class Utils
   # Relational
   ##############################
   # @private
-  @reverseRelation: (model_type, owning_model_name) ->
-    return null unless model_type.relation
-    reverse_key = inflection.underscore(owning_model_name)
-    return relation if relation = model_type.relation(reverse_key = inflection.underscore(owning_model_name)) # singular
-    return model_type.relation(inflection.pluralize(reverse_key)) # plural
+  @findOrGenerateReverseRelation: (relation) ->
+    model_type = relation.model_type
+    reverse_model_type = relation.reverse_model_type
+    reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
+
+    if relation.as
+      reverse_relation = reverse_model_type.relation(relation.as)
+#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
+      if reverse_relation
+        reverse_relation.foreign_key = relation.foreign_key
+        reverse_relation.reverse_relation = relation
+    else
+      key_root = inflection.underscore(model_type.model_name)
+      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.singularize(key_root)) # singular
+        reverse_relation = reverse_model_type.relation(reverse_key = inflection.pluralize(key_root)) # plural
+
+    # check for reverse since they need to store the foreign key
+    if not reverse_relation and (relation.type is 'hasOne' or relation.type is 'hasMany')
+      reverse_relation =  reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
+    return reverse_relation
 
   # @private
-  @dataId: (data) ->
-    if data instanceof Backbone.Model
-      return data.id
-    else if _.isObject(data)
-      return data.id
-    return data
+  @dataId: (data) -> return data?.id or data
 
-  @joinTableName: (relation) ->
+  # @private
+  @dataToModel: (data, model_type) ->
+    return null unless data
+    return (Utils.dataToModel(item) for item in data) if _.isArray(data)
+    if data instanceof Backbone.Model
+      model = data
+    else if _.isObject(data)
+      model = new model_type(model_type::parse(data))
+    else
+      model = new model_type({id: data})
+      model._orm_needs_load = true
+    return model
+
+  @updateModel: (model, data) ->
+    return if not data or (model is data) or data._orm_needs_load
+    data = data.toJSON() if data instanceof Backbone.Model
+    if _.isObject(data)
+      model.set(data)
+      delete model._orm_needs_load
+    return model
+
+  @updateOrNew: (data, model_type) ->
+    if cache = model_type.cache()
+      Utils.updateModel(model, data) if model = cache.get(Utils.dataId(data))
+    unless model
+      model = Utils.dataToModel(data, model_type)
+      cache.set(model.id, model) if model and cache
+    return model
+
+  @joinTableURL: (relation) ->
     model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
     model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))
     return if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+
+  @joinTableModelName: (relation) -> inflection.classify(inflection.singularize(Utils.joinTableURL(relation)))
 
   # @private
   @createJoinTableModel: (relation) ->
@@ -75,11 +114,16 @@ module.exports = class Utils
     schema[relation.foreign_key] = ['Integer', indexed: true]
     schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
 
-    # @private
-    class JoinTable extends Backbone.Model
-      urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{Utils.joinTableName(relation)}"
-      @schema: schema
-      sync: relation.model_type.createSync(JoinTable)
+    try
+      class JoinTable extends Backbone.Model
+        urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{Utils.joinTableURL(relation)}"
+        @schema: schema
+        sync: relation.model_type.createSync(JoinTable)
+    catch
+      class JoinTable extends Backbone.Model
+        @model_name: Utils.joinTableModelName(relation)
+        @schema: schema
+        sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable
 
@@ -151,6 +195,8 @@ module.exports = class Utils
   ##############################
   # @private
   @batch: (model_type, query, options, callback, fn) ->
+    Cursor = require './cursor'
+
     [query, options, callback, fn] = [{}, {}, query, options] if arguments.length is 3
     [query, options, callback, fn] = [{}, query, options, callback] if arguments.length is 4
 

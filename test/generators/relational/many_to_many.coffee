@@ -7,29 +7,33 @@ Queue = require 'queue-async'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 
-runTests = (options, cache, embed) ->
+runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 1
+  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
-    sync: SYNC(Reverse, cache)
+    sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
-    sync: SYNC(Owner, cache)
+    sync: SYNC(Owner)
 
   describe "Many to Many (cache: #{cache} embed: #{embed})", ->
 
+    before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
+    after (done) -> callback(); done()
     beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
       MODELS = {}
 
       queue = new Queue(1)
@@ -91,7 +95,7 @@ runTests = (options, cache, embed) ->
             assert.ok(!!owner, 'found owner')
 
             if Owner.cache()
-              assert.deepEqual(JSON.stringify(test_model.toJSON()), JSON.stringify(owner.toJSON()), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
@@ -164,8 +168,10 @@ runTests = (options, cache, embed) ->
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
-module.exports = (options) ->
-  runTests(options, false, false)
-  runTests(options, true, false)
-  runTests(options, false, true) if options.embed
-  runTests(options, true, true) if options.embed
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> runTests(options, false, false, callback)
+  queue.defer (callback) -> runTests(options, true, false, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
+  queue.await callback
