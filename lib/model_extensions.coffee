@@ -280,6 +280,9 @@ module.exports = (model_type) ->
     @_orm_save or= 0
     @_orm_save++
 
+    # clear out of the cache
+    cache.del(@id) if cache = @cache()
+
     return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
