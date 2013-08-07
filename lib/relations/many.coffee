@@ -11,7 +11,8 @@ module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{inflection.singularize(@key)}_ids"
-    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
+    # @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
+    @foreign_key = inflection.foreign_key(@model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
@@ -42,17 +43,15 @@ module.exports = class Many
     models = []
     for item in value
       if related_model = collection.get(Utils.dataId(item))
-        Utils.updateModel(model, item)
+        Utils.updateModel(related_model, item)
       else
         related_model = Utils.updateOrNew(item, @reverse_model_type)
       models.push(related_model)
 
     if @reverse_relation.type is 'belongsTo'
-      for related_model in collection.models when related_model.id not in _.pluck(models, 'id')
+      model_ids = _.pluck(models, 'id')
+      for related_model in _.clone(collection.models) when not _.contains(model_ids, related_model.id)
         related_model.set(@foreign_key, null)
-        #todo: is this necessary?
-        if cache = @reverse_model_type.cache()
-          cache.set(related_model.id, related_model)
         @_queueDependentSave(model, related_model.id)
 
     collection.reset(models)
@@ -162,7 +161,7 @@ module.exports = class Many
     throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
     collection.add(related_model)
 
-##todo: update isLoaded when adding / removing
+## TODO: update isLoaded when adding / removing
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
@@ -253,17 +252,13 @@ module.exports = class Many
 
       # process the found models
       for model_json in json
-
-        # update existing
         if related_model = collection.get(model_json.id)
           related_model.set(model_json)
-
-        # create new
         else
           collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
 
       if cache = @reverse_model_type.cache()
-        cache.set(model.id, model) for model in collection.models
+        cache.set(model.id, related_model) for related_model in collection.models
 
       @_setLoaded(model, true)
 

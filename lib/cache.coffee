@@ -55,17 +55,17 @@ class Cache
       model_cache.del(id) for id in ids
     return @
 
-  get: (model_name, data) ->
+  get: (model_name, ids) ->
     return undefined unless model_cache = @caches[model_name] # no caching
-    return (model_cache.get(Utils.dataId(item)) for item in data) if _.isArray(data)
-    model = model_cache.get(Utils.dataId(data))
-    console.log "Cache (#{model_name}) #{if !!model then 'hit' else 'miss'}: #{Utils.dataId(data)}" if @verbose
-    return model
+
+    return model_cache.get(ids) unless _.isArray(ids)
+    return (model_cache.get(id) for id in ids)
 
   set: (model_name, model) ->
     return @ if model._orm_never_cache # never cache
     throw new Error "Missing id for model: #{model_name}" unless model.id
     return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
+
     if current_model = model_cache.get(model.id)
       Utils.updateModel(current_model, model)
     else

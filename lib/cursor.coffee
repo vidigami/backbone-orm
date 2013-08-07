@@ -67,11 +67,17 @@ module.exports = class Cursor
   hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
+    return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
     @toJSON (err, json) =>
       return callback(err) if err
-      return callback(new Error "Cannot call toModels on cursor with values. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
-      return callback(null, if json then Utils.updateOrNew(json, @model_type) else null) if @_cursor.$one
-      callback(null, (Utils.updateOrNew(attributes, @model_type) for attributes in json))
+      return callback(null, null) if @_cursor.$one and not json
+      can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
+      json = [json] unless _.isArray(json)
+      if can_cache
+        models = (Utils.updateOrNew(item, @model_type) for item in json)
+      else
+        models = (@model_type(@model_type::parse(item)) for item in json)
+      return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'

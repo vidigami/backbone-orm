@@ -75,7 +75,7 @@ module.exports = class Utils
   # @private
   @dataToModel: (data, model_type) ->
     return null unless data
-    return (Utils.dataToModel(item) for item in data) if _.isArray(data)
+    return (Utils.dataToModel(item, model_type) for item in data) if _.isArray(data)
     if data instanceof Backbone.Model
       model = data
     else if _.isObject(data)
@@ -89,15 +89,22 @@ module.exports = class Utils
     return if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
     if _.isObject(data)
-      model.set(data)
       delete model._orm_needs_load
+      model.set(data)
+      schema = model.schema()
+      for key of model.attributes
+        continue unless _.isUndefined(data[key])
+        if schema and relation = schema.relation(key)
+          model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
+        else
+          model.unset(key)
     return model
 
   @updateOrNew: (data, model_type) ->
     if cache = model_type.cache()
       Utils.updateModel(model, data) if model = cache.get(Utils.dataId(data))
     unless model
-      model = Utils.dataToModel(data, model_type)
+      model = if data instanceof Backbone.Model then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache
     return model
 

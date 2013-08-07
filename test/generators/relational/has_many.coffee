@@ -287,7 +287,6 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(removed_reverse.get('owner_id'), null, 'Reverse relation has its foreign key set to null')
 
           owner.save {}, Utils.bbCallback (err, owner) ->
-            Reverse.find {}, (err, rs) -> (console.log r.id, r.get('owner_id') for r in rs)
             Reverse.find {owner_id: owner.id}, (err, new_reverses) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(new_reverses.length, 1, "Relations loaded from store have the correct length\nExpected: #{1}\nActual: #{new_reverses.length}")
