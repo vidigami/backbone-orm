@@ -76,7 +76,7 @@ module.exports = class Cursor
       if can_cache
         models = (Utils.updateOrNew(item, @model_type) for item in json)
       else
-        models = (@model_type(@model_type::parse(item)) for item in json)
+        models = (new @model_type(@model_type::parse(item)) for item in json)
       return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type

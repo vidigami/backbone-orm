@@ -36,6 +36,7 @@ class Cache
     return @
 
   configureSync: (model_type, sync_fn) ->
+    return sync_fn if model_type::_orm_never_cache
     return if @getOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
 
   reset: (model_name, ids) ->
