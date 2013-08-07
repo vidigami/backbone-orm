@@ -39,7 +39,7 @@ module.exports = class One
       Utils.updateModel(previous_related_model, value)
 
     # clear the reverse relation if it's loaded
-    else if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
+    else if (value is null) and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
       unless @embed or @reverse_relation.embed
         if model.isLoaded(@key)
           previous_related_model.set(@reverse_relation.key, null) if previous_related_model and previous_related_model.get(@reverse_relation.key)
@@ -50,8 +50,6 @@ module.exports = class One
 
   get: (model, key, callback) ->
     throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
-
-    # console.log "GET #{key} is_loaded: #{model.isLoaded(@key)}" if @model_type.model_name is 'Owner'
 
     returnValue = =>
       return null unless related_model = model.attributes[@key]
@@ -144,7 +142,6 @@ module.exports = class One
       return callback(err) if err
 
       model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
-
       model.setLoaded(@key, true)
       callback(null, related_model)
 
@@ -166,12 +163,12 @@ module.exports = class One
 
     model._orm_bindings = {}
     model._orm_bindings.change = (model) =>
+      related_model = model.get(@key)
+
       # update backlinks
       if previous_related_model = model.previous(@key)
         if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
-
-      # update backlinks
-      if related_model = model.get(@key)
+      if related_model
         if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
     model.on("change:#{@key}", model._orm_bindings.change)
