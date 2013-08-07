@@ -292,7 +292,7 @@ module.exports = (model_type) ->
     options.success = (model, resp, options) =>
       delete @_orm_save if --@_orm_save is 0
 
-      queue = new Queue()
+      queue = new Queue(1)
 
       # now remove relations
       for key, relation of schema.relations
