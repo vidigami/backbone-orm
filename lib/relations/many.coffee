@@ -20,11 +20,7 @@ module.exports = class Many
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
 
     # check for join table
-    if @reverse_relation.type is 'hasMany' and not @join_table
-      if @reverse_relation.join_table
-        @join_table = @reverse_relation.join_table
-      else
-        @join_table = Utils.createJoinTableModel(@)
+    @join_table = Utils.findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
   initializeModel: (model, key) ->
     model.setLoaded(@key, false)

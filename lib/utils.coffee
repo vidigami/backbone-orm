@@ -70,6 +70,16 @@ module.exports = class Utils
     return reverse_relation
 
   # @private
+  @findOrGenerateJoinTable: (relation) ->
+    # already exists
+    return join_table if join_table = (relation.join_table or relation.reverse_relation.join_table)
+    return relation.model_type.schema().generateJoinTable(relation)
+
+  ##############################
+  # Data to Model Helpers
+  ##############################
+
+  # @private
   @dataId: (data) -> return data?.id or data
 
   # @private
@@ -107,32 +117,6 @@ module.exports = class Utils
       model = if data instanceof Backbone.Model then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache
     return model
-
-  @joinTableURL: (relation) ->
-    model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
-    model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))
-    return if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
-
-  @joinTableModelName: (relation) -> inflection.classify(inflection.singularize(Utils.joinTableURL(relation)))
-
-  # @private
-  @createJoinTableModel: (relation) ->
-    schema = {}
-    schema[relation.foreign_key] = ['Integer', indexed: true]
-    schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
-
-    try
-      class JoinTable extends Backbone.Model
-        urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{Utils.joinTableURL(relation)}"
-        @schema: schema
-        sync: relation.model_type.createSync(JoinTable)
-    catch
-      class JoinTable extends Backbone.Model
-        @model_name: Utils.joinTableModelName(relation)
-        @schema: schema
-        sync: relation.model_type.createSync(JoinTable)
-
-    return JoinTable
 
   ##############################
   # Sorting
