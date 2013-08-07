@@ -47,7 +47,7 @@ module.exports = class Schema
         sync: relation.model_type.createSync(JoinTable)
     catch
       class JoinTable extends Backbone.Model
-        @model_name: Schema.joinTableModelName(relation)
+        urlRoot: "/#{Schema.joinTableModelName(relation)}"
         @schema: schema
         sync: relation.model_type.createSync(JoinTable)
 
