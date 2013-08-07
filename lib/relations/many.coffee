@@ -11,8 +11,7 @@ module.exports = class Many
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{inflection.singularize(@key)}_ids"
-    # @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
-    @foreign_key = inflection.foreign_key(@model_type.model_name) unless @foreign_key
+    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
@@ -257,28 +256,27 @@ module.exports = class Many
 
   _clearRelation: (model, callback) ->
     (query = {})[@foreign_key] = model.attributes.id
+
+    # clear in memory collection
+    collection = @_ensureCollection(model)
+    related_model.set(@foreign_key, null) for related_model in _.clone(collection.models)
+
     if @reverse_relation.type is 'hasMany'
-      @join_table.destroy query, (err, json) =>
-        callback()
+      @join_table.destroy(query, callback)
     else
-      if (collection = @_ensureCollection(model))?.length
-        @_clearHasOneRelatedModels(collection.models, callback)
-      else
-        @cursor(model, @key).toModels (err, related_models) =>
-          return callback(err) if err
-          @_clearHasOneRelatedModels(related_models, callback)
+      @cursor(model, @key).toModels (err, related_models) =>
+        return callback(err) if err
+        @_clearHasOneRelatedModels(related_models, callback)
 
   _clearHasOneRelatedModels: (related_models, callback) ->
     return callback() unless related_models.length
     (update = {})[@foreign_key] = null
     queue = new Queue()
     for related_model in related_models
-      if related_model
-        do (related_model) =>
-          queue.defer (callback) =>
-            related_model.save update, Utils.bbCallback (err, saved_model) =>
-              callback(err) if err
-              if cache = @reverse_model_type.cache()
-                cache.set(saved_model.id, saved_model)
-              callback()
+      continue unless related_model
+      do (related_model) => queue.defer (callback) =>
+        related_model.save update, Utils.bbCallback (err, saved_model) =>
+          callback(err) if err
+          cache.set(saved_model.id, saved_model) if cache = @reverse_model_type.cache()
+          callback()
     queue.await callback
