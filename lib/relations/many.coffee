@@ -153,7 +153,9 @@ module.exports = class Many
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
-    throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
+    if current_related_model
+      collection.remove(current_related_model)
+      # throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}"
     collection.add(related_model)
 
   # TODO: update isLoaded when adding / removing
