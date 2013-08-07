@@ -28,7 +28,7 @@ module.exports = class Many
         @join_table = Utils.createJoinTableModel(@)
 
   initializeModel: (model, key) ->
-    @_setLoaded(model, false)
+    model.setLoaded(@key, false)
     @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
@@ -55,7 +55,7 @@ module.exports = class Many
         @_queueDependentSave(model, related_model.id)
 
     collection.reset(models)
-    @_setLoaded(model, true)
+    model.setLoaded(@key, true)
 
     return @
 
@@ -106,7 +106,7 @@ module.exports = class Many
     # hasMany
     else
       collection = @_ensureCollection(model)
-      return callback() unless @_isLoaded(model) # not loaded
+      return callback() unless model.isLoaded(@key) # not loaded
 
       # TODO: optimize
       query = {$values: @foreign_key}
@@ -183,16 +183,6 @@ module.exports = class Many
   # Internal
   ####################################
 
-  _setLoaded: (model, loaded) ->
-    if loaded
-      delete model._orm?.needs_load?[@key]
-    else
-      model._orm or= {}
-      (model._orm.needs_load or= {})[@key] = true
-
-  _isLoaded: (model) ->
-    return not model._orm.needs_load?[@key]
-
   _queueDependentSave: (model, id) ->
     model._orm or= {}
     (model._orm.dependent_saves or= {})[@key] or= []
@@ -239,7 +229,7 @@ module.exports = class Many
 
   # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
-    return true if @_isLoaded(model, key) # already loaded
+    return true if model.isLoaded(@key) # already loaded
     collection = @_ensureCollection(model)
 
     # TODO: check which objects are already loaded in cache and ignore ids
@@ -260,7 +250,7 @@ module.exports = class Many
       if cache = @reverse_model_type.cache()
         cache.set(model.id, related_model) for related_model in collection.models
 
-      @_setLoaded(model, true)
+      model.setLoaded(@key, true)
 
       callback(null, collection.models)
     return false

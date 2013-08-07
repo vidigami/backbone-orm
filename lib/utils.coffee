@@ -82,14 +82,14 @@ module.exports = class Utils
       model = new model_type(model_type::parse(data))
     else
       model = new model_type({id: data})
-      model._orm_needs_load = true
+      model.setLoaded(false)
     return model
 
   @updateModel: (model, data) ->
     return if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
     if _.isObject(data)
-      delete model._orm_needs_load
+      model.setLoaded(true)
       model.set(data)
       schema = model.schema()
       for key of model.attributes

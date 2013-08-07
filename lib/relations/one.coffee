@@ -17,7 +17,7 @@ module.exports = class One
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   initializeModel: (model, key) ->
-    @_setLoaded(model, !!(@embed or @reverse_relation?.embed))
+    model.setLoaded(@key, !!(@embed or @reverse_relation?.embed))
     @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
@@ -26,9 +26,11 @@ module.exports = class One
     value = null if _.isUndefined(value) # Backbone clear or reset
 
     return @ if value is (previous_related_model = model.get(@key)) # no change
+    value_is_model = (value instanceof Backbone.Model)
+    model.setLoaded(@key, true) if not model.isLoaded(@key) and (value_is_model or _.isObject(value)) # set loaded state
 
     # set the relation now or later merge into the existing model
-    if value and not (value instanceof Backbone.Model)
+    if value and not value_is_model
       value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = !!previous_related_model
     Backbone.Model::set.call(model, @key, value, options) unless merge_into_existing
 
@@ -39,7 +41,7 @@ module.exports = class One
     # clear the reverse relation if it's loaded
     else if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
       unless @embed or @reverse_relation.embed
-        if @_isLoaded(model)
+        if model.isLoaded(@key)
           previous_related_model.set(@reverse_relation.key, null) if previous_related_model and previous_related_model.get(@reverse_relation.key)
           # Note the model as it needs to be saved to have its foreign key updated
         @_queueDependentSave(model) if @type is 'hasOne'
@@ -48,6 +50,8 @@ module.exports = class One
 
   get: (model, key, callback) ->
     throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+
+    # console.log "GET #{key} is_loaded: #{model.isLoaded(@key)}" if @model_type.model_name is 'Owner'
 
     returnValue = =>
       return null unless related_model = model.attributes[@key]
@@ -102,10 +106,6 @@ module.exports = class One
     return json[json_key] = related_model.toJSON() if @embed
     return json[json_key] = related_model.id if @type is 'belongsTo'
 
-  has: (model, key, data) ->
-    return data is current_related_model if not current_related_model = model.attributes[@key]
-    return current_related_model.id is Utils.dataId(data)
-
   cursor: (model, key, query) ->
     query = _.extend({$one:true}, query or {})
     if model instanceof Backbone.Model
@@ -127,17 +127,6 @@ module.exports = class One
   ####################################
   # Internal
   ####################################
-
-  # TODO: optimize so don't need to check each time
-  _setLoaded: (model, loaded) ->
-    if loaded
-      delete model._orm?.needs_load?[@key]
-    else
-      model._orm or= {}
-      (model._orm.needs_load or= {})[@key] = true
-
-  _isLoaded: (model) -> not model._orm?.needs_load?[@key]
-
   _queueDependentSave: (model) ->
     model._orm or= {}
     (model._orm.dependent_saves or= {})[@key] = true
@@ -149,14 +138,14 @@ module.exports = class One
   # TODO: optimize so don't need to check each time
   # TODO: check which objects are already loaded in cache and ignore ids
   _fetchRelated: (model, key, callback) ->
-    return true if @_isLoaded(model) or not model.id # already loaded or not loadable
+    return true if model.isLoaded(@key) or not model.id # already loaded or not loadable
 
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
 
       model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
 
-      @_setLoaded(model, true)
+      model.setLoaded(@key, true)
       callback(null, related_model)
 
     return false

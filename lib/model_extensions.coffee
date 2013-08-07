@@ -160,6 +160,18 @@ module.exports = (model_type) ->
   model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
   model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type.relation(key) then !!relation.embed else false
 
+  model_type::isLoaded = (key) ->
+    key = '__model__' if arguments.length is 0
+    not @_orm?.needs_load[key]
+
+  model_type::setLoaded = (key, is_loaded) ->
+    [key, is_loaded] = ['__model__', key] if arguments.length is 1
+    if is_loaded
+      delete @_orm?.needs_load?[key]
+    else
+      @_orm or= {}
+      (@_orm.needs_load or= {})[key] = true
+
   ###################################
   # Backbone ORM - Model Overrides
   ###################################
