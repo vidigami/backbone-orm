@@ -25,25 +25,25 @@ module.exports = class One
     throw new Error "One::set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
-    related_model = model.attributes[@key]
+    return @ if value is (previous_related_model = model.get(@key)) # no change
 
-    # Clear the reverse relation if it's loaded
-    if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
+    # set the relation now or later merge into the existing model
+    if value and not (value instanceof Backbone.Model)
+      value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = !!previous_related_model
+    Backbone.Model::set.call(model, @key, value, options) unless merge_into_existing
+
+    # not setting a new model, update the previous model
+    if merge_into_existing
+      Utils.updateModel(previous_related_model, value)
+
+    # clear the reverse relation if it's loaded
+    else if value is null and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
       unless @embed or @reverse_relation.embed
         if @_isLoaded(model)
-          related_model.set(@reverse_relation.key, null) if related_model and related_model.get(@reverse_relation.key)
+          previous_related_model.set(@reverse_relation.key, null) if previous_related_model and previous_related_model.get(@reverse_relation.key)
           # Note the model as it needs to be saved to have its foreign key updated
         @_queueDependentSave(model) if @type is 'hasOne'
 
-    else if @has(model, @key, value)
-      return @ unless related_model # null
-      Utils.updateModel(related_model, value)
-      if related_model.id and not related_model._orm_needs_load
-        cache.set(related_model.id, related_model) if cache = @reverse_model_type.cache()
-      return @
-
-    related_model = if value then Utils.updateOrNew(value, @reverse_model_type) else null
-    Backbone.Model::set.call(model, @key, related_model, options)
     return @
 
   get: (model, key, callback) ->
