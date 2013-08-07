@@ -93,8 +93,8 @@ module.exports = class Many
             # Update foreign keys of relations that should no longer point to this model
             (query = {})[@foreign_key] = model.attributes.id
             @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
-              @_clearHasOneRelatedModels(attached_models, callback)
               @_clearDependentSaves(model)
+              @_clearHasOneRelatedModels(attached_models, callback)
 
         return queue.await callback
 
@@ -160,7 +160,7 @@ module.exports = class Many
     throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
     collection.add(related_model)
 
-## TODO: update isLoaded when adding / removing
+  # TODO: update isLoaded when adding / removing
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
@@ -187,8 +187,7 @@ module.exports = class Many
     (model._orm.dependent_saves or= {})[@key] or= []
     model._orm.dependent_saves[@key].push(id)
 
-  _clearDependentSaves: (model) ->
-    delete model._orm?.dependent_saves?[@key]
+  _clearDependentSaves: (model) -> delete model._orm?.dependent_saves?[@key]
 
   # TODO: ensure initialize is called only once and only from initializeModel
   _ensureCollection: (model) -> @_bindBacklinks(model)
