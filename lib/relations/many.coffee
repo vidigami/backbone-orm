@@ -261,6 +261,7 @@ module.exports = class Many
     collection = @_ensureCollection(model)
     related_model.set(@foreign_key, null) for related_model in _.clone(collection.models)
 
+    # clear in store
     if @reverse_relation.type is 'hasMany'
       @join_table.destroy(query, callback)
     else
