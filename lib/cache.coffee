@@ -36,7 +36,7 @@ class Cache
     return @
 
   configureSync: (model_type, sync_fn) ->
-    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateModelCache(model_type))
+    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateModelCache(model_type.model_name))
     model_type.cache = cache
     return require('./cache_sync')(model_type, sync_fn)
 
@@ -56,9 +56,9 @@ class Cache
     model_cache.del(id) for id in ids
     return @
 
-  getOrCreateModelCache: (model_type) ->
-    model_name = model_type.model_name
-    return model_cache if model_cache = @caches[model_type.model_name]
+  getOrCreateModelCache: (model_name) ->
+    throw new Error "Missing model name for cache" unless model_name
+    return model_cache if model_cache = @caches[model_name]
 
     # there are options
     if options = @options.modelTypes[model_name]
