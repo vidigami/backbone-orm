@@ -71,9 +71,8 @@ module.exports = class Cursor
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
-      can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
       json = [json] unless _.isArray(json)
-      if can_cache
+      if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
         models = (Utils.updateOrNew(item, @model_type) for item in json)
       else
         models = (new @model_type(@model_type::parse(item)) for item in json)

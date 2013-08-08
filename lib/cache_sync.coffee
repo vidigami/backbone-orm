@@ -18,30 +18,30 @@ class CacheSync
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
-    return options.success(cached_model.toJSON()) if (cached_model = model.cache().get(model.id)) # use cached
+    return options.success(cached_model.toJSON()) if (cached_model = @model_type.cache.get(model.id)) # use cached
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       model.set({id: json.id})
-      if cache_model = model.cache().get(model.id)
+      if cache_model = @model_type.cache.get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
       else
-        model.cache().set(model.id, model)
+        @model_type.cache.set(model.id, model)
       options.success(json)
 
   update: (model, options) ->
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      if cache_model = model.cache().get(model.id)
+      if cache_model = @model_type.cache.get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
       else
-        model.cache().set(model.id, model)
+        @model_type.cache.set(model.id, model)
       options.success(json)
 
   delete: (model, options) ->
-    model.cache().del(model.id) # remove from the cache
+    @model_type.cache.del(model.id) # remove from the cache
     @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
