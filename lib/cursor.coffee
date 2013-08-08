@@ -68,6 +68,34 @@ module.exports = class Cursor
 
   toModels: (callback) ->
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
+
+    # a cache candidate
+    # if not (@_cursor.$offset or @_cursor.$limit or @_cursor.$include) and cache = @model_type.cache
+    #   find_size = _.size(@_find)
+    #   if find_size is 0
+    #     return callback(null, model) if not (ids = @_cursor.$ids) and @_cursor.$one and (model = cache.get())
+
+    #   else if find_size is 1 and @_find.id
+    #     if not (ids = @_find.id.$in) and (model = cache.get(@_find.id))
+    #       return callback(null, if @_cursor.$one then model else [model])
+
+    #   if ids
+    #     missing_ids = [] # TODO: fetch delta ids, need to handle sorting, etc
+    #     models = []
+    #     for id in ids
+    #       (missing_ids.push(id); continue) unless model = cache.get(id)
+    #       models.push(model)
+    #       break if @_cursor.$one
+
+    #     if @_cursor.$one
+    #       return callback(null, models[0]) if models.length
+    #     else
+    #       if not missing_ids.length # found everything
+    #         if @_cursor.$sort
+    #           $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+    #           models.sort (model, next_model) => return Utils.jsonFieldCompare(model.attributes, next_model.attributes, $sort_fields)
+    #         return callback(null, models)
+
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
@@ -75,7 +103,7 @@ module.exports = class Cursor
       if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
         models = (Utils.updateOrNew(item, @model_type) for item in json)
       else
-        models = (new @model_type(@model_type::parse(item)) for item in json)
+        models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
       return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
@@ -84,7 +112,7 @@ module.exports = class Cursor
   ##############################################
   # Helpers
   ##############################################
-  selectResults: (json, callback) ->
+  selectResults: (json) ->
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
       $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
@@ -93,10 +121,18 @@ module.exports = class Cursor
         json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
       else
         json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+
     else if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      json = _.map(json, (item) => _.pick(item, $select))
+      json = (_.pick(item, $select) for item in json)
 
     else if @_cursor.$white_list
-      json = _.map(json, (item) => _.pick(item, @_cursor.$white_list))
+      json = (_.pick(item, @_cursor.$white_list) for item in json)
+
     return json
+
+  selectFromModels: (models) ->
+    if @_cursor.$select or @_cursor.$white_list
+      $select = _.intersection(@_cursor.$select or [], @_cursor.$white_list or [])
+      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in json)
+    return models

@@ -72,7 +72,6 @@ runTests = (options, cache, callback) ->
           assert.equal(model.id, test_model.id, 'model has the correct id')
           done()
 
-
     it 'Handles another find id query', (done) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -84,7 +83,6 @@ runTests = (options, cache, callback) ->
           assert.equal(model.id, test_model.id, 'model has the correct id')
           done()
 
-
     it 'Handles a find by query id', (done) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -95,7 +93,6 @@ runTests = (options, cache, callback) ->
           assert.equal(models.length, 1, 'finds the model')
           assert.equal(models[0].id, test_model.id, 'model has the correct id')
           done()
-
 
     it 'Handles a name find query', (done) ->
       Flat.findOne (err, test_model) ->
