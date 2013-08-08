@@ -110,7 +110,7 @@ module.exports = (model_type) ->
       model = new model_type(data)
       model.save {}, (err) ->
         return callback(err) if err
-        cache.add(model.id, model) if cache = model_type.cache
+        cache.set(model.id, model) if cache = model_type.cache
         callback(null, model)
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
