@@ -81,7 +81,7 @@ module.exports = (model_type) ->
     return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
     return sync.schema if method is 'schema'
-    if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else return undefined
+    return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
   require('./lib/model_extensions')(model_type) # mixin extensions
   return require('./lib/cache').configureSync(model_type, sync_fn)

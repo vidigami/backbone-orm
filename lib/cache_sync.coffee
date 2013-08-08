@@ -81,7 +81,7 @@ module.exports = (model_type, wrapped_sync_fn) ->
     sync.initialize()
     return wrapped_sync_fn.apply(null, arguments) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
-    return wrapped_sync_fn('schema') if method is 'schema'
-    if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else return undefined
+    return sync[method].apply(sync, Array::slice.call(arguments, 1)) if sync[method]
+    return wrapped_sync_fn.apply(wrapped_sync_fn, Array::slice.call(arguments))
 
   return sync_fn
