@@ -5,8 +5,6 @@ CacheCursor = require './cache_cursor'
 Schema = require './schema'
 Utils = require './utils'
 
-Cache = require './cache'
-
 DEFAULT_LIMIT = 1000
 DEFAULT_PARALLELISM = 100
 
@@ -20,33 +18,30 @@ class CacheSync
     throw new Error('Missing model_name for model') unless @model_type.model_name
 
   read: (model, options) ->
-    if (cached_model = Cache.get(@model_type.model_name, model.id)) # use cached
-      return options.success(cached_model.toJSON())
+    return options.success(cached_model.toJSON()) if (cached_model = model.cache().get(model.id)) # use cached
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       model.set({id: json.id})
-      cache = model.cache()
-      if cache_model = cache.get(model.id)
+      if cache_model = model.cache().get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
       else
-        cache.set(model.id, model)
+        model.cache().set(model.id, model)
       options.success(json)
 
   update: (model, options) ->
     @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
-      cache = model.cache()
-      if cache_model = cache.get(model.id)
+      if cache_model = model.cache().get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
       else
-        cache.set(model.id, model)
+        model.cache().set(model.id, model)
       options.success(json)
 
   delete: (model, options) ->
-    Cache.del(@model_type.model_name, model.id) # remove from the cache
+    model.cache().del(model.id) # remove from the cache
     @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
@@ -55,7 +50,7 @@ class CacheSync
   # Backbone ORM - Class Extensions
   ###################################
   resetSchema: (options, callback) ->
-    Cache.reset(@model_type.model_name)
+    @model_type.cache.reset()
     @wrapped_sync_fn('resetSchema', options, callback)
 
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
@@ -69,10 +64,8 @@ class CacheSync
   # Backbone Cache Sync - Custom Extensions
   ###################################
   connect: (url) ->
-    Cache.clear(@model_type.model_name)
+    @model_type.cache.reset()
     @wrapped_sync_fn('connect')
-
-  cache: -> Cache.getOrCreateModelCache(@model_type.model_name)
 
 module.exports = (model_type, wrapped_sync_fn) ->
   sync = new CacheSync(model_type, wrapped_sync_fn)

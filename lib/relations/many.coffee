@@ -239,7 +239,7 @@ module.exports = class Many
         else
           collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
 
-      if cache = @reverse_model_type.cache()
+      if cache = @reverse_model_type.cache
         cache.set(model.id, related_model) for related_model in collection.models
 
       model.setLoaded(@key, true)
@@ -273,6 +273,6 @@ module.exports = class Many
       do (related_model) => queue.defer (callback) =>
         related_model.save update, Utils.bbCallback (err, saved_model) =>
           callback(err) if err
-          cache.set(saved_model.id, saved_model) if cache = @reverse_model_type.cache()
+          cache.set(saved_model.id, saved_model) if cache = @reverse_model_type.cache
           callback()
     queue.await callback

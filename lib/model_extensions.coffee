@@ -110,7 +110,7 @@ module.exports = (model_type) ->
       model = new model_type(data)
       model.save {}, (err) ->
         return callback(err) if err
-        cache.add(model.id, model) if cache = model_type.cache()
+        cache.add(model.id, model) if cache = model_type.cache
         callback(null, model)
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
@@ -155,7 +155,7 @@ module.exports = (model_type) ->
   # Backbone ORM - Helpers
   ###################################
 
-  model_type::cache = model_type.cache = -> model_type::sync('cache')
+  model_type::cache = -> model_type.cache
   model_type::schema = model_type.schema = -> model_type::sync('schema')
   model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
   model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type.relation(key) then !!relation.embed else false

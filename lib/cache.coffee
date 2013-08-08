@@ -36,52 +36,29 @@ class Cache
     return @
 
   configureSync: (model_type, sync_fn) ->
-    return sync_fn if model_type::_orm_never_cache
-    return if @getOrCreateModelCache(model_type.model_name) then require('./cache_sync')(model_type, sync_fn) else sync_fn
+    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateModelCache(model_type))
+    model_type.cache = cache
+    return require('./cache_sync')(model_type, sync_fn)
 
-  reset: (model_name, ids) ->
+  reset: (model_type, ids) ->
     # clear the full cache
     if arguments.length is 0
       value.reset() for key, value of @caches
       @caches = {}
+      return
 
-    # clear a model cache
-    else if arguments.length is 1
-      return @ unless model_cache = @caches[model_name] # no caching
-      model_cache.reset()
+    return @ unless model_cache = @caches[model_type.model_name] # no caching
+
+    (model_cache.reset(); return @) if arguments.length is 1 # clear a model cache
 
     # clear specific ids from a model cache
-    else
-      ids = [ids] unless _.isArray(ids)
-      model_cache.del(id) for id in ids
-    return @
-
-  get: (model_name, ids) ->
-    return undefined unless model_cache = @caches[model_name] # no caching
-
-    return model_cache.get(ids) unless _.isArray(ids)
-    return (model_cache.get(id) for id in ids)
-
-  set: (model_name, model) ->
-    return @ if model._orm_never_cache # never cache
-    throw new Error "Missing id for model: #{model_name}" unless model.id
-    return @ unless model_cache = @getOrCreateModelCache(model_name) # no caching
-
-    if current_model = model_cache.get(model.id)
-      Utils.updateModel(current_model, model)
-    else
-      model_cache.set(model.id, model)
-    return @
-
-  del: (model_name, ids) ->
-    return @ unless model_cache = @caches[model_name] # no caching
-
     ids = [ids] unless _.isArray(ids)
     model_cache.del(id) for id in ids
     return @
 
-  getOrCreateModelCache: (model_name) ->
-    return model_cache if model_cache = @caches[model_name]
+  getOrCreateModelCache: (model_type) ->
+    model_name = model_type.model_name
+    return model_cache if model_cache = @caches[model_type.model_name]
 
     # there are options
     if options = @options.modelTypes[model_name]
