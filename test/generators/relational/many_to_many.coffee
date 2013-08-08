@@ -163,6 +163,17 @@ runTests = (options, cache, embed, callback) ->
               assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
               done()
 
+    it 'Can query on a ManyToMany relation by related id', (done) ->
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        Reverse.cursor({owner_id: owner.id}).toModels (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverses, 'found models')
+          assert.equal(reverses.length, 2*BASE_COUNT, "Found the correct number of reverses\n expected: #{2*BASE_COUNT}, actual: #{reverses.length}")
+          done()
+
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
