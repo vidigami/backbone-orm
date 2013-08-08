@@ -146,16 +146,11 @@ module.exports = class Many
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = collection.toJSON() if @embed
 
-  # TODO: review for multiple instances, eg. same id
-  has: (model, key, data) -> return !!@_ensureCollection(model).get(Utils.dataId(data))
-
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
-    if current_related_model
-      collection.remove(current_related_model)
-      # throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}"
+    throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
     collection.add(related_model)
 
   # TODO: update isLoaded when adding / removing
@@ -201,13 +196,13 @@ module.exports = class Many
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
-        related_model.set(@reverse_relation.key, model) unless related_model.attributes[@reverse_relation.key] is model
+        related_model.set(@reverse_relation.key, model) unless related_model.get(@reverse_relation.key) is model
 
     collection._orm_bindings.remove = (related_model) =>
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
-        related_model.set(@reverse_relation.key, null) unless related_model.attributes[@reverse_relation.key] is null
+        related_model.set(@reverse_relation.key, null) unless related_model.get(@reverse_relation.key) is null
 
     collection._orm_bindings.reset = (collection, options) =>
       current_models = collection.models
