@@ -148,7 +148,8 @@ module.exports = class MemoryCursor extends Cursor
 
       # do a join or lookup
       do (relation_key, value_key, value) => queue.defer (callback) =>
-        relation = @model_type.relation(relation_key)
+        unless relation = @model_type.relation(relation_key)
+          return callback(new Error("Relation '#{relation_key}' not found on model #{@model_type.model_name} for find query: #{util.inspect(@_find)}"))
         if not relation.join_table and (value_key is 'id')
           find_query["#{relation_key}_#{value_key}"] = value
           callback()
