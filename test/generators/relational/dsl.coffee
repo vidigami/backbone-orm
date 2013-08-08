@@ -56,7 +56,7 @@ runTests = (options, cache, callback) ->
       queue.defer (callback) ->
         create_queue = new Queue()
 
-        create_queue.defer (callback) -> Fabricator.create(Flat, 2*BASE_COUNT, {
+        create_queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
           created_at: Fabricator.date
           updated_at: Fabricator.date
@@ -81,7 +81,7 @@ runTests = (options, cache, callback) ->
         for owner in MODELS.owner
           do (owner) ->
             owner.set({
-              flat: MODELS.flat[0]
+              flat: MODELS.flat.pop()
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
             save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
