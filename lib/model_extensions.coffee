@@ -252,6 +252,7 @@ module.exports = (model_type) ->
       (attributes = {})[key] = value;
 
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
+    options = {} unless options
     original_success = options.success
     original_error = options.error
     options = _.clone(options)
@@ -286,6 +287,7 @@ module.exports = (model_type) ->
     return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
+    options = {} unless options
     original_success = options.success
     original_error = options.error
     options = _.clone(options)
