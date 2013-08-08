@@ -39,7 +39,7 @@ runTests = (options, cache, callback) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSONUtils.renderTemplate (cache: #{cache})", ->
+  describe "JSON DSL (cache: #{cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     after (done) -> callback(); done()

@@ -89,6 +89,7 @@ module.exports = class Many
             # Update foreign keys of relations that should no longer point to this model
             (query = {})[@foreign_key] = model.attributes.id
             @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
+              return callback(err) if err
               @_clearDependentSaves(model)
               @_clearHasOneRelatedModels(attached_models, callback)
 
