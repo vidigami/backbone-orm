@@ -40,6 +40,8 @@ module.exports = class MemoryCursor extends Cursor
     exists = @hasCursorQuery('$exists')
 
     @buildFindQuery (err, find_query) =>
+      return callback(err) if err
+
       keys = _.keys(find_query)
       json = []
       queue = new Queue(1)
