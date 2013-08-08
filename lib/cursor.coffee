@@ -132,7 +132,11 @@ module.exports = class Cursor
     return json
 
   selectFromModels: (models) ->
-    if @_cursor.$select or @_cursor.$white_list
-      $select = _.intersection(@_cursor.$select or [], @_cursor.$white_list or [])
-      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in json)
+    if @_cursor.$select
+      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in models)
+
+    else if @_cursor.$white_list
+      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setLoaded(false); model for item in models)
+
     return models

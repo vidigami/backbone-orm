@@ -150,7 +150,9 @@ module.exports = class MemoryCursor extends Cursor
 
       # do a join or lookup
       do (relation_key, value_key, value) => queue.defer (callback) =>
-        return callback() unless relation = @model_type.relation(relation_key) # assume it is embedded
+        # assume embedded
+        (find_query[key] = value; return callback()) unless relation = @model_type.relation(relation_key)
+
         if not relation.join_table and (value_key is 'id')
           find_query["#{relation_key}_#{value_key}"] = value
           callback()
