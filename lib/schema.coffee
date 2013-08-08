@@ -4,6 +4,7 @@ Backbone = require 'backbone'
 One = require './relations/one'
 Many = require './relations/many'
 inflection = require 'inflection'
+Utils = require './utils'
 
 # @private
 module.exports = class Schema
