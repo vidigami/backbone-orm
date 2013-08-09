@@ -118,14 +118,12 @@ module.exports = class Many
 
         # destroy old
         if changes.removed
-          for model_json in changes.removed
-            # TODO: optimize
-            do (model_json) => queue.defer (callback) =>
-              # console.log "Destroying join for: #{@model_type.model_name} join: #{util.inspect(model_json)}"
-              @join_table.destroy model_json.id, callback
+          do (model_json) => queue.defer (callback) =>
+            @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
 
         # create new
         for related_id in added
+          # TODO: optimize through batch create
           do (related_id) => queue.defer (callback) =>
             attributes = {}
             attributes[@foreign_key] = model.id
