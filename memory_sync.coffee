@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+Backbone = require 'backbone'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
@@ -70,15 +71,22 @@ class MemorySync
       delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
     callback()
 
-module.exports = (model_type) ->
-  sync = new MemorySync(model_type)
+module.exports = (type) ->
+  # collection
+  if type is Backbone.Collection
+    Utils.configureCollectionModelType(type, module.exports)
+    sync = new MemorySync(type)
+    require('./lib/collection_extensions')(type) # mixin extensions
 
-  model_type::sync = sync_fn = (method, model, options={}) -> # save for access by model extensions
-    sync.initialize()
-    return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
-    return sync if method is 'sync'
-    return sync.schema if method is 'schema'
-    return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
+  # model
+  else
+    sync = new MemorySync(type)
+    type::sync = sync_fn = (method, model, options={}) -> # save for access by model extensions
+      sync.initialize()
+      return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
+      return sync if method is 'sync'
+      return sync.schema if method is 'schema'
+      return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
-  require('./lib/model_extensions')(model_type) # mixin extensions
-  return require('./lib/cache').configureSync(model_type, sync_fn)
+    require('./lib/model_extensions')(type) # mixin extensions
+    return require('./lib/cache').configureSync(type, sync_fn)

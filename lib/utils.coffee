@@ -15,7 +15,10 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 
 
 module.exports = class Utils
-  @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
+  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(err or new Error("Backbone call failed"), model, resp, options))}
+  @wrapOptions: (options={}, callback) ->
+    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
+    return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
   # @private
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
@@ -43,6 +46,26 @@ module.exports = class Utils
       result.password = if auth_parts.length > 1 then auth_parts[1] else null
 
     return result
+
+  ##############################
+  # ModelType
+  ##############################
+  @configureCollectionModelType: (type, sync) ->
+    unless type.model
+      type.model.sync = sync(ORMModel) if type.model::sync is Backbone.Model::sync # override built-in backbone sync
+      return type.model
+
+    else
+      class ORMModel extends Backbone.Model
+        url: ->
+          url = _.result(@collection or type::url, 'url')
+          unless @isNew()
+            url_parts = URL.parse(url)
+            url_parts.pathname = "#{url_parts.pathname}/encodeURIComponent(@id)"
+            url = URL.format(url_parts)
+          return url
+        sync: sync(ORMModel)
+      return ORMModel
 
   ##############################
   # Relational
