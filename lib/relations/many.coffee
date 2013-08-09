@@ -170,7 +170,7 @@ module.exports = class Many
     json = if model instanceof Backbone.Model then model.attributes else model
     (query = _.clone(query or {}))[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
-    return (@join_table or @reverse_model_type).cursor(query)
+    return @reverse_model_type.cursor(query)
 
   ####################################
   # Internal
@@ -219,16 +219,13 @@ module.exports = class Many
     collection.on(method, collection._orm_bindings[method]) for method in ['add', 'remove', 'reset']
     return collection
 
-  # TODO: optimize so don't need to check each time
   _fetchRelated: (model, key, callback) ->
     return true if model.isLoaded(@key) # already loaded
     collection = @_ensureCollection(model)
 
-    # TODO: check which objects are already loaded in cache and ignore ids
-
     # fetch
     (query = {})[@foreign_key] = model.id
-    (@join_table or @reverse_model_type).cursor(query).toJSON (err, json) =>
+    @reverse_model_type.cursor(query).toJSON (err, json) =>
 
       return callback(err) if err
 
