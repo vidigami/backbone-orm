@@ -170,7 +170,7 @@ runTests = (options, cache, embed, callback) ->
         Reverse.cursor({owner_id: owner.id}).toModels (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(reverses.length, 2*BASE_COUNT, "Found the correct number of reverses\n expected: #{2*BASE_COUNT}, actual: #{reverses.length}")
+          assert.equal(reverses.length, 2, "Found the correct number of reverses\n expected: #{2}, actual: #{reverses.length}")
           done()
 
 

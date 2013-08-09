@@ -20,11 +20,8 @@ Utils = require './lib/utils'
 class MemorySync
   # @private
   constructor: (@model_type) ->
+    @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @model_type.store = @store = {}
-
-    unless @model_type.model_name # model_name will come from the url
-      throw new Error('Missing url for model') unless url = _.result(@model_type.prototype, 'url')
-      @model_type.model_name = Utils.parseUrl(url).model_name
     @schema = new Schema(@model_type)
 
   # @private

@@ -143,19 +143,28 @@ module.exports = class MemoryCursor extends Cursor
 
     find_query = {}
     for key, value of @_find
-      (find_query[key] = value; continue) if (key.indexOf('.') < 0)
+      if (key.indexOf('.') < 0)
+        (find_query[key] = value; continue) unless reverse_relation = @model_type.reverseRelation(key)
+        (find_query[key] = value; continue) unless reverse_relation.join_table
+        do (key, value, reverse_relation) => queue.defer (callback) =>
+          (related_query = {})[key] = value
+          related_query.$values = reverse_relation.reverse_relation.foreign_key
+          reverse_relation.join_table.cursor(related_query).toJSON (err, ids) =>
+            return callback(err) if err
+            find_query.id = {$in: ids}
+            callback()
+        continue
 
       [relation_key, value_key] = key.split('.')
       (find_query[key] = value; continue) if @model_type.relationIsEmbedded(relation_key) # embedded so a nested query is possible in mongo
 
       # do a join or lookup
       do (relation_key, value_key, value) => queue.defer (callback) =>
-        # assume embedded
-        (find_query[key] = value; return callback()) unless relation = @model_type.relation(relation_key)
+        (find_query[key] = value; return callback()) unless relation = @model_type.relation(relation_key) # assume embedded
 
         if not relation.join_table and (value_key is 'id')
-          find_query["#{relation_key}_#{value_key}"] = value
-          callback()
+          find_query[relation.foreign_key] = value
+          return callback()
 
         # TODO: optimize with a one-step join?
         else if relation.join_table or (relation.type is 'belongsTo')
