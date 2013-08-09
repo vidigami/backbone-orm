@@ -124,9 +124,11 @@ module.exports = class MemoryCursor extends Cursor
 
       queue.await =>
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
-        return callback(null, if json.length then json[0] else null) if @_cursor.$one
+        if @_cursor.$one
+          return callback(null, null) unless json.length
+          return callback(null, @selectResults([json[0]])[0])
 
-        json = @selectResults(json, callback)
+        json = @selectResults(json)
         if @hasCursorQuery('$page')
           callback(null, {
             offset: @_cursor.$offset
@@ -149,9 +151,9 @@ module.exports = class MemoryCursor extends Cursor
         do (key, value, reverse_relation) => queue.defer (callback) =>
           (related_query = {})[key] = value
           related_query.$values = reverse_relation.reverse_relation.foreign_key
-          reverse_relation.join_table.cursor(related_query).toJSON (err, ids) =>
+          reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
-            find_query.id = {$in: ids}
+            find_query.id = {$in: model_ids}
             callback()
         continue
 
@@ -171,6 +173,7 @@ module.exports = class MemoryCursor extends Cursor
           (related_query = {$values: 'id'})[value_key] = value
           relation.reverse_relation.model_type.cursor(related_query).toJSON (err, related_ids) =>
             return callback(err) if err
+
             if relation.join_table
               (join_query = {})[relation.reverse_relation.foreign_key] = {$in: related_ids}
               join_query.$values = relation.foreign_key
@@ -182,12 +185,13 @@ module.exports = class MemoryCursor extends Cursor
               find_query[relation.foreign_key] = {$in: related_ids}
               callback()
 
-        # foreign key is on the model
+        # foreign key is on this model
         else
           (related_query = {})[value_key] = value
           related_query.$values = relation.foreign_key
-          relation.reverse_relation.model_type.cursor(related_query).toJSON (err, model_ids) =>
+          relation.reverse_model_type.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
+
             find_query.id = {$in: model_ids}
             callback()
 

@@ -73,12 +73,12 @@ runTests = (options, cache, embed, callback) ->
       # link and save all
       queue.defer (callback) ->
         save_queue = new Queue()
+        reversed_reverse = _.clone(MODELS.reverse).reverse()
 
-        for owner, index in MODELS.owner
-          do (owner, index) ->
-            as_index = BASE_COUNT - index - 1
-            owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse[index], reverse_as: MODELS.reverse[as_index]})
-            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
+        for owner in MODELS.owner
+          do (owner) -> save_queue.defer (callback) ->
+            owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop(), reverse_as: reversed_reverse.pop()})
+            owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 
@@ -295,10 +295,10 @@ runTests = (options, cache, embed, callback) ->
     it 'Can query on a related (hasOne) model', (done) ->
       Reverse.findOne (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found model')
+        assert.ok(reverse, 'Reverse found model')
         Owner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, 'found model')
+          assert.ok(owner, 'Owner found model')
 
           unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
             assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
