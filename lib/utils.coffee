@@ -51,21 +51,24 @@ module.exports = class Utils
   # ModelType
   ##############################
   @configureCollectionModelType: (type, sync) ->
-    unless type.model
-      type.model.sync = sync(ORMModel) if type.model::sync is Backbone.Model::sync # override built-in backbone sync
-      return type.model
+    modelURL = ->
+      url = _.result(@collection or type::, 'url')
+      unless @isNew()
+        url_parts = URL.parse(url)
+        url_parts.pathname = "#{url_parts.pathname}/encodeURIComponent(@id)"
+        url = URL.format(url_parts)
+      return url
 
-    else
+    model_type = type::model
+    if not model_type or (model_type is Backbone.Model)
       class ORMModel extends Backbone.Model
-        url: ->
-          url = _.result(@collection or type::url, 'url')
-          unless @isNew()
-            url_parts = URL.parse(url)
-            url_parts.pathname = "#{url_parts.pathname}/encodeURIComponent(@id)"
-            url = URL.format(url_parts)
-          return url
+        url: modelURL
         sync: sync(ORMModel)
-      return ORMModel
+      return type::model = ORMModel
+    else if model_type::sync is Backbone.Model::sync # override built-in backbone sync
+      model_type::url = modelURL
+      model_type::sync = sync(model_type)
+    return model_type
 
   ##############################
   # Relational
