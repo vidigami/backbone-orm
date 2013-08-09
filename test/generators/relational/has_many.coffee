@@ -24,7 +24,7 @@ runTests = (options, cache, embed, callback) ->
     urlRoot: "#{DATABASE_URL}/reverses"
     @schema: _.defaults({
       owner: -> ['belongsTo', Owner]
-      owner_as: -> ['belongsTo', Owner, as: 'reverses_as']
+      another_owner: -> ['belongsTo', Owner, as: 'more_reverses']
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
@@ -33,7 +33,7 @@ runTests = (options, cache, embed, callback) ->
     @schema: _.defaults({
       flats: -> ['hasMany', Flat]
       reverses: -> ['hasMany', Reverse]
-      reverses_as: -> ['hasMany', Reverse, as: 'owner_as', ids_accessor: 'reverses_as_ids']
+      more_reverses: -> ['hasMany', Reverse, as: 'another_owner', ids_accessor: 'more_reverses_ids']
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
@@ -62,6 +62,10 @@ runTests = (options, cache, embed, callback) ->
           name: Fabricator.uniqueId('reverse_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.reverse = models; callback(err))
+        create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
+          name: Fabricator.uniqueId('reverse_')
+          created_at: Fabricator.date
+        }, (err, models) -> MODELS.more_reverse = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
           name: Fabricator.uniqueId('owner_')
           created_at: Fabricator.date
@@ -78,7 +82,7 @@ runTests = (options, cache, embed, callback) ->
             owner.set({
               flats: [MODELS.flat.pop(), MODELS.flat.pop()]
               reverses: [MODELS.reverse[index], MODELS.reverse[index+1]]
-              reverses_as: [MODELS.reverse[index+1], MODELS.reverse[index]]
+              more_reverses: [MODELS.more_reverse[index], MODELS.more_reverse[index+1]]
             })
             save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
 
@@ -167,29 +171,35 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        test_model.get 'reverses_as', (err, reverses) ->
+        test_model.get 'more_reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
           assert.equal(2, reverses.length, "Expected: #{2}. Actual: #{reverses.length}")
 
-          if test_model.relationIsEmbedded('reverses_as')
+          if test_model.relationIsEmbedded('more_reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), 'Serialized embedded')
-          assert.deepEqual(test_model.get('reverses_as_ids')[0], reverses[0].id, 'serialized id only')
-          reverse = reverses[0]
+          assert.deepEqual(test_model.get('more_reverses_ids')[0], reverses[0].id, 'serialized id only')
 
-          reverse.get 'owner_as', (err, owner) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(owner, 'found owner models')
-            if reverse.relationIsEmbedded('owner')
-              assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().owner_as_id)}. Actual: #{util.inspect(owner.id)}")
-            assert.deepEqual(reverse.get('owner_as_id'), owner.id, "Serialized id only. Expected: #{reverse.get('owner_as_id')}. Actual: #{owner.id}")
 
-            if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
-            else
-              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
-            done()
+          test_model.get 'reverses', (err, test_reverses) ->
 
+            for reverse in reverses
+              assert.notEqual(test_reverse.id, reverse.id, "Expected: #{test_reverse.id} to not be: #{reverse.id}") for test_reverse in test_reverses
+
+            reverse = reverses[0]
+            reverse.get 'another_owner', (err, owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(owner, 'found owner models')
+              if reverse.relationIsEmbedded('owner')
+                assert.deepEqual(reverse.toJSON().another_owner_id, owner.id, "Serialized embedded. Expected: #{util.inspect(reverse.toJSON().another_owner_id)}. Actual: #{util.inspect(owner.id)}")
+              assert.deepEqual(reverse.get('another_owner_id'), owner.id, "Serialized id only. Expected: #{reverse.get('another_owner_id')}. Actual: #{owner.id}")
+
+              if Owner.cache
+                assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+              else
+                assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+              done()
+#
     it 'Can include related (one-way hasMany) models', (done) ->
       Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
