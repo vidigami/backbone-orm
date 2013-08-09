@@ -12,7 +12,7 @@ runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 20
+  BASE_COUNT = 50
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
