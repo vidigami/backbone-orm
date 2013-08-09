@@ -48,7 +48,12 @@ class MemorySync
   # @private
   delete: (model, options) ->
     return options.error(new Error('Model not found')) unless model_json = @store[model.id]
+
+    # destroy backlinks
+
     delete @store[model.id]
+
+
     options.success()
 
   ###################################
@@ -63,12 +68,16 @@ class MemorySync
 
   # @private
   destroy: (query, callback) ->
-    return @resetSchema({}, callback) unless (keys = _.keys(query)).length
+    unless (keys = _.keys(query)).length
+      # destroy backlinks
+     return @resetSchema({}, callback)
 
-    # destroy specific records
-    for id, model_json of @store
-      delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
-    callback()
+    else
+      # destroy specific records
+      for id, model_json of @store
+        # destroy backlinks
+        delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
+      callback()
 
 module.exports = (model_type) ->
   sync = new MemorySync(model_type)

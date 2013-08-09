@@ -29,6 +29,8 @@ module.exports = class One
     value_is_model = (value instanceof Backbone.Model)
     model.setLoaded(@key, true) if not model.isLoaded(@key) and (value_is_model or _.isObject(value)) # set loaded state
 
+    # TODO: use the same code for dependent save state caching
+
     # set the relation now or later merge into the existing model
     if value and not value_is_model
       value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = !!previous_related_model
@@ -93,7 +95,14 @@ module.exports = class One
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
-    return @_clearRelation(model, callback) if @type is 'hasOne'
+
+    # clear in memory
+    if @type is 'hasOne'
+      @_clearRelation(model, callback)
+
+    # clear in store
+    model::sync('sync').clearBacklinks(model, @key, callback)
+
     callback() # nothing to save
 
   appendJSON: (json, model, key) ->
