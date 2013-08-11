@@ -68,8 +68,8 @@ runTests = (options, cache, callback) ->
 
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
-        sync: SYNC(Collection)
         model: SomeModel
+        sync: SYNC(Collection)
 
       collection = new Collection()
       collection.fetch bbCallback (err, fetched_collection) ->
