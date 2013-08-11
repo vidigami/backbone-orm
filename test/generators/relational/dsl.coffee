@@ -12,7 +12,7 @@ runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 5
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
@@ -79,12 +79,12 @@ runTests = (options, cache, callback) ->
         save_queue = new Queue()
 
         for owner in MODELS.owner
-          do (owner) ->
+          do (owner) -> save_queue.defer (callback) ->
             owner.set({
               flat: MODELS.flat.pop()
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
-            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
+            owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 

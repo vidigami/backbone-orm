@@ -47,6 +47,13 @@ module.exports = class Utils
   ##############################
   # Relational
   ##############################
+  @findOrGenerateModelName: (model_type) ->
+    return model_type.model_name if model_type.model_name
+    if url = _.result(model_type.prototype, 'url')
+      return model_name if model_name = Utils.parseUrl(url).model_name
+    return model_type.name if model_type.name
+    throw "Could not find or generate model name for #{model_type}"
+
   # @private
   @findOrGenerateReverseRelation: (relation) ->
     model_type = relation.model_type

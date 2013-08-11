@@ -12,7 +12,7 @@ runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 5
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
@@ -77,14 +77,14 @@ runTests = (options, cache, embed, callback) ->
       queue.defer (callback) ->
         save_queue = new Queue()
 
-        for owner, index in MODELS.owner
-          do (owner, index) ->
+        for owner in MODELS.owner
+          do (owner) -> save_queue.defer (callback) ->
             owner.set({
               flats: [MODELS.flat.pop(), MODELS.flat.pop()]
-              reverses: [MODELS.reverse[index], MODELS.reverse[index+1]]
-              more_reverses: [MODELS.more_reverse[index], MODELS.more_reverse[index+1]]
+              reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]
+              more_reverses: [MODELS.more_reverse.pop(), MODELS.more_reverse.pop()]
             })
-            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
+            owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 
@@ -131,7 +131,7 @@ runTests = (options, cache, embed, callback) ->
         test_model.get 'reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(2, reverses.length, "Expected: #{2}. Actual: #{reverses.length}")
+          assert.equal(2, reverses.length, "Reverses Expected: #{2}. Actual: #{reverses.length}")
 
           if test_model.relationIsEmbedded('reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), 'Serialized embedded')
@@ -146,9 +146,9 @@ runTests = (options, cache, embed, callback) ->
             assert.deepEqual(reverse.get('owner_id'), owner.id, "Serialized id only. Expected: #{reverse.get('owner_id')}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "Owner Expected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
             else
-              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+              assert.equal(test_model.id, owner.id, "Owner Expected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
     it 'Appends json for a related model', (done) ->
@@ -174,7 +174,7 @@ runTests = (options, cache, embed, callback) ->
         test_model.get 'more_reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(2, reverses.length, "Expected: #{2}. Actual: #{reverses.length}")
+          assert.equal(2, reverses.length, "Reverses Expected: #{2}. Actual: #{reverses.length}")
 
           if test_model.relationIsEmbedded('more_reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), 'Serialized embedded')
@@ -195,17 +195,18 @@ runTests = (options, cache, embed, callback) ->
               assert.deepEqual(reverse.get('another_owner_id'), owner.id, "Serialized id only. Expected: #{reverse.get('another_owner_id')}. Actual: #{owner.id}")
 
               if Owner.cache
-                assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+                assert.deepEqual(test_model.toJSON(), owner.toJSON(), "Owner Expected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
               else
-                assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+                assert.equal(test_model.id, owner.id, "Owner Expected: #{test_model.id}\nActual: #{owner.id}")
               done()
+
 #
     it 'Can include related (one-way hasMany) models', (done) ->
       Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.ok(test_model.flats, 'Has related flats')
-        assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
+        assert.equal(test_model.flats.length, 2, "Has the correct number of related flats \nExpected: #{2}\nActual: #{test_model.flats.length}")
         done()
 
     it 'Can include multiple related (one-way hasMany) models', (done) ->
@@ -215,8 +216,8 @@ runTests = (options, cache, embed, callback) ->
 
         assert.ok(test_model.flats, 'Has related flats')
         assert.ok(test_model.reverses, 'Has related reverses')
-        assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
-        assert.equal(test_model.reverses.length, 2*BASE_COUNT, "Has the correct number of related reverses \nExpected: #{test_model.reverses.length}\nActual: #{test_model.reverses.length}")
+        assert.equal(test_model.flats.length, 2, "Has the correct number of related flats \nExpected: #{2}\nActual: #{test_model.flats.length}")
+        assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{test_model.reverses.length}\nActual: #{test_model.reverses.length}")
 
         for flat in test_model.flats
           assert.equal(test_model.id, flat.owner_id, "\nExpected: #{test_model.id}\nActual: #{flat.owner_id}")
@@ -249,7 +250,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(test_model.flats, 'Has related flats')
           assert.ok(test_model.reverses, 'Has related reverses')
 
-          assert.equal(test_model.flats.length, 2*BASE_COUNT, "Has the correct number of related flats \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.flats.length}")
+          assert.equal(test_model.flats.length, 2, "Has the correct number of related flats \nExpected: #{2}\nActual: #{test_model.flats.length}")
           assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
 
           for flat in test_model.flats
@@ -265,7 +266,7 @@ runTests = (options, cache, embed, callback) ->
         owner.get 'reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(reverses.length, 2*BASE_COUNT, 'Found reverses')
+          assert.equal(reverses.length, 2, 'Found reverses')
           for reverse in reverses
             assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
 
@@ -287,7 +288,7 @@ runTests = (options, cache, embed, callback) ->
         owner.get 'reverses', (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(reverses.length, 2*BASE_COUNT, 'Found reverses')
+          assert.equal(reverses.length, 2, 'Found reverses')
           for reverse in reverses
             assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
 

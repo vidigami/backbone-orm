@@ -11,7 +11,7 @@ runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 1
+  BASE_COUNT = 5
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Reverse extends Backbone.Model
@@ -61,9 +61,9 @@ runTests = (options, cache, embed, callback) ->
         save_queue = new Queue()
 
         for owner in MODELS.owner
-          do (owner) ->
+          do (owner) -> save_queue.defer (callback) ->
             owner.set({reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]})
-            save_queue.defer (callback) -> owner.save {}, Utils.bbCallback callback
+            owner.save {}, Utils.bbCallback callback
 
         save_queue.await callback
 
@@ -105,7 +105,7 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.ok(test_model.reverses, 'Has related reverses')
-        assert.equal(test_model.reverses.length, 2*BASE_COUNT, "Has the correct number of related reverses \nExpected: #{2*BASE_COUNT}\nActual: #{test_model.reverses.length}")
+        assert.equal(test_model.reverses.length, 2, "Has the correct number of related reverses \nExpected: #{2}\nActual: #{test_model.reverses.length}")
         done()
 
     it 'Can query on related (two-way hasMany) models', (done) ->
@@ -170,7 +170,7 @@ runTests = (options, cache, embed, callback) ->
         Reverse.cursor({owner_id: owner.id}).toModels (err, reverses) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found models')
-          assert.equal(reverses.length, 2*BASE_COUNT, "Found the correct number of reverses\n expected: #{2*BASE_COUNT}, actual: #{reverses.length}")
+          assert.equal(reverses.length, 2, "Found the correct number of reverses\n expected: #{2}, actual: #{reverses.length}")
           done()
 
 

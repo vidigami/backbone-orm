@@ -22,9 +22,6 @@ module.exports = class JSONUtils
       if (values.length >= 20) and values[values.length-1] is 'Z'
         date = moment.utc(values)
         return if date and date.isValid() then date.toDate() else values
-      # "quoted string"
-      else if match = /^"(.*)"$/.exec(values)
-        return match[1]
       else
         return true if values is 'true'
         return false if values is 'false'
