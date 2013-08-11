@@ -20,7 +20,7 @@ runTests = (options, cache, callback) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Utils.batch (cache: #{cache})", ->
+  describe "Backbone.Collection (cache: #{cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Model], done)
     after (done) -> callback(); done()
