@@ -163,7 +163,7 @@ module.exports = (model_type) ->
 
   model_type::isLoaded = (key) ->
     key = '__model__' if arguments.length is 0
-    not @_orm?.needs_load[key]
+    not @_orm?.needs_load?[key]
 
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
@@ -215,9 +215,9 @@ module.exports = (model_type) ->
   model_type::toJSON = (options={}) ->
     schema = model_type.schema() if model_type.schema
 
-    return @id if @_orm_json > 0
-    @_orm_json or= 0
-    @_orm_json++
+    @_orm or= {}
+    return @id if @_orm.json > 0
+    @_orm.json or= 0; @_orm.json++
 
     json = {}
     attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
@@ -234,14 +234,14 @@ module.exports = (model_type) ->
       else
         json[key] = value
 
-    delete @_orm_json if --@_orm_json is 0
+    --@_orm.json
     return json
 
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
-    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm_save > 0
-    @_orm_save or= 0
-    @_orm_save++
+    @_orm or= {}
+    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
+    @_orm.save or= 0; @_orm.save++
 
     return _original_save.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
@@ -252,13 +252,9 @@ module.exports = (model_type) ->
     else
       (attributes = {})[key] = value;
 
-    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
-    options = {} unless options
-    original_success = options.success
-    original_error = options.error
-    options = _.clone(options)
-    options.success = (model, resp, options) =>
-      delete @_orm_save if --@_orm_save is 0
+    return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
+      --@_orm.save
+      return options.error?(@, resp, options) if err
 
       queue = new Queue(1)
 
@@ -267,33 +263,22 @@ module.exports = (model_type) ->
         do (relation) => queue.defer (callback) => relation.save(@, key, callback)
 
       queue.await (err) =>
-        return original_error?(@, new Error "Failed to save relations. #{err}") if err
-        original_success?(model, resp, options)
-
-    options.error = (model, resp, options) =>
-      delete @_orm_save if --@_orm_save is 0
-      original_error?(model, resp, options)
-
-    return _original_save.call(@, attributes, options)
+        return options.error?(@, Error "Failed to save relations. #{err}", options) if err
+        options.success?(@, resp, options)
+    ))
 
   _original_destroy = model_type::destroy
   model_type::destroy = (options) ->
-    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm_save > 0
-    @_orm_save or= 0
-    @_orm_save++
-
-    # clear out of the cache
-    cache.del(@id) if cache = @cache()
-
+    cache.del(@id) if cache = @cache() # clear out of the cache
     return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
-    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
-    options = {} unless options
-    original_success = options.success
-    original_error = options.error
-    options = _.clone(options)
-    options.success = (model, resp, options) =>
-      delete @_orm_save if --@_orm_save is 0
+    @_orm or= {}
+    throw new Error "Model is in a destroy loop: #{model_type.model_name}" if @_orm.destroy > 0
+    @_orm.destroy or= 0; @_orm.destroy++
+
+    return _original_destroy.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
+      --@_orm.destroy
+      return options.error?(@, resp, options) if err
 
       queue = new Queue(1)
 
@@ -302,22 +287,17 @@ module.exports = (model_type) ->
         do (relation) => queue.defer (callback) => relation.destroy(@, callback)
 
       queue.await (err) =>
-        return original_error?(@, new Error "Failed to destroy relations. #{err}") if err
-        original_success?(model, resp, options)
-
-    options.error = (model, resp, options) =>
-      delete @_orm_save if --@_orm_save is 0
-      original_error?(model, resp, options)
-
-    return _original_destroy.call(@, options)
+        return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
+        options.success?(model, resp, options)
+    ))
 
   _original_clone = model_type::clone
   model_type::clone = (key, value, options) ->
     return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
-    return @id if @_orm_clone > 0
-    @_orm_clone or= 0
-    @_orm_clone++
+    @_orm or= {}
+    return @id if @_orm.clone > 0
+    @_orm.clone or= 0; @_orm.clone++
 
     json = {}
     for key, value of @attributes
@@ -331,7 +311,7 @@ module.exports = (model_type) ->
       else
         json[key] = value
 
-    delete @_orm_clone if --@_orm_clone is 0
+    --@_orm.clone
     return new @constructor(json)
 
   model_type::cursor = (key, query={}) ->
