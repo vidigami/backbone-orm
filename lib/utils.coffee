@@ -15,7 +15,7 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 
 
 module.exports = class Utils
-  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(err or new Error("Backbone call failed"), model, resp, options))}
+  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
   @wrapOptions: (options={}, callback) ->
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
