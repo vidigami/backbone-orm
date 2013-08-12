@@ -38,101 +38,10 @@ runTests = (options, embed, callback) ->
 
       queue.await done
 
-    describe 'count', ->
-      it 'Handles a count query', (done) ->
-        Flat.count (err, count) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.equal(count, BASE_COUNT, "Expected: #{count}. Actual: #{BASE_COUNT}")
+    describe 'TODO', ->
+      it 'TODO', (done) ->
           done()
 
-      it 'counts by query', (done) ->
-        bob = new Flat({name: 'Bob'})
-
-        queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
-
-        queue.defer (callback) ->
-          Flat.count {name: 'Bob'}, (err, count) ->
-            assert.equal(count, 1, 'found Bob through query')
-            callback(err)
-
-        queue.defer (callback) ->
-          Flat.count {name: 'Fred'}, (err, count) ->
-            assert.equal(count, 0, 'no Fred')
-            callback(err)
-
-        queue.defer (callback) ->
-          Flat.count {}, (err, count) ->
-            assert.ok(count >= 1, 'found Bob through empty query')
-            callback(err)
-
-        queue.await done
-
-      it 'counts by query with multiple', (done) ->
-        bob = new Flat({name: 'Bob'})
-        fred = new Flat({name: 'Fred'})
-
-        queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
-        queue.defer (callback) -> fred.save {}, Utils.bbCallback(callback)
-
-        queue.defer (callback) ->
-          Flat.count {name: 'Bob'}, (err, count) ->
-            assert.equal(count, 1, 'found Bob through query')
-            callback(err)
-
-        queue.defer (callback) ->
-          Flat.count {name: 'Fred'}, (err, count) ->
-            assert.equal(count, 1, 'Fred')
-            callback(err)
-
-        queue.defer (callback) ->
-          Flat.count {}, (err, count) ->
-            assert.ok(count >= 2, 'found Bob and Fred through empty query')
-            callback(err)
-
-        queue.defer (callback) ->
-          Flat.count (err, count) ->
-            assert.ok(count >= 2, 'found Bob and Fred when skipping query')
-            callback(err)
-
-        queue.await done
-
-    describe 'all', ->
-      it 'Handles an all query', (done) ->
-        Flat.all (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
-          done()
-
-    describe 'exists', ->
-      it 'Handles an exist with no query', (done) ->
-        Flat.exists (err, exists) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(exists, 'something exists')
-          done()
-
-      it 'Handles an exist query', (done) ->
-        Flat.findOne (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(model, 'found a model')
-
-          Flat.exists {name: model.get('name')}, (err, exists) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(exists, 'the model exists by name')
-
-            Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
-              assert.ok(!err, "No errors: #{err}")
-              assert.ok(!exists, 'the model does not exist by bad name')
-
-              Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
-                assert.ok(!err, "No errors: #{err}")
-                assert.ok(exists, 'the model exists by created_at')
-
-                Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
-                  assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!exists, 'the model does not exist by bad created_at')
-                  done()
 
 # TODO: explain required set up
 
