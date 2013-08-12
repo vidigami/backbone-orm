@@ -102,21 +102,19 @@ module.exports = class Many
 
     # save current
 
-
-    queue = new Queue(1)
-
-    # save in memory models
-    collection = @_ensureCollection(model)
-    for related_model in _.clone(collection.models)
-      do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
-
     if @reverse_relation.type is 'belongsTo'
 
       # collection
       if related_models = related_model.models
+        queue = new Queue(1) # TODO: parallelism
+
+        for related_model in related_models when (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
+          do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
+
         if dependent_ids = model._orm.dependent_saves?[@key]
           queue.defer (callback) =>
             # Update foreign keys of relations that should no longer point to this model
+            (query = {})[@foreign_key] = model.attributes.id
             @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
               return callback(err) if err
               @_clearDependentSaves(model)
@@ -131,8 +129,6 @@ module.exports = class Many
     # hasMany
     else
       collection = @_ensureCollection(model)
-
-      # TODO: is this correct? what about a partially loaded set of models through ids bootstrapping
       return callback() unless model.isLoaded(@key) # not loaded
 
       # TODO: optimize
@@ -168,6 +164,72 @@ module.exports = class Many
 
     # nothing to save
     callback()
+
+    # queue = new Queue(1)
+
+    # # save in memory models
+    # collection = @_ensureCollection(model)
+    # for related_model in _.clone(collection.models)
+    #   do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
+
+    # if @reverse_relation.type is 'belongsTo'
+
+    #   # collection
+    #   if related_models = related_model.models
+    #     if dependent_ids = model._orm.dependent_saves?[@key]
+    #       queue.defer (callback) =>
+    #         # Update foreign keys of relations that should no longer point to this model
+    #         @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
+    #           return callback(err) if err
+    #           @_clearDependentSaves(model)
+    #           @_clearHasOneRelatedModels(attached_models, callback)
+
+    #     return queue.await callback
+
+    #   # model
+    #   else
+    #     return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
+
+    # # hasMany
+    # else
+    #   collection = @_ensureCollection(model)
+
+    #   # TODO: is this correct? what about a partially loaded set of models through ids bootstrapping
+    #   return callback() unless model.isLoaded(@key) # not loaded
+
+    #   # TODO: optimize
+    #   query = {$values: @foreign_key}
+    #   query[@foreign_key] = model.id
+    #   @join_table.cursor(query).toJSON (err, json) =>
+    #     return callback(err) if err
+
+    #     related_ids = _.pluck(collection.models, 'id')
+    #     changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
+    #     added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
+
+    #     queue = new Queue(1) # TODO: parallelism
+
+    #     # destroy old
+    #     if changes.removed
+    #       do (model_json) => queue.defer (callback) =>
+    #         @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
+
+    #     # create new
+    #     for related_id in added
+    #       # TODO: optimize through batch create
+    #       do (related_id) => queue.defer (callback) =>
+    #         attributes = {}
+    #         attributes[@foreign_key] = model.id
+    #         attributes[@reverse_relation.foreign_key] = related_id
+    #         # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+    #         join = new @join_table(attributes)
+    #         join.save {}, Utils.bbCallback callback
+
+    #     queue.await callback
+    #   return
+
+    # # nothing to save
+    # callback()
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
