@@ -1,0 +1,145 @@
+util = require 'util'
+assert = require 'assert'
+_ = require 'underscore'
+Backbone = require 'backbone'
+Queue = require 'queue-async'
+moment = require 'moment'
+
+Fabricator = require '../../../fabricator'
+Utils = require '../../../lib/utils'
+
+runTests = (options, embed, callback) ->
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 5
+  require('../../../lib/cache').configure({max: 100}) # configure caching
+
+  class Flat extends Backbone.Model
+    urlRoot: "#{DATABASE_URL}/flats"
+    @schema: BASE_SCHEMA
+    sync: SYNC(Flat)
+
+  describe "Cache Options (embed: #{embed})", ->
+
+    before (done) -> return done() unless options.before; options.before([Flat], done)
+    after (done) -> callback(); done()
+    beforeEach (done) ->
+      require('../../../lib/cache').reset() # reset cache
+      queue = new Queue(1)
+
+      queue.defer (callback) -> Flat.resetSchema(callback)
+
+      queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
+        name: Fabricator.uniqueId('flat_')
+        created_at: Fabricator.date
+        updated_at: Fabricator.date
+      }, callback)
+
+      queue.await done
+
+    describe 'count', ->
+      it 'Handles a count query', (done) ->
+        Flat.count (err, count) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(count, BASE_COUNT, "Expected: #{count}. Actual: #{BASE_COUNT}")
+          done()
+
+      it 'counts by query', (done) ->
+        bob = new Flat({name: 'Bob'})
+
+        queue = new Queue(1)
+        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
+
+        queue.defer (callback) ->
+          Flat.count {name: 'Bob'}, (err, count) ->
+            assert.equal(count, 1, 'found Bob through query')
+            callback(err)
+
+        queue.defer (callback) ->
+          Flat.count {name: 'Fred'}, (err, count) ->
+            assert.equal(count, 0, 'no Fred')
+            callback(err)
+
+        queue.defer (callback) ->
+          Flat.count {}, (err, count) ->
+            assert.ok(count >= 1, 'found Bob through empty query')
+            callback(err)
+
+        queue.await done
+
+      it 'counts by query with multiple', (done) ->
+        bob = new Flat({name: 'Bob'})
+        fred = new Flat({name: 'Fred'})
+
+        queue = new Queue(1)
+        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
+        queue.defer (callback) -> fred.save {}, Utils.bbCallback(callback)
+
+        queue.defer (callback) ->
+          Flat.count {name: 'Bob'}, (err, count) ->
+            assert.equal(count, 1, 'found Bob through query')
+            callback(err)
+
+        queue.defer (callback) ->
+          Flat.count {name: 'Fred'}, (err, count) ->
+            assert.equal(count, 1, 'Fred')
+            callback(err)
+
+        queue.defer (callback) ->
+          Flat.count {}, (err, count) ->
+            assert.ok(count >= 2, 'found Bob and Fred through empty query')
+            callback(err)
+
+        queue.defer (callback) ->
+          Flat.count (err, count) ->
+            assert.ok(count >= 2, 'found Bob and Fred when skipping query')
+            callback(err)
+
+        queue.await done
+
+    describe 'all', ->
+      it 'Handles an all query', (done) ->
+        Flat.all (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
+          done()
+
+    describe 'exists', ->
+      it 'Handles an exist with no query', (done) ->
+        Flat.exists (err, exists) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(exists, 'something exists')
+          done()
+
+      it 'Handles an exist query', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(model, 'found a model')
+
+          Flat.exists {name: model.get('name')}, (err, exists) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(exists, 'the model exists by name')
+
+            Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!exists, 'the model does not exist by bad name')
+
+              Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(exists, 'the model exists by created_at')
+
+                Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(!exists, 'the model does not exist by bad created_at')
+                  done()
+
+# TODO: explain required set up
+
+# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
+# beforeEach should return the models_json for the current run
+module.exports = (options, callback) ->
+  queue = new Queue(1)
+  queue.defer (callback) -> runTests(options, false, callback)
+  # not options.embed or queue.defer (callback) -> runTests(options, true, callback)
+  queue.await callback
