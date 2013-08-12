@@ -134,13 +134,6 @@ module.exports = class Utils
     if _.isObject(data)
       model.setLoaded(true)
       model.set(data)
-      schema = model.schema()
-      for key of model.attributes
-        continue unless _.isUndefined(data[key])
-        if schema and relation = schema.relation(key)
-          model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
-        else
-          model.unset(key)
     return model
 
   @updateOrNew: (data, model_type) ->
