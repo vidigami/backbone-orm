@@ -20,20 +20,21 @@ module.exports = class JSONUtils
       result[key] = JSONUtils.parse(value) for key, value of values
       return result
     else if _.isString(values)
-      values = match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
-
       # Date
       if (values.length >= 20) and values[values.length-1] is 'Z'
         date = moment.utc(values)
         return if date and date.isValid() then date.toDate() else values
+
       # Boolean
-      else
-        return true if values is 'true'
-        return false if values is 'false'
-        # stringified JSON
-        try
-          return JSONUtils.parse(values) if values = JSON.parse(values)
-        catch err
+      return true if values is 'true'
+      return false if values is 'false'
+
+      return match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
+
+      # stringified JSON
+      try
+        return JSONUtils.parse(values) if values = JSON.parse(values)
+      catch err
     return values
 
   # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
@@ -45,13 +46,13 @@ module.exports = class JSONUtils
     return null if _.isNull(values)
     if _.isArray(values)
       return JSON.stringify(values)
+    else if _.isDate(values) or values.toJSON
+      return values.toJSON()
     else if _.isObject(values)
       return JSON.stringify(values) if depth > 0
       result = {}
       result[key] = JSONUtils.toQuery(value, 1) for key, value of values
       return result
-    else if values.toJSON
-      return values.toJSON()
     return values
 
   # Render a template that can be a key, keys, DSL object, or function.
