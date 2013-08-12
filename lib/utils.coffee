@@ -15,7 +15,10 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 
 
 module.exports = class Utils
-  @bbCallback: (callback) -> return {success: ((model) -> callback(null, model)), error: ((model, err) -> callback(err or new Error("Backbone call failed")))}
+  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
+  @wrapOptions: (options={}, callback) ->
+    options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
+    return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
   # @private
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
@@ -43,6 +46,44 @@ module.exports = class Utils
       result.password = if auth_parts.length > 1 then auth_parts[1] else null
 
     return result
+
+  @get: (model, key, default_value) ->
+    model._orm or= {}
+    return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
+
+  @set: (model, key, value) ->
+    model._orm or= {}
+    if _.isUndefined(value)
+      delete model._orm[key]
+    else
+      model._orm[key] = value
+
+  @orSet: (model, key, value) ->
+    model._orm or= {}
+    model._orm[key] = value unless model._orm.hasOwnProperty(key)
+
+  ##############################
+  # ModelType
+  ##############################
+  @configureCollectionModelType: (type, sync) ->
+    modelURL = ->
+      url = _.result(@collection or type::, 'url')
+      unless @isNew()
+        url_parts = URL.parse(url)
+        url_parts.pathname = "#{url_parts.pathname}/encodeURIComponent(@id)"
+        url = URL.format(url_parts)
+      return url
+
+    model_type = type::model
+    if not model_type or (model_type is Backbone.Model)
+      class ORMModel extends Backbone.Model
+        url: modelURL
+        sync: sync(ORMModel)
+      return type::model = ORMModel
+    else if model_type::sync is Backbone.Model::sync # override built-in backbone sync
+      model_type::url = modelURL
+      model_type::sync = sync(model_type)
+    return model_type
 
   ##############################
   # Relational
@@ -108,13 +149,15 @@ module.exports = class Utils
     if _.isObject(data)
       model.setLoaded(true)
       model.set(data)
-      schema = model.schema()
-      for key of model.attributes
-        continue unless _.isUndefined(data[key])
-        if schema and relation = schema.relation(key)
-          model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
-        else
-          model.unset(key)
+
+      # TODO: handle partial models
+      # schema = model.schema()
+      # for key of model.attributes
+      #   continue unless _.isUndefined(data[key])
+      #   if schema and relation = schema.relation(key)
+      #     model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
+      #   else
+      #     model.unset(key)
     return model
 
   @updateOrNew: (data, model_type) ->

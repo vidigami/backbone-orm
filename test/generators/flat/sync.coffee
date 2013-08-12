@@ -66,7 +66,7 @@ runTests = (options, cache, callback) ->
             done()
 
     describe 'destroy model', ->
-      it 'fetches data', (done) ->
+      it 'destroys a model', (done) ->
         Flat.findOne (err, model) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(!!model, 'got model')

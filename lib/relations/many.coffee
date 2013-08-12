@@ -228,20 +228,20 @@ module.exports = class Many
     return collection unless @reverse_relation # no back links
 
     # TODO: how should destroying the collection work?
-    collection._orm_bindings = {}
-    collection._orm_bindings.add = (related_model) =>
+    events = Utils.set(collection, 'events', {})
+    events.add = (related_model) =>
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
         related_model.set(@reverse_relation.key, model) unless related_model.get(@reverse_relation.key) is model
 
-    collection._orm_bindings.remove = (related_model) =>
+    events.remove = (related_model) =>
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
         related_model.set(@reverse_relation.key, null) unless related_model.get(@reverse_relation.key) is null
 
-    collection._orm_bindings.reset = (collection, options) =>
+    events.reset = (collection, options) =>
       current_models = collection.models
       previous_models = options.previousModels or []
 
@@ -249,10 +249,10 @@ module.exports = class Many
       added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 
       # update back links
-      (collection._orm_bindings.remove(related_model) for related_model in changes.removed) if changes.removed
-      (collection._orm_bindings.add(related_model) for related_model in added)
+      (events.remove(related_model) for related_model in changes.removed) if changes.removed
+      (events.add(related_model) for related_model in added)
 
-    collection.on(method, collection._orm_bindings[method]) for method in ['add', 'remove', 'reset']
+    collection.on(method, events[method]) for method in ['add', 'remove', 'reset']
     return collection
 
   _fetchRelated: (model, key, callback) ->
