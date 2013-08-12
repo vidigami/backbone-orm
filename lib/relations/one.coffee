@@ -58,14 +58,17 @@ module.exports = class One
       return if key is @ids_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
-    if not @manual_fetch and callback
-      is_loaded = @_fetchRelated model, key, (err) =>
+    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
+      @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
+
+        model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
+        model.setLoaded(@key, true)
         callback(null, returnValue())
 
     # synchronous path
     result = returnValue()
-    callback(null, result) if (is_loaded or @manual_fetch) and callback
+    callback(null, result) if callback and (is_loaded or @manual_fetch)
     return result
 
   save: (model, key, callback) ->
@@ -134,39 +137,6 @@ module.exports = class One
   ####################################
   # Internal
   ####################################
-  _queueDependentSave: (model) ->
-    model._orm or= {}
-    (model._orm.dependent_saves or= {})[@key] = true
-
-  _clearDependentSave: (model) -> delete model._orm?.dependent_saves?[@key]
-
-  _hasDependentSave: (model) -> model._orm?.dependent_saves?[@key]
-
-  # TODO: optimize so don't need to check each time
-  # TODO: check which objects are already loaded in cache and ignore ids
-  _fetchRelated: (model, key, callback) ->
-    return true if model.isLoaded(@key) or not model.id # already loaded or not loadable
-
-    @cursor(model, key).toJSON (err, json) =>
-      return callback(err) if err
-
-      model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
-      model.setLoaded(@key, true)
-      callback(null, related_model)
-
-    return false
-
-  _clearRelation: (model, callback) ->
-    (update = {})[@foreign_key] = null
-    @_clearDependentSave(model)
-    if related_model = model.attributes[@key]
-      related_model.save update, Utils.bbCallback callback
-    else
-      @cursor(model, @key).toModels (err, related_model) =>
-        return callback(err) if err
-        return callback() unless related_model
-        related_model.save update, Utils.bbCallback callback
-
   _bindBacklinks: (model) ->
     return unless @reverse_relation
 
@@ -182,3 +152,22 @@ module.exports = class One
 
     model.on("change:#{@key}", events.change)
     return model
+
+  _queueDependentSave: (model) ->
+    model._orm or= {}
+    (model._orm.dependent_saves or= {})[@key] = true
+
+  _clearDependentSave: (model) -> delete model._orm?.dependent_saves?[@key]
+
+  _hasDependentSave: (model) -> model._orm?.dependent_saves?[@key]
+
+  _clearRelation: (model, callback) ->
+    (update = {})[@foreign_key] = null
+    @_clearDependentSave(model)
+    if related_model = model.attributes[@key]
+      related_model.save update, Utils.bbCallback callback
+    else
+      @cursor(model, @key).toModels (err, related_model) =>
+        return callback(err) if err
+        return callback() unless related_model
+        related_model.save update, Utils.bbCallback callback

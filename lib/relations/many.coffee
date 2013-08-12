@@ -59,27 +59,42 @@ module.exports = class Many
 
   get: (model, key, callback) ->
     throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    collection = @_ensureCollection(model)
     returnValue = =>
-      collection = @_ensureCollection(model)
       return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
 
     # asynchronous path, needs load
-    if not @manual_fetch and callback
-      is_loaded = @_fetchRelated model, key, (err) =>
+    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
+
+      # fetch
+      (query = {})[@foreign_key] = model.id
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
+        model.setLoaded(@key, true)
+
+        # process the found models
+        for model_json in json
+          if related_model = collection.get(model_json.id)
+            related_model.set(model_json)
+          else
+            collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
+
+        # update cache
+        (cache.set(model.id, related_model) for related_model in collection.models) if cache = @reverse_model_type.cache
+
         result = returnValue()
         callback(null, if result.models then result.models else result)
 
     # synchronous path
     result = returnValue()
-    callback(null, if result.models then result.models else result) if (is_loaded or @manual_fetch) and callback
+    callback(null, if result.models then result.models else result) if callback and (is_loaded or @manual_fetch)
     return result
 
   save: (model, key, callback) ->
     return callback() if not @reverse_relation or not (related_model = model.attributes[@key])
 
     # update store
-    model::sync('sync').syncMemoryWithDisk(model, @key, callback)
+    # model::sync('sync').syncMemoryWithDisk(model, @key, callback)
 
     # determine changes
 
@@ -95,66 +110,64 @@ module.exports = class Many
     for related_model in _.clone(collection.models)
       do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
-    # if @reverse_relation.type is 'belongsTo'
+    if @reverse_relation.type is 'belongsTo'
 
-    #   # collection
-    #   if related_models = related_model.models
+      # collection
+      if related_models = related_model.models
+        if dependent_ids = model._orm.dependent_saves?[@key]
+          queue.defer (callback) =>
+            # Update foreign keys of relations that should no longer point to this model
+            @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
+              return callback(err) if err
+              @_clearDependentSaves(model)
+              @_clearHasOneRelatedModels(attached_models, callback)
 
+        return queue.await callback
 
-    #     if dependent_ids = model._orm.dependent_saves?[@key]
-    #       queue.defer (callback) =>
-    #         # Update foreign keys of relations that should no longer point to this model
-    #         @reverse_model_type.cursor({$ids: dependent_ids}).toModels (err, attached_models) =>
-    #           return callback(err) if err
-    #           @_clearDependentSaves(model)
-    #           @_clearHasOneRelatedModels(attached_models, callback)
+      # model
+      else
+        return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
 
-    #     return queue.await callback
+    # hasMany
+    else
+      collection = @_ensureCollection(model)
 
-    #   # model
-    #   else
-    #     return related_model.save {}, Utils.bbCallback callback if related_model.hasChanged(@reverse_relation.key) or not related_model.id
+      # TODO: is this correct? what about a partially loaded set of models through ids bootstrapping
+      return callback() unless model.isLoaded(@key) # not loaded
 
-    # # hasMany
-    # else
-    #   collection = @_ensureCollection(model)
+      # TODO: optimize
+      query = {$values: @foreign_key}
+      query[@foreign_key] = model.id
+      @join_table.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
 
-    #   # TODO: is this correct? what about a partially loaded set of models through ids bootstrapping
-    #   return callback() unless model.isLoaded(@key) # not loaded
+        related_ids = _.pluck(collection.models, 'id')
+        changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
+        added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
 
-    #   # TODO: optimize
-    #   query = {$values: @foreign_key}
-    #   query[@foreign_key] = model.id
-    #   @join_table.cursor(query).toJSON (err, json) =>
-    #     return callback(err) if err
+        queue = new Queue(1) # TODO: parallelism
 
-    #     related_ids = _.pluck(collection.models, 'id')
-    #     changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
-    #     added = if changes.kept then _.difference(related_ids, changes.kept) else related_ids
+        # destroy old
+        if changes.removed
+          do (model_json) => queue.defer (callback) =>
+            @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
 
-    #     queue = new Queue(1) # TODO: parallelism
+        # create new
+        for related_id in added
+          # TODO: optimize through batch create
+          do (related_id) => queue.defer (callback) =>
+            attributes = {}
+            attributes[@foreign_key] = model.id
+            attributes[@reverse_relation.foreign_key] = related_id
+            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+            join = new @join_table(attributes)
+            join.save {}, Utils.bbCallback callback
 
-    #     # destroy old
-    #     if changes.removed
-    #       do (model_json) => queue.defer (callback) =>
-    #         @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
+        queue.await callback
+      return
 
-    #     # create new
-    #     for related_id in added
-    #       # TODO: optimize through batch create
-    #       do (related_id) => queue.defer (callback) =>
-    #         attributes = {}
-    #         attributes[@foreign_key] = model.id
-    #         attributes[@reverse_relation.foreign_key] = related_id
-    #         # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
-    #         join = new @join_table(attributes)
-    #         join.save {}, Utils.bbCallback callback
-
-    #     queue.await callback
-    #   return
-
-    # # nothing to save
-    # callback()
+    # nothing to save
+    callback()
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -187,20 +200,19 @@ module.exports = class Many
       related_model.set(@foreign_key, null)
       cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
-    # clear in store
-    model::sync('sync').clearBacklinks(model, @key, callback)
-
-    # json = if model instanceof Backbone.Model then model.attributes else model
     # # clear in store
-    # (query = {})[@foreign_key] = model.attributes.id
-    # if @reverse_relation.type is 'hasMany'
-    #   @join_table.destroy(query, callback)
-    # else
-    #   @cursor(model, @key).toModels (err, related_models) =>
-    #     return callback(err) if err
-    #     @_clearHasOneRelatedModels(related_models, callback)
+    # model::sync('sync').clearBacklinks(model, @key, callback)
 
-    # return @_clearRelation(model, callback)
+    json = if model instanceof Backbone.Model then model.attributes else model
+    # clear in store
+    (query = {})[@foreign_key] = model.attributes.id
+    if @reverse_relation.type is 'hasMany'
+      @join_table.destroy(query, callback)
+    else
+      @cursor(model, @key).toModels (err, related_models) =>
+        return callback(err) if err
+        @_clearHasOneRelatedModels(related_models, callback)
+    return
 
   cursor: (model, key, query) ->
     json = if model instanceof Backbone.Model then model.attributes else model
@@ -211,17 +223,6 @@ module.exports = class Many
   ####################################
   # Internal
   ####################################
-
-  _queueDependentSave: (model, id) ->
-    model._orm or= {}
-    (model._orm.dependent_saves or= {})[@key] or= []
-    model._orm.dependent_saves[@key].push(id) # TODO: uniq?
-
-  _clearDependentSaves: (model) -> delete model._orm?.dependent_saves?[@key]
-
-  # TODO: ensure initialize is called only once and only from initializeModel
-  _ensureCollection: (model) -> @_bindBacklinks(model)
-
   _bindBacklinks: (model) ->
     return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
     collection = model.attributes[@key] = new @collection_type()
@@ -255,30 +256,15 @@ module.exports = class Many
     collection.on(method, events[method]) for method in ['add', 'remove', 'reset']
     return collection
 
-  _fetchRelated: (model, key, callback) ->
-    return true if model.isLoaded(@key) # already loaded
-    collection = @_ensureCollection(model)
+  _queueDependentSave: (model, id) ->
+    model._orm or= {}
+    (model._orm.dependent_saves or= {})[@key] or= []
+    model._orm.dependent_saves[@key].push(id) # TODO: uniq?
 
-    # fetch
-    (query = {})[@foreign_key] = model.id
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
+  _clearDependentSaves: (model) -> delete model._orm?.dependent_saves?[@key]
 
-      return callback(err) if err
-
-      # process the found models
-      for model_json in json
-        if related_model = collection.get(model_json.id)
-          related_model.set(model_json)
-        else
-          collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
-
-      if cache = @reverse_model_type.cache
-        cache.set(model.id, related_model) for related_model in collection.models
-
-      model.setLoaded(@key, true)
-
-      callback(null, collection.models)
-    return false
+  # TODO: ensure initialize is called only once and only from initializeModel
+  _ensureCollection: (model) -> @_bindBacklinks(model)
 
   _clearHasOneRelatedModels: (related_models, callback) ->
     return callback() unless related_models.length
