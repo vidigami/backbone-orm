@@ -16,7 +16,7 @@ module.exports = class JSONUtils
     return _.map(values, JSONUtils.parse) if _.isArray(values)
     if _.isObject(values)
       result = {}
-      result[key] = JSONUtils.parse(value) for key, value of values
+      result[key] = decodeURIComponent(JSONUtils.parse(value)) for key, value of values
       return result
     else if _.isString(values)
       # Date
@@ -25,28 +25,29 @@ module.exports = class JSONUtils
         return if date and date.isValid() then date.toDate() else values
       # "quoted string"
       else if match = /^\"(.*)\"$/.exec(values)
-        return match[0]
+        return decodeURIComponent(match[0])
       # Boolean
       else
         return true if values is 'true'
         return false if values is 'false'
         # stringified JSON
         try
-          return JSONUtils.parse(values) if values = JSON.parse(values)
+          return decodeURIComponent(JSONUtils.parse(values)) if values = JSON.parse(values)
         catch err
-    return values
+    return decodeURIComponent(values)
 
-  # Serialze json to a toQuery format.
+  # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
   #
   # @example
   #   query = JSONUtils.toQuery(json)
   #
-  @toQuery: (values) ->
+  @toQuery: (values, depth=0) ->
     if _.isArray(values)
       return JSON.stringify(values)
     else if _.isObject(values)
+      return JSON.stringify(values) if depth > 0
       result = {}
-      result[key] = JSON.stringify(value) for key, value of values
+      result[key] = JSONUtils.toQuery(value, 1) for key, value of values
       return result
     else if values.toJSON
       return values.toJSON()
