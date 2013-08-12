@@ -12,6 +12,7 @@ module.exports = class JSONUtils
   #     query = JSONUtils.parse(req.query)
   #
   @parse: (values) ->
+    return null if _.isNull(values) or (values is 'null')
     return values if _.isDate(values)
     return _.map(values, JSONUtils.parse) if _.isArray(values)
     if _.isObject(values)
@@ -19,13 +20,12 @@ module.exports = class JSONUtils
       result[key] = JSONUtils.parse(value) for key, value of values
       return result
     else if _.isString(values)
+      values = match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
+
       # Date
       if (values.length >= 20) and values[values.length-1] is 'Z'
         date = moment.utc(values)
         return if date and date.isValid() then date.toDate() else values
-      # "quoted string"
-      else if match = /^\"(.*)\"$/.exec(values)
-        return match[0]
       # Boolean
       else
         return true if values is 'true'
@@ -42,6 +42,7 @@ module.exports = class JSONUtils
   #   query = JSONUtils.toQuery(json)
   #
   @toQuery: (values, depth=0) ->
+    return null if _.isNull(values)
     if _.isArray(values)
       return JSON.stringify(values)
     else if _.isObject(values)
