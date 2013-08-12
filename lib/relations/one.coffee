@@ -161,8 +161,8 @@ module.exports = class One
   _bindBacklinks: (model) ->
     return unless @reverse_relation
 
-    model._orm_bindings = {}
-    model._orm_bindings.change = (model) =>
+    events = Utils.set(model, 'events', {})
+    events.change = (model) =>
       related_model = model.get(@key)
 
       # update backlinks
@@ -171,5 +171,5 @@ module.exports = class One
       if related_model
         if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
 
-    model.on("change:#{@key}", model._orm_bindings.change)
+    model.on("change:#{@key}", events.change)
     return model

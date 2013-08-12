@@ -47,6 +47,21 @@ module.exports = class Utils
 
     return result
 
+  @get: (model, key, default_value) ->
+    model._orm or= {}
+    return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
+
+  @set: (model, key, value) ->
+    model._orm or= {}
+    if _.isUndefined(value)
+      delete model._orm[key]
+    else
+      model._orm[key] = value
+
+  @orSet: (model, key, value) ->
+    model._orm or= {}
+    model._orm[key] = value unless model._orm.hasOwnProperty(key)
+
   ##############################
   # ModelType
   ##############################
