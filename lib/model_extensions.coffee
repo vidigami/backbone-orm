@@ -237,10 +237,6 @@ module.exports = (model_type) ->
 
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
-    @_orm or= {}
-    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
-    @_orm.save or= 0; @_orm.save++
-
     return _original_save.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
     # multiple signatures
@@ -249,6 +245,11 @@ module.exports = (model_type) ->
       options = value
     else
       (attributes = {})[key] = value;
+
+    @_orm or= {}
+    # throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
+    return options.success(@, {}, options) if @_orm.save > 0
+    @_orm.save or= 0; @_orm.save++
 
     return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
       --@_orm.save
