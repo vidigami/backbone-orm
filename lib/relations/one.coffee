@@ -21,18 +21,17 @@ module.exports = class One
     @_bindBacklinks(model)
 
   set: (model, key, value, options) ->
-    throw new Error "One::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
-    throw new Error "One::set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
+    throw new Error "One.set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "One.set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
     return @ if value is (previous_related_model = model.get(@key)) # no change
-    value_is_model = (value instanceof Backbone.Model)
-    model.setLoaded(@key, true) if not model.isLoaded(@key) and (value_is_model or _.isObject(value)) # set loaded state
-
-    # TODO: use the same code for dependent save state caching
+    is_model = (value instanceof Backbone.Model)
+    Utils.set(model, 'rel_dirty', true)
+    model.setLoaded(@key, true) if not model.isLoaded(@key) and (is_model or _.isObject(value)) # set loaded state
 
     # set the relation now or later merge into the existing model
-    if value and not value_is_model
+    if value and not is_model
       value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = !!previous_related_model
     Backbone.Model::set.call(model, @key, value, options) unless merge_into_existing
 
@@ -40,13 +39,10 @@ module.exports = class One
     if merge_into_existing
       Utils.updateModel(previous_related_model, value)
 
-    # clear the reverse relation if it's loaded
+    # update in memory - clear the reverse relation if it's loaded
     else if (value is null) and @reverse_relation and (@reverse_relation.type is 'hasOne' or @reverse_relation.type is 'belongsTo')
-      unless @embed or @reverse_relation.embed
-        if model.isLoaded(@key)
-          previous_related_model.set(@reverse_relation.key, null) if previous_related_model and previous_related_model.get(@reverse_relation.key)
-          # Note the model as it needs to be saved to have its foreign key updated
-        @_queueDependentSave(model) if @type is 'hasOne'
+      unless (@embed or @reverse_relation.embed)
+        previous_related_model.set(@reverse_relation.key, null) if model.isLoaded(@key) and previous_related_model and (previous_related_model.get(@reverse_relation.key) is model)
 
     return @
 
@@ -72,8 +68,12 @@ module.exports = class One
     return result
 
   save: (model, key, callback) ->
-    return callback() if not @reverse_relation
+    return callback() if not @reverse_relation or not @_hasChanged(model)
+    Utils.set(model, 'rel_dirty', false)
     related_model = model.attributes[@key]
+
+    @cursor(model, key).toJSON (err, json) =>
+      return callback(err) if err
 
     if @reverse_relation.type is 'hasOne'
       # TODO: optimize correct ordering (eg. save other before us in save method)
@@ -153,13 +153,7 @@ module.exports = class One
     model.on("change:#{@key}", events.change)
     return model
 
-  _queueDependentSave: (model) ->
-    model._orm or= {}
-    (model._orm.dependent_saves or= {})[@key] = true
-
-  _clearDependentSave: (model) -> delete model._orm?.dependent_saves?[@key]
-
-  _hasDependentSave: (model) -> model._orm?.dependent_saves?[@key]
+  _hasChanged: (model) -> return !!Utils.get(model, 'rel_dirty')
 
   _clearRelation: (model, callback) ->
     (update = {})[@foreign_key] = null

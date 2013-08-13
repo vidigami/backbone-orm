@@ -53,14 +53,15 @@ module.exports = class Utils
 
   @set: (model, key, value) ->
     model._orm or= {}
-    if _.isUndefined(value)
-      delete model._orm[key]
-    else
-      model._orm[key] = value
+    model._orm[key] = value
 
   @orSet: (model, key, value) ->
     model._orm or= {}
     model._orm[key] = value unless model._orm.hasOwnProperty(key)
+
+  @reset: (model, key) ->
+    model._orm or= {}
+    delete model._orm[key]
 
   ##############################
   # ModelType
