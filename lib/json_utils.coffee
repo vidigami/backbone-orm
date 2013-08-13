@@ -12,6 +12,7 @@ module.exports = class JSONUtils
   #     query = JSONUtils.parse(req.query)
   #
   @parse: (values) ->
+    return null if _.isNull(values) or (values is 'null')
     return values if _.isDate(values)
     return _.map(values, JSONUtils.parse) if _.isArray(values)
     if _.isObject(values)
@@ -19,31 +20,39 @@ module.exports = class JSONUtils
       result[key] = JSONUtils.parse(value) for key, value of values
       return result
     else if _.isString(values)
+      # Date
       if (values.length >= 20) and values[values.length-1] is 'Z'
         date = moment.utc(values)
         return if date and date.isValid() then date.toDate() else values
-      else
-        return true if values is 'true'
-        return false if values is 'false'
-        try
-          return JSONUtils.parse(values) if values = JSON.parse(values)
-        catch err
+
+      # Boolean
+      return true if values is 'true'
+      return false if values is 'false'
+
+      return match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
+
+      # stringified JSON
+      try
+        return JSONUtils.parse(values) if values = JSON.parse(values)
+      catch err
     return values
 
-  # Serialze json to a toQuery format.
+  # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
   #
   # @example
   #   query = JSONUtils.toQuery(json)
   #
-  @toQuery: (values) ->
+  @toQuery: (values, depth=0) ->
+    return null if _.isNull(values)
     if _.isArray(values)
       return JSON.stringify(values)
-    else if _.isObject(values)
-      result = {}
-      result[key] = JSON.stringify(value) for key, value of values
-      return result
-    else if values.toJSON
+    else if _.isDate(values) or values.toJSON
       return values.toJSON()
+    else if _.isObject(values)
+      return JSON.stringify(values) if depth > 0
+      result = {}
+      result[key] = JSONUtils.toQuery(value, 1) for key, value of values
+      return result
     return values
 
   # Render a template that can be a key, keys, DSL object, or function.

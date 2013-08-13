@@ -293,14 +293,14 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(reverse.get('owner_id'), owner.id, 'Reverse has an owner_id')
 
           removed_reverse = reverses[1]
-          owner.set('reverses', [reverses[0]])
+          owner.set({reverses: [reverses[0]]})
           assert.equal(owner.get('reverses').length, 1, "It has the correct number of relations after set\nExpected: #{1}\nActual: #{owner.get('reverses').length}")
           assert.equal(removed_reverse.get('owner_id'), null, 'Reverse relation has its foreign key set to null')
 
           owner.save {}, Utils.bbCallback (err, owner) ->
             Reverse.find {owner_id: owner.id}, (err, new_reverses) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.equal(new_reverses.length, 1, "Relations loaded from store have the correct length\nExpected: #{1}\nActual: #{new_reverses.length}")
+              assert.equal(1, new_reverses.length, "Relations loaded from store have the correct length\nExpected: #{1}\nActual: #{new_reverses.length}")
               done()
 
     it 'Clears its reverse relations on delete when the reverse relation is loaded (one-way hasMany)', (done) ->
@@ -328,6 +328,7 @@ runTests = (options, cache, embed, callback) ->
 
           owner.destroy Utils.bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
+
             Reverse.find {owner_id: owner.id}, (err, null_reverses) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')

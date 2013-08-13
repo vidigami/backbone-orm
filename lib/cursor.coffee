@@ -57,7 +57,7 @@ module.exports = class Cursor
   # Execution of the Query
   ##############################################
   count: (callback) -> @execWithCursorQuery('$count', callback)
-  exists: (callback) -> @execWithCursorQuery('$count', callback)
+  exists: (callback) -> @execWithCursorQuery('$exists', callback)
   execWithCursorQuery: (key, callback) ->
     value = @_cursor[key]
     @_cursor[key] = true
