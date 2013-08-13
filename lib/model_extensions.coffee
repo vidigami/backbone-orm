@@ -163,15 +163,13 @@ module.exports = (model_type) ->
 
   model_type::isLoaded = (key) ->
     key = '__model__' if arguments.length is 0
-    not @_orm?.needs_load?[key]
+    not Utils.orSet(@, 'needs_load', {})[key]
 
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
-    if is_loaded
-      delete @_orm?.needs_load?[key]
-    else
-      @_orm or= {}
-      (@_orm.needs_load or= {})[key] = true
+    needs_load = Utils.orSet(@, 'needs_load', {})
+    return delete needs_load[key] if is_loaded
+    needs_load[key] = true
 
   ###################################
   # Backbone ORM - Model Overrides
@@ -204,12 +202,10 @@ module.exports = (model_type) ->
   model_type::get = (key, callback) ->
     schema = model_type.schema() if model_type.schema
 
-    if schema and (relation = schema.relation(key))
-      return relation.get(@, key, callback)
-    else
-      value = _original_get.call(@, key)
-      callback(null, value) if callback
-      return value
+    return relation.get(@, key, callback) if schema and (relation = schema.relation(key))
+    value = _original_get.call(@, key)
+    callback(null, value) if callback
+    return value
 
   _original_toJSON = model_type::toJSON
   model_type::toJSON = (options={}) ->

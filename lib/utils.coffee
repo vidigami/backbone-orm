@@ -15,7 +15,7 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 
 
 module.exports = class Utils
-  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(err or new Error("Backbone call failed"), model, resp, options))}
+  @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
   @wrapOptions: (options={}, callback) ->
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
@@ -46,6 +46,24 @@ module.exports = class Utils
       result.password = if auth_parts.length > 1 then auth_parts[1] else null
 
     return result
+
+  @get: (model, key, default_value) ->
+    model._orm or= {}
+    return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
+
+  @set: (model, key, value) ->
+    model._orm or= {}
+    model._orm[key] = value
+    return model._orm[key]
+
+  @orSet: (model, key, value) ->
+    model._orm or= {}
+    model._orm[key] = value unless model._orm.hasOwnProperty(key)
+    return model._orm[key]
+
+  @reset: (model, key) ->
+    model._orm or= {}
+    delete model._orm[key]
 
   ##############################
   # ModelType
@@ -129,18 +147,20 @@ module.exports = class Utils
     return model
 
   @updateModel: (model, data) ->
-    return if not data or (model is data) or data._orm_needs_load
+    return model if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
     if _.isObject(data)
       model.setLoaded(true)
       model.set(data)
-      schema = model.schema()
-      for key of model.attributes
-        continue unless _.isUndefined(data[key])
-        if schema and relation = schema.relation(key)
-          model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
-        else
-          model.unset(key)
+
+      # TODO: handle partial models
+      # schema = model.schema()
+      # for key of model.attributes
+      #   continue unless _.isUndefined(data[key])
+      #   if schema and relation = schema.relation(key)
+      #     model.unset(key) if relation.type is 'belongsTo' and _.isUndefined(data[relation.ids_accessor]) # unset removed keys
+      #   else
+      #     model.unset(key)
     return model
 
   @updateOrNew: (data, model_type) ->

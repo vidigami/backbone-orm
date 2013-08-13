@@ -20,7 +20,7 @@ runTests = (options, cache, callback) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Utils.batch (cache: #{cache})", ->
+  describe "Backbone.Collection (cache: #{cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Model], done)
     after (done) -> callback(); done()
@@ -56,27 +56,43 @@ runTests = (options, cache, callback) ->
         url: "#{DATABASE_URL}/models"
         sync: SYNC(Collection)
 
-      collection = new Collection()
-      collection.fetch bbCallback (err, fetched_collection) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
-        assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
-        done()
+      runTest = (err) ->
+        return done(err) if err
+
+        collection = new Collection()
+        collection.fetch bbCallback (err, fetched_collection) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
+          assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
+          done()
+
+      if options.before
+        options.before([Collection::model], runTest)
+      else
+        runTest()
 
     it 'fetch models using upgraded model', (done) ->
       class SomeModel extends Backbone.Model
 
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
-        sync: SYNC(Collection)
         model: SomeModel
+        sync: SYNC(Collection)
 
-      collection = new Collection()
-      collection.fetch bbCallback (err, fetched_collection) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
-        assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
-        done()
+      runTest = (err) ->
+        return done(err) if err
+
+        collection = new Collection()
+        collection.fetch bbCallback (err, fetched_collection) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
+          assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
+          done()
+
+      if options.before
+        options.before([Collection::model], runTest)
+      else
+        runTest()
 
 # TODO: explain required set up
 

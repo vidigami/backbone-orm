@@ -1,10 +1,12 @@
 util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
+Queue = require 'queue-async'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
+bbCallback = Utils.bbCallback
 
 STORES = {}
 
@@ -44,13 +46,12 @@ class MemorySync
 
   # @private
   update: (model, options) ->
-    return @create(model, options) unless model_json = @store[model.id] # if bootstrapped, it may not yet be in the store
-    _.extend(model_json, model.toJSON())
+    @store[model.id] = model_json = model.toJSON()
     options.success(_.clone(model_json))
 
   # @private
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless model_json = @store[model.id]
+    return options.error(new Error('Model not found')) unless @store[model.id]
     delete @store[model.id]
     options.success()
 
@@ -59,19 +60,28 @@ class MemorySync
   ###################################
 
   # @private
-  resetSchema: (options, callback) -> delete @store[key] for key of @store; callback()
+  resetSchema: (options, callback) ->
+    queue = new Queue(1)
+    for id, model_json of @store
+      do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
+    queue.await callback
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    return @resetSchema({}, callback) unless (keys = _.keys(query)).length
+    unless (keys = _.keys(query)).length
+      # destroy backlinks
+     return @resetSchema({}, callback)
 
-    # destroy specific records
-    for id, model_json of @store
-      delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
-    callback()
+    else
+      # destroy specific records
+      queue = new Queue(1)
+      for id, model_json of @store
+        if _.isEqual(_.pick(model_json, keys), query)
+          do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
+      queue.await callback
 
 module.exports = (type) ->
   if (new type()) instanceof Backbone.Collection # collection
@@ -83,6 +93,7 @@ module.exports = (type) ->
     sync.initialize()
     return module.exports.apply(null, Array::slice.call(arguments, 1)) if method is 'createSync' # create a new sync
     return sync if method is 'sync'
+    return false if method is 'isRemote'
     return sync.schema if method is 'schema'
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
