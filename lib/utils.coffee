@@ -68,6 +68,13 @@ module.exports = class Utils
   ##############################
   # ModelType
   ##############################
+  @findOrGenerateModelName: (model_type) ->
+    return model_type.model_name if model_type.model_name
+    if url = _.result(model_type.prototype, 'url')
+      return model_name if model_name = Utils.parseUrl(url).model_name
+    return model_type.name if model_type.name
+    throw "Could not find or generate model name for #{model_type}"
+
   @configureCollectionModelType: (type, sync) ->
     modelURL = ->
       url = _.result(@collection or type::, 'url')
@@ -87,44 +94,6 @@ module.exports = class Utils
       model_type::url = modelURL
       model_type::sync = sync(model_type)
     return model_type
-
-  ##############################
-  # Relational
-  ##############################
-  @findOrGenerateModelName: (model_type) ->
-    return model_type.model_name if model_type.model_name
-    if url = _.result(model_type.prototype, 'url')
-      return model_name if model_name = Utils.parseUrl(url).model_name
-    return model_type.name if model_type.name
-    throw "Could not find or generate model name for #{model_type}"
-
-  # @private
-  @findOrGenerateReverseRelation: (relation) ->
-    model_type = relation.model_type
-    reverse_model_type = relation.reverse_model_type
-    reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
-
-    if relation.as
-      reverse_relation = reverse_model_type.relation(relation.as)
-#      throw new Error "Reverse relation from `#{@model_type.name}` as `#{@as}` not found on model `#{@reverse_model_type.name}`" unless @reverse_relation
-      if reverse_relation
-        reverse_relation.foreign_key = relation.foreign_key
-        reverse_relation.reverse_relation = relation
-    else
-      key_root = inflection.underscore(model_type.model_name)
-      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.singularize(key_root)) # singular
-        reverse_relation = reverse_model_type.relation(reverse_key = inflection.pluralize(key_root)) # plural
-
-    # check for reverse since they need to store the foreign key
-    if not reverse_relation and (relation.type is 'hasOne' or relation.type is 'hasMany')
-      reverse_relation =  reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
-    return reverse_relation
-
-  # @private
-  @findOrGenerateJoinTable: (relation) ->
-    # already exists
-    return join_table if join_table = (relation.join_table or relation.reverse_relation.join_table)
-    return relation.model_type.schema().generateJoinTable(relation)
 
   ##############################
   # Data to Model Helpers

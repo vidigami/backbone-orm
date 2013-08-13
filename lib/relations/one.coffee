@@ -14,7 +14,7 @@ module.exports = class One extends require('./relation')
     @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
-    @reverse_relation = Utils.findOrGenerateReverseRelation(@)
+    @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   initializeModel: (model, key) ->

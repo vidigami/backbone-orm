@@ -15,12 +15,12 @@ module.exports = class Many extends require('./relation')
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
-    @reverse_relation = Utils.findOrGenerateReverseRelation(@)
+    @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
 
     # check for join table
-    @join_table = Utils.findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
+    @join_table = @_findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
   initializeModel: (model, key) ->
     model.setLoaded(@key, false)
