@@ -128,4 +128,8 @@ module.exports = class One extends require('./relation')
     model.on("change:#{@key}", events.change)
     return model
 
-  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]
+  _hasChanged: (model) ->
+    return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)
+    return false unless @reverse_relation
+    return false unless related_model = model.attributes[@key]
+    return related_model.hasChanged(@reverse_relation.foreign_key)

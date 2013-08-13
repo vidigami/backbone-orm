@@ -106,7 +106,7 @@ module.exports = class Many extends require('./relation')
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
     return unless current_related_model = collection.get(related_model.id)
-    collection.remove(current_related_model.id)
+    collection.remove(current_related_model)
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
@@ -181,4 +181,9 @@ module.exports = class Many extends require('./relation')
     return collection
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
-  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]
+  _hasChanged: (model) ->
+    return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)
+    return false unless @reverse_relation
+    collection = @_ensureCollection(model)
+    return true for model in model.models when model.hasChanged(@reverse_relation.foreign_key)
+    return false
