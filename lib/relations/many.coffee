@@ -118,8 +118,8 @@ module.exports = class Many
       else
         # clear removed - TODO: optimize using batch update
         if changes.removed
-          for removed_json in changes.removed
-            do (removed_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(removed_json), callback)
+          for related_json in changes.removed
+            do (related_json) => queue.defer (callback) => Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
 
         # add new
         for added_id in added_ids
@@ -154,7 +154,7 @@ module.exports = class Many
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
-
+    delete Utils.orSet(model, 'rel_dirty', {})[@key]
     collection = @_ensureCollection(model)
     use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
 
@@ -176,8 +176,8 @@ module.exports = class Many
 
         # clear reverses
         queue = new Queue(1)
-        for removed_json in json
-          do (removed_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(removed_json), callback)
+        for related_json in json
+          do (related_json) => queue.defer (callback) => Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
         queue.await callback
 
   cursor: (model, key, query) ->
@@ -224,17 +224,3 @@ module.exports = class Many
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
   _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]
-
-  _clearAndSaveRelatedBacklink: (model, related_model, callback) ->
-    return callback() unless related_related = related_model.get(@reverse_relation.key)
-
-    if related_collection = related_related.models # collection
-      related_collection.remove(found) if found = related_collection.get(model.id)
-    else # model
-      found = related_related if related_related.id is model.id
-      related_model.set(@reverse_relation.foreign_key, null) if found
-    return callback() unless found # no longer related, skip
-
-    related_model.save {}, Utils.bbCallback (err, saved_model) =>
-      cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
-      callback(err)

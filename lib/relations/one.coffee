@@ -75,38 +75,27 @@ module.exports = class One
     @cursor(model, key).toJSON (err, json) =>
       return callback(err) if err
 
-    if @reverse_relation.type is 'hasOne'
-      # TODO: optimize correct ordering (eg. save other before us in save method)
-      if related_model and not related_model.id
-        return related_model.save {}, Utils.bbCallback (err) =>
-          return callback() if err
-          model.save {}, Utils.bbCallback callback
+      if @reverse_relation.type is 'hasOne'
+        # TODO: optimize correct ordering (eg. save other before us in save method)
+        if related_model and not related_model.id
+          return related_model.save {}, Utils.bbCallback (err) =>
+            return callback() if err
+            model.save {}, Utils.bbCallback callback
 
-      return callback()
+      else if @reverse_relation.type is 'belongsTo'
+        if related_model and (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
+          return related_model.save {}, Utils.bbCallback(callback)
 
-    else if @reverse_relation.type is 'belongsTo'
-      if related_model and (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
-        return related_model.save {}, Utils.bbCallback(callback)
-
-      else if @_hasDependentSave(model)
-        return @_clearRelation(model, callback)
-
-    else # hasMany
-      # nothing to do?
-
-    callback() # nothing to save
+      callback() # nothing to save (note above return statements)
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
+    delete Utils.orSet(model, 'rel_dirty', {})[@key]
 
-    # clear in memory
-    if @type is 'hasOne'
-      @_clearRelation(model, callback)
-
-    # clear in store
-    model::sync('sync').clearBacklinks(model, @key, callback)
-
-    callback() # nothing to save
+    @cursor(model, @key).toJSON (err, related_json) =>
+      return callback(err) if err
+      return callback() unless related_json
+      Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -154,14 +143,3 @@ module.exports = class One
     return model
 
   _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]
-
-  _clearRelation: (model, callback) ->
-    (update = {})[@foreign_key] = null
-    @_clearDependentSave(model)
-    if related_model = model.attributes[@key]
-      related_model.save update, Utils.bbCallback callback
-    else
-      @cursor(model, @key).toModels (err, related_model) =>
-        return callback(err) if err
-        return callback() unless related_model
-        related_model.save update, Utils.bbCallback callback
