@@ -3,6 +3,7 @@ _ = require 'underscore'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
+bbCallback = Utils.bbCallback
 
 module.exports = class Relation
 
@@ -15,11 +16,13 @@ module.exports = class Relation
       json = [] unless json
       json = [json] unless _.isArray(json)
       queue = new Queue(1)
+      ids_generated = false
 
       # ensure there are ids
       for related_model in related_models
         continue if related_model.id
-        do (related_model) => queue.defer (callback) => return related_model.save {}, Utils.bbCallback callback
+        ids_generated = true
+        do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
       use_join = @join_table and not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
       related_ids = _.pluck(related_models, 'id')
@@ -57,6 +60,11 @@ module.exports = class Relation
             related_model.save {}, Utils.bbCallback (err, saved_model) =>
               cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
               callback(err)
+
+      # need to resave ourself - TODO: optimize before save is called
+      queue.defer (callback) =>
+        return callback() unless ids_generated
+        model.save {}, bbCallback callback
 
       queue.await callback
 

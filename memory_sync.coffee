@@ -44,16 +44,12 @@ class MemorySync
 
   # @private
   update: (model, options) ->
-    return @create(model, options) unless model_json = @store[model.id] # if bootstrapped, it may not yet be in the store
     @store[model.id] = model_json = model.toJSON()
     options.success(_.clone(model_json))
 
   # @private
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless model_json = @store[model.id]
-
-    # destroy backlinks
-
+    return options.error(new Error('Model not found')) unless @store[model.id]
     delete @store[model.id]
     options.success()
 
