@@ -163,15 +163,13 @@ module.exports = (model_type) ->
 
   model_type::isLoaded = (key) ->
     key = '__model__' if arguments.length is 0
-    not @_orm?.needs_load?[key]
+    not Utils.orSet(@, 'needs_load', {})[key]
 
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
-    if is_loaded
-      delete @_orm?.needs_load?[key]
-    else
-      @_orm or= {}
-      (@_orm.needs_load or= {})[key] = true
+    needs_load = Utils.orSet(@, 'needs_load', {})
+    return delete needs_load[key] if is_loaded
+    needs_load[key] = true
 
   ###################################
   # Backbone ORM - Model Overrides

@@ -27,7 +27,7 @@ module.exports = class One
 
     return @ if value is (previous_related_model = model.get(@key)) # no change
     is_model = (value instanceof Backbone.Model)
-    Utils.set(model, 'rel_dirty', true)
+    Utils.orSet(model, 'rel_dirty', {})[@key] = true
     model.setLoaded(@key, true) if not model.isLoaded(@key) and (is_model or _.isObject(value)) # set loaded state
 
     # set the relation now or later merge into the existing model
@@ -69,7 +69,7 @@ module.exports = class One
 
   save: (model, key, callback) ->
     return callback() if not @reverse_relation or not @_hasChanged(model)
-    Utils.set(model, 'rel_dirty', false)
+    delete Utils.orSet(model, 'rel_dirty', {})[@key]
     related_model = model.attributes[@key]
 
     @cursor(model, key).toJSON (err, json) =>
@@ -153,7 +153,7 @@ module.exports = class One
     model.on("change:#{@key}", events.change)
     return model
 
-  _hasChanged: (model) -> return !!Utils.get(model, 'rel_dirty')
+  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]
 
   _clearRelation: (model, callback) ->
     (update = {})[@foreign_key] = null

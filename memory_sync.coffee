@@ -45,7 +45,7 @@ class MemorySync
   # @private
   update: (model, options) ->
     return @create(model, options) unless model_json = @store[model.id] # if bootstrapped, it may not yet be in the store
-    _.extend(model_json, model.toJSON())
+    @store[model.id] = model_json = model.toJSON()
     options.success(_.clone(model_json))
 
   # @private

@@ -34,11 +34,11 @@ module.exports = class Many
     value = [] if _.isUndefined(value) # Backbone clear or reset
     throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
-    Utils.set(model, 'rel_dirty', true)
+    Utils.orSet(model, 'rel_dirty', {})[@key] = true
     model.setLoaded(@key, true)
 
     # set the collection with found or created models
-    models = ((if related_model = collection.get(Utils.dataId(item)) then Utils.updateModel(related_model, item) else related_model = Utils.updateOrNew(item, @reverse_model_type)) for item in value)
+    models = ((if related_model = collection.get(Utils.dataId(item)) then Utils.updateModel(related_model, item) else Utils.updateOrNew(item, @reverse_model_type)) for item in value)
     previous_models = _.clone(collection.models)
     collection.reset(models)
 
@@ -83,7 +83,7 @@ module.exports = class Many
 
   save: (model, key, callback) ->
     return callback() if not @reverse_relation or not @_hasChanged(model)
-    Utils.set(model, 'rel_dirty', false)
+    delete Utils.orSet(model, 'rel_dirty', {})[@key]
     collection = @_ensureCollection(model)
     use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
 
@@ -117,21 +117,22 @@ module.exports = class Many
       # clear back links on models and save
       else
         # clear removed - TODO: optimize using batch update
-        for removed_json in changes.removed
-          related_model = new @reverse_model_type(removed_json)
-          do (related_model) => queue.defer (callback) =>
-            if related_collection = related_model.models # collection
-              related_collection.remove(found) if found = related_collection.get(model.id)
+        if changes.removed
+          for removed_json in changes.removed
+            related_model = new @reverse_model_type(removed_json)
+            do (related_model) => queue.defer (callback) =>
 
-            else # model
-              if found = related_model.get(@foreign_key)
-                found = null unless found.id is model.id
-                related_model.set(@foreign_key, null) if found
-            return callback() unless found # no longer related, skip
+              if related_collection = related_model.models # collection
+                related_collection.remove(found) if found = related_collection.get(model.id)
+              else # model
+                if found = related_model.get(@reverse_relation.key)
+                  found = null unless found.id is model.id
+                  related_model.set(@reverse_relation.foreign_key, null) if found
+              return callback() unless found # no longer related, skip
 
-            related_model.save {}, Utils.bbCallback (err, saved_model) =>
-              cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
-              callback(err)
+              related_model.save {}, Utils.bbCallback (err, saved_model) =>
+                cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
+                callback(err)
 
         # add new
         for added_id in added_ids
@@ -189,7 +190,7 @@ module.exports = class Many
         queue = new Queue(1)
 
         # clear reverses
-        for removed_json in changes.removed
+        for removed_json in json
           related_model = new @reverse_model_type(removed_json)
           do (related_model) => queue.defer (callback) =>
 
@@ -251,4 +252,4 @@ module.exports = class Many
     return collection
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
-  _hasChanged: (model) -> return !!Utils.get(model, 'rel_dirty')
+  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key]

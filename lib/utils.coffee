@@ -54,10 +54,12 @@ module.exports = class Utils
   @set: (model, key, value) ->
     model._orm or= {}
     model._orm[key] = value
+    return model._orm[key]
 
   @orSet: (model, key, value) ->
     model._orm or= {}
     model._orm[key] = value unless model._orm.hasOwnProperty(key)
+    return model._orm[key]
 
   @reset: (model, key) ->
     model._orm or= {}
@@ -145,7 +147,7 @@ module.exports = class Utils
     return model
 
   @updateModel: (model, data) ->
-    return if not data or (model is data) or data._orm_needs_load
+    return model if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
     if _.isObject(data)
       model.setLoaded(true)
