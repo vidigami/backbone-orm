@@ -29,7 +29,7 @@ module.exports = class Relation
     reverse_relation.reverse_relation = @ if reverse_relation and not reverse_relation.reverse_relation
     return reverse_relation
 
-  _findOrGenerateJoinTable: ->
+  findOrGenerateJoinTable: ->
     # already exists
     return join_table if join_table = (@join_table or @reverse_relation.join_table)
     return @model_type.schema().generateJoinTable(@)

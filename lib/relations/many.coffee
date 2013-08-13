@@ -20,7 +20,7 @@ module.exports = class Many extends require('./relation')
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
 
     # check for join table
-    @join_table = @_findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
+    @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
   initializeModel: (model, key) ->
     model.setLoaded(@key, false)
