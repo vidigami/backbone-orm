@@ -156,6 +156,7 @@ module.exports = (model_type) ->
   ###################################
 
   model_type::cache = -> model_type.cache
+  model_type::tableName = model_type.tableName = -> model_type::sync('tableName')
   model_type::schema = model_type.schema = -> model_type::sync('schema')
   model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
   model_type::relationIsEmbedded = model_type.relationIsEmbedded = (key) -> return if relation = model_type.relation(key) then !!relation.embed else false

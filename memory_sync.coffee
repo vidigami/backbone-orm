@@ -95,6 +95,7 @@ module.exports = (type) ->
     return sync if method is 'sync'
     return false if method is 'isRemote'
     return sync.schema if method is 'schema'
+    return undefined if method is 'tableName'
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
   require('./lib/model_extensions')(type)
