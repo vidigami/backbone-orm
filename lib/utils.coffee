@@ -171,20 +171,6 @@ module.exports = class Utils
       cache.set(model.id, model) if model and cache
     return model
 
-  @clearAndSaveRelatedBacklink: (model, related_model, related_relation, callback) ->
-    return callback() unless related_related = related_model.get(related_relation.key)
-
-    if related_collection = related_related.models # collection
-      related_collection.remove(found) if found = related_collection.get(model.id)
-    else # model
-      found = related_related if related_related.id is model.id
-      related_model.set(related_relation.foreign_key, null) if found
-    return callback() unless found # no longer related, skip
-
-    related_model.save {}, Utils.bbCallback (err, saved_model) =>
-      cache.set(saved_model.id, saved_model) if not err and cache = related_relation.model_type.cache
-      callback(err)
-
   ##############################
   # Sorting
   ##############################

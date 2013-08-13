@@ -7,7 +7,7 @@ Queue = require 'queue-async'
 Utils = require '../utils'
 
 # @private
-module.exports = class Many
+module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{inflection.singularize(@key)}_ids"
@@ -84,52 +84,10 @@ module.exports = class Many
   save: (model, key, callback) ->
     return callback() if not @reverse_relation or not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
+
     collection = @_ensureCollection(model)
-    use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
-
-    (query = {})[@foreign_key] = model.id
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
-      return callback(err) if err
-
-      related_models = _.clone(collection.models)
-      related_ids = _.pluck(related_models, 'id')
-      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
-      added_ids = if changes.added then _.difference(related_ids, (test.id for test in changes.kept)) else related_ids
-      queue = new Queue(1)
-
-      # update store through join table
-      if use_join
-        # destroy removed
-        if changes.removed
-          do (model_json) => queue.defer (callback) =>
-            @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
-
-        # create new - TODO: optimize through batch create
-        for related_id in added_ids
-          do (related_id) => queue.defer (callback) =>
-            attributes = {}
-            attributes[@foreign_key] = model.id
-            attributes[@reverse_relation.foreign_key] = related_id
-            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
-            join = new @join_table(attributes)
-            join.save {}, Utils.bbCallback callback
-
-      # clear back links on models and save
-      else
-        # clear removed - TODO: optimize using batch update
-        if changes.removed
-          for related_json in changes.removed
-            do (related_json) => queue.defer (callback) => Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
-
-        # add new
-        for added_id in added_ids
-          related_model = _.find(related_models, (test) -> test.id is added_id)
-          do (related_model) => queue.defer (callback) =>
-            related_model.save {}, Utils.bbCallback (err, saved_model) =>
-              cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
-              callback(err)
-
-      queue.await callback
+    related_models = _.clone(collection.models)
+    @_saveRelated(model, related_models, callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
@@ -177,7 +135,7 @@ module.exports = class Many
         # clear reverses
         queue = new Queue(1)
         for related_json in json
-          do (related_json) => queue.defer (callback) => Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
+          do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
         queue.await callback
 
   cursor: (model, key, query) ->

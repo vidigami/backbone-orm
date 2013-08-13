@@ -2,11 +2,12 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
+Queue = require 'queue-async'
 
 Utils = require '../utils'
 
 # @private
-module.exports = class One
+module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{@key}_id"
@@ -70,23 +71,8 @@ module.exports = class One
   save: (model, key, callback) ->
     return callback() if not @reverse_relation or not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
-    related_model = model.attributes[@key]
-
-    @cursor(model, key).toJSON (err, json) =>
-      return callback(err) if err
-
-      if @reverse_relation.type is 'hasOne'
-        # TODO: optimize correct ordering (eg. save other before us in save method)
-        if related_model and not related_model.id
-          return related_model.save {}, Utils.bbCallback (err) =>
-            return callback() if err
-            model.save {}, Utils.bbCallback callback
-
-      else if @reverse_relation.type is 'belongsTo'
-        if related_model and (related_model.hasChanged(@reverse_relation.key) or not related_model.id)
-          return related_model.save {}, Utils.bbCallback(callback)
-
-      callback() # nothing to save (note above return statements)
+    return callback() unless related_model = model.attributes[@key]
+    @_saveRelated(model, [related_model], callback)
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
@@ -95,7 +81,7 @@ module.exports = class One
     @cursor(model, @key).toJSON (err, related_json) =>
       return callback(err) if err
       return callback() unless related_json
-      Utils.clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), @reverse_relation, callback)
+      @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
