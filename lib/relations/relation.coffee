@@ -12,19 +12,15 @@ module.exports = class Relation
   _findOrGenerateReverseRelation: ->
     model_type = @model_type
     reverse_model_type = @reverse_model_type
-    reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # not a relational model
+    reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # convert to relational
 
-    if @as
-      if reverse_relation = reverse_model_type.relation(@as)
-        reverse_foreign_key = @foreign_key
-    else
-      key_root = inflection.underscore(model_type.model_name)
-      unless reverse_relation = reverse_model_type.relation(reverse_key = inflection.singularize(key_root)) # singular
-        reverse_relation = reverse_model_type.relation(reverse_key = inflection.pluralize(key_root)) # plural
+    key_root = @as or inflection.underscore(model_type.model_name)
+    reverse_relation = reverse_model_type.relation(key_root) # as
+    reverse_relation = reverse_model_type.relation(inflection.singularize(key_root)) unless reverse_relation # singular
+    reverse_relation = reverse_model_type.relation(inflection.pluralize(key_root)) unless reverse_relation # plural
 
-    # check for reverse since they need to store the foreign key
-    if not reverse_relation and (@type is 'hasOne' or @type is 'hasMany')
-      reverse_relation =  reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
+    if not reverse_relation and (@type isnt 'belongsTo')
+      reverse_relation = reverse_model_type.schema().generateBelongsTo(reverse_model_type, model_type)
 
     reverse_relation.reverse_relation = @ if reverse_relation and not reverse_relation.reverse_relation
     return reverse_relation
