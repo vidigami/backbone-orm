@@ -1,10 +1,12 @@
 util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
+Queue = require 'queue-async'
 
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
+bbCallback = Utils.bbCallback
 
 STORES = {}
 
@@ -58,7 +60,11 @@ class MemorySync
   ###################################
 
   # @private
-  resetSchema: (options, callback) -> delete @store[key] for key of @store; callback()
+  resetSchema: (options, callback) ->
+    queue = new Queue(1)
+    for id, model_json of @store
+      do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
+    queue.await callback
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
@@ -71,10 +77,11 @@ class MemorySync
 
     else
       # destroy specific records
+      queue = new Queue(1)
       for id, model_json of @store
-        # destroy backlinks
-        delete @store[id] if _.isEqual(_.pick(model_json, keys), query)
-      callback()
+        if _.isEqual(_.pick(model_json, keys), query)
+          do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
+      queue.await callback
 
 module.exports = (type) ->
   if (new type()) instanceof Backbone.Collection # collection

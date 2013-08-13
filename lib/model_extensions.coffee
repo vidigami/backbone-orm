@@ -202,12 +202,10 @@ module.exports = (model_type) ->
   model_type::get = (key, callback) ->
     schema = model_type.schema() if model_type.schema
 
-    if schema and (relation = schema.relation(key))
-      return relation.get(@, key, callback)
-    else
-      value = _original_get.call(@, key)
-      callback(null, value) if callback
-      return value
+    return relation.get(@, key, callback) if schema and (relation = schema.relation(key))
+    value = _original_get.call(@, key)
+    callback(null, value) if callback
+    return value
 
   _original_toJSON = model_type::toJSON
   model_type::toJSON = (options={}) ->

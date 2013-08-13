@@ -105,38 +105,38 @@ module.exports = class Many extends require('./relation')
 
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
-    current_related_model = collection.get(related_model.id)
-    throw new Error "Model removed but still exists: #{util.inspect(current_related_model.attributes)}" if current_related_model and current_related_model isnt related_model
-    return unless current_related_model
-    collection.remove(related_model.id)
+    return unless current_related_model = collection.get(related_model.id)
+    collection.remove(current_related_model.id)
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
-    collection = @_ensureCollection(model)
+    if model instanceof Backbone.Model
+      collection = @_ensureCollection(model)
+      related_models = _.clone(collection.models)
+    else
+      related_models = (new @reverse_model_type(json) for json in (model[@key] or []))
     use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
 
     # clear in memory
-    for related_model in _.clone(collection.models)
+    for related_model in related_models
       related_model.set(@foreign_key, null)
       cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
     # clear in store through join table
-    if use_join
-      (query = {})[@foreign_key] = model.attributes.id
-      return @join_table.destroy(query, callback)
+    (query = {})[@foreign_key] = model.id
+    return @join_table.destroy(query, callback) if use_join
 
     # clear back links on models and save
-    else
-      (query = {})[@foreign_key] = model.id
-      @reverse_model_type.cursor(query).toJSON (err, json) =>
-        return callback(err) if err
+    (query = {})[@foreign_key] = model.id
+    @reverse_model_type.cursor(query).toJSON (err, json) =>
+      return callback(err) if err
 
-        # clear reverses
-        queue = new Queue(1)
-        for related_json in json
-          do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
-        queue.await callback
+      # clear reverses
+      queue = new Queue(1)
+      for related_json in json
+        do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+      queue.await callback
 
   cursor: (model, key, query) ->
     json = if model instanceof Backbone.Model then model.attributes else model

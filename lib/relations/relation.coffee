@@ -1,5 +1,6 @@
 util = require 'util'
 _ = require 'underscore'
+Backbone = require 'backbone'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
@@ -71,8 +72,8 @@ module.exports = class Relation
   _clearAndSaveRelatedBacklink: (model, related_model, callback) ->
     return callback() unless (@reverse_relation and related_related = related_model.get(@reverse_relation.key))
 
-    if related_collection = related_related.models # collection
-      related_collection.remove(found) if found = related_collection.get(model.id)
+    if related_related.models # collection
+      related_related.remove(found) if found = related_related.get(model.id)
     else # model
       found = related_related if related_related.id is model.id
       related_model.set(@reverse_relation.foreign_key, null) if found
