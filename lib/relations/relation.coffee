@@ -14,8 +14,7 @@ module.exports = class Relation
     @cursor(model, @key).toJSON (err, json) =>
       return callback(err) if err
 
-      json = [] unless json
-      json = [json] unless _.isArray(json)
+      json = (if json then [json] else []) unless _.isArray(json) # a One relation
       queue = new Queue(1)
       ids_generated = false
 
@@ -25,7 +24,7 @@ module.exports = class Relation
         ids_generated = true
         do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
-      use_join = @join_table and not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
+      use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
       related_ids = _.pluck(related_models, 'id')
       changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
       added_ids = if changes.added then _.difference(related_ids, (test.id for test in changes.kept)) else related_ids

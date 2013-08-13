@@ -56,10 +56,8 @@ module.exports = class Many extends require('./relation')
 
     # asynchronous path, needs load
     if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
-
       # fetch
-      (query = {})[@foreign_key] = model.id
-      @reverse_model_type.cursor(query).toJSON (err, json) =>
+      @cursor(model, @key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)
 
@@ -116,7 +114,7 @@ module.exports = class Many extends require('./relation')
       related_models = _.clone(collection.models)
     else
       related_models = (new @reverse_model_type(json) for json in (model[@key] or []))
-    use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
+    use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
 
     # clear in memory
     for related_model in related_models
@@ -142,7 +140,9 @@ module.exports = class Many extends require('./relation')
     json = if model instanceof Backbone.Model then model.attributes else model
     (query = _.clone(query or {}))[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
-    return @reverse_model_type.cursor(query)
+
+    reverse_table = if @join_table and not @reverse_model_type::sync('isRemote') then @join_table else @reverse_model_type
+    return reverse_table.cursor(query)
 
   ####################################
   # Internal
