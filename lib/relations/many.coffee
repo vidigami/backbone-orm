@@ -11,7 +11,8 @@ module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{inflection.singularize(@key)}_ids"
-    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
+    @join_key = inflection.foreign_key(@as or @model_type.model_name)
+    @foreign_key = @join_key unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->

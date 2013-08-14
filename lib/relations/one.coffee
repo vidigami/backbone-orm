@@ -11,7 +11,8 @@ module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @ids_accessor or= "#{@key}_id"
-    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
+    @join_key = inflection.foreign_key(@as or @model_type.model_name)
+    @foreign_key = if @type is 'belongsTo' then inflection.foreign_key(@key) else @join_key unless @foreign_key
 
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)
