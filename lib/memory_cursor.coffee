@@ -176,14 +176,14 @@ module.exports = class MemoryCursor extends Cursor
             return callback(err) if err
 
             if relation.join_table
-              (join_query = {})[relation.reverse_relation.join_key] = {$in: related_ids}
+              (join_query = {})[relation.reverse_relation.join_key] = {$in: _.compact(related_ids)}
               join_query.$values = relation.foreign_key
               relation.join_table.cursor(join_query).toJSON (err, model_ids) =>
                 return callback(err) if err
-                find_query.id = {$in: model_ids}
+                find_query.id = {$in: _.compact(model_ids)}
                 callback()
             else
-              find_query[relation.foreign_key] = {$in: related_ids}
+              find_query[relation.foreign_key] = {$in: _.compact(related_ids)}
               callback()
 
         # foreign key is on this model
@@ -193,7 +193,7 @@ module.exports = class MemoryCursor extends Cursor
           relation.reverse_model_type.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
 
-            find_query.id = {$in: model_ids}
+            find_query.id = {$in: _.compact(model_ids)}
             callback()
 
     queue.await (err) =>

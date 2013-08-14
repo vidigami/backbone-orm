@@ -226,13 +226,13 @@ runTests = (options, cache, embed, callback) ->
         done()
 
     it 'Can query on related (one-way hasMany) models', (done) ->
-      Reverse.findOne (err, reverse) ->
+      Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'found model')
         Owner.cursor({'reverses.name': reverse.get('name')}).toJSON (err, json) ->
           test_model = json[0]
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(test_model, 'found model')
+          assert.ok(test_model, 'found test model')
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           done()
 
