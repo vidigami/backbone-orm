@@ -75,9 +75,11 @@ module.exports = class Relation
           for related_json in changes.removed
             do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
 
-        # add new
+        # add new, if they have changed
         for added_id in added_ids
           related_model = _.find(related_models, (test) -> test.id is added_id)
+          continue unless @reverse_relation._hasChanged(related_model) # related has not changed
+
           do (related_model) => queue.defer (callback) =>
             related_model.save {}, Utils.bbCallback (err, saved_model) =>
               cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
