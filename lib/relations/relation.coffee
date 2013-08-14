@@ -78,7 +78,7 @@ module.exports = class Relation
         # add new, if they have changed
         for added_id in added_ids
           related_model = _.find(related_models, (test) -> test.id is added_id)
-          continue unless @reverse_relation._hasChanged(related_model) # related has not changed
+          continue if not related_model.isLoaded() or not @reverse_relation._hasChanged(related_model) # related is loaded and has not changed
 
           do (related_model) => queue.defer (callback) =>
             related_model.save {}, Utils.bbCallback (err, saved_model) =>

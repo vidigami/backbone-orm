@@ -238,6 +238,7 @@ module.exports = (model_type) ->
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
     schema = model_type.schema() if model_type.schema
+    throw new Error "An unloaded model is trying to be saved: #{model_type.model_name}" unless @isLoaded()
 
     # multiple signatures
     if key is null or _.isObject(key)
