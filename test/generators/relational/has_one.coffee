@@ -53,7 +53,7 @@ runTests = (options, cache, embed, callback) ->
 
       # create all
       queue.defer (callback) ->
-        create_queue = new Queue()
+        create_queue = new Queue(1)
 
         create_queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
@@ -72,7 +72,7 @@ runTests = (options, cache, embed, callback) ->
 
       # link and save all
       queue.defer (callback) ->
-        save_queue = new Queue()
+        save_queue = new Queue(1)
         reversed_reverse = _.clone(MODELS.reverse).reverse()
 
         for owner in MODELS.owner

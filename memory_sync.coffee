@@ -8,6 +8,7 @@ Schema = require './lib/schema'
 Utils = require './lib/utils'
 bbCallback = Utils.bbCallback
 
+DESTROY_BATCH_LIMIT = 1000
 STORES = {}
 
 # Backbone Sync for in-memory models.
@@ -60,28 +61,15 @@ class MemorySync
   ###################################
 
   # @private
-  resetSchema: (options, callback) ->
-    queue = new Queue(1)
-    for id, model_json of @store
-      do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
-    queue.await callback
+  resetSchema: (options, callback) -> @destroy({}, callback)
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    unless (keys = _.keys(query)).length
-      # destroy backlinks
-     return @resetSchema({}, callback)
-
-    else
-      # destroy specific records
-      queue = new Queue(1)
-      for id, model_json of @store
-        if _.isEqual(_.pick(model_json, keys), query)
-          do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
-      queue.await callback
+    @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
+      (new @model_type(model_json)).destroy bbCallback(callback)
 
 module.exports = (type) ->
   if (new type()) instanceof Backbone.Collection # collection
