@@ -46,8 +46,8 @@ module.exports = class Schema
 
   generateJoinTable: (relation) ->
     schema = {}
-    schema[relation.foreign_key] = ['Integer', indexed: true]
-    schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
+    schema[relation.join_key] = ['Integer', indexed: true]
+    schema[relation.reverse_relation.join_key] = ['Integer', indexed: true]
     url = Schema.joinTableURL(relation)
     name = inflection.pluralize(inflection.classify(url))
 
