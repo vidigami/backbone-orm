@@ -25,7 +25,7 @@ module.exports = class Schema
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.foreign_key is reverse_key)
     return null
 
-  generateBelongsTo: (model_type, reverse_model_type) ->
+  initializeOrGenerateBelongsTo: (model_type, reverse_model_type) ->
     key = inflection.underscore(reverse_model_type.model_name)
     if @raw[key] and not @relation(key) # not intitialized yet, intialize now
       relation = @_parseField(key, @raw[key])
