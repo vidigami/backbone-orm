@@ -27,7 +27,12 @@ module.exports = class Schema
 
   generateBelongsTo: (model_type, reverse_model_type) ->
     key = inflection.underscore(reverse_model_type.model_name)
-    throw "Schema for '#{model_type.model_name}' already has relation '#{key}'" if @raw[key]
+    if @raw[key] and not @relation(key) # not intitialized yet, intialize now
+      relation = @_parseField(key, @raw[key])
+      relation.initialize()
+      return relation
+
+    # generate new
     relation = @_parseField(key, @raw[key] = ['belongsTo', reverse_model_type, manual_fetch: true])
     relation.initialize()
     return relation
