@@ -141,8 +141,11 @@ module.exports = class Many extends require('./relation')
     (query = _.clone(query or {}))[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
 
-    reverse_table = if @join_table and not @reverse_model_type::sync('isRemote') then @join_table else @reverse_model_type
-    return reverse_table.cursor(query)
+    use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
+    if use_join
+      return @join_table.cursor(query)
+    else
+      return @reverse_model_type.cursor(query)
 
   ####################################
   # Internal
