@@ -20,7 +20,7 @@ module.exports = class Relation
     reverse_relation = reverse_model_type.relation(inflection.pluralize(key_root)) unless reverse_relation # plural
 
     if not reverse_relation and (@type isnt 'belongsTo')
-      reverse_relation = reverse_model_type.schema().initializeOrGenerateBelongsTo(reverse_model_type, model_type)
+      reverse_relation = reverse_model_type.schema().generateBelongsTo(model_type)
 
     reverse_relation.reverse_relation = @ if reverse_relation and not reverse_relation.reverse_relation
     return reverse_relation

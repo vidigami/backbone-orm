@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Queue = require 'queue-async'
 moment = require 'moment'
+inflection = require 'inflection'
 
 Utils = require './utils'
 Cursor = require './cursor'
@@ -150,7 +151,9 @@ module.exports = class MemoryCursor extends Cursor
         (find_query[key] = value; continue) unless reverse_relation.join_table
         do (key, value, reverse_relation) => queue.defer (callback) =>
           (related_query = {})[key] = value
-          related_query.$values = reverse_relation.reverse_relation.foreign_key
+          reverse_reverse_relation = reverse_relation.reverse_relation
+          reverse_key = inflection.foreign_key(reverse_reverse_relation.as or reverse_reverse_relation.model_type.model_name)
+          related_query.$values = reverse_key
           reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
             find_query.id = {$in: model_ids}

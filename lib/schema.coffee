@@ -25,9 +25,11 @@ module.exports = class Schema
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.foreign_key is reverse_key)
     return null
 
-  initializeOrGenerateBelongsTo: (model_type, reverse_model_type) ->
+  generateBelongsTo: (reverse_model_type) ->
     key = inflection.underscore(reverse_model_type.model_name)
-    if @raw[key] and not @relation(key) # not intitialized yet, intialize now
+    return relation if relation = @relations[key] # already exists
+
+    if @raw[key] # not intitialized yet, intialize now
       relation = @_parseField(key, @raw[key])
       relation.initialize()
       return relation
@@ -85,7 +87,7 @@ module.exports = class Schema
     switch type
       when 'hasOne', 'belongsTo', 'hasMany'
         options.type = type
-        relation = @relations[key] = if (type is 'hasMany') then new Many(@model_type, key, options) else new One(@model_type, key, options)
+        relation = @relations[key] = if type is 'hasMany' then new Many(@model_type, key, options) else new One(@model_type, key, options)
         @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
         return relation
       else
