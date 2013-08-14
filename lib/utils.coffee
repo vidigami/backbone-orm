@@ -95,6 +95,13 @@ module.exports = class Utils
       model_type::sync = sync(model_type)
     return model_type
 
+  @destroyRelationsByJSON: (model_type, model_json, callback) ->
+    return callback() unless schema = model_type.schema()
+    queue = new Queue(1)
+    for key, relation in schema
+      do (relation) -> queue.defer (callback) -> relation.destroy(model_json, callback)
+    queue.await callback
+
   ##############################
   # Data to Model Helpers
   ##############################

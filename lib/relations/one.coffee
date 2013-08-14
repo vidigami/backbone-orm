@@ -77,7 +77,7 @@ module.exports = class One extends require('./relation')
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
-    delete Utils.orSet(model, 'rel_dirty', {})[@key]
+    delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
 
     @cursor(model, @key).toJSON (err, related_json) =>
       return callback(err) if err

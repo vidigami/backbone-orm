@@ -109,8 +109,8 @@ module.exports = class Many extends require('./relation')
 
   destroy: (model, callback) ->
     return callback() if not @reverse_relation
-    delete Utils.orSet(model, 'rel_dirty', {})[@key]
     if model instanceof Backbone.Model
+      delete Utils.orSet(model, 'rel_dirty', {})[@key]
       collection = @_ensureCollection(model)
       related_models = _.clone(collection.models)
     else

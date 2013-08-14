@@ -69,7 +69,8 @@ class MemorySync
   # @private
   destroy: (query, callback) ->
     @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
-      (new @model_type(model_json)).destroy bbCallback(callback)
+      Utils.destroyRelationsByJSON(@model_type, model_json, callback)
+      delete @store[model_json.id]
 
 module.exports = (type) ->
   if (new type()) instanceof Backbone.Collection # collection
