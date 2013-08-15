@@ -31,7 +31,7 @@ module.exports = class Relation
     return @model_type.schema().generateJoinTable(@)
 
   _saveRelated: (model, related_models, callback) ->
-    return callback() if @embed or not @reverse_relation or (@reverse_relation.type is 'belongsTo') # no foriegn key, no save required
+    return callback() if @embed or not @reverse_relation or (@reverse_relation.type is 'hasOne') # no foriegn key, no save required
 
     @cursor(model, @key).toJSON (err, json) =>
       return callback(err) if err
