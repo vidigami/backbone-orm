@@ -56,7 +56,7 @@ module.exports = class One extends require('./relation')
       return if key is @ids_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
-    if callback and not @virtual and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
+    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
 
@@ -66,7 +66,7 @@ module.exports = class One extends require('./relation')
 
     # synchronous path
     result = returnValue()
-    callback(null, result) if callback and (is_loaded or @virtual)
+    callback(null, result) if callback and (is_loaded or @manual_fetch)
     return result
 
   save: (model, key, callback) ->
@@ -94,7 +94,7 @@ module.exports = class One extends require('./relation')
 
   cursor: (model, key, query) ->
     query = _.extend({$one:true}, query or {})
-    return VirtualCursor(query, {model: model, relation: @}) if @virtual
+    # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
         if related_model = related_model = model.attributes[@key]
