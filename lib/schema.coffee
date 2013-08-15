@@ -35,7 +35,7 @@ module.exports = class Schema
       return relation
 
     # generate new
-    relation = @_parseField(key, @raw[key] = ['belongsTo', reverse_model_type, manual_fetch: true])
+    relation = @_parseField(key, @raw[key] = ['belongsTo', reverse_model_type, virtual: true])
     relation.initialize()
     return relation
 

@@ -56,7 +56,7 @@ module.exports = class Many extends require('./relation')
       return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
 
     # asynchronous path, needs load
-    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
+    if callback and not @virtual and not (is_loaded = model.isLoaded(@key))
       # fetch
       @cursor(model, @key).toJSON (err, json) =>
         return callback(err) if err
@@ -77,7 +77,7 @@ module.exports = class Many extends require('./relation')
 
     # synchronous path
     result = returnValue()
-    callback(null, if result.models then result.models else result) if callback and (is_loaded or @manual_fetch)
+    callback(null, if result.models then result.models else result) if callback and (is_loaded or @virtual)
     return result
 
   save: (model, key, callback) ->
@@ -138,6 +138,8 @@ module.exports = class Many extends require('./relation')
       queue.await callback
 
   cursor: (model, key, query) ->
+    return VirtualCursor(query, {model: model, relation: @}) if @virtual
+
     json = if model instanceof Backbone.Model then model.attributes else model
     (query = _.clone(query or {}))[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
