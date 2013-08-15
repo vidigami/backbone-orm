@@ -81,12 +81,10 @@ module.exports = class Many extends require('./relation')
     return result
 
   save: (model, key, callback) ->
-    return callback() if not @reverse_relation or not @_hasChanged(model)
+    return callback() if not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
-
     collection = @_ensureCollection(model)
-    related_models = _.clone(collection.models)
-    @_saveRelated(model, related_models, callback)
+    @_saveRelated(model, _.clone(collection.models), callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships

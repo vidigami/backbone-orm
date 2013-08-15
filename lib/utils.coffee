@@ -102,6 +102,20 @@ module.exports = class Utils
       do (relation) -> queue.defer (callback) -> relation.destroy(model_json, callback)
     queue.await callback
 
+  @presaveBelongsToRelationships: (model, callback) ->
+    return callback() if not model.schema
+    queue = new Queue(1)
+    schema = model.schema()
+
+    for key, relation of schema.relations
+      continue if relation.type isnt 'belongsTo' or not (value = model.get(key))
+      related_models = if value.models then value.models else [value]
+      for related_model in related_models
+        continue if related_model.id # belongsTo require an id
+        do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
+
+    queue.await callback
+
   ##############################
   # Data to Model Helpers
   ##############################

@@ -237,7 +237,6 @@ module.exports = (model_type) ->
 
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
-    schema = model_type.schema() if model_type.schema
     throw new Error "An unloaded model is trying to be saved: #{model_type.model_name}" unless @isLoaded()
 
     # multiple signatures
@@ -247,25 +246,32 @@ module.exports = (model_type) ->
     else
       (attributes = {})[key] = value;
 
+    # set the attributes
+    @set(attributes, options)
+    attributes = {}
+
     @_orm or= {}
     throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
     @_orm.save or= 0; @_orm.save++
 
-    return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
-      --@_orm.save
+    Utils.presaveBelongsToRelationships @, (err) =>
       return options.error?(@, resp, options) if err
 
-      queue = new Queue(1)
+      return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
+        --@_orm.save
+        return options.error?(@, resp, options) if err
+        queue = new Queue(1)
 
-      # now save relations
-      if schema
-        for key, relation of schema.relations
-          do (relation) => queue.defer (callback) => relation.save(@, key, callback)
+        # now save relations
+        if model_type.schema
+          schema = model_type.schema()
+          for key, relation of schema.relations
+            do (relation) => queue.defer (callback) => relation.save(@, key, callback)
 
-      queue.await (err) =>
-        return options.error?(@, Error "Failed to save relations. #{err}", options) if err
-        options.success?(@, resp, options)
-    ))
+        queue.await (err) =>
+          return options.error?(@, Error "Failed to save relations. #{err}", options) if err
+          options.success?(@, resp, options)
+      ))
 
   _original_destroy = model_type::destroy
   model_type::destroy = (options) ->

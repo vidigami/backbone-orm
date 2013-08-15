@@ -59,9 +59,9 @@ module.exports = class One extends require('./relation')
     if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
+        model.setLoaded(@key, true)
 
         model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
-        model.setLoaded(@key, true)
         callback(null, returnValue())
 
     # synchronous path
@@ -70,7 +70,7 @@ module.exports = class One extends require('./relation')
     return result
 
   save: (model, key, callback) ->
-    return callback() if not @reverse_relation or not @_hasChanged(model)
+    return callback() if not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
     return callback() unless related_model = model.attributes[@key]
     @_saveRelated(model, [related_model], callback)

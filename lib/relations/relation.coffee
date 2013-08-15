@@ -31,20 +31,13 @@ module.exports = class Relation
     return @model_type.schema().generateJoinTable(@)
 
   _saveRelated: (model, related_models, callback) ->
-    return callback() if @embed or not @reverse_relation
+    return callback() if @embed or not @reverse_relation or (@reverse_relation.type is 'belongsTo') # no foriegn key, no save required
 
     @cursor(model, @key).toJSON (err, json) =>
       return callback(err) if err
 
       json = (if json then [json] else []) unless _.isArray(json) # a One relation
       queue = new Queue(1)
-      ids_generated = false
-
-      # ensure there are ids
-      for related_model in related_models
-        continue if related_model.id
-        ids_generated = true
-        do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
 
       use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
       related_ids = _.pluck(related_models, 'id')
@@ -84,11 +77,6 @@ module.exports = class Relation
             related_model.save {}, Utils.bbCallback (err, saved_model) =>
               cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
               callback(err)
-
-      # need to resave ourself - TODO: optimize before save is called
-      queue.defer (callback) =>
-        return callback() unless ids_generated
-        model.save {}, bbCallback callback
 
       queue.await callback
 
