@@ -237,8 +237,6 @@ module.exports = (model_type) ->
 
   _original_save = model_type::save
   model_type::save = (key, value, options) ->
-    throw new Error "An unloaded model is trying to be saved: #{model_type.model_name}" unless @isLoaded()
-
     # multiple signatures
     if key is null or _.isObject(key)
       attributes = key
@@ -246,13 +244,15 @@ module.exports = (model_type) ->
     else
       (attributes = {})[key] = value;
 
+    return options.error?(new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
+
+    @_orm or= {}
+    return options.error?(new Error "Model is in a save loop: #{model_type.model_name}") if @_orm.save > 0
+    @_orm.save or= 0; @_orm.save++
+
     # set the attributes
     @set(attributes, options)
     attributes = {}
-
-    @_orm or= {}
-    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
-    @_orm.save or= 0; @_orm.save++
 
     Utils.presaveBelongsToRelationships @, (err) =>
       return options.error?(@, resp, options) if err
