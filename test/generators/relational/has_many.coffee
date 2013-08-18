@@ -319,7 +319,7 @@ runTests = (options, cache, embed, callback) ->
               done()
 
     it 'Clears its reverse relations on delete when the reverse relation isnt loaded (one-way hasMany)', (done) ->
-      Owner.cursor({$one: true}).toModels (err, owner) ->
+      Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -333,6 +333,16 @@ runTests = (options, cache, embed, callback) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(null_reverses.length, 0, 'No reverses found for this owner after save')
               done()
+
+    it 'Should be able to count relationships', (done) ->
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+
+        Reverse.count {owner_id: owner.id}, (err, count) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(2, count, "Counted reverses. Expected: 2. Actual: #{count}")
+          done()
 
 # TODO: explain required set up
 

@@ -321,6 +321,16 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(reverse.get('name'), owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.get('name')}\nActual: #{owner.reverse.name}")
           done()
 
+    it 'Should be able to count relationships', (done) ->
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+
+        Reverse.count {owner_id: owner.id}, (err, count) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(1, count, "Counted reverses. Expected: 1. Actual: #{count}")
+          done()
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....

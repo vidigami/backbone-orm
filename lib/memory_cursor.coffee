@@ -47,16 +47,6 @@ module.exports = class MemoryCursor extends Cursor
       json = []
       queue = new Queue(1)
 
-      # only the count
-      if @hasCursorQuery('$count')
-        json_count = @_count(find_query, keys)
-        start_index = @_cursor.$offset or 0
-        if @_cursor.$one
-          json_count = Math.max(0, json_count - start_index)
-        else if @_cursor.$limit
-          json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
-        return callback(null, json_count)
-
       queue.defer (callback) =>
         ins = {}
         (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
@@ -124,6 +114,7 @@ module.exports = class MemoryCursor extends Cursor
         queue.defer (callback) => @fetchIncludes(json, callback)
 
       queue.await =>
+        return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
         if @_cursor.$one
           return callback(null, null) unless json.length
