@@ -120,12 +120,20 @@ module.exports = class One extends require('./relation')
     events = Utils.set(model, 'events', {})
     events.change = (model) =>
       related_model = model.get(@key)
+      previous_related_model = model.previous(@key)
 
       # update backlinks
-      if previous_related_model = model.previous(@key)
-        if @reverse_relation.remove then @reverse_relation.remove(previous_related_model, model) else previous_related_model.set(@reverse_relation.key, null)
+      if previous_related_model
+        if @reverse_relation.remove
+          @reverse_relation.remove(previous_related_model, model)
+        else
+          previous_related_model.set(@reverse_relation.key, null)
+
       if related_model
-        if @reverse_relation.add then @reverse_relation.add(related_model, model) else related_model.set(@reverse_relation.key, model)
+        if @reverse_relation.add
+          @reverse_relation.add(related_model, model)
+        else
+          related_model.set(@reverse_relation.key, model)
 
     model.on("change:#{@key}", events.change)
     return model

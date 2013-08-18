@@ -168,14 +168,14 @@ module.exports = class Many extends require('./relation')
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
-        related_model.set(@reverse_relation.key, null) unless related_model.get(@reverse_relation.key) is null
+        related_model.set(@reverse_relation.key, null) if related_model.get(@reverse_relation.key) is model
 
     events.reset = (collection, options) =>
       current_models = collection.models
       previous_models = options.previousModels or []
 
       changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
-      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
+      added = if changes.kept then _.select(current_models, (test) -> !_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 
       # update back links
       (events.remove(related_model) for related_model in changes.removed) if changes.removed

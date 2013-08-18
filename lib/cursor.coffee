@@ -153,8 +153,9 @@ module.exports = class Cursor
 
       for model in models
         continue if _.isNull(related_models = model.get(include)) # nothing to bind
-        related_models = related_models.models or [related_models]
+        return callback(new Error "toModels lookupIncludes: could not find include '#{include}' for model #{@model_type.model_name}") if _.isUndefined(related_models) # nothing to bind
 
+        related_models = related_models.models or [related_models]
         for related_model in related_models
           return callback(new Error "toModels lookupIncludes: expecting to find reverse model for #{model.id}") unless reverse_related_models = related_model.get(relation.reverse_relation.key)
 
