@@ -50,8 +50,9 @@ module.exports = class Relation
       if use_join
         # destroy removed
         if changes.removed
-          do (model_json) => queue.defer (callback) =>
-            @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
+          for model_json in changes.removed
+            do (model_json) => queue.defer (callback) =>
+              @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
 
         # create new - TODO: optimize through batch create
         for related_id in added_ids

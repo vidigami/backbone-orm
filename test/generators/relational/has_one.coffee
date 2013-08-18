@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 runTests = (options, cache, embed, callback) ->
@@ -352,16 +353,17 @@ runTests = (options, cache, embed, callback) ->
       # TODO: implement embedded
       return done() if embed
 
+      checkReverseFn = (reverse, expected_owner) -> return (callback) ->
+        assert.ok(reverse, 'Reverse exists')
+        assert.equal(expected_owner, reverse.get('owner'), "Reverse owner is correct. Expected: #{expected_owner}. Actual: #{reverse.get('owner')}")
+        callback()
+
       Owner.cursor().limit(2).include('reverse').toModels (err, owners) ->
         assert.ok(!err, "No errors: #{err}")
         assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+
         reverse0 = owners[0].get('reverse'); owner0 = owners[0]
         reverse1 = owners[1].get('reverse'); owner1 = owners[1]
-
-        checkReverseFn = (reverse, expected_owner) -> return (callback) ->
-          assert.ok(reverse, "Reverse exists")
-          assert.equal(expected_owner, reverse.get('owner'), "Reverse owner is correct. Expected: #{expected_owner}. Actual: #{reverse.get('owner')}")
-          callback()
 
         queue = new Queue(1)
         queue.defer checkReverseFn(reverse0, owner0)
@@ -373,6 +375,21 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(null, reverse0.get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverse0.get('owner'))}")
           assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
           callback()
+
+        # save and recheck
+        queue.defer (callback) -> owner0.save {}, bbCallback callback
+        queue.defer (callback) -> owner1.save {}, bbCallback callback
+        queue.defer (callback) ->
+          Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+            reverse0b = owners[0].get('reverse'); owner0 = owners[0]
+            reverse1b = owners[1].get('reverse'); owner1 = owners[1]
+
+            queue.defer checkReverseFn(reverse0b, owner0) # confirm it moved
+            assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{util.inspect(reverse1.toJSON())}.\nActual: #{util.inspect(reverse0b.toJSON())}")
+            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
+            callback()
 
         queue.await done
 
