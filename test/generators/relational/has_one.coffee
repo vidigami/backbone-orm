@@ -355,6 +355,8 @@ runTests = (options, cache, embed, callback) ->
       Owner.cursor().limit(2).include('reverse').toModels (err, owners) ->
         assert.ok(!err, "No errors: #{err}")
         assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+        reverse0 = owners[0].get('reverse'); owner0 = owners[0]
+        reverse1 = owners[1].get('reverse'); owner1 = owners[1]
 
         checkReverseFn = (reverse, expected_owner) -> return (callback) ->
           assert.ok(reverse, "Reverse exists")
@@ -362,10 +364,11 @@ runTests = (options, cache, embed, callback) ->
           callback()
 
         queue = new Queue(1)
-        queue.defer checkReverseFn(reverse0 = owners[0].get('reverse'), owner0 = owners[0])
-        queue.defer checkReverseFn(reverse1 = owners[1].get('reverse'), owner1 = owners[1])
+        queue.defer checkReverseFn(reverse0, owner0)
+        queue.defer checkReverseFn(reverse1, owner1)
         queue.defer (callback) ->
           owner0.set({reverse: reverse1})
+
           queue.defer checkReverseFn(reverse1, owner0) # confirm it moved
           assert.equal(null, reverse0.get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverse0.get('owner'))}")
           assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")

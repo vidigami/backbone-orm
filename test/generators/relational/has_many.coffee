@@ -360,6 +360,10 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(!err, "No errors: #{err}")
         assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
 
+        reverses0 = _.clone(owners[0].get('reverses').models); owner0 = owners[0]
+        reverses1 = _.clone(owners[1].get('reverses').models); owner1 = owners[1]
+        new_reverses0 = [reverses0[0], reverses1[0]]
+
         checkReverseFn = (reverses, expected_owner) -> return (callback) ->
           assert.ok(reverses, "Reverses exists")
           for reverse in reverses
@@ -367,10 +371,10 @@ runTests = (options, cache, embed, callback) ->
           callback()
 
         queue = new Queue(1)
-        queue.defer checkReverseFn(reverses0 = _.clone(owners[0].get('reverses').models), owner0 = owners[0])
-        queue.defer checkReverseFn(reverses1 = _.clone(owners[1].get('reverses').models), owner1 = owners[1])
+        queue.defer checkReverseFn(reverses0, owner0)
+        queue.defer checkReverseFn(reverses1, owner1)
         queue.defer (callback) ->
-          owner0.set({reverses: new_reverses0 = [reverses0[0], reverses1[0]]})
+          owner0.set({reverses: new_reverses0})
           queue.defer checkReverseFn(new_reverses0, owner0) # confirm it moved
           assert.equal(null, reverses0[1].get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverses0[1].get('owner'))}")
           assert.equal(owner1, reverses1[1].get('owner'), "Reverse owner is cleared.\nExpected: #{util.inspect(owner1)}.\nActual: #{util.inspect(reverses1[1].get('owner'))}")
