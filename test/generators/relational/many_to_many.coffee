@@ -182,6 +182,20 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(2, count, "Counted reverses. Expected: 2. Actual: #{count}")
           done()
 
+    it 'Should be able to count relationships with paging', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+
+        Reverse.cursor({owner_id: owner.id, $page: true}).toJSON (err, paging_info) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(0, paging_info.offset, "Has offset. Expected: 0. Actual: #{paging_info.offset}")
+          assert.equal(2, paging_info.total_rows, "Counted reverses. Expected: 2. Actual: #{paging_info.total_rows}")
+          done()
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....

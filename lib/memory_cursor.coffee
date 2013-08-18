@@ -122,11 +122,13 @@ module.exports = class MemoryCursor extends Cursor
 
         json = @selectResults(json)
         if @hasCursorQuery('$page')
-          callback(null, {
-            offset: @_cursor.$offset
-            total_rows: @_count(find_query, keys)
-            rows: json
-          })
+          count_cursor = new MemoryCursor(@_find, _.extend(_.pick(@, ['model_type', 'store'])))
+          count_cursor.count (err, count) =>
+            callback(null, {
+              offset: @_cursor.$offset or 0
+              total_rows: count
+              rows: json
+            })
         else
           callback(null, json)
 
@@ -228,12 +230,6 @@ module.exports = class MemoryCursor extends Cursor
   ##########################################
   # Internal
   ##########################################
-  _count: (find_query, keys) ->
-    if keys.length
-      json_count = _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), find_query) then memo + 1 else memo), 0)
-    else
-      json_count = _.size(@store)
-
   _valueIsMatch: (find_query, key_path, model_json, callback) ->
     key_components = key_path.split('.')
     model_type = @model_type
