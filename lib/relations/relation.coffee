@@ -8,6 +8,13 @@ Utils = require '../utils'
 bbCallback = Utils.bbCallback
 
 module.exports = class Relation
+  hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
+  isManyToMany: -> return @type is 'hasMany' and @reverse_relation and @reverse_relation.type is 'hasMany'
+
+  findOrGenerateJoinTable: ->
+    # already exists
+    return join_table if join_table = (@join_table or @reverse_relation.join_table)
+    return @model_type.schema().generateJoinTable(@)
 
   _findOrGenerateReverseRelation: ->
     model_type = @model_type
@@ -24,11 +31,6 @@ module.exports = class Relation
 
     reverse_relation.reverse_relation = @ if reverse_relation and not reverse_relation.reverse_relation
     return reverse_relation
-
-  findOrGenerateJoinTable: ->
-    # already exists
-    return join_table if join_table = (@join_table or @reverse_relation.join_table)
-    return @model_type.schema().generateJoinTable(@)
 
   _saveRelated: (model, related_models, callback) ->
     return callback() if @embed or not @reverse_relation or (@reverse_relation.type is 'hasOne') # no foriegn key, no save required

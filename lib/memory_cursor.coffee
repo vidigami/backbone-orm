@@ -43,8 +43,8 @@ module.exports = class MemoryCursor extends Cursor
     @buildFindQuery (err, find_query) =>
       return callback(err) if err
 
-      keys = _.keys(find_query)
       json = []
+      keys = _.keys(find_query)
       queue = new Queue(1)
 
       queue.defer (callback) =>
@@ -139,14 +139,25 @@ module.exports = class MemoryCursor extends Cursor
     for key, value of @_find
       if (key.indexOf('.') < 0)
         (find_query[key] = value; continue) unless reverse_relation = @model_type.reverseRelation(key)
-        (find_query[key] = value; continue) unless reverse_relation.join_table
+        (find_query[key] = value; continue) if not reverse_relation.embed and not reverse_relation.join_table
         do (key, value, reverse_relation) => queue.defer (callback) =>
-          (related_query = {})[key] = value
-          related_query.$values = reverse_relation.reverse_relation.join_key
-          reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
-            return callback(err) if err
-            find_query.id = {$in: model_ids}
-            callback()
+          if reverse_relation.embed
+
+            # TODO: should a cursor be returned instead of a find_query?
+            throw Error "Embedded find is not yet supported"
+
+            (related_query = {}).id = value
+            reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
+              return callback(err) if err
+              find_query._json = _.map(models_json, (test) -> test[reverse_relation.key])
+              callback()
+          else
+            (related_query = {})[key] = value
+            related_query.$values = reverse_relation.reverse_relation.join_key
+            reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
+              return callback(err) if err
+              find_query.id = {$in: model_ids}
+              callback()
         continue
 
       [relation_key, value_key] = key.split('.')
