@@ -69,7 +69,8 @@ module.exports = class Relation
         # clear removed - TODO: optimize using batch update
         if changes.removed
           for related_json in changes.removed
-            do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+            do (related_json) => queue.defer (callback) =>
+              @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
 
         # add new, if they have changed
         for added_id in added_ids
@@ -87,11 +88,11 @@ module.exports = class Relation
     return callback() unless (@reverse_relation and related_related = related_model.get(@reverse_relation.key))
 
     if related_related.models # collection
-      related_related.remove(found) if found = related_related.get(model.id)
+      return callback() unless found = related_related.get(model.id)
+      related_related.remove(found)
     else # model
-      found = related_related if related_related.id is model.id
-      related_model.set(@reverse_relation.foreign_key, null) if found
-    return callback() unless found # no longer related, skip
+      return callback() unless Utils.dataId(related_related) is model.id
+      related_model.set(@reverse_relation.key, null)
 
     related_model.save {}, Utils.bbCallback (err, saved_model) =>
       cache.set(saved_model.id, saved_model) if not err and cache = @reverse_relation.model_type.cache

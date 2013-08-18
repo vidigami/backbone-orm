@@ -127,7 +127,7 @@ module.exports = class One extends require('./relation')
         if @reverse_relation.remove
           @reverse_relation.remove(previous_related_model, model)
         else
-          previous_related_model.set(@reverse_relation.key, null)
+          previous_related_model.set(@reverse_relation.key, null) if Utils.dataId(previous_related_model.get(@reverse_relation.key)) is model.id
 
       if related_model
         if @reverse_relation.add
