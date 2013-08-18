@@ -348,6 +348,26 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, paging_info.total_rows, "Counted reverses. Expected: 1. Actual: #{paging_info.total_rows}")
           done()
 
+    it 'Should manage backlinks', (done) ->
+      # TODO: implement embedded
+      return done() if embed
+
+      Owner.cursor().limit(2).include('reverse').toModels (err, owners) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+
+        checkReverseFn = (reverse, expected_owner) -> return (callback) ->
+          assert.ok(reverse, "Reverse exists")
+          reverse.get 'owner', (err, reverse_owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.deepEqual(expected_owner.toJSON(), reverse.get('owner').toJSON(), "Reverse owner is a match.\nExpected: #{util.inspect(expected_owner.toJSON())}.\nActual: #{util.inspect(reverse.get('owner').toJSON())}")
+            callback()
+
+        queue = new Queue(1)
+        queue.defer checkReverseFn(owners[0].get('reverse'), owners[0])
+        queue.defer checkReverseFn(owners[1].get('reverse'), owners[1])
+        queue.await done
+
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
