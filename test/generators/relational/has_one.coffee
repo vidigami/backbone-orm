@@ -358,14 +358,19 @@ runTests = (options, cache, embed, callback) ->
 
         checkReverseFn = (reverse, expected_owner) -> return (callback) ->
           assert.ok(reverse, "Reverse exists")
-          reverse.get 'owner', (err, reverse_owner) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.deepEqual(expected_owner.toJSON(), reverse.get('owner').toJSON(), "Reverse owner is a match.\nExpected: #{util.inspect(expected_owner.toJSON())}.\nActual: #{util.inspect(reverse.get('owner').toJSON())}")
-            callback()
+          assert.equal(expected_owner, reverse.get('owner'), "Reverse owner is correct. Expected: #{expected_owner}. Actual: #{reverse.get('owner')}")
+          callback()
 
         queue = new Queue(1)
-        queue.defer checkReverseFn(owners[0].get('reverse'), owners[0])
-        queue.defer checkReverseFn(owners[1].get('reverse'), owners[1])
+        queue.defer checkReverseFn(reverse0 = owners[0].get('reverse'), owner0 = owners[0])
+        queue.defer checkReverseFn(reverse1 = owners[1].get('reverse'), owner1 = owners[1])
+        queue.defer (callback) ->
+          owner0.set({reverse: reverse1})
+          queue.defer checkReverseFn(reverse1, owner0) # confirm it moved
+          assert.equal(null, reverse0.get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverse0.get('owner'))}")
+          assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
+          callback()
+
         queue.await done
 
 # TODO: explain required set up

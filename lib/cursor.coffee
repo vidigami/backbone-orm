@@ -104,7 +104,10 @@ module.exports = class Cursor
         models = (Utils.updateOrNew(item, @model_type) for item in json)
       else
         models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
-      return callback(null, if @_cursor.$one then models[0] else models)
+
+      @lookupIncludes models, (err, models) =>
+        return callback(err) if err
+        return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
@@ -131,7 +134,7 @@ module.exports = class Cursor
 
     return json
 
-  selectFromModels: (models) ->
+  selectFromModels: (models, callback) ->
     if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
       models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in models)
@@ -140,3 +143,29 @@ module.exports = class Cursor
       models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setLoaded(false); model for item in models)
 
     return models
+
+  lookupIncludes: (models, callback) ->
+    return callback(null, models) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
+    schema = @model_type.schema()
+
+    for include in @_cursor.$include
+      relation = schema.relation(include)
+
+      for model in models
+        continue if _.isNull(related_models = model.get(include)) # nothing to bind
+        related_models = related_models.models or [related_models]
+
+        for related_model in related_models
+          return callback(new Error "toModels lookupIncludes: expecting to find reverse model for #{model.id}") unless reverse_related_models = related_model.get(relation.reverse_relation.key)
+
+          # collection
+          if reverse_related_models.models
+            return callback(new Error "toModels lookupIncludes: Couldn't find model #{model.id}.") unless reverse_related_model = reverse_related_models.get(model.id)
+            reverse_related_models.models.splice(reverse_related_models.models.indexOf(reverse_related_model), 1, model) # no one is listening yet
+
+          # model
+          else
+            return callback(new Error "toModels lookupIncludes: Unexpected model. Expecting: #{model.id}. Found: #{related_models.id}") if reverse_related_models.id isnt model.id
+            related_model.attributes[relation.reverse_relation.key] = model # no one is listening yet
+
+    callback(null, models)
