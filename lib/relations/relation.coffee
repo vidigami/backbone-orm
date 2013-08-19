@@ -42,9 +42,10 @@ module.exports = class Relation
       queue = new Queue(1)
 
       use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
+      related_key = if use_join then @reverse_relation.join_key else 'id'
       related_ids = _.pluck(related_models, 'id')
-      changes = _.groupBy(json, (test) -> if _.contains(related_ids, test.id) then 'kept' else 'removed')
-      added_ids = if changes.added then _.difference(related_ids, (test.id for test in changes.kept)) else related_ids
+      changes = _.groupBy(json, (test) => if _.contains(related_ids, test[related_key]) then 'kept' else 'removed')
+      added_ids = if changes.added then _.difference(related_ids, (test[related_key] for test in changes.kept)) else related_ids
 
       # update store through join table
       if use_join
