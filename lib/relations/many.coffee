@@ -133,7 +133,7 @@ module.exports = class Many extends require('./relation')
       # clear reverses
       queue = new Queue(1)
       for related_json in json
-        do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+        do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, related_json, callback)
       queue.await callback
 
   cursor: (model, key, query) ->

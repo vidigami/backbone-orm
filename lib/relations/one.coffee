@@ -128,6 +128,7 @@ module.exports = class One extends require('./relation')
     events.change = (model) =>
       related_model = model.get(@key)
       previous_related_model = model.previous(@key)
+      return if Utils.dataId(related_model) is Utils.dataId(previous_related_model) # no change
 
       # update backlinks
       if previous_related_model

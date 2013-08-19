@@ -53,9 +53,10 @@ module.exports = class Relation
       if use_join
         # destroy removed
         if changes.removed
-          for model_json in changes.removed
-            do (model_json) => queue.defer (callback) =>
-              @join_table.destroy {id: {$in: (model_json.id for model_json in changes.removed)}}, callback
+          queue.defer (callback) =>
+            destroy_query = {}
+            destroy_query[related_key] = {$in: (model_json.id for model_json in changes.removed)}
+            @join_table.destroy destroy_query, callback
 
         # create new - TODO: optimize through batch create
         for related_id in added_ids
@@ -73,7 +74,7 @@ module.exports = class Relation
         if changes.removed
           for related_json in changes.removed
             do (related_json) => queue.defer (callback) =>
-              @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+              @_clearAndSaveRelatedBacklink(model, related_json, callback)
 
         # add new, if they have changed
         for added_id in added_ids
@@ -87,16 +88,14 @@ module.exports = class Relation
 
       queue.await callback
 
-  _clearAndSaveRelatedBacklink: (model, related_model, callback) ->
-    return callback() unless (@reverse_relation and related_related = related_model.get(@reverse_relation.key))
+  # NOTE: this method takes raw data and instantiates a simple model for a non-relational data write
+  _clearAndSaveRelatedBacklink: (model, related_json, callback) ->
+    return callback() unless (@reverse_relation and @reverse_relation.type is 'belongsTo')
 
-    if related_related.models # collection
-      return callback() unless found = related_related.get(model.id)
-      related_related.remove(found)
-    else # model
-      return callback() unless Utils.dataId(related_related) is model.id
-      related_model.set(@reverse_relation.key, null)
+    # no longer a match
+    return callback() unless related_json[@reverse_relation.foreign_key] is model.id
 
-    related_model.save {}, Utils.bbCallback (err, saved_model) =>
-      cache.set(saved_model.id, saved_model) if not err and cache = @reverse_relation.model_type.cache
-      callback(err)
+    # update the foreign key and save raw data
+    related_json[@reverse_relation.foreign_key] = null
+    related_model = new Backbone.Model(related_json)
+    @reverse_model_type::sync 'update', related_model, bbCallback callback
