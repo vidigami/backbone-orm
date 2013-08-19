@@ -453,7 +453,28 @@ runTests = (options, cache, embed, callback) ->
             callback()
 
         queue.await done
-# TODO: explain required set up
+
+    it 'does not serialize virtual attributes', (done) ->
+      Owner.cursor({$one: true}).include('flats').toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'Reverse found model')
+
+        assert.equal(2, owner.get('flats').length, "Virtual flat exists. Expected: #{2}. Actual: #{owner.get('flats').length}")
+
+        relation = owner.relation('flats')
+        relation.virtual = true
+
+        flats = owner.get('flats')
+        owner.set({flats: []})
+        owner.save {flats: flats}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Owner.cache.reset(owner.id) if Owner.cache
+          Owner.find owner.id, (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(0, owner.get('flats').length, "Virtual flat is not saved. Expected: #{0}. Actual: #{owner.get('flats').length}")
+            done()
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

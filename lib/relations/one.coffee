@@ -86,6 +86,7 @@ module.exports = class One extends require('./relation')
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
+    return if @isVirtual() # skip virtual attributes
 
     json_key = if @embed then key else @ids_accessor
     return json[json_key] = null unless related_model = model.attributes[key]

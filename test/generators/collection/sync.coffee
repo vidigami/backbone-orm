@@ -94,7 +94,7 @@ runTests = (options, cache, callback) ->
       else
         runTest()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

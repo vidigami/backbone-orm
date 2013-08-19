@@ -103,7 +103,7 @@ runTests = (options, cache, callback) ->
           assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
           done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

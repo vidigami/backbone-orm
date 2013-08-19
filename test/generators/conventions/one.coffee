@@ -189,7 +189,7 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(!related_json.updated_at, "flat doesn't have updated_at")
             done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

@@ -105,7 +105,7 @@ runTests = (options, cache, callback) ->
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

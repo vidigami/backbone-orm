@@ -13,7 +13,7 @@ runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 5
+  BASE_COUNT = 1
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
@@ -393,7 +393,33 @@ runTests = (options, cache, embed, callback) ->
 
         queue.await done
 
-# TODO: explain required set up
+    it 'does not serialize virtual attributes', (done) ->
+      json_key = if embed then 'flat' else 'flat_id'
+
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'Reverse found model')
+
+        json = owner.toJSON()
+        assert.ok(json.hasOwnProperty(json_key), 'Serialized flat')
+
+        relation = owner.relation('flat')
+        relation.virtual = true
+
+        virtual_json = owner.toJSON()
+        assert.ok(!virtual_json.hasOwnProperty(json_key), 'Did not serialize flat')
+
+        flat = owner.get('flat')
+        owner.set({flat: null})
+        owner.save {flat: flat}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Owner.cache.reset(owner.id) if Owner.cache
+          Owner.find owner.id, (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(!owner.get('flat'), 'Virtual flat is not saved')
+            done()
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

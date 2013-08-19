@@ -99,7 +99,7 @@ runTests = (options, cache, embed, callback) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

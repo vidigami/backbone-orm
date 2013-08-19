@@ -88,6 +88,7 @@ module.exports = class Many extends require('./relation')
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships
+    return if @isVirtual() # skip virtual attributes
 
     collection = @_ensureCollection(model)
     json_key = if @embed then key else @ids_accessor

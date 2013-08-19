@@ -134,7 +134,7 @@ runTests = (options, cache, callback) ->
                   assert.ok(!exists, 'the model does not exist by bad created_at')
                   done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
