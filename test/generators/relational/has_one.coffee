@@ -111,17 +111,23 @@ runTests = (options, cache, embed, callback) ->
 
         reverse_id = test_model.id
         new_model = new Owner({reverse_id: reverse_id})
-        new_model.get('reverse').fetch bbCallback (err) ->
-          assert.ok(!err, "No errors: #{err}")
 
-          new_model.save {}, bbCallback (err) ->
+        queue = new Queue(1)
+        if not new_model.get('reverse').isLoaded()
+          queue.defer (callback) -> new_model.get('reverse').fetch bbCallback callback
+
+        queue.defer (callback) -> new_model.save {}, bbCallback callback
+
+        queue.defer (callback) ->
+          new_model.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, 'found related model')
+            assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
+            callback()
 
-            new_model.get 'reverse', (err, reverse) ->
-              assert.ok(!err, "No errors: #{err}")
-              assert.ok(reverse, 'found related model')
-              assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
-              done()
+        queue.await (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
       Owner.findOne (err, test_model) ->
@@ -448,7 +454,9 @@ runTests = (options, cache, embed, callback) ->
                 assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
               callback()
 
-          queue.await done
+          queue.await (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            done()
 
     backlinkTests(false)
     backlinkTests(true)

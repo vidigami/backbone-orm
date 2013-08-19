@@ -422,7 +422,9 @@ runTests = (options, cache, embed, callback) ->
                 queue.defer checkReverseFn(reverses1b, owner1) # confirm it moved
               callback()
 
-          queue.await done
+          queue.await (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            done()
 
       it "Should update backlinks using the collection directly (#{if virtual then 'virtual' else 'no modifiers'})", (done) ->
         checkReverseFn = (reverses, expected_owner) -> return (callback) ->
@@ -488,7 +490,9 @@ runTests = (options, cache, embed, callback) ->
 
               callback()
 
-          queue.await done
+          queue.await (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            done()
 
     backlinkTests(false)
     backlinkTests(true)
