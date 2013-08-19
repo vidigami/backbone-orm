@@ -44,7 +44,6 @@ class Cache
     # clear the full cache
     if arguments.length is 0
       value.reset() for key, value of @caches
-      @caches = {}
       return @
 
     return @ unless model_cache = @caches[model_type.model_name] # no caching

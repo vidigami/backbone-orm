@@ -100,6 +100,7 @@ module.exports = class Cursor
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
       json = [json] unless _.isArray(json)
+
       if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
         models = (Utils.updateOrNew(item, @model_type) for item in json)
       else
@@ -166,7 +167,7 @@ module.exports = class Cursor
 
           # model
           else
-            return callback(new Error "toModels lookupIncludes: Unexpected model. Expecting: #{model.id}. Found: #{related_models.id}") if reverse_related_models.id isnt model.id
+            return callback(new Error "toModels lookupIncludes: Unexpected model. Expecting: #{model.id}. Found: #{reverse_related_models.id}") if reverse_related_models.id isnt model.id
             related_model.attributes[relation.reverse_relation.key] = model # no one is listening yet
 
     callback(null, models)

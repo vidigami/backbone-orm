@@ -381,6 +381,9 @@ runTests = (options, cache, embed, callback) ->
           queue.defer (callback) ->
             owner0.set({reverse: reverse1})
 
+            assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
+            assert.ok(!owner1.get('reverse'), "Owner1 has no reverse.")
+
             queue.defer checkReverseFn(reverse1, owner0) # confirm it moved
             assert.equal(null, reverse0.get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverse0.get('owner'))}")
             assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
@@ -390,6 +393,7 @@ runTests = (options, cache, embed, callback) ->
           queue.defer (callback) -> owner0.save {}, bbCallback callback
           queue.defer (callback) -> owner1.save {}, bbCallback callback
           queue.defer (callback) ->
+            require('../../../lib/cache').reset() # reset cache
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
@@ -434,7 +438,7 @@ runTests = (options, cache, embed, callback) ->
         owner.save {flat: flat}, bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
 
-          Owner.cache.reset(owner.id) if Owner.cache
+          require('../../../lib/cache').reset() # reset cache
           Owner.find owner.id, (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!owner.get('flat'), 'Virtual flat is not saved')

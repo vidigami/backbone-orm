@@ -215,6 +215,7 @@ module.exports = class MemoryCursor extends Cursor
       continue if @model_type.relationIsEmbedded(key)
       return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
 
+      # TODO: optimize by grouping included keys, fetching once, and then updating all relationships
       # Load the included models
       for model_json in json
         do (key, model_json) => load_queue.defer (callback) =>
