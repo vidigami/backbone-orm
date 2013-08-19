@@ -101,13 +101,11 @@ module.exports = class Cursor
       return callback(null, null) if @_cursor.$one and not json
       json = [json] unless _.isArray(json)
 
-      if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
-        models = (Utils.updateOrNew(item, @model_type) for item in json)
-      else
-        models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
-
-      @lookupIncludes models, (err, models) =>
-        return callback(err) if err
+      @prepareIncludes json, (err, json) =>
+        if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
+          models = (Utils.updateOrNew(item, @model_type) for item in json)
+        else
+          models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
         return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
@@ -145,29 +143,31 @@ module.exports = class Cursor
 
     return models
 
-  lookupIncludes: (models, callback) ->
-    return callback(null, models) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
+  prepareIncludes: (json, callback) ->
+    return callback(null, json) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
     schema = @model_type.schema()
+    shared_related_models = {}
+
+    findOrNew = (related_json, reverse_model_type) =>
+      unless shared_related_models[related_json.id]
+        if reverse_model_type.cache
+          unless shared_related_models[related_json.id] = reverse_model_type.cache.get(related_json.id)
+            reverse_model_type.cache.set(related_json.id, shared_related_models[related_json.id] = new reverse_model_type(related_json))
+        else
+          shared_related_models[related_json.id] = new reverse_model_type(related_json)
+      return shared_related_models[related_json.id]
 
     for include in @_cursor.$include
       relation = schema.relation(include)
+      shared_related_models = {} # reset
 
-      for model in models
-        continue if _.isNull(related_models = model.get(include)) # nothing to bind
-        return callback(new Error "toModels lookupIncludes: could not find include '#{include}' for model #{@model_type.model_name}") if _.isUndefined(related_models) # nothing to bind
+      for model_json in json
+        # many
+        if _.isArray(related_json = model_json[include])
+          model_json[include] = (findOrNew(item, relation.reverse_model_type) for item in related_json)
 
-        related_models = related_models.models or [related_models]
-        for related_model in related_models
-          return callback(new Error "toModels lookupIncludes: expecting to find reverse model for #{model.id}") unless reverse_related_models = related_model.get(relation.reverse_relation.key)
+        # one
+        else if related_json
+          model_json[include] = findOrNew(related_json, relation.reverse_model_type)
 
-          # collection
-          if reverse_related_models.models
-            return callback(new Error "toModels lookupIncludes: Couldn't find model #{model.id}.") unless reverse_related_model = reverse_related_models.get(model.id)
-            reverse_related_models.models.splice(reverse_related_models.models.indexOf(reverse_related_model), 1, model) # no one is listening yet
-
-          # model
-          else
-            return callback(new Error "toModels lookupIncludes: Unexpected model. Expecting: #{model.id}. Found: #{reverse_related_models.id}") if reverse_related_models.id isnt model.id
-            related_model.attributes[relation.reverse_relation.key] = model # no one is listening yet
-
-    callback(null, models)
+    callback(null, json)
