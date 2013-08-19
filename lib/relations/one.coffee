@@ -126,9 +126,10 @@ module.exports = class One extends require('./relation')
       # update backlinks
       if previous_related_model
         if @reverse_relation.remove
-          @reverse_relation.remove(previous_related_model, model)
+         @reverse_relation.remove(previous_related_model, model) if not @isVirtual() or not related_model
         else
-          previous_related_model.set(@reverse_relation.key, null) if Utils.dataId(previous_related_model.get(@reverse_relation.key)) is model.id
+          current_model = previous_related_model.get(@reverse_relation.key)
+          previous_related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id
 
       if related_model
         if @reverse_relation.add

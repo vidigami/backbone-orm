@@ -163,13 +163,15 @@ module.exports = class Many extends require('./relation')
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
-        related_model.set(@reverse_relation.key, model) unless related_model.get(@reverse_relation.key) is model
+        current_model = related_model.get(@reverse_relation.key)
+        related_model.set(@reverse_relation.key, model) unless Utils.dataId(current_model) is model.id
 
     events.remove = (related_model) =>
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
-        related_model.set(@reverse_relation.key, null) if related_model.get(@reverse_relation.key) is model
+        current_model = related_model.get(@reverse_relation.key)
+        related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id
 
     events.reset = (collection, options) =>
       current_models = collection.models
