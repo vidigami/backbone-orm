@@ -18,7 +18,7 @@ module.exports = class One extends require('./relation')
     @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
-  initializeModel: (model, key) ->
+  initializeModel: (model) ->
     model.setLoaded(@key, !!(@embed or @reverse_relation?.embed))
     @_bindBacklinks(model)
 
@@ -69,7 +69,7 @@ module.exports = class One extends require('./relation')
     callback(null, result) if callback and (is_loaded or @manual_fetch)
     return result
 
-  save: (model, key, callback) ->
+  save: (model, callback) ->
     return callback() if not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
     return callback() unless related_model = model.attributes[@key]
@@ -117,8 +117,14 @@ module.exports = class One extends require('./relation')
   ####################################
   _bindBacklinks: (model) ->
     return unless @reverse_relation
-
     events = Utils.set(model, 'events', {})
+
+    setBacklink = (related_model) =>
+      if @reverse_relation.add
+        @reverse_relation.add(related_model, model)
+      else
+        related_model.set(@reverse_relation.key, model)
+
     events.change = (model) =>
       related_model = model.get(@key)
       previous_related_model = model.previous(@key)
@@ -131,13 +137,14 @@ module.exports = class One extends require('./relation')
           current_model = previous_related_model.get(@reverse_relation.key)
           previous_related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id
 
-      if related_model
-        if @reverse_relation.add
-          @reverse_relation.add(related_model, model)
-        else
-          related_model.set(@reverse_relation.key, model)
+      setBacklink(related_model) if related_model
 
-    model.on("change:#{@key}", events.change)
+    # TODO: how to unbind
+    model.on("change:#{@key}", events.change) # bind
+
+    # already set, set up initial value
+    setBacklink(related_model) if related_model = model.get(@key)
+
     return model
 
   _hasChanged: (model) ->

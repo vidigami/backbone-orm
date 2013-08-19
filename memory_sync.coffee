@@ -52,7 +52,7 @@ class MemorySync
 
   # @private
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless @store[model.id]
+    return options.error(model, new Error('Model not found')) unless @store[model.id]
     delete @store[model.id]
     options.success()
 

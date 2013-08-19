@@ -23,7 +23,7 @@ module.exports = class Many extends require('./relation')
     # check for join table
     @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
-  initializeModel: (model, key) ->
+  initializeModel: (model) ->
     model.setLoaded(@key, false)
     @_bindBacklinks(model)
 
@@ -80,7 +80,7 @@ module.exports = class Many extends require('./relation')
     callback(null, if result.models then result.models else result) if callback and (is_loaded or @manual_fetch)
     return result
 
-  save: (model, key, callback) ->
+  save: (model, callback) ->
     return callback() if not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
     collection = @_ensureCollection(model)
@@ -157,7 +157,6 @@ module.exports = class Many extends require('./relation')
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
 
-    # TODO: how should destroying the collection work?
     events = Utils.set(collection, 'events', {})
     events.add = (related_model) =>
       if @reverse_relation.add
@@ -183,7 +182,9 @@ module.exports = class Many extends require('./relation')
       (events.remove(related_model) for related_model in changes.removed) if changes.removed
       (events.add(related_model) for related_model in added)
 
-    collection.on(method, events[method]) for method in ['add', 'remove', 'reset']
+    # TODO: how to unbind
+    collection.on(method, events[method]) for method in ['add', 'remove', 'reset'] # bind
+
     return collection
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)

@@ -87,6 +87,42 @@ runTests = (options, cache, embed, callback) ->
 
       queue.await done
 
+    it 'Can create a related model by id (belongsTo)', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        flat_id = test_model.id
+        new_model = new Owner({flat_id: flat_id})
+
+        new_model.save {}, bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          new_model.get 'flat', (err, flat) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(flat, 'found related model')
+            assert.equal(flat_id, flat.id, 'Loaded model is correct')
+            done()
+
+    it 'Can create a related model by id (hasOne)', (done) ->
+      Reverse.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        reverse_id = test_model.id
+        new_model = new Owner({reverse_id: reverse_id})
+        new_model.get('reverse').fetch bbCallback (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          new_model.save {}, bbCallback (err) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            new_model.get 'reverse', (err, reverse) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(reverse, 'found related model')
+              assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
+              done()
+
     it 'Handles a get query for a belongsTo relation', (done) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")

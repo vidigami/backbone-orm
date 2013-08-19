@@ -67,7 +67,7 @@ module.exports = class Schema
     return JoinTable
 
   initializeModel: (model) ->
-    relation.initializeModel(model, key) for key, relation of @relations
+    relation.initializeModel(model) for key, relation of @relations
 
   allColumns: ->
     columns = _.keys(@fields)

@@ -184,6 +184,14 @@ module.exports = (model_type) ->
 
   model_type::modelName = -> return model_type.model_name
 
+  _original_fetch = model_type::fetch
+  model_type::fetch = (options) ->
+    return _original_fetch.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
+      return options.error?(@, resp, options) if err
+      @setLoaded(true)
+      options.success?(model, resp, options)
+    ))
+
   _original_set = model_type::set
   model_type::set = (key, value, options) ->
     return _original_set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
@@ -244,10 +252,10 @@ module.exports = (model_type) ->
     else
       (attributes = {})[key] = value;
 
-    return options.error?(new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
+    return options.error?(@, new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
 
     @_orm or= {}
-    return options.error?(new Error "Model is in a save loop: #{model_type.model_name}") if @_orm.save > 0
+    return options.error?(@, new Error "Model is in a save loop: #{model_type.model_name}") if @_orm.save > 0
     @_orm.save or= 0; @_orm.save++
 
     # set the attributes
@@ -266,7 +274,7 @@ module.exports = (model_type) ->
         if model_type.schema
           schema = model_type.schema()
           for key, relation of schema.relations
-            do (relation) => queue.defer (callback) => relation.save(@, key, callback)
+            do (relation) => queue.defer (callback) => relation.save(@, callback)
 
         queue.await (err) =>
           return options.error?(@, Error "Failed to save relations. #{err}", options) if err
