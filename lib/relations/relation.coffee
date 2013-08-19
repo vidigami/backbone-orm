@@ -44,10 +44,9 @@ module.exports = class Relation
       queue = new Queue(1)
 
       use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
-      related_key = if use_join then @reverse_relation.join_key else 'id'
       related_ids = _.pluck(related_models, 'id')
-      changes = _.groupBy(json, (test) => if _.contains(related_ids, test[related_key]) then 'kept' else 'removed')
-      added_ids = if changes.added then _.difference(related_ids, (test[related_key] for test in changes.kept)) else related_ids
+      changes = _.groupBy(json, (test) => if _.contains(related_ids, test.id) then 'kept' else 'removed')
+      added_ids = if changes.kept then _.difference(related_ids, (test.id for test in changes.kept)) else related_ids
 
       # update store through join table
       if use_join
@@ -55,7 +54,7 @@ module.exports = class Relation
         if changes.removed
           queue.defer (callback) =>
             destroy_query = {}
-            destroy_query[related_key] = {$in: (model_json.id for model_json in changes.removed)}
+            destroy_query[@reverse_relation.join_key] = {$in: (model_json.id for model_json in changes.removed)}
             @join_table.destroy destroy_query, callback
 
         # create new - TODO: optimize through batch create
@@ -79,7 +78,7 @@ module.exports = class Relation
         # add new, if they have changed
         for added_id in added_ids
           related_model = _.find(related_models, (test) -> test.id is added_id)
-          continue if not related_model.isLoaded() or not @reverse_relation._hasChanged(related_model) # related is loaded and has not changed
+          continue if not @reverse_relation._hasChanged(related_model) # related has not changed
 
           do (related_model) => queue.defer (callback) =>
             related_model.save {}, Utils.bbCallback (err, saved_model) =>

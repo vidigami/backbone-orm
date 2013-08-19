@@ -267,10 +267,10 @@ runTests = (options, cache, embed, callback) ->
               assert.equal(null, reverses0[1].get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverses0[1].get('owner'))}")
               queue.defer checkReverseFn(reverses1b, owner1) # confirm it moved
 
-              assert.equal(getReverseCount(reverses0b[0]), reverses0b[0].get('owners').models.length, "Reverse0_0b has expected owners.\nExpected: #{getReverseCount(reverses0b[0])}.\nActual: #{util.inspect(reverses0b[0].get('owners').models)}")
-              assert.equal(getReverseCount(reverses0b[1]), reverses0b[1].get('owners').models.length, "Reverse0_1b has expected owners.\nExpected: #{getReverseCount(reverses0b[1])}.\nActual: #{util.inspect(reverses0b[1].get('owners').models)}")
-              assert.equal(getReverseCount(reverses1b[0]), reverses1b[0].get('owners').models.length, "Reverse1_0b has expected owners.\nExpected: #{getReverseCount(reverses1b[0])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
-              assert.equal(getReverseCount(reverses1b[1]), reverses1b[1].get('owners').models.length, "Reverse1_0b has expected owners.\nExpected: #{getReverseCount(reverses1b[1])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
+              assert.equal(getReverseCount(reverses0b[0]), reverses0b[0].get('owners').models.length, "Reverse0_0b (#{reverses0b[0].id}) has expected owners.\nExpected: #{getReverseCount(reverses0b[0])}.\nActual: #{util.inspect(reverses0b[0].get('owners').models)}")
+              assert.equal(getReverseCount(reverses0b[1]), reverses0b[1].get('owners').models.length, "Reverse0_1b (#{reverses0b[1].id}) has expected owners.\nExpected: #{getReverseCount(reverses0b[1])}.\nActual: #{util.inspect(reverses0b[1].get('owners').models)}")
+              assert.equal(getReverseCount(reverses1b[0]), reverses1b[0].get('owners').models.length, "Reverse1_0b (#{reverses1b[0].id}) has expected owners.\nExpected: #{getReverseCount(reverses1b[0])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
+              assert.equal(getReverseCount(reverses1b[1]), reverses1b[1].get('owners').models.length, "Reverse1_0b (#{reverses1b[1].id}) has expected owners.\nExpected: #{getReverseCount(reverses1b[1])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
 
               callback()
 

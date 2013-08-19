@@ -114,7 +114,6 @@ module.exports = class Many extends require('./relation')
       related_models = _.clone(collection.models)
     else
       related_models = (new @reverse_model_type(json) for json in (model[@key] or []))
-    use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
 
     # clear in memory
     for related_model in related_models
@@ -123,7 +122,7 @@ module.exports = class Many extends require('./relation')
 
     # clear in store through join table
     (query = {})[@foreign_key] = model.id
-    return @join_table.destroy(query, callback) if use_join
+    return @join_table.destroy(query, callback) if @join_table
 
     # clear back links on models and save
     (query = {})[@foreign_key] = model.id
@@ -142,12 +141,7 @@ module.exports = class Many extends require('./relation')
     json = if model instanceof Backbone.Model then model.attributes else model
     (query = _.clone(query or {}))[@foreign_key] = json.id
     (query.$values or= []).push('id') if key is @ids_accessor
-
-    use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
-    if use_join
-      return @join_table.cursor(query)
-    else
-      return @reverse_model_type.cursor(query)
+    return @reverse_model_type.cursor(query)
 
   ####################################
   # Internal
