@@ -173,7 +173,6 @@ module.exports = class Many extends require('./relation')
     events.reset = (collection, options) =>
       current_models = collection.models
       previous_models = options.previousModels or []
-
       changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
       added = if changes.kept then _.select(current_models, (test) -> !_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 

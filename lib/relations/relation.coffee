@@ -8,8 +8,8 @@ Utils = require '../utils'
 bbCallback = Utils.bbCallback
 
 module.exports = class Relation
-  hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
-  isManyToMany: -> return @type is 'hasMany' and @reverse_relation and @reverse_relation.type is 'hasMany'
+  # hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
+  # isManyToMany: -> return @type is 'hasMany' and @reverse_relation and @reverse_relation.type is 'hasMany'
 
   findOrGenerateJoinTable: ->
     # already exists

@@ -12,7 +12,7 @@ runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 5
+  BASE_COUNT = 2
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   class Reverse extends Backbone.Model
@@ -197,9 +197,9 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(2, paging_info.total_rows, "Counted reverses. Expected: 2. Actual: #{paging_info.total_rows}")
           done()
 
-    it 'Should manage backlinks (no modifiers)', (done) ->
+    it 'Should update backlinks using set (no modifiers)', (done) ->
       checkReverseFn = (reverses, expected_owner) -> return (callback) ->
-        assert.ok(reverses, "Reverses exists")
+        assert.ok(reverses, 'Reverses exists')
         for reverse in reverses
           assert.ok(_.contains(reverse.get('owners').models, expected_owner), "Reverse owner is in the list. Expected: #{expected_owner}. Actual: #{reverse.get('owners').models}")
         callback()
@@ -238,20 +238,7 @@ runTests = (options, cache, embed, callback) ->
           callback()
 
         # save and recheck
-        queue.defer (callback) ->
-          # reverses0a = _.clone(owners[0].get('reverses').models)
-          # console.log "\nowner0a: #{owner0.id}\n***original reverses: #{test.id for test in new_reverses0}"
-
-          owner0.save {}, bbCallback callback
-          # console.log "***************************"
-          # console.log "***************************"
-          # console.log "SAVINING: owner0: #{owner0.id} reverses0a: #{reverse.id for reverse in new_reverses0}"
-
-          # owner0.save {}, bbCallback (err, owner) ->
-          #   reverses0b = _.clone(owner.get('reverses').models); owner0 = owners[0]
-          #   console.log "\nowner0b: #{owner.id}\n***post reverses: #{test.id for test in reverses0b}"
-          #   callback()
-
+        queue.defer (callback) -> owner0.save {}, bbCallback callback
         queue.defer (callback) -> owner1.save {}, bbCallback callback
         queue.defer (callback) ->
           Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
@@ -259,13 +246,6 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
             reverses0b = _.clone(owners[0].get('reverses').models); owner0 = owners[0]
             reverses1b = _.clone(owners[1].get('reverses').models); owner1 = owners[1]
-
-            # console.log "\nowner0: #{owner0.id}\n***original reverses: #{test.id for test in reverses0}"
-            # console.log "\nowner0a: #{owner0.id}\n***original reverses: #{test.id for test in reverses0a}"
-            # console.log "\nowner0b: #{owner0.id}\n***post reverses: #{test.id for test in reverses0b}"
-            # console.log "\nowner1: #{owner1.id}\n***original reverses: #{test.id for test in reverses1}"
-            # console.log "\nowner1a: #{owner1.id}\n***original reverses: #{test.id for test in reverses1a}"
-            # console.log "\nowner1b: #{owner1.id}\n***post reverses: #{test.id for test in reverses1b}"
 
             assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
             assert.equal(2, owner1.get('reverses').models.length, "Owner1b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
@@ -282,11 +262,6 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(null, reverses0[1].get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverses0[1].get('owner'))}")
             queue.defer checkReverseFn(reverses1b, owner1) # confirm it moved
 
-            # console.log "\nowner0: #{owner0.id}\n***original reverses: #{test.id for test in reverses0}"
-            # console.log "\nowner0b: #{owner0.id}\n***post reverses: #{test.id for test in reverses0b}"
-            # console.log "\nowner1: #{owner1.id}\n***original reverses: #{test.id for test in reverses1}"
-            # console.log "\nowner1b: #{owner1.id}\n***post reverses: #{test.id for test in reverses1b}"
-
             assert.equal(getReverseCount(reverses0b[0]), reverses0b[0].get('owners').models.length, "Reverse0_0b has expected owners.\nExpected: #{getReverseCount(reverses0b[0])}.\nActual: #{util.inspect(reverses0b[0].get('owners').models)}")
             assert.equal(getReverseCount(reverses0b[1]), reverses0b[1].get('owners').models.length, "Reverse0_1b has expected owners.\nExpected: #{getReverseCount(reverses0b[1])}.\nActual: #{util.inspect(reverses0b[1].get('owners').models)}")
             assert.equal(getReverseCount(reverses1b[0]), reverses1b[0].get('owners').models.length, "Reverse1_0b has expected owners.\nExpected: #{getReverseCount(reverses1b[0])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
@@ -296,6 +271,76 @@ runTests = (options, cache, embed, callback) ->
 
         queue.await done
 
+    it 'Should update backlinks using the collection directly (no modifiers)', (done) ->
+      checkReverseFn = (reverses, expected_owner) -> return (callback) ->
+        assert.ok(reverses, 'Reverses exists')
+        for reverse in reverses
+          assert.ok(_.contains(reverse.get('owners').models, expected_owner), "Reverse owner is in the list. Expected: #{expected_owner}. Actual: #{reverse.get('owners').models}")
+        callback()
+
+      Owner.cursor().limit(2).include('reverses').toModels (err, owners) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+
+        reverses0 = _.clone(owners[0].get('reverses').models); owner0 = owners[0]; reverses0a = null; reverses0b = null
+        reverses1 = _.clone(owners[1].get('reverses').models); owner1 = owners[1]; reverses1a = null; reverses1b = null
+        shared_reverse0 = reverses1[0]
+
+        queue = new Queue(1)
+        queue.defer checkReverseFn(reverses0, owner0)
+        queue.defer checkReverseFn(reverses1, owner1)
+        assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
+        assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
+        assert.equal(1, reverses1[0].get('owners').models.length, "Reverse1_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
+        assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+
+        queue.defer (callback) ->
+          reverses = owner0.get('reverses')
+          reverses.add(shared_reverse0)
+
+          queue.defer checkReverseFn([shared_reverse0], owner0) # confirm it moved
+          queue.defer checkReverseFn(reverses1, owner1)
+
+          reverses0a = _.clone(owners[0].get('reverses').models)
+          reverses1a = _.clone(owners[1].get('reverses').models)
+
+          assert.equal(3, owner0.get('reverses').models.length, "Owner0 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
+          assert.equal(2, owner1.get('reverses').models.length, "Owner1 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
+
+          assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
+          assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
+          assert.equal(2, reverses1[0].get('owners').models.length, "Reverse1_0 has 2 owners.\nExpected: #{2}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
+          assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+          callback()
+
+        # save and recheck
+        queue.defer (callback) -> owner0.save {}, bbCallback callback
+        queue.defer (callback) -> owner1.save {}, bbCallback callback
+        queue.defer (callback) ->
+          Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
+            reverses0b = _.clone(owners[0].get('reverses').models); owner0 = owners[0]
+            reverses1b = _.clone(owners[1].get('reverses').models); owner1 = owners[1]
+
+            assert.equal(3, owner0.get('reverses').models.length, "Owner0b has 3 reverses.\nExpected: #{3}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
+            assert.equal(2, owner1.get('reverses').models.length, "Owner1b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
+
+            getReverseCount = (reverse) ->
+              return if shared_reverse0.id is reverse.id then 2 else 1
+
+            queue.defer checkReverseFn(reverses0b, owner0) # confirm it moved
+            assert.equal(null, reverses0[1].get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverses0[1].get('owner'))}")
+            queue.defer checkReverseFn(reverses1b, owner1) # confirm it moved
+
+            assert.equal(getReverseCount(reverses0b[0]), reverses0b[0].get('owners').models.length, "Reverse0_0b has expected owners.\nExpected: #{getReverseCount(reverses0b[0])}.\nActual: #{util.inspect(reverses0b[0].get('owners').models)}")
+            assert.equal(getReverseCount(reverses0b[1]), reverses0b[1].get('owners').models.length, "Reverse0_1b has expected owners.\nExpected: #{getReverseCount(reverses0b[1])}.\nActual: #{util.inspect(reverses0b[1].get('owners').models)}")
+            assert.equal(getReverseCount(reverses1b[0]), reverses1b[0].get('owners').models.length, "Reverse1_0b has expected owners.\nExpected: #{getReverseCount(reverses1b[0])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
+            assert.equal(getReverseCount(reverses1b[1]), reverses1b[1].get('owners').models.length, "Reverse1_0b has expected owners.\nExpected: #{getReverseCount(reverses1b[1])}.\nActual: #{util.inspect(reverses1b[0].get('owners').models)}")
+
+            callback()
+
+        queue.await done
 # TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....

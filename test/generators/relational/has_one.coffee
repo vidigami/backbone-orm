@@ -349,7 +349,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, paging_info.total_rows, "Counted reverses. Expected: 1. Actual: #{paging_info.total_rows}")
           done()
 
-    it 'Should manage backlinks (no modifiers)', (done) ->
+    it 'Should update backlinks using set (no modifiers)', (done) ->
       # TODO: implement embedded
       return done() if embed
 
