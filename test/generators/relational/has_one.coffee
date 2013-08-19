@@ -478,14 +478,14 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(!virtual_json.hasOwnProperty(json_key), 'Did not serialize flat')
 
         flat = owner.get('flat')
-        owner.set({flat: null})
-        owner.save {flat: flat}, bbCallback (err) ->
+        flat_id = flat.id
+        owner.save {flat: null}, bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           require('../../../lib/cache').reset() # reset cache
-          Owner.find owner.id, (err, owner) ->
+          Owner.find owner.id, (err, loaded_owner) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(!owner.get('flat'), 'Virtual flat is not saved')
+            assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')
             done()
 
 
