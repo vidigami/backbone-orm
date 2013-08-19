@@ -104,30 +104,31 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(flat_id, flat.id, 'Loaded model is correct')
             done()
 
-    it 'Can create a related model by id (hasOne)', (done) ->
-      Reverse.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
+    # TODO: does this case make sense given the location of the foreign keys?
+    # it 'Can create a related model by id (hasOne)', (done) ->
+    #   Reverse.findOne (err, test_model) ->
+    #     assert.ok(!err, "No errors: #{err}")
+    #     assert.ok(test_model, 'found model')
 
-        reverse_id = test_model.id
-        new_model = new Owner({reverse_id: reverse_id})
+    #     reverse_id = test_model.id
+    #     new_model = new Owner({reverse_id: reverse_id})
 
-        queue = new Queue(1)
-        if not new_model.get('reverse').isLoaded()
-          queue.defer (callback) -> new_model.get('reverse').fetch bbCallback callback
+    #     queue = new Queue(1)
+    #     if not new_model.get('reverse').isLoaded()
+    #       queue.defer (callback) -> new_model.get('reverse').fetch bbCallback callback
 
-        queue.defer (callback) -> new_model.save {}, bbCallback callback
+    #     queue.defer (callback) -> new_model.save {}, bbCallback callback
 
-        queue.defer (callback) ->
-          new_model.get 'reverse', (err, reverse) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(reverse, 'found related model')
-            assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
-            callback()
+    #     queue.defer (callback) ->
+    #       new_model.get 'reverse', (err, reverse) ->
+    #         assert.ok(!err, "No errors: #{err}")
+    #         assert.ok(reverse, 'found related model')
+    #         assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
+    #         callback()
 
-        queue.await (err) ->
-          assert.ok(!err, "No errors: #{err}")
-          done()
+    #     queue.await (err) ->
+    #       assert.ok(!err, "No errors: #{err}")
+    #       done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
       Owner.findOne (err, test_model) ->
