@@ -466,7 +466,8 @@ runTests = (options, cache, embed, callback) ->
 
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'Reverse found model')
+        assert.ok(owner, 'Owners found')
+        flat_id = owner.get('flat').id
 
         json = owner.toJSON()
         assert.ok(json.hasOwnProperty(json_key), 'Serialized flat')
@@ -477,16 +478,21 @@ runTests = (options, cache, embed, callback) ->
         virtual_json = owner.toJSON()
         assert.ok(!virtual_json.hasOwnProperty(json_key), 'Did not serialize flat')
 
-        flat = owner.get('flat')
-        flat_id = flat.id
-        owner.save {flat: null}, bbCallback (err) ->
-          assert.ok(!err, "No errors: #{err}")
+        owner_with_flat = new Owner(json)
+        assert.equal(owner_with_flat.get('flat').id, flat_id, 'Virtual with flat was deserialized')
 
-          require('../../../lib/cache').reset() # reset cache
-          Owner.find owner.id, (err, loaded_owner) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')
-            done()
+        owner_with_virtual_flat = new Owner(virtual_json)
+        assert.equal(owner_with_virtual_flat.get('flat'), null, 'Virtual without flat was deserialized')
+        done()
+
+        # owner.save {flat: null}, bbCallback (err) ->
+        #   assert.ok(!err, "No errors: #{err}")
+
+        #   require('../../../lib/cache').reset() # reset cache
+        #   Owner.find owner.id, (err, loaded_owner) ->
+        #     assert.ok(!err, "No errors: #{err}")
+        #     assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')
+        #     done()
 
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
