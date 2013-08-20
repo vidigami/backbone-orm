@@ -111,7 +111,10 @@ module.exports = class MemoryCursor extends Cursor
             json = json.splice(0, Math.min(json.length, @_cursor.$limit))
           callback()
 
-        queue.defer (callback) => @fetchIncludes(json, callback)
+        queue.defer (callback) =>
+          return callback() unless @_cursor.$include
+          json = (_.clone(model_json) for model_json in json) # ensure we don't update the underlying store
+          @fetchIncludes(json, callback)
 
       queue.await =>
         return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
