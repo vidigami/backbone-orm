@@ -263,7 +263,7 @@ module.exports = (model_type) ->
     attributes = {}
 
     Utils.presaveBelongsToRelationships @, (err) =>
-      return options.error?(@, resp, options) if err
+      return options.error?(@, err) if err
 
       return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
         --@_orm.save
