@@ -97,4 +97,7 @@ module.exports = class Relation
     # update the foreign key and save raw data
     related_json[@reverse_relation.foreign_key] = null
     related_model = new Backbone.Model(related_json)
+    related_model.urlRoot = =>
+      try url = _.result(@reverse_model_type.prototype, 'url') catch e
+      return url
     @reverse_model_type::sync 'update', related_model, bbCallback callback
