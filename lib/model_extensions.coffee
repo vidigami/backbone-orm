@@ -192,6 +192,12 @@ module.exports = (model_type) ->
       options.success?(model, resp, options)
     ))
 
+  _original_unset = model_type::unset
+  model_type::unset = (key) ->
+    id = @id
+    _original_unset.apply(@, arguments)
+    model_type.cache.del(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
+
   _original_set = model_type::set
   model_type::set = (key, value, options) ->
     return _original_set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
@@ -206,6 +212,8 @@ module.exports = (model_type) ->
         relation.set(@, key, value, options)
       else
         _original_set.call(@, key, value, options)
+
+    # model_type.cache.set(@id, @) if model_type.cache and @isLoaded() and @id # update the cache: TODO: look at the partial models code
     return @
 
   _original_get = model_type::get
