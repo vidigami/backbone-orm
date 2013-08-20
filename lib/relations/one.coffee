@@ -56,7 +56,7 @@ module.exports = class One extends require('./relation')
       return if key is @ids_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
-    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
+    if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)

@@ -56,7 +56,7 @@ module.exports = class Many extends require('./relation')
       return if key is @ids_accessor then (related_model.id for related_model in collection.models) else collection
 
     # asynchronous path, needs load
-    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
+    if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
       # fetch
       @cursor(model, @key).toJSON (err, json) =>
         return callback(err) if err
