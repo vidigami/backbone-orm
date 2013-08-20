@@ -90,7 +90,7 @@ module.exports = class One extends require('./relation')
 
     json_key = if @embed then key else @ids_accessor
     unless related_model = model.attributes[key]
-      json[json_key] = null if @type is 'belongsTo'
+      json[json_key] = null if @embed or @type is 'belongsTo'
       return
     return json[json_key] = related_model.toJSON() if @embed
     return json[json_key] = related_model.id if @type is 'belongsTo'

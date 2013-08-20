@@ -207,7 +207,7 @@ runTests = (options, cache, embed, callback) ->
           new_owner_id = new_owner.id
           assert.ok(new_owner_id, 'had an id after after')
 
-          assert.equal(null, owner.get(related_key), "Didn't modify previous related. Expected: #{null}. Actual: #{owner.get(related_key)}")
+          assert.equal(null, owner.get(related_key), "Modified previous related. Expected: #{null}. Actual: #{owner.get(related_key)}")
           assert.equal(null, owner.get(related_id_accessor), "Got related_id from previous related. Expected: #{null}. Actual: #{new_owner.get(related_id_accessor)}")
           assert.equal(related, new_owner.get(related_key), "Copied related. Expected: #{related}. Actual: #{new_owner.get(related_key)}")
           assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
@@ -221,7 +221,7 @@ runTests = (options, cache, embed, callback) ->
         queue.defer (callback) ->
           owner1.get related_key, (err, related) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.equal(null, related, "Loaded related from previous related. Expected: #{null}. Actual: #{related}")
+            assert.equal(null, related, "Failed to loaded related from previous related. Expected: #{null}. Actual: #{related}")
             assert.equal(null, owner1.get(related_id_accessor), "Failed to get related_id from reloaded previous related. Expected: #{null}. Actual: #{owner1.get(related_id_accessor)}")
 
             new_owner1.get related_key, (err, related) ->
