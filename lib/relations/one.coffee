@@ -34,7 +34,7 @@ module.exports = class One extends require('./relation')
 
     # set the relation now or later merge into the existing model
     if value and not is_model
-      value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = !!previous_related_model
+      value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = Utils.dataId(previous_related_model) is Utils.dataId(value)
     Backbone.Model::set.call(model, @key, value, options) unless merge_into_existing
 
     # not setting a new model, update the previous model
@@ -135,7 +135,7 @@ module.exports = class One extends require('./relation')
       # update backlinks
       if previous_related_model
         if @reverse_relation.remove
-         @reverse_relation.remove(previous_related_model, model) if not @isVirtual() or not related_model
+          @reverse_relation.remove(previous_related_model, model) if not @isVirtual() or not related_model
         else
           current_model = previous_related_model.get(@reverse_relation.key)
           previous_related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id

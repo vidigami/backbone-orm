@@ -409,12 +409,11 @@ runTests = (options, cache, embed, callback) ->
               owner0 = owners[0]; reverses0b = _.clone(owner0.get('reverses').models)
               owner1 = owners[1]; reverses1b = _.clone(owner1.get('reverses').models)
 
-              assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
               if virtual # doesn't save
-                assert.equal(2, owner0.get('reverses').models.length, "Owner0 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
+                assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
                 assert.equal(2, owner1.get('reverses').models.length, "Owner1b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
               else
-                assert.equal(2, owner0.get('reverses').models.length, "Owner0 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
+                assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
                 assert.equal(1, owner1.get('reverses').models.length, "Owner1b has 1 reverses.\nExpected: #{1}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
 
                 queue.defer checkReverseFn(reverses0b, owner0) # confirm it moved
