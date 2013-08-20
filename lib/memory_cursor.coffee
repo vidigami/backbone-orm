@@ -52,11 +52,13 @@ module.exports = class MemoryCursor extends Cursor
         (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
         ins_size = _.size(ins)
 
+        # NOTE: we clone the data out of the store since the caller could modify it
+
         # use find
         if keys.length or ins_size
           if @_cursor.$ids
             for id, model_json of @store
-              json.push(model_json) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(_.clone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
@@ -71,7 +73,7 @@ module.exports = class MemoryCursor extends Cursor
                   return callback(err) if err
                   return callback() unless is_match
                   if not find_keys.length or (exists and (keys.length isnt find_keys.length)) # exists only needs one result
-                    json.push(model_json)
+                    json.push(_.clone(model_json))
                     return callback()
 
                   # check next key
@@ -88,9 +90,9 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(model_json) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json.push(_.clone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
           else
-            json = (model_json for id, model_json of @store)
+            json = (_.clone(model_json) for id, model_json of @store)
           callback()
 
       if not exists
@@ -111,10 +113,7 @@ module.exports = class MemoryCursor extends Cursor
             json = json.splice(0, Math.min(json.length, @_cursor.$limit))
           callback()
 
-        queue.defer (callback) =>
-          return callback() unless @_cursor.$include
-          json = (_.clone(model_json) for model_json in json) # ensure we don't update the underlying store
-          @fetchIncludes(json, callback)
+        queue.defer (callback) => @fetchIncludes(json, callback)
 
       queue.await =>
         return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
