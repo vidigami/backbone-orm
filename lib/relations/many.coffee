@@ -53,7 +53,7 @@ module.exports = class Many extends require('./relation')
     throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     collection = @_ensureCollection(model)
     returnValue = =>
-      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
+      return if key is @ids_accessor then (related_model.id for related_model in collection.models) else collection
 
     # asynchronous path, needs load
     if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
