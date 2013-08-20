@@ -37,18 +37,18 @@ class MemorySync
 
   # @private
   read: (model, options) ->
-    options.success(if model.models then (json for id, json of @store) else @store[model.id])
+    options.success(if model.models then (Utils.deepClone(model_json) for id, model_json of @store) else Utils.deepClone(@store[model.id]))
 
   # @private
   create: (model, options) ->
     model.set(id: Utils.guid())
     model_json = @store[model.id] = model.toJSON()
-    options.success(_.clone(model_json))
+    options.success(Utils.deepClone(model_json))
 
   # @private
   update: (model, options) ->
     @store[model.id] = model_json = model.toJSON()
-    options.success(_.clone(model_json))
+    options.success(Utils.deepClone(model_json))
 
   # @private
   delete: (model, options) ->

@@ -20,6 +20,17 @@ module.exports = class Utils
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
+  @deepClone: (obj) ->
+    return obj if not obj or (typeof obj isnt 'object')
+    return String::slice.call(obj) if _.isString(obj)
+    return new Date(obj.valueOf()) if _.isDate(obj)
+    return (Utils.deepClone(item) for item in obj) if _.isArray(obj)
+    if _.isObject(obj) and obj.constructor is {}.constructor # simple object
+      result = {}
+      result[key] = Utils.deepClone(value) for key, value of obj
+      return result
+    return obj
+
   # @private
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 

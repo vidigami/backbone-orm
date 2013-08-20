@@ -44,11 +44,9 @@ module.exports = class JSONUtils
   #
   @toQuery: (values, depth=0) ->
     return null if _.isNull(values)
-    if _.isArray(values)
-      return JSON.stringify(values)
-    else if _.isDate(values) or values.toJSON
-      return values.toJSON()
-    else if _.isObject(values)
+    return JSON.stringify(values) if _.isArray(values)
+    return values.toJSON() if _.isDate(values) or values.toJSON
+    if _.isObject(values)
       return JSON.stringify(values) if depth > 0
       result = {}
       result[key] = JSONUtils.toQuery(value, 1) for key, value of values
