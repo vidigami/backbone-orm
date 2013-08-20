@@ -121,6 +121,117 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(flat_id, flat.id, 'Loaded model is correct')
             done()
 
+    it 'Can create a model and update the relationship (belongsTo)', (done) ->
+      related_key = 'flat'
+      related_id_accessor = 'flat_id'
+
+      Owner.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        assert.ok(related = owner.get(related_key), 'included related')
+
+        owner_id = owner.id
+        related_id = related.id
+
+        (attributes = {})[related_key] = related
+        new_owner = new Owner(attributes)
+        owner1 = null; new_owner1 = null; new_owner_id = null
+
+        assert.equal(related, owner.get(related_key), "Didn't modify previous related. Expected: #{related}. Actual: #{owner.get(related_key)}")
+        assert.equal(related_id, owner.get(related_id_accessor), "Got related_id from previous related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+        assert.equal(related, new_owner.get(related_key), "Copied related. Expected: #{related}. Actual: #{new_owner.get(related_key)}")
+        assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+
+        queue = new Queue(1)
+        queue.defer (callback) -> new_owner.save {}, bbCallback callback
+        queue.defer (callback) -> owner.save {}, bbCallback callback
+
+        # make sure nothing changed after save
+        queue.defer (callback) ->
+          new_owner_id = new_owner.id
+          assert.ok(new_owner_id, 'had an id after after')
+
+          assert.equal(related, owner.get(related_key), "Didn't modify previous related. Expected: #{related}. Actual: #{owner.get(related_key)}")
+          assert.equal(related_id, owner.get(related_id_accessor), "Got related_id from previous related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+          assert.equal(related, new_owner.get(related_key), "Copied related. Expected: #{related}. Actual: #{new_owner.get(related_key)}")
+          assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+          callback()
+
+        # load
+        queue.defer (callback) -> Owner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
+        queue.defer (callback) -> Owner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
+
+        # check
+        queue.defer (callback) ->
+          assert.equal(related_id, owner1.get(related_id_accessor), "Got related_id from reloaded previous related. Expected: #{related_id}. Actual: #{owner1.get(related_id_accessor)}")
+          assert.equal(related_id, new_owner1.get(related_id_accessor), "Got related_id from reloaded copied related. Expected: #{related_id}. Actual: #{new_owner1.get(related_id_accessor)}")
+
+          owner1.get related_key, (err, related) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(related_id, related.id, "Loaded related from previous related. Expected: #{related_id}. Actual: #{related.id}")
+
+            new_owner1.get related_key, (err, related) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(related_id, related.id, "Loaded related from previous related. Expected: #{related_id}. Actual: #{related.id}")
+              callback()
+
+        queue.await done
+
+    it 'Can create a model and update the relationship (belongsTo)', (done) ->
+      related_key = 'reverse'
+      related_id_accessor = 'reverse_id'
+
+      Owner.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found model')
+        assert.ok(related = owner.get(related_key), 'included related')
+
+        owner_id = owner.id
+        related_id = related.id
+
+        (attributes = {})[related_key] = related
+        new_owner = new Owner(attributes)
+        owner1 = null; new_owner1 = null; new_owner_id = null
+
+        assert.equal(null, owner.get(related_key), "Modified previous related. Expected: #{null}. Actual: #{owner.get(related_key)}")
+        assert.equal(null, owner.get(related_id_accessor), "Failed to get related_id from previous related. Expected: #{null}. Actual: #{new_owner.get(related_id_accessor)}")
+        assert.equal(related, new_owner.get(related_key), "Copied related. Expected: #{related}. Actual: #{new_owner.get(related_key)}")
+        assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+
+        queue = new Queue(1)
+        queue.defer (callback) -> new_owner.save {}, bbCallback callback
+        queue.defer (callback) -> owner.save {}, bbCallback callback
+
+        # make sure nothing changed after save
+        queue.defer (callback) ->
+          new_owner_id = new_owner.id
+          assert.ok(new_owner_id, 'had an id after after')
+
+          assert.equal(null, owner.get(related_key), "Didn't modify previous related. Expected: #{null}. Actual: #{owner.get(related_key)}")
+          assert.equal(null, owner.get(related_id_accessor), "Got related_id from previous related. Expected: #{null}. Actual: #{new_owner.get(related_id_accessor)}")
+          assert.equal(related, new_owner.get(related_key), "Copied related. Expected: #{related}. Actual: #{new_owner.get(related_key)}")
+          assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
+          callback()
+
+        # load
+        queue.defer (callback) -> Owner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
+        queue.defer (callback) -> Owner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
+
+        # check
+        queue.defer (callback) ->
+          owner1.get related_key, (err, related) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(null, owner1.get(related_id_accessor), "Failed to get related_id from reloaded previous related. Expected: #{null}. Actual: #{owner1.get(related_id_accessor)}")
+            assert.equal(null, related, "Loaded related from previous related. Expected: #{null}. Actual: #{related}")
+
+            new_owner1.get related_key, (err, related) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(related_id, new_owner1.get(related_id_accessor), "Got related_id from reloaded copied related. Expected: #{related_id}. Actual: #{new_owner1.get(related_id_accessor)}")
+              assert.equal(related_id, related.id, "Loaded related from previous related. Expected: #{related_id}. Actual: #{related.id}")
+              callback()
+
+        queue.await done
+
     # it 'Can create a related model by id (hasOne)', (done) ->
     #   Reverse.findOne (err, test_model) ->
     #     assert.ok(!err, "No errors: #{err}")
@@ -434,8 +545,8 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
             assert.ok(!owner1.get('reverse'), "Owner1 has no reverse.")
 
-            queue.defer checkReverseFn(reverse1, owner0) # confirm it moved
-            assert.equal(null, reverse0.get('owner'), "Reverse owner is cleared.\nExpected: #{null}.\nActual: #{util.inspect(reverse0.get('owner'))}")
+            queue.defer checkReverseFn(reverse1, owner0) # confirm it also is related
+            queue.defer checkReverseFn(reverse0, owner0) # confirm it stayed
             assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
             callback()
 

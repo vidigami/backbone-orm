@@ -133,7 +133,7 @@ module.exports = class One extends require('./relation')
       return if Utils.dataId(related_model) is Utils.dataId(previous_related_model) # no change
 
       # update backlinks
-      if previous_related_model
+      if previous_related_model and (@reverse_relation and @reverse_relation.type isnt 'belongsTo') # allow for multiple
         if @reverse_relation.remove
           @reverse_relation.remove(previous_related_model, model) if not @isVirtual() or not related_model
         else
