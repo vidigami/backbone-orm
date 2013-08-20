@@ -212,8 +212,8 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
 
-          reverses0 = _.clone(owners[0].get('reverses').models); owner0 = owners[0]; reverses0a = null; reverses0b = null
-          reverses1 = _.clone(owners[1].get('reverses').models); owner1 = owners[1]; reverses1a = null; reverses1b = null
+          owner0 = owners[0]; reverses0 = _.clone(owner0.get('reverses').models); reverses0a = null; reverses0b = null
+          owner1 = owners[1]; reverses1 = _.clone(owner1.get('reverses').models); reverses1a = null; reverses1b = null
           new_reverses0 = [reverses0[0], reverses1[0]]
 
           queue = new Queue(1)
@@ -248,8 +248,8 @@ runTests = (options, cache, embed, callback) ->
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
-              reverses0b = _.clone(owners[0].get('reverses').models); owner0 = owners[0]
-              reverses1b = _.clone(owners[1].get('reverses').models); owner1 = owners[1]
+              owner0 = owners[0]; reverses0b = _.clone(owner0.get('reverses').models)
+              owner1 = owners[1]; reverses1b = _.clone(owner1.get('reverses').models)
 
               assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
               assert.equal(2, owner1.get('reverses').models.length, "Owner1b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
@@ -293,8 +293,8 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
 
-          reverses0 = _.clone(owners[0].get('reverses').models); owner0 = owners[0]; reverses0a = null; reverses0b = null
-          reverses1 = _.clone(owners[1].get('reverses').models); owner1 = owners[1]; reverses1a = null; reverses1b = null
+          owner0 = owners[0]; reverses0 = _.clone(owner0.get('reverses').models); reverses0a = null; reverses0b = null
+          owner1 = owners[1]; reverses1 = _.clone(owner1.get('reverses').models); reverses1a = null; reverses1b = null
           shared_reverse0 = reverses1[0]
 
           queue = new Queue(1)
@@ -331,8 +331,8 @@ runTests = (options, cache, embed, callback) ->
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
-              reverses0b = _.clone(owners[0].get('reverses').models); owner0 = owners[0]
-              reverses1b = _.clone(owners[1].get('reverses').models); owner1 = owners[1]
+              owner0 = owners[0]; reverses0b = _.clone(owner0.get('reverses').models)
+              owner1 = owners[1]; reverses1b = _.clone(owner1.get('reverses').models)
 
               if virtual # doesn't save
                 assert.equal(2, owner0.get('reverses').models.length, "Owner0b has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")

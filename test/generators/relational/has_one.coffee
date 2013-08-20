@@ -412,8 +412,8 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
 
-          reverse0 = owners[0].get('reverse'); owner0 = owners[0]
-          reverse1 = owners[1].get('reverse'); owner1 = owners[1]
+          owner0 = owners[0]; reverse0 = owner0.get('reverse')
+          owner1 = owners[1]; reverse1 = owner1.get('reverse')
 
           assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
           assert.ok(owner1.get('reverse'), "Owner1 has 1 reverse.")
@@ -440,8 +440,8 @@ runTests = (options, cache, embed, callback) ->
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
-              reverse0b = owners[0].get('reverse'); owner0 = owners[0]
-              reverse1b = owners[1].get('reverse'); owner1 = owners[1]
+              owner0 = owners[0]; reverse0b = owner0.get('reverse')
+              owner1 = owners[1]; reverse1b = owner1.get('reverse')
 
               if virtual
                 assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
