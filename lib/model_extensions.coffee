@@ -305,28 +305,44 @@ module.exports = (model_type) ->
         options.success?(model, resp, options)
     ))
 
+  findOrClone = (model, options) ->
+    return model.clone(options) if model.isNew() or not model.modelName
+    cache = options._cache[model.modelName()] or= {}
+    clone = cache[model.id] = model.clone(options) unless clone = cache[model.id]
+    return clone
+
   _original_clone = model_type::clone
-  model_type::clone = (key, value, options) ->
-    return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+  model_type::clone = (options) ->
+    return _original_clone.apply(@, arguments) unless model_type.schema
+
+    options or= {}
+    options._cache or= {}
+    cache = options._cache[@modelName()] or= {}
 
     @_orm or= {}
-    return @id if @_orm.clone > 0
+    if @_orm.clone > 0 # TODO: how to handle recursion
+      return if @id then cache[@id] else _original_clone.apply(@, arguments)
     @_orm.clone or= 0; @_orm.clone++
 
-    json = {}
-    for key, value of @attributes
+    # create a shell to refer to
+    if @id
+      cache[@id] = clone = new @constructor() unless clone = cache[@id]
+    else
+      clone = new @constructor()
 
+    for key, value of @attributes
       if value instanceof Backbone.Collection
-        json[key] = new value.constructor(model.clone() for model in value.models)
+        clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
+        clone.attributes[key].values = (findOrClone(model, options) for model in value.models)
 
       else if value instanceof Backbone.Model
-        json[key] = value.clone()
+        clone.attributes[key] = findOrClone(value, options)
 
       else
-        json[key] = value
+        clone.attributes[key] = value
 
     --@_orm.clone
-    return new @constructor(json)
+    return clone
 
   model_type::cursor = (key, query={}) ->
     schema = model_type.schema() if model_type.schema

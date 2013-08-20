@@ -68,6 +68,7 @@ module.exports = class Schema
 
   initializeModel: (model) ->
     relation.initializeModel(model) for key, relation of @relations
+    return
 
   allColumns: ->
     columns = _.keys(@fields)
