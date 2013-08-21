@@ -27,6 +27,10 @@ module.exports = class Many extends require('./relation')
     model.setLoaded(@key, false)
     @_bindBacklinks(model)
 
+  releaseModel: (model) ->
+    @_unbindBacklinks(model)
+    delete model._orm
+
   set: (model, key, value, options) ->
     throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     collection = @_bindBacklinks(model)
@@ -181,10 +185,21 @@ module.exports = class Many extends require('./relation')
       (events.remove(related_model) for related_model in changes.removed) if changes.removed
       (events.add(related_model) for related_model in added)
 
-    # TODO: how to unbind
     collection.on(method, events[method]) for method in ['add', 'remove', 'reset'] # bind
 
     return collection
+
+  _unbindBacklinks: (model) ->
+    return unless events = Utils.get(model, 'events') # already unbound
+    Utils.unset(model, 'events')
+
+    collection = model.attributes[@key]
+    collection.models.splice()
+    events = _.clone()
+    for method in ['add', 'remove', 'reset'] # unbind
+      collection.off(method, events[method])
+      events[method] = null
+    return
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
   _hasChanged: (model) ->

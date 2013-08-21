@@ -22,6 +22,10 @@ module.exports = class One extends require('./relation')
     model.setLoaded(@key, !!(@embed or @reverse_relation?.embed))
     @_bindBacklinks(model)
 
+  releaseModel: (model) ->
+    @_unbindBacklinks(model)
+    delete model._orm
+
   set: (model, key, value, options) ->
     throw new Error "One.set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
     throw new Error "One.set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
@@ -149,6 +153,15 @@ module.exports = class One extends require('./relation')
     setBacklink(related_model) if related_model = model.get(@key)
 
     return model
+
+  _unbindBacklinks: (model) ->
+    return unless events = Utils.get(model, 'events') # already unbound
+    Utils.unset(model, 'events')
+
+    model.attributes[@key] = null
+    model.off("change:#{@key}", events.change) # unbind
+    events.change = null
+    return
 
   _hasChanged: (model) ->
     return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)

@@ -175,13 +175,23 @@ module.exports = (model_type) ->
     needs_load[key] = true
 
   ###################################
-  # Backbone ORM - Model Overrides
+  # Backbone ORM - Model Lifecyle - initialize and release
   ###################################
 
   _original_initialize = model_type::initialize
   model_type::initialize = ->
-    schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
+    if model_type.schema and (schema = model_type.schema())
+      relation.initializeModel(@) for key, relation of schema.relations
     return _original_initialize.apply(@, arguments)
+
+  model_type::release = ->
+    if model_type.schema and (schema = model_type.schema())
+      relation.releaseModel(@) for key, relation of schema.relations
+    return
+
+  ###################################
+  # Backbone ORM - Model Overrides
+  ###################################
 
   model_type::modelName = -> return model_type.model_name
 

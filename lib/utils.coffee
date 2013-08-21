@@ -72,7 +72,7 @@ module.exports = class Utils
     model._orm[key] = value unless model._orm.hasOwnProperty(key)
     return model._orm[key]
 
-  @reset: (model, key) ->
+  @unset: (model, key) ->
     model._orm or= {}
     delete model._orm[key]
 
@@ -263,6 +263,8 @@ module.exports = class Utils
           processed_count++
           break if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
         queue.await (err) ->
+          # model.release() for model in models # clean up memory
+
           return callback(err) if err
           return callback(null, processed_count) if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
           batch_cursor.$offset += batch_cursor.$limit
