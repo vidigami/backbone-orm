@@ -5,6 +5,7 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './utils'
+require './collection_extensions' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
 

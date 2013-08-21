@@ -165,8 +165,8 @@ module.exports = class Utils
     return model
 
   @updateOrNew: (data, model_type) ->
-    if cache = model_type.cache
-      Utils.updateModel(model, data) if model = cache.get(Utils.dataId(data))
+    if (cache = model_type.cache) and (id = Utils.dataId(data))
+      Utils.updateModel(model, data) if model = cache.get(id)
     unless model
       model = if data instanceof Backbone.Model then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache
