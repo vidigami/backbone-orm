@@ -348,6 +348,7 @@ module.exports = (model_type) ->
       cache[@id] = clone = new @constructor() unless clone = cache[@id]
     else
       clone = new @constructor()
+    clone.id = @attributes.id if @attributes.id
 
     for key, value of @attributes
       if value instanceof Backbone.Collection
