@@ -119,19 +119,19 @@ runTests = (options, cache, callback) ->
 
           Flat.exists {name: model.get('name')}, (err, exists) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(exists, 'the model exists by name')
+            assert.ok(exists, "the model exists by name. Expected: #{true}. Actual: #{exists}")
 
             Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!exists, 'the model does not exist by bad name')
+              assert.ok(!exists, "the model does not exist by bad name. Expected: #{false}. Actual: #{exists}")
 
               Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(exists, 'the model exists by created_at')
+                assert.ok(exists, "the model exists by created_at. Expected: #{true}. Actual: #{exists}")
 
                 Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!exists, 'the model does not exist by bad created_at')
+                  assert.ok(!exists, "the model does not exist by bad created_at. Expected: #{false}. Actual: #{exists}")
                   done()
 
 
