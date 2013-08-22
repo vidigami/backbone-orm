@@ -174,6 +174,12 @@ module.exports = (model_type) ->
     return delete needs_load[key] if is_loaded
     needs_load[key] = true
 
+  model_type::isPartial = ->
+    !!Utils.get(@, 'partial')
+
+  model_type::setPartial = (is_partial) ->
+    if is_partial then Utils.set(@, 'partial', true) else Utils.unset(@, 'partial')
+
   ###################################
   # Backbone ORM - Model Lifecyle - initialize and release
   ###################################

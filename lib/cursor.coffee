@@ -105,7 +105,7 @@ module.exports = class Cursor
         if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
           models = (Utils.updateOrNew(item, @model_type) for item in json)
         else
-          models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
+          models = (model = new @model_type(@model_type::parse(item)); model.setPartial(true); model for item in json)
         return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
@@ -136,10 +136,10 @@ module.exports = class Cursor
   selectFromModels: (models, callback) ->
     if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in models)
+      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setPartial(true); model for item in models)
 
     else if @_cursor.$white_list
-      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setLoaded(false); model for item in models)
+      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setPartial(true); model for item in models)
 
     return models
 
