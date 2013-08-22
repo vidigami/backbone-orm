@@ -10,10 +10,7 @@ resetFiles = (directory, options, callback) ->
     return callback(err) if err
     return callback() unless files
 
-    options.verbose = true
-
     queue = new Queue(1)
-
 
     for file in files
       do (file) -> queue.defer (callback) ->
