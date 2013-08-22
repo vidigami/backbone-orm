@@ -8,5 +8,6 @@ module.exports = (options, callback) ->
   queue.defer (callback) -> require('./all_collection')(options, callback)
   queue.defer (callback) -> require('./all_conventions')(options, callback)
   queue.defer (callback) -> require('./all_flat')(options, callback)
+  queue.defer (callback) -> require('./all_migrations')(options, callback)
   queue.defer (callback) -> require('./all_relational')(options, callback)
   queue.await callback
