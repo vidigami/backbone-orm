@@ -19,9 +19,9 @@ runTests = (options, cache, embed, callback) ->
   require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
 
   # manually clear the cache so the model can be rebootstrapped
-  delete require.cache[require.resolve('./directory/reverse')]
+  delete require.cache[require.resolve('./directory/nested/reverse')]
   delete require.cache[require.resolve('./directory/owner')]
-  Reverse = require './directory/reverse'
+  Reverse = require './directory/nested/reverse'
   Owner = require './directory/owner'
 
   # pre-configure
