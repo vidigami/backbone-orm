@@ -533,8 +533,8 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2, owners.length, "Found owners. Expected: 2. Actual: #{owners.length}")
 
-          owner0 = owners[0]; reverse0 = owner0.get('reverse')
-          owner1 = owners[1]; reverse1 = owner1.get('reverse')
+          owner0 = owners[0]; owner0_id = owner0.id; reverse0 = owner0.get('reverse')
+          owner1 = owners[1]; owner1_id = owner1.id; reverse1 = owner1.get('reverse')
 
           assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
           assert.ok(owner1.get('reverse'), "Owner1 has 1 reverse.")
@@ -561,8 +561,18 @@ runTests = (options, cache, embed, callback) ->
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
-              owner0 = owners[0]; reverse0b = owner0.get('reverse')
-              owner1 = owners[1]; reverse1b = owner1.get('reverse')
+
+              # lookup owners
+              owner0 = owner1 = null
+              for owner in owners
+                if owner.id is owner0_id
+                  owner0 = owner
+                else if owner.id is owner1_id
+                  owner1 = owner
+              assert(owner0, 'refound owner0')
+              assert(owner1, 'refound owner1')
+              reverse0b = owner0.get('reverse')
+              reverse1b = owner1.get('reverse')
 
               if virtual
                 assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
