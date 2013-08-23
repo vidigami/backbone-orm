@@ -191,9 +191,10 @@ module.exports = (model_type) ->
     return _original_initialize.apply(@, arguments)
 
   model_type::release = ->
-    if model_type.schema and (schema = model_type.schema())
-      relation.releaseModel(@) for key, relation of schema.relations
-    return
+    throw "release: experimental and incomplete"
+    # if model_type.schema and (schema = model_type.schema())
+    #   relation.releaseModel(@) for key, relation of schema.relations
+    # return
 
   ###################################
   # Backbone ORM - Model Overrides
