@@ -209,11 +209,11 @@ module.exports = (model_type) ->
       return callback(new Error("destroyRelation: relation '#{key}' unrecognized")) unless relation = @relation(key)
       if arguments.length is 2
         callback = related_model
-        relation.destroyAll(@, key, callback)
+        relation.destroyAll(@, callback)
 
       else
         return callback(new Error("destroyRelation: missing related_model for '#{key}'")) unless related_model
-        relation.destroyOne(@, key, related_model, callback)
+        relation.destroyOne(@, related_model, callback)
 
   ###################################
   # Backbone ORM - Model Overrides

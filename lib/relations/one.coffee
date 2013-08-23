@@ -5,7 +5,7 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
-bbCallback = Utils
+bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class One extends require('./relation')
@@ -81,13 +81,13 @@ module.exports = class One extends require('./relation')
     @_saveRelated(model, [related_model], callback)
 
   destroyOne: (model, related, callback) ->
-    related_id = Utils.dataId(related)
-    if current_related_model = model.get(@key)
-      model.set(@key, null) if current_related_model.id is related_id
+    return callback() unless related_id = Utils.dataId(related)
+
+    # destroy in memory
+    model.set(@key, null) if model.get(@key)?.id is related_id
 
     # clear in store on us
-    if @type is 'belongsTo'
-      model.save {}, bbCallback callback
+    return model.save({}, bbCallback(callback)) if @type is 'belongsTo'
 
     # clear in store on related
     @cursor(model, @key).toJSON (err, related_json) =>
@@ -120,14 +120,13 @@ module.exports = class One extends require('./relation')
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
-        if related_model = related_model = model.attributes[@key]
-          query.id = related_model.id
+        query.$zero = true unless query.id = model.attributes[@key]?.id
       else
         query[@foreign_key] = model.id
     else
       # json
       if @type is 'belongsTo'
-        query.id = model[@foreign_key]
+        query.$zero = true unless query.id = model[@foreign_key]
       else
         query[@foreign_key] = model.id
 

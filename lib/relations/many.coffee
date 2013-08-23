@@ -115,8 +115,8 @@ module.exports = class Many extends require('./relation')
     collection.remove(current_related_model)
 
   destroyOne: (model, related, callback) ->
+    return callback() unless related_id = Utils.dataId(related)
     collection = @_ensureCollection(model)
-    related_id = Utils.dataId(related)
     collection.remove(current_related_model) if current_related_model = collection.get(related_id)
 
     # clear in store through join table
@@ -128,6 +128,7 @@ module.exports = class Many extends require('./relation')
     query.id = related_id
     @reverse_model_type.cursor(query).toJSON (err, related_json) =>
       return callback(err) if err
+      return callback() unless related_json
       @_clearAndSaveRelatedBacklink(model, related_json, callback)
 
   destroyAll: (model, callback) ->
