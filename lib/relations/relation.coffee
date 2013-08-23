@@ -43,52 +43,58 @@ module.exports = class Relation
       json = (if json then [json] else []) unless _.isArray(json) # a One relation
       queue = new Queue(1)
 
-      use_join = @join_table # and not @reverse_model_type::sync('isRemote') # TODO: optimize relationship update
       related_ids = _.pluck(related_models, 'id')
       changes = _.groupBy(json, (test) => if _.contains(related_ids, test.id) then 'kept' else 'removed')
       added_ids = if changes.kept then _.difference(related_ids, (test.id for test in changes.kept)) else related_ids
 
-      # update store through join table
-      if use_join
-        # destroy removed
-        if changes.removed
+      # destroy removed
+      if changes.removed
+        if @join_table
           queue.defer (callback) =>
             destroy_query = {}
-            destroy_query[@reverse_relation.join_key] = {$in: (model_json.id for model_json in changes.removed)}
+            destroy_query[@reverse_relation.join_key] = {$in: (related_json.id for related_json in changes.removed)}
             @join_table.destroy destroy_query, callback
-
-        # create new - TODO: optimize through batch create
-        for related_id in added_ids
-          do (related_id) => queue.defer (callback) =>
-            attributes = {}
-            attributes[@foreign_key] = model.id
-            attributes[@reverse_relation.foreign_key] = related_id
-            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
-            join = new @join_table(attributes)
-            join.save {}, Utils.bbCallback callback
-
-      # clear back links on models and save
-      else
-        # clear removed - TODO: optimize using batch update
-        if changes.removed
+        else
+          # TODO: optimize using batch update
           for related_json in changes.removed
             do (related_json) => queue.defer (callback) =>
               @_clearAndSaveRelatedBacklink(model, related_json, callback)
 
-        # add new, if they have changed
-        for added_id in added_ids
-          related_model = _.find(related_models, (test) -> test.id is added_id)
-          continue if not @reverse_relation._hasChanged(related_model) # related has not changed
+      # create new
+      if added_ids.length
+        if @join_table
+          # TODO: optimize through batch create
+          for related_id in added_ids
+            do (related_id) => queue.defer (callback) =>
+              attributes = {}
+              attributes[@foreign_key] = model.id
+              attributes[@reverse_relation.foreign_key] = related_id
+              # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+              join = new @join_table(attributes)
+              join.save {}, Utils.bbCallback callback
 
-          do (related_model) => queue.defer (callback) =>
-            related_model.save {}, Utils.bbCallback (err, saved_model) =>
-              cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
-              callback(err)
+        else
+          # add new, if they have changed
+          for added_id in added_ids
+            related_model = _.find(related_models, (test) -> test.id is added_id)
+            continue if not @reverse_relation._hasChanged(related_model) # related has not changed
+
+            do (related_model) => queue.defer (callback) =>
+              related_model.save {}, Utils.bbCallback (err, saved_model) =>
+                cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
+                callback(err)
 
       queue.await callback
 
   # NOTE: this method takes raw data and instantiates a simple model for a non-relational data write
   _clearAndSaveRelatedBacklink: (model, related_json, callback) ->
+    if @join_table
+      destroy_query = {}
+      destroy_query[@join_key] = model.id
+      destroy_query[@reverse_relation.join_key] = related_json.id
+      @join_table.destroy destroy_query, callback
+      return
+
     return callback() unless (@reverse_relation and @reverse_relation.type is 'belongsTo')
 
     # no longer a match

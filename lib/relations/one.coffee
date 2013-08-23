@@ -5,6 +5,7 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
+bbCallback = Utils
 
 # @private
 module.exports = class One extends require('./relation')
@@ -79,14 +80,29 @@ module.exports = class One extends require('./relation')
     return callback() unless related_model = model.attributes[@key]
     @_saveRelated(model, [related_model], callback)
 
-  destroy: (model, callback) ->
+  destroyOne: (model, related, callback) ->
+    related_id = Utils.dataId(related)
+    if current_related_model = model.get(@key)
+      model.set(@key, null) if current_related_model.id is related_id
+
+    # clear in store on us
+    if @type is 'belongsTo'
+      model.save {}, bbCallback callback
+
+    # clear in store on related
+    @cursor(model, @key).toJSON (err, related_json) =>
+      return callback(err) if err
+      return callback() unless related_json
+      @_clearAndSaveRelatedBacklink(model, related_json, callback)
+
+  destroyAll: (model, callback) ->
     return callback() if not @reverse_relation
     delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
 
     @cursor(model, @key).toJSON (err, related_json) =>
       return callback(err) if err
       return callback() unless related_json
-      @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+      @_clearAndSaveRelatedBacklink(model, related_json, callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships

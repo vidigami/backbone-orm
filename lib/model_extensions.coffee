@@ -196,6 +196,14 @@ module.exports = (model_type) ->
     #   relation.releaseModel(@) for key, relation of schema.relations
     # return
 
+  model_type::destroyRelation = (key, related_model, callback) ->
+    return callback(new Error("destroyRelation: relation '#{key}' unrecognized")) unless relation = @relation(key)
+    if arguments.length is 2
+      relation.destroyAll(@, key, callback)
+    else
+      return callback(new Error("destroyRelation: missing related_model for '#{key}'")) unless related_model
+      relation.destroyOne(@, key, related_model, callback)
+
   ###################################
   # Backbone ORM - Model Overrides
   ###################################
@@ -324,7 +332,7 @@ module.exports = (model_type) ->
 
       # now remove relations
       for key, relation of schema.relations
-        do (relation) => queue.defer (callback) => relation.destroy(@, callback)
+        do (relation) => queue.defer (callback) => relation.destroyAll(@, callback)
 
       queue.await (err) =>
         return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err

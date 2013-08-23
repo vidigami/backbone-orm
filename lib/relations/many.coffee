@@ -114,7 +114,23 @@ module.exports = class Many extends require('./relation')
     return unless current_related_model = collection.get(related_model.id)
     collection.remove(current_related_model)
 
-  destroy: (model, callback) ->
+  destroyOne: (model, related, callback) ->
+    collection = @_ensureCollection(model)
+    related_id = Utils.dataId(related)
+    collection.remove(current_related_model) if current_related_model = collection.get(related_id)
+
+    # clear in store through join table
+    return @_clearAndSaveRelatedBacklink(model, {id: related_id}, callback) if @join_table # can directly destroy the join table entry
+
+    # clear back links on models and save
+    query = {$one: true}
+    query[@foreign_key] = model.id
+    query.id = related_id
+    @reverse_model_type.cursor(query).toJSON (err, related_json) =>
+      return callback(err) if err
+      @_clearAndSaveRelatedBacklink(model, related_json, callback)
+
+  destroyAll: (model, callback) ->
     return callback() if not @reverse_relation
     if model instanceof Backbone.Model
       delete Utils.orSet(model, 'rel_dirty', {})[@key]
@@ -133,7 +149,6 @@ module.exports = class Many extends require('./relation')
     return @join_table.destroy(query, callback) if @join_table
 
     # clear back links on models and save
-    (query = {})[@foreign_key] = model.id
     @reverse_model_type.cursor(query).toJSON (err, json) =>
       return callback(err) if err
 
