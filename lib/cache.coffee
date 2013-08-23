@@ -55,6 +55,11 @@ class Cache
     model_cache.del(id) for id in ids
     return @
 
+  hardReset: ->
+    @configure()
+    delete @caches[key] for key, value of @caches
+    return @
+
   getOrCreateModelCache: (model_name) ->
     throw new Error "Missing model name for cache" unless model_name
     return model_cache if model_cache = @caches[model_name]

@@ -14,7 +14,7 @@ runTests = (options, cache, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
