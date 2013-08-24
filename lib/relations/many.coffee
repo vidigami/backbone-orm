@@ -114,22 +114,40 @@ module.exports = class Many extends require('./relation')
     return unless current_related_model = collection.get(related_model.id)
     collection.remove(current_related_model)
 
-  destroyOne: (model, related, callback) ->
-    return callback() unless related_id = Utils.dataId(related)
+  destroySome: (model, relateds, callback) ->
+    return callback(new Error('One.destroySome: embedded relationships are not supported')) if @isEmbedded()
+
     collection = @_ensureCollection(model)
-    collection.remove(current_related_model) if current_related_model = collection.get(related_id)
+
+    # destroy in memory
+    for related in relateds
+      for current_related_model in collection.models
+        (collection.remove(current_related_model); break) if Utils.dataIsSameModel(current_related_model, related) # a match
+
+    related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store through join table
-    return @_clearAndSaveRelatedBacklink(model, {id: related_id}, callback) if @join_table # can directly destroy the join table entry
+    if @join_table # can directly destroy the join table entry
+      query = {}
+      query[@join_key] = model.id
+      query[@reverse_relation.join_key] = {$in: related_ids}
+      @join_table.destroy query, callback
 
     # clear back links on models and save
-    query = {$one: true}
-    query[@foreign_key] = model.id
-    query.id = related_id
-    @reverse_model_type.cursor(query).toJSON (err, related_json) =>
-      return callback(err) if err
-      return callback() unless related_json
-      @_clearAndSaveRelatedBacklink(model, related_json, callback)
+    else
+      query = {$one: true}
+      query[@foreign_key] = model.id
+      query.id = {$in: related_ids}
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+
+        # clear reverses
+        queue = new Queue(1)
+        for related_json in json
+          do (related_json) => queue.defer (callback) =>
+            related_json[@reverse_relation.foreign_key] = null
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        queue.await callback
 
   destroyAll: (model, callback) ->
     return callback() if not @reverse_relation
@@ -147,17 +165,21 @@ module.exports = class Many extends require('./relation')
 
     # clear in store through join table
     (query = {})[@foreign_key] = model.id
-    return @join_table.destroy(query, callback) if @join_table
+    if @join_table
+      return @join_table.destroy(query, callback)
 
     # clear back links on models and save
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
-      return callback(err) if err
+    else
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
 
-      # clear reverses
-      queue = new Queue(1)
-      for related_json in json
-        do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, related_json, callback)
-      queue.await callback
+        # clear reverses
+        queue = new Queue(1)
+        for related_json in json
+          do (related_json) => queue.defer (callback) =>
+            related_json[@reverse_relation.foreign_key] = null
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        queue.await callback
 
   cursor: (model, key, query) ->
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable

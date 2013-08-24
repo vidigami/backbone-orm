@@ -80,20 +80,39 @@ module.exports = class One extends require('./relation')
     return callback() unless related_model = model.attributes[@key]
     @_saveRelated(model, [related_model], callback)
 
-  destroyOne: (model, related, callback) ->
-    return callback() unless related_id = Utils.dataId(related)
+  # TODO: review for embedded
+  destroySome: (model, relateds, callback) ->
+    return callback(new Error('One.destroySome: embedded relationships are not supported')) if @isEmbedded()
 
     # destroy in memory
-    model.set(@key, null) if model.get(@key)?.id is related_id
+    if current_related_model = model.get(@key)
+      for related in relateds
+        (model.set(@key, null); break) if Utils.dataIsSameModel(current_related_model, related) # match
+
+    # no id yet
+    return callback() if model.isNew()
+
+    related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store on us
-    return model.save({}, bbCallback(callback)) if @type is 'belongsTo'
+    if @type is 'belongsTo'
+      @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+        return callback(err) if err
+        return callback() unless model_json
+        return callback() unless _.contains(related_ids, model_json[@foreign_key])
+
+        model_json[@foreign_key] = null
+        Utils.modelJSONSave(model_json, @model_type, callback)
 
     # clear in store on related
-    @cursor(model, @key).toJSON (err, related_json) =>
-      return callback(err) if err
-      return callback() unless related_json
-      @_clearAndSaveRelatedBacklink(model, related_json, callback)
+    else
+      @cursor(model, @key).toJSON (err, related_json) =>
+        return callback(err) if err
+        return callback() unless related_json
+        return callback() unless _.contains(related_ids, related_json.id)
+
+        related_json[@reverse_relation.foreign_key] = null
+        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
   destroyAll: (model, callback) ->
     return callback() if not @reverse_relation
@@ -102,7 +121,9 @@ module.exports = class One extends require('./relation')
     @cursor(model, @key).toJSON (err, related_json) =>
       return callback(err) if err
       return callback() unless related_json
-      @_clearAndSaveRelatedBacklink(model, related_json, callback)
+
+      related_json[@reverse_relation.foreign_key] = null
+      Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
   appendJSON: (json, model, key) ->
     return if key is @ids_accessor # only write the relationships

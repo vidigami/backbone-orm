@@ -10,6 +10,7 @@ bbCallback = Utils.bbCallback
 module.exports = class Relation
   # hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
   # isManyToMany: -> return @type is 'hasMany' and @reverse_relation and @reverse_relation.type is 'hasMany'
+  isEmbedded: -> return !!@embed or (@reverse_relation and @reverse_relation.embed)
   isVirtual: -> return !!@virtual or (@reverse_relation and @reverse_relation.virtual)
 
   findOrGenerateJoinTable: ->
@@ -51,14 +52,15 @@ module.exports = class Relation
       if changes.removed
         if @join_table
           queue.defer (callback) =>
-            destroy_query = {}
-            destroy_query[@reverse_relation.join_key] = {$in: (related_json.id for related_json in changes.removed)}
-            @join_table.destroy destroy_query, callback
+            query = {}
+            query[@reverse_relation.join_key] = {$in: (related_json.id for related_json in changes.removed)}
+            @join_table.destroy query, callback
         else
           # TODO: optimize using batch update
           for related_json in changes.removed
             do (related_json) => queue.defer (callback) =>
-              @_clearAndSaveRelatedBacklink(model, related_json, callback)
+              related_json[@reverse_relation.foreign_key] = null
+              Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
       # create new
       if added_ids.length
@@ -85,25 +87,3 @@ module.exports = class Relation
                 callback(err)
 
       queue.await callback
-
-  # NOTE: this method takes raw data and instantiates a simple model for a non-relational data write
-  _clearAndSaveRelatedBacklink: (model, related_json, callback) ->
-    if @join_table
-      destroy_query = {}
-      destroy_query[@join_key] = model.id
-      destroy_query[@reverse_relation.join_key] = related_json.id
-      @join_table.destroy destroy_query, callback
-      return
-
-    return callback() unless (@reverse_relation and @reverse_relation.type is 'belongsTo')
-
-    # no longer a match
-    return callback() unless related_json[@reverse_relation.foreign_key] is model.id
-
-    # update the foreign key and save raw data
-    related_json[@reverse_relation.foreign_key] = null
-    related_model = new Backbone.Model(related_json)
-    related_model.urlRoot = =>
-      try url = _.result(@reverse_model_type.prototype, 'url') catch e
-      return url
-    @reverse_model_type::sync 'update', related_model, bbCallback callback

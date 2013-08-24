@@ -134,6 +134,12 @@ module.exports = class Utils
   # @private
   @dataId: (data) -> return data?.id or data
 
+  @dataIsSameModel: (data1, data2) ->
+    return _.isEqual(data1, data2) if not data1 or not data2
+    return true if Utils.dataId(data1) is Utils.dataId(data1)
+    return _.isEqual(data1, data2) if _.isObject(data1) and _.isObject(data2)
+    return false
+
   # @private
   @dataToModel: (data, model_type) ->
     return null unless data
@@ -171,6 +177,13 @@ module.exports = class Utils
       model = if data instanceof Backbone.Model then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache
     return model
+
+  @modelJSONSave: (model_json, model_type, callback) ->
+    model = new Backbone.Model(model_json)
+    model.urlRoot = =>
+      try url = _.result(model_type.prototype, 'url') catch e
+      return url
+    model_type::sync 'update', model, Utils.bbCallback callback
 
   ##############################
   # Sorting
