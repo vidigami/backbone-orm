@@ -126,6 +126,8 @@ module.exports = class Many extends require('./relation')
 
     related_ids = (Utils.dataId(related) for related in relateds)
 
+    console.log "DESTROYING: #{util.inspect(related_ids)}"
+
     # clear in store through join table
     if @join_table # can directly destroy the join table entry
       query = {}
@@ -135,7 +137,7 @@ module.exports = class Many extends require('./relation')
 
     # clear back links on models and save
     else
-      query = {$one: true}
+      query = {}
       query[@foreign_key] = model.id
       query.id = {$in: related_ids}
       @reverse_model_type.cursor(query).toJSON (err, json) =>
