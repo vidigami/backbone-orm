@@ -126,8 +126,6 @@ module.exports = class Many extends require('./relation')
 
     related_ids = (Utils.dataId(related) for related in relateds)
 
-    console.log "DESTROYING: #{util.inspect(related_ids)}"
-
     # clear in store through join table
     if @join_table # can directly destroy the join table entry
       query = {}

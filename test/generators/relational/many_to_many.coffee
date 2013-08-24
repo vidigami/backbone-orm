@@ -238,16 +238,14 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', [destroyed_model], (err) ->
+          owner.destroyRelations 'reverses', [destroyed_model, other_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
 
-            assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
-            assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+            assert.equal(0, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{0}. Actual: #{owner.get('reverses').models.length}")
 
             owner.get 'reverses', (err, reverses) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.equal(1, reverses.length, "loaded correct models. Expected: #{1}. Actual: #{reverses.length}")
-              assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
+              assert.equal(0, reverses.length, "loaded correct models. Expected: #{0}. Actual: #{reverses.length}")
 
               Owner.findOne owner.id, (err, owner) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -255,8 +253,7 @@ runTests = (options, cache, embed, callback) ->
 
                 owner.get 'reverses', (err, reverses) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.equal(1, reverses.length, "loaded correct models. Expected: #{1}. Actual: #{reverses.length}")
-                  assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
+                  assert.equal(0, reverses.length, "loaded correct models. Expected: #{0}. Actual: #{reverses.length}")
                   done()
 
     it 'Can manually delete a relationship by related_id (hasMany)', (done) ->
