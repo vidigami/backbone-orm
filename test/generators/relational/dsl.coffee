@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 runTests = (options, cache, callback) ->
@@ -84,7 +85,7 @@ runTests = (options, cache, callback) ->
               flat: MODELS.flat.pop()
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
-            owner.save {}, Utils.bbCallback callback
+            owner.save {}, bbCallback callback
 
         save_queue.await callback
 

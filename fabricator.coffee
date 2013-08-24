@@ -4,6 +4,7 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './lib/utils'
+bbCallback = Utils.bbCallback
 
 # Fabricator to generate test data.
 #
@@ -28,7 +29,7 @@ module.exports = class Fabricator
     models = Fabricator.new(model_type, count, attributes_info)
     queue = new Queue()
     for model in models
-      do (model) -> queue.defer (callback) -> model.save {}, Utils.bbCallback(callback)
+      do (model) -> queue.defer (callback) -> model.save {}, bbCallback(callback)
     queue.await (err) -> callback(err, models)
 
   # Return the same fixed value for each fabricated model

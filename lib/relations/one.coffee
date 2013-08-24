@@ -5,7 +5,6 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
-bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class One extends require('./relation')

@@ -81,7 +81,7 @@ runTests = (options, cache, embed, callback) ->
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
             owner.set({flat: MODELS.flat.pop(), reverse: MODELS.reverse.pop(), reverse_as: reversed_reverse.pop()})
-            owner.save {}, Utils.bbCallback callback
+            owner.save {}, bbCallback callback
 
         save_queue.await callback
 
@@ -599,7 +599,7 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(test_model, 'found model')
 
         fetched_owner = new Owner({id: test_model.id})
-        fetched_owner.fetch Utils.bbCallback (err) ->
+        fetched_owner.fetch bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 

@@ -65,7 +65,7 @@ runTests = (options, cache, embed, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, Utils.bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, bbCallback callback
 
         save_queue.await callback
 
@@ -495,7 +495,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found model')
 
-          owner.destroy Utils.bbCallback (err, owner) ->
+          owner.destroy bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
 
             Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
@@ -511,7 +511,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found model')
 
-          owner.destroy Utils.bbCallback (err, owner) ->
+          owner.destroy bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
 
             Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->

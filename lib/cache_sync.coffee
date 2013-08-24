@@ -4,6 +4,7 @@ _ = require 'underscore'
 CacheCursor = require './cache_cursor'
 Schema = require './schema'
 Utils = require './utils'
+bbCallback = Utils.bbCallback
 
 DEFAULT_LIMIT = 1000
 DEFAULT_PARALLELISM = 100
@@ -22,7 +23,7 @@ class CacheSync
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
-    @wrapped_sync_fn 'create', model, Utils.bbCallback (err, json) =>
+    @wrapped_sync_fn 'create', model, bbCallback (err, json) =>
       return options.error(err) if err
       model.set({id: json.id})
       if cache_model = @model_type.cache.get(model.id)
@@ -32,7 +33,7 @@ class CacheSync
       options.success(json)
 
   update: (model, options) ->
-    @wrapped_sync_fn 'update', model, Utils.bbCallback (err, json) =>
+    @wrapped_sync_fn 'update', model, bbCallback (err, json) =>
       return options.error(err) if err
       if cache_model = @model_type.cache.get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
@@ -42,7 +43,7 @@ class CacheSync
 
   delete: (model, options) ->
     @model_type.cache.del(model.id) # remove from the cache
-    @wrapped_sync_fn 'delete', model, Utils.bbCallback (err, json) =>
+    @wrapped_sync_fn 'delete', model, bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)
 
@@ -58,7 +59,7 @@ class CacheSync
   destroy: (query, callback) ->
     # TODO: review for optimization
     @model_type.batch query, {$limit: DEFAULT_LIMIT, parallelism: DEFAULT_PARALLELISM}, callback, (model, callback) ->
-      model.destroy Utils.bbCallback callback
+      model.destroy bbCallback callback
 
   ###################################
   # Backbone Cache Sync - Custom Extensions

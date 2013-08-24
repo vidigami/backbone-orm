@@ -87,7 +87,7 @@ runTests = (options, cache, embed, callback) ->
               reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]
               more_reverses: [MODELS.more_reverse.pop(), MODELS.more_reverse.pop()]
             })
-            owner.save {}, Utils.bbCallback callback
+            owner.save {}, bbCallback callback
 
         save_queue.await callback
 
@@ -657,7 +657,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(owner.get('reverses').length, 1, "It has the correct number of relations after set\nExpected: #{1}\nActual: #{owner.get('reverses').length}")
           assert.equal(removed_reverse.get('owner_id'), null, 'Reverse relation has its foreign key set to null')
 
-          owner.save {}, Utils.bbCallback (err, owner) ->
+          owner.save {}, bbCallback (err, owner) ->
             Reverse.find {owner_id: owner.id}, (err, new_reverses) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(1, new_reverses.length, "Relations loaded from store have the correct length\nExpected: #{1}\nActual: #{new_reverses.length}")
@@ -671,7 +671,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found model')
 
-          owner.destroy Utils.bbCallback (err, owner) ->
+          owner.destroy bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
             Reverse.find {owner_id: owner.id}, (err, null_reverses) ->
               assert.ok(!err, "No errors: #{err}")
@@ -686,7 +686,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverses, 'found model')
 
-          owner.destroy Utils.bbCallback (err, owner) ->
+          owner.destroy bbCallback (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
 
             Reverse.find {owner_id: owner.id}, (err, null_reverses) ->

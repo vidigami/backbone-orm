@@ -6,7 +6,6 @@ Queue = require 'queue-async'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
-bbCallback = Utils.bbCallback
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}

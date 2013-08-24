@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 runTests = (options, cache, embed, callback) ->
@@ -73,7 +74,7 @@ runTests = (options, cache, embed, callback) ->
         reverses = MODELS.reverse.slice()
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, Utils.bbCallback callback
+            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, bbCallback callback
 
         save_queue.await callback
 
@@ -86,7 +87,7 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(test_model, 'found model')
 
         fetched_owner = new Owner({id: test_model.id})
-        fetched_owner.fetch Utils.bbCallback (err) ->
+        fetched_owner.fetch bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 
