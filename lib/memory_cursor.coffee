@@ -150,7 +150,7 @@ module.exports = class MemoryCursor extends Cursor
           if reverse_relation.embed
 
             # TODO: should a cursor be returned instead of a find_query?
-            throw Error "Embedded find is not yet supported"
+            throw Error "Embedded find is not yet supported. @_find: #{util.inspect(@_find)}"
 
             (related_query = {}).id = value
             reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
