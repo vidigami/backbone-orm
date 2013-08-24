@@ -22,7 +22,7 @@ module.exports = class Schema
 
   relation: (key) -> return @relations[key] or @ids_accessor[key]
   reverseRelation: (reverse_key) ->
-    return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.foreign_key is reverse_key)
+    return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
     return null
 
   generateBelongsTo: (reverse_model_type) ->
