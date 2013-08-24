@@ -228,7 +228,39 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', destroyed_model.toJSON(), (err) ->
+          owner.destroyRelations 'reverses', destroyed_model, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
+            assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+
+            owner.get 'reverses', (err, reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(1, reverses.length, "loaded correct models. Expected: #{1}. Actual: #{reverses.length}")
+              assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
+
+              Owner.findOne owner.id, (err, owner) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(owner, 'found owners')
+
+                owner.get 'reverses', (err, reverses) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.equal(1, reverses.length, "loaded correct models. Expected: #{1}. Actual: #{reverses.length}")
+                  assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
+                  done()
+
+    it 'Can manually delete a relationship by array of related_model (hasMany)', (done) ->
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+
+        owner.get 'reverses', (err, reverses) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(2, reverses.length, "loaded correct models. Expected: #{2}. Actual: #{reverses.length}")
+
+          destroyed_model = reverses[0]
+          other_model = reverses[1]
+          owner.destroyRelations 'reverses', [destroyed_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
@@ -316,6 +348,34 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = owner
           reverse.destroyRelations 'owner', destroyed_model, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+
+            reverse.get 'owner', (err, owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!owner, 'destroyed correct model')
+
+              Reverse.findOne reverse.id, (err, reverse) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(reverse, 'found reverse')
+                assert.ok(!reverse.get('owner'), 'destroyed correct model')
+
+                reverse.get 'owner', (err, owner) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(!owner, 'destroyed correct model')
+                  done()
+
+    it 'Can manually delete a relationship by array of related_model (belongsTo)', (done) ->
+      Reverse.findOne (err, reverse) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(reverse, 'found reverse')
+
+        reverse.get 'owner', (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, "loaded correct model")
+
+          destroyed_model = owner
+          reverse.destroyRelations 'owner', [destroyed_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
 
