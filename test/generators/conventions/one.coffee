@@ -191,7 +191,6 @@ runTests = (options, cache, embed, callback) ->
             done()
 
 
-
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
 module.exports = (options, callback) ->
