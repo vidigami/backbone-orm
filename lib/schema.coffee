@@ -68,8 +68,7 @@ module.exports = class Schema
 
   allColumns: ->
     columns = _.keys(@fields)
-    for name, relation of @relations
-      columns.push(relation.foreign_key) if relation.type is 'belongsTo'
+    columns.push(relation.foreign_key) for key, relation of @relations when relation.type is 'belongsTo'
     return columns
 
   #################################
