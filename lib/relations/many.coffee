@@ -136,7 +136,7 @@ module.exports = class Many extends require('./relation')
     # clear back links on models and save
     else
       query = {}
-      query[@foreign_key] = model.id
+      query[@reverse_relation.foreign_key] = model.id
       query.id = {$in: related_ids}
       @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
@@ -164,12 +164,13 @@ module.exports = class Many extends require('./relation')
       cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
     # clear in store through join table
-    (query = {})[@foreign_key] = model.id
     if @join_table
+      (query = {})[@join_key] = model.id
       return @join_table.destroy(query, callback)
 
     # clear back links on models and save
     else
+      (query = {})[@reverse_relation.foreign_key] = model.id
       @reverse_model_type.cursor(query).toJSON (err, json) =>
         return callback(err) if err
 
