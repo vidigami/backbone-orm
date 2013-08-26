@@ -34,7 +34,7 @@ runTests = (options, cache, embed, callback) ->
     @schema: _.defaults({
       flats: -> ['hasMany', Flat]
       reverses: -> ['hasMany', Reverse]
-      more_reverses: -> ['hasMany', Reverse, as: 'another_owner', ids_accessor: 'more_reverses_ids']
+      more_reverses: -> ['hasMany', Reverse, as: 'another_owner', virtual_id_accessor: 'more_reverses_ids']
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 

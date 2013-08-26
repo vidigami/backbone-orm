@@ -10,7 +10,7 @@ Utils = require '../utils'
 module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor or= "#{@key}_id"
+    @virtual_id_accessor or= "#{@key}_id"
     @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
@@ -27,7 +27,7 @@ module.exports = class One extends require('./relation')
     delete model._orm
 
   set: (model, key, value, options) ->
-    throw new Error "One.set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "One.set: Unexpected key #{key}. Expecting: #{@key} or #{@virtual_id_accessor} or #{@foreign_key}" unless ((key is @key) or (key is @virtual_id_accessor) or (key is @foreign_key))
     throw new Error "One.set: cannot set an array for attribute #{@key} on #{@model_type.model_name}" if _.isArray(value)
     value = null if _.isUndefined(value) # Backbone clear or reset
 
@@ -53,18 +53,17 @@ module.exports = class One extends require('./relation')
     return @
 
   get: (model, key, callback) ->
-    throw new Error "One::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "One.get: Unexpected key #{key}. Expecting: #{@key} or #{@virtual_id_accessor} or #{@foreign_key}" unless ((key is @key) or (key is @virtual_id_accessor) or (key is @foreign_key))
 
     returnValue = =>
       return null unless related_model = model.attributes[@key]
-      return if key is @ids_accessor then related_model.id else related_model
+      return if key is @virtual_id_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
     if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)
-
         model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
         callback(null, returnValue())
 
@@ -125,10 +124,10 @@ module.exports = class One extends require('./relation')
       Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
   appendJSON: (json, model, key) ->
-    return if key is @ids_accessor # only write the relationships
+    return if key is @virtual_id_accessor # only write the relationships
     return if @isVirtual() # skip virtual attributes
 
-    json_key = if @embed then key else @ids_accessor
+    json_key = if @embed then key else @foreign_key
     unless related_model = model.attributes[key]
       json[json_key] = null if @embed or @type is 'belongsTo'
       return
@@ -142,15 +141,15 @@ module.exports = class One extends require('./relation')
       if @type is 'belongsTo'
         query.$zero = true unless query.id = model.attributes[@key]?.id
       else
-        query[@foreign_key] = model.id
+        query[@reverse_relation.foreign_key] = model.id
     else
       # json
       if @type is 'belongsTo'
         query.$zero = true unless query.id = model[@foreign_key]
       else
-        query[@foreign_key] = model.id
+        query[@reverse_relation.foreign_key] = model.id
 
-    query.$values = ['id'] if key is @ids_accessor
+    query.$values = ['id'] if key is @virtual_id_accessor
     return @reverse_model_type.cursor(query)
 
   ####################################

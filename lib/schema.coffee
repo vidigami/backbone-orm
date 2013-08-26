@@ -10,7 +10,7 @@ Utils = require './utils'
 module.exports = class Schema
   constructor: (@model_type) ->
     @raw = _.clone(_.result(@model_type, 'schema') or {})
-    @fields ={}; @relations ={}; @ids_accessor = {}
+    @fields ={}; @relations ={}; @virtual_accessors = {}
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
@@ -20,7 +20,7 @@ module.exports = class Schema
     relation.initialize() for key, relation of @relations
     return
 
-  relation: (key) -> return @relations[key] or @ids_accessor[key]
+  relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
     return null
@@ -84,7 +84,8 @@ module.exports = class Schema
       when 'hasOne', 'belongsTo', 'hasMany'
         options.type = type
         relation = @relations[key] = if type is 'hasMany' then new Many(@model_type, key, options) else new One(@model_type, key, options)
-        @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+        @virtual_accessors[relation.virtual_id_accessor] = relation if relation.virtual_id_accessor
+        @virtual_accessors[relation.foreign_key] = relation if type is 'belongsTo'
         return relation
       else
         throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
