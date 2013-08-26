@@ -29,18 +29,26 @@ runTests = (options, cache, embed, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
+  class ForeignReverse extends Backbone.Model
+    urlRoot: "#{DATABASE_URL}/foreign_reverses"
+    @schema: _.defaults({
+      owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
+    }, BASE_SCHEMA)
+    sync: SYNC(ForeignReverse)
+
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       flats: -> ['hasMany', Flat]
       reverses: -> ['hasMany', Reverse]
-      more_reverses: -> ['hasMany', Reverse, as: 'another_owner', virtual_id_accessor: 'more_reverses_ids']
+      more_reverses: -> ['hasMany', Reverse, as: 'another_owner']
+      foreign_reverses: -> ['hasMany', ForeignReverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
   describe "hasMany (cache: #{cache} embed: #{embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
+    before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
       require('../../../lib/cache').reset() # reset cache
@@ -51,7 +59,7 @@ runTests = (options, cache, embed, callback) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
@@ -69,6 +77,10 @@ runTests = (options, cache, embed, callback) ->
           name: Fabricator.uniqueId('reverse_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.more_reverse = models; callback(err))
+        create_queue.defer (callback) -> Fabricator.create(ForeignReverse, BASE_COUNT, {
+          name: Fabricator.uniqueId('foreign_reverse_')
+          created_at: Fabricator.date
+        }, (err, models) -> MODELS.foreign_reverse = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
           name: Fabricator.uniqueId('owner_')
           created_at: Fabricator.date
@@ -84,14 +96,29 @@ runTests = (options, cache, embed, callback) ->
           do (owner) -> save_queue.defer (callback) ->
             owner.set({
               flats: [MODELS.flat.pop(), MODELS.flat.pop()]
-              reverses: [reverse1 = MODELS.reverse.pop(), reverse2 = MODELS.reverse.pop()]
+              reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
               more_reverses: [MODELS.more_reverse.pop(), MODELS.more_reverse.pop()]
+              foreign_reverses: [MODELS.foreign_reverse.pop()]
             })
             owner.save {}, bbCallback callback
 
         save_queue.await callback
 
       queue.await done
+
+    it 'Can fetch and serialize a custom foreign key', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        test_model.get 'foreign_reverses', (err, related_models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(1, related_models.length, "found related models. Expected: #{1}. Actual: #{related_models.length}")
+
+          for related_model in related_models
+            related_json = related_model.toJSON()
+            assert.equal(test_model.id, related_json.ownerish_id, "Serialized the foreign id. Expected: #{test_model.id}. Actual: #{related_json.ownerish_id}")
+          done()
 
     it 'Can create a model and load a related model by id (hasMany)', (done) ->
       Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
@@ -538,11 +565,10 @@ runTests = (options, cache, embed, callback) ->
 
           if test_model.relationIsEmbedded('more_reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), 'Serialized embedded')
-          assert.deepEqual(test_model.get('more_reverses_ids')[0], reverses[0].id, 'serialized id only')
-
+          assert.deepEqual(test_model.get('more_reverse_ids')[0], reverses[0].id, 'serialized id only')
 
           test_model.get 'reverses', (err, test_reverses) ->
-
+            assert.ok(!err, "No errors: #{err}")
             for reverse in reverses
               assert.notEqual(test_reverse.id, reverse.id, "Expected: #{test_reverse.id} to not be: #{reverse.id}") for test_reverse in test_reverses
 

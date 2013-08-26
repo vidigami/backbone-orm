@@ -185,7 +185,7 @@ module.exports = class Many extends require('./relation')
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
 
     json = if model instanceof Backbone.Model then model.attributes else model
-    (query = _.clone(query or {}))[@foreign_key] = json.id
+    (query = _.clone(query or {}))[@reverse_relation.foreign_key] = json.id
     (query.$values or= []).push('id') if key is @virtual_id_accessor
     return @reverse_model_type.cursor(query)
 
