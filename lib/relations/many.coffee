@@ -204,7 +204,7 @@ module.exports = class Many extends require('./relation')
         @reverse_relation.add(related_model, model)
       else
         current_model = related_model.get(@reverse_relation.key)
-        is_current = Utils.dataId(current_model) is model.id
+        is_current = model.id and (Utils.dataId(current_model) is model.id)
         related_model.set(@reverse_relation.key, model) if not is_current or (is_current and not current_model.isLoaded())
 
     events.remove = (related_model) =>
