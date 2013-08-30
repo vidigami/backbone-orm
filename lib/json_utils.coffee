@@ -150,29 +150,34 @@ module.exports = class JSONUtils
           else
             relation.cursor(model, field, query).toJSON (err, json) -> result[key] = json; callback(err)
 
-        else if key is '$select'
-          if _.isString(args)
-            JSONUtils.renderKey model, args, options, (err, json) -> result[args] = json; callback(err)
-          else
-            JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
-
-        # full_name:      'name'
-        else if _.isString(args)
-          JSONUtils.renderKey model, args, options, (err, json) -> result[key] = json; callback(err)
-
-        # can_delete: (photo, options, callback) ->
-        else if _.isFunction(args)
-          args model, options, (err, json) -> result[key] = json; callback(err)
-
-        # is_great: {method: 'isGreatFor', args: [options.user]}
-        else if _.isString(args.method)
-          fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
-          fn_args.push((err, json) -> result[key] = json; callback())
-          model[args.method].apply(model, fn_args)
-
         else
-          console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
-          return callback(new Error "Unknown DSL action: #{key}: #{util.inspect(args)}")
+
+          if key.length > 1 and key[key.length-1] is '_'
+            key = key[0..key.length-2]
+
+          if key is '$select'
+            if _.isString(args)
+              JSONUtils.renderKey model, args, options, (err, json) -> result[args] = json; callback(err)
+            else
+              JSONUtils.renderKeys model, args, options, (err, json) -> _.extend(result, json); callback(err)
+
+            # full_name:      'name'
+          else if _.isString(args)
+            JSONUtils.renderKey model, args, options, (err, json) -> result[key] = json; callback(err)
+
+            # can_delete: (photo, options, callback) ->
+          else if _.isFunction(args)
+            args model, options, (err, json) -> result[key] = json; callback(err)
+
+            # is_great: {method: 'isGreatFor', args: [options.user]}
+          else if _.isString(args.method)
+            fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
+            fn_args.push((err, json) -> result[key] = json; callback())
+            model[args.method].apply(model, fn_args)
+
+          else
+            console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
+            return callback(new Error "Unknown DSL action: #{key}: #{util.inspect(args)}")
 
     queue.await (err) -> callback(err, if err then undefined else result)
 
