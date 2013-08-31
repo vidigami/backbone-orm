@@ -142,7 +142,7 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', destroyed_model.id, (err) ->
+          owner.patchRemove 'reverses', destroyed_model.id, (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
@@ -174,7 +174,7 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', destroyed_model.toJSON(), (err) ->
+          owner.patchRemove 'reverses', destroyed_model.toJSON(), (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
@@ -206,7 +206,7 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', destroyed_model, (err) ->
+          owner.patchRemove 'reverses', destroyed_model, (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
@@ -238,7 +238,7 @@ runTests = (options, cache, embed, callback) ->
 
           destroyed_model = reverses[0]
           other_model = reverses[1]
-          owner.destroyRelations 'reverses', [destroyed_model, other_model], (err) ->
+          owner.patchRemove 'reverses', [destroyed_model, other_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.equal(0, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{0}. Actual: #{owner.get('reverses').models.length}")
@@ -266,7 +266,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, owners.length, "loaded correct models. Expected: #{1}. Actual: #{owners.length}")
 
           destroyed_model = owners[0]
-          reverse.destroyRelations 'owners', destroyed_model.id, (err) ->
+          reverse.patchRemove 'owners', destroyed_model.id, (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, reverse.get('owners').models.length, "destroyed in memory relationship.")
 
@@ -294,7 +294,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, owners.length, "loaded correct models. Expected: #{1}. Actual: #{owners.length}")
 
           destroyed_model = owners[0]
-          reverse.destroyRelations 'owners', destroyed_model.toJSON(), (err) ->
+          reverse.patchRemove 'owners', destroyed_model.toJSON(), (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, reverse.get('owners').models.length, "destroyed in memory relationship.")
 
@@ -322,7 +322,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, owners.length, "loaded correct models. Expected: #{1}. Actual: #{owners.length}")
 
           destroyed_model = owners[0]
-          reverse.destroyRelations 'owners', destroyed_model, (err) ->
+          reverse.patchRemove 'owners', destroyed_model, (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, reverse.get('owners').models.length, "destroyed in memory relationship.")
 
@@ -350,7 +350,7 @@ runTests = (options, cache, embed, callback) ->
           assert.equal(1, owners.length, "loaded correct models. Expected: #{1}. Actual: #{owners.length}")
 
           destroyed_model = owners[0]
-          reverse.destroyRelations 'owners', [destroyed_model], (err) ->
+          reverse.patchRemove 'owners', [destroyed_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, reverse.get('owners').models.length, "destroyed in memory relationship.")
 

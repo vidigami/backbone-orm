@@ -191,26 +191,31 @@ module.exports = (model_type) ->
     #   relation.releaseModel(@) for key, relation of schema.relations
     # return
 
-  model_type::destroyRelations = (key, relateds, callback) ->
+  model_type::patchAdd = (key, relateds, callback) ->
+    return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
+    return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds
+    relateds = [relateds] unless _.isArray(relateds)
+    return relation.patchAdd(@, relateds, callback)
+
+  model_type::patchRemove = (key, relateds, callback) ->
     if arguments.length is 1
       callback = key
       schema = model_type.schema()
       queue = new Queue(1)
       for key, relation of schema.relations
-        do (relation) => queue.defer (callback) => relation.destroyAll(@, callback)
+        do (relation) => queue.defer (callback) => relation.patchRemove(@, callback)
       queue.await callback
 
     else
-      return callback(new Error("destroyRelation: relation '#{key}' unrecognized")) unless relation = @relation(key)
+      return callback(new Error("patchRemove: relation '#{key}' unrecognized")) unless relation = @relation(key)
       if arguments.length is 2
         callback = relateds
-        relation.destroyAll(@, callback)
+        relation.patchRemove(@, callback)
 
       else
-        return callback(new Error("destroyRelation: missing relateds for '#{key}'")) unless relateds
+        return callback(new Error("patchRemove: missing relateds for '#{key}'")) unless relateds
         relateds = [relateds] unless _.isArray(relateds)
-        return relation.destroySome(@, relateds, callback)
-
+        return relation.patchRemove(@, relateds, callback)
 
   ###################################
   # Backbone ORM - Relationship Query
@@ -352,7 +357,7 @@ module.exports = (model_type) ->
         --@_orm.destroy
         return options.error?(@, resp, options) if err
 
-        @destroyRelations (err) =>
+        @patchRemove (err) =>
           return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
           options.success?(model, resp, options)
       ))

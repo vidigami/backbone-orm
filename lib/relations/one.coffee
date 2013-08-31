@@ -5,6 +5,7 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
+bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class One extends require('./relation')
@@ -78,8 +79,68 @@ module.exports = class One extends require('./relation')
     return callback() unless related_model = model.attributes[@key]
     @_saveRelated(model, [related_model], callback)
 
-  # TODO: review for embedded
-  destroySome: (model, relateds, callback) ->
+  patchAdd: (model, relateds, callback) ->
+    return callback(new Error "One.patchAdd: model has null id for: #{@key}") unless model.id
+    return callback(new Error "One.patchAdd: missing model for: #{@key}") unless relateds
+    return callback(new Error "One.patchAdd: should be provided with one model only for key: #{@key}") if _.isArray(relateds)
+    return callback(new Error "One.patchAdd: cannot add a new model. Please save first.") unless related_id = Utils.dataId(relateds)
+
+    if model.isLoaded(@key) # NOTE: only if it is loaded, will it update the in-memory representation
+      @model.set(@key, relateds)
+
+    # belongs to, update the model
+    if @type is 'belongsTo'
+      unless model.isLoaded(@key)
+        model.fetch bbCallback (err) =>
+          return callback(err) if err
+          (attributes = {})[@key] = relateds
+          model.save attributes, bbCallback callback
+      else
+        model.save {}, bbCallback callback
+
+    # belongs to, update the related
+    else
+      if related instanceof Backbone.Model
+        related_json = related.toJSON() if related.isLoaded()
+      else if _.isObject(related)
+        related_json = related
+
+      # fetch not needed
+      if related_json
+        related_json[@reverse_relation.foreign_key] = model.id
+        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+
+      # fetch then save
+      else
+        query = {$one: true}
+        query[@reverse_relation.foreign_key] = model.id
+        query.id = related_id
+        @reverse_model_type.cursor(query).toJSON (err, model_json) =>
+          return callback(err) if err
+          return callback() unless model_json
+
+          related_json[@reverse_relation.foreign_key] = model.id
+          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+
+  patchRemove: (model, relateds, callback) ->
+    return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
+
+    # REMOVE ALL
+    if arguments.length is 2
+      callback = relateds
+      return callback() if not @reverse_relation
+      delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
+
+      @cursor(model, @key).toJSON (err, related_json) =>
+        return callback(err) if err
+        return callback() unless related_json
+
+        related_json[@reverse_relation.foreign_key] = null
+        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+      return
+
+    # REMOVE SOME
+    # TODO: review for embedded
     return callback(new Error('One.destroySome: embedded relationships are not supported')) if @isEmbedded()
 
     # destroy in memory
@@ -111,17 +172,6 @@ module.exports = class One extends require('./relation')
 
         related_json[@reverse_relation.foreign_key] = null
         Utils.modelJSONSave(related_json, @reverse_model_type, callback)
-
-  destroyAll: (model, callback) ->
-    return callback() if not @reverse_relation
-    delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
-
-    @cursor(model, @key).toJSON (err, related_json) =>
-      return callback(err) if err
-      return callback() unless related_json
-
-      related_json[@reverse_relation.foreign_key] = null
-      Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
   appendJSON: (json, model, key) ->
     return if key is @virtual_id_accessor # only write the relationships

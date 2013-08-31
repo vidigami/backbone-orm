@@ -68,7 +68,7 @@ class MemorySync
   # @private
   destroy: (query, callback) ->
     @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
-      Utils.destroyRelationsByJSON @model_type, model_json, (err) =>
+      Utils.patchRemoveByJSON @model_type, model_json, (err) =>
         delete @store[model_json.id] unless err
         callback(err)
 

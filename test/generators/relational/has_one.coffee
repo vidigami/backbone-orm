@@ -164,7 +164,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(reverse, "loaded correct model.")
 
           destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model.id, (err) ->
+          owner.patchRemove 'reverse', destroyed_model.id, (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -195,7 +195,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(reverse, "loaded correct model.")
 
           destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model.toJSON(), (err) ->
+          owner.patchRemove 'reverse', destroyed_model.toJSON(), (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -226,7 +226,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(reverse, "loaded correct model.")
 
           destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model, (err) ->
+          owner.patchRemove 'reverse', destroyed_model, (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -257,7 +257,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(reverse, "loaded correct model.")
 
           destroyed_model = reverse
-          owner.destroyRelations 'reverse', [destroyed_model], (err) ->
+          owner.patchRemove 'reverse', [destroyed_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
 
             assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -288,7 +288,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(owner, "loaded correct model")
 
           destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model.id, (err) ->
+          reverse.patchRemove 'owner', destroyed_model.id, (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
 
@@ -319,7 +319,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(owner, "loaded correct model")
 
           destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model.toJSON(), (err) ->
+          reverse.patchRemove 'owner', destroyed_model.toJSON(), (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
 
@@ -350,7 +350,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(owner, "loaded correct model")
 
           destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model, (err) ->
+          reverse.patchRemove 'owner', destroyed_model, (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
 
@@ -381,7 +381,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(owner, "loaded correct model")
 
           destroyed_model = owner
-          reverse.destroyRelations 'owner', [destroyed_model], (err) ->
+          reverse.patchRemove 'owner', [destroyed_model], (err) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
 
