@@ -247,7 +247,7 @@ module.exports = (model_type) ->
 
         # mark as initialized and clear out needs_load flags
         needs_load = Utils.orSet(@, 'needs_load', {})
-        delete needs_load[key] for key, value of needs_load when value
+        delete needs_load[key] for key, value of needs_load when !value
         Utils.set(@, 'is_initialized', true)
 
       return model_type::_orm_original_fns.initialize.apply(@, arguments)

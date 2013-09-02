@@ -796,7 +796,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 
-          reverse = fetched_owner.get 'reverse', (err, reverse) ->
+          fetched_owner.get 'reverse', (err, reverse) ->
             if fetched_owner.relationIsEmbedded('reverse')
               assert.ok(!err, "No errors: #{err}")
               assert.ok(!reverse, 'Cannot yet load the model') # TODO: implement a fetch from the related model

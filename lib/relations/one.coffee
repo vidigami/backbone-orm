@@ -20,7 +20,7 @@ module.exports = class One extends require('./relation')
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   initializeModel: (model) ->
-    model.setLoaded(@key, !!(@embed or @reverse_relation?.embed)) unless model.isLoadedExists(@key) # it may have been set before initialize is called
+    model.setLoaded(@key, @isEmbedded()) unless model.isLoadedExists(@key) # it may have been set before initialize is called
     @_bindBacklinks(model)
 
   releaseModel: (model) ->
