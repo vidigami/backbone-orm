@@ -194,7 +194,6 @@ module.exports = (model_type) ->
   model_type::patchAdd = (key, relateds, callback) ->
     return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
     return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds
-    relateds = [relateds] unless _.isArray(relateds)
     return relation.patchAdd(@, relateds, callback)
 
   model_type::patchRemove = (key, relateds, callback) ->
@@ -214,7 +213,6 @@ module.exports = (model_type) ->
 
       else
         return callback(new Error("patchRemove: missing relateds for '#{key}'")) unless relateds
-        relateds = [relateds] unless _.isArray(relateds)
         return relation.patchRemove(@, relateds, callback)
 
   ###################################

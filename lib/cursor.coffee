@@ -67,6 +67,8 @@ module.exports = class Cursor
   hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
+    console.trace "toModels: #{util.inspect(callback)}" unless _.isFunction(callback)
+
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
 
     # a cache candidate

@@ -34,12 +34,20 @@ module.exports = class One extends require('./relation')
 
     return @ if value is (previous_related_model = model.get(@key)) # no change
     is_model = (value instanceof Backbone.Model)
+    new_related_id = Utils.dataId(value)
+    previous_related_id = Utils.dataId(previous_related_model)
     Utils.orSet(model, 'rel_dirty', {})[@key] = true
-    model.setLoaded(@key, true) if not model.isLoaded(@key) and (is_model or _.isObject(value)) # set loaded state
+
+    # update loaded state
+    if (previous_related_id isnt new_related_id) or not model.isLoaded(@key)
+      if (is_model and (value.isLoaded())) or (new_related_id isnt value)
+        model.setLoaded(@key, true)
+      else
+        model.setLoaded(@key, _.isNull(value))
 
     # set the relation now or later merge into the existing model
     if value and not is_model
-      value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = Utils.dataId(previous_related_model) is Utils.dataId(value)
+      value = Utils.updateOrNew(value, @reverse_model_type) unless merge_into_existing = (previous_related_id is new_related_id)
     Backbone.Model::set.call(model, @key, value, options) unless merge_into_existing
 
     # not setting a new model, update the previous model
@@ -79,48 +87,60 @@ module.exports = class One extends require('./relation')
     return callback() unless related_model = model.attributes[@key]
     @_saveRelated(model, [related_model], callback)
 
-  patchAdd: (model, relateds, callback) ->
+  patchAdd: (model, related, callback) ->
     return callback(new Error "One.patchAdd: model has null id for: #{@key}") unless model.id
-    return callback(new Error "One.patchAdd: missing model for: #{@key}") unless relateds
-    return callback(new Error "One.patchAdd: should be provided with one model only for key: #{@key}") if _.isArray(relateds)
-    return callback(new Error "One.patchAdd: cannot add a new model. Please save first.") unless related_id = Utils.dataId(relateds)
+    return callback(new Error "One.patchAdd: missing model for: #{@key}") unless related
+    return callback(new Error "One.patchAdd: should be provided with one model only for key: #{@key}") if _.isArray(related)
+    return callback(new Error "One.patchAdd: cannot add a new model. Please save first.") unless related_id = Utils.dataId(related)
 
-    if model.isLoaded(@key) # NOTE: only if it is loaded, will it update the in-memory representation
-      @model.set(@key, relateds)
+    model.set(@key, related) # set the model
 
     # belongs to, update the model
     if @type is 'belongsTo'
-      unless model.isLoaded(@key)
+      if model.isLoaded(@key)
+        model.save {}, bbCallback callback
+      else
         model.fetch bbCallback (err) =>
           return callback(err) if err
-          (attributes = {})[@key] = relateds
+          (attributes = {})[@key] = related
           model.save attributes, bbCallback callback
-      else
-        model.save {}, bbCallback callback
 
-    # belongs to, update the related
+    # not belongs to, update the related
     else
-      if related instanceof Backbone.Model
-        related_json = related.toJSON() if related.isLoaded()
-      else if _.isObject(related)
-        related_json = related
+      @cursor(model, @key).toJSON (err, current_related_model) =>
+        return callback(err) if err
+        return callback() if current_related_model and (related_id is current_related_model.id) # already set
 
-      # fetch not needed
-      if related_json
-        related_json[@reverse_relation.foreign_key] = model.id
-        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        queue = new Queue(1)
 
-      # fetch then save
-      else
-        query = {$one: true}
-        query[@reverse_relation.foreign_key] = model.id
-        query.id = related_id
-        @reverse_model_type.cursor(query).toJSON (err, model_json) =>
-          return callback(err) if err
-          return callback() unless model_json
+        # clear previous
+        unless current_related_model
+          queue.defer (callback) => @patchRemove(model, current_related_model, callback)
 
-          related_json[@reverse_relation.foreign_key] = model.id
-          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        # set new
+        queue.defer (callback) =>
+          if related instanceof Backbone.Model
+            related_json = related.toJSON() if related.isLoaded()
+          else if related_id isnt related
+            related_json = related
+
+          # fetch not needed
+          if related_json
+            related_json[@reverse_relation.foreign_key] = model.id
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+
+          # fetch then save
+          else
+            query = {$one: true}
+            query.id = related_id
+            @reverse_model_type.cursor(query).toJSON (err, related_json) =>
+              return callback(err) if err
+              return callback() unless related_json
+
+              related_json[@reverse_relation.foreign_key] = model.id
+              Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+
+        queue.await callback
 
   patchRemove: (model, relateds, callback) ->
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
@@ -141,7 +161,9 @@ module.exports = class One extends require('./relation')
 
     # REMOVE SOME
     # TODO: review for embedded
-    return callback(new Error('One.destroySome: embedded relationships are not supported')) if @isEmbedded()
+    return callback(new Error('One.patchRemove: embedded relationships are not supported')) if @isEmbedded()
+    return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
+    relateds = [relateds] unless _.isArray(relateds)
 
     # destroy in memory
     if current_related_model = model.get(@key)

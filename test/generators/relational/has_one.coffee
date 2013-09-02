@@ -151,6 +151,36 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(flat_id, flat.id, 'Loaded model is correct')
             done()
 
+    it 'Can manually add a relationship by related_id (hasOne)', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.findOne (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+
+        owner.get 'reverse', (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, "loaded correct model.")
+
+          Reverse.cursor({id: {$ne: reverse.id}, $one: true}).toJSON (err, another_reverse_json) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(another_reverse_json, "loaded another model.")
+            assert.ok(reverse.id isnt another_reverse_json.id, "loaded a model with a different id.")
+
+            owner.patchAdd 'reverse', another_reverse_json.id, (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              current_reverse = owner.get('reverse')
+              assert.ok(current_reverse.id is another_reverse_json.id, "Set the id: #{err}. Expected: #{another_reverse_json.id}. Actual: #{current_reverse.id}")
+
+              owner.get 'reverse', (err, current_reverse) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(current_reverse, "loaded another model.")
+                assert.equal(current_reverse.get('owner_id'), owner.id, "owner_id is correct.")
+
+                assert.ok(_.isEqual(_.omit(current_reverse.toJSON(), 'owner_id'), _.omit(another_reverse_json, 'owner_id')), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_reverse_json, 'owner_id'))}. Actual: #{util.inspect(_.omit(current_reverse.toJSON(), 'owner_id'))}")
+                done()
+
     it 'Can manually delete a relationship by related_id (hasOne)', (done) ->
       # TODO: implement embedded find
       return done() if embed

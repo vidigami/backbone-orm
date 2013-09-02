@@ -210,7 +210,7 @@ module.exports = class Many extends require('./relation')
       return
 
     # REMOVE SOME
-    return callback(new Error('Many.destroySome: embedded relationships are not supported')) if @isEmbedded()
+    return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
     collection = @_ensureCollection(model)
 
     # destroy in memory
