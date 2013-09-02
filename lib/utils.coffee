@@ -146,11 +146,12 @@ module.exports = class Utils
     return (Utils.dataToModel(item, model_type) for item in data) if _.isArray(data)
     if data instanceof Backbone.Model
       model = data
-    else if _.isObject(data)
+    else if Utils.dataId(data) isnt data
       model = new model_type(model_type::parse(data))
     else
       model = new model_type({id: data})
       model.setLoaded(false)
+
     return model
 
   @updateModel: (model, data) ->

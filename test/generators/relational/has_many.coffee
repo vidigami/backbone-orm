@@ -180,6 +180,55 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
             done()
 
+    it 'Can manually add a relationship by related_id (hasOne)', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.cursor().include('reverses').toModel (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+        reverses = owner.get('reverses').models
+        assert.equal(reverses.length, 2, "loaded correct models.")
+        reverse_ids = (reverse.id for reverse in reverses)
+
+        Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(another_owner, "loaded another model.")
+          assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
+
+          another_reverses = another_owner.get('reverses').models
+          assert.equal(another_reverses.length, 2, "loaded correct models.")
+          another_reverse_ids = (reverse.id for reverse in another_reverses)
+          moved_reverse_id = another_reverse_ids[0]
+          moved_reverse_json = another_reverses[0].toJSON()
+
+          owner.patchAdd 'reverses', moved_reverse_id, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            updated_reverses = owner.get('reverses').models
+            updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+            assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+            assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+
+            Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              updated_another_reverses = another_owner.get('reverses').models
+              updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+              assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
+              assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
+
+              owner.get 'reverses', (err, updated_reverses) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+                updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
+
+                assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
+                done()
+
     it 'Can manually delete a relationship by related_id (hasMany)', (done) ->
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
@@ -646,7 +695,7 @@ runTests = (options, cache, embed, callback) ->
           done()
 
     it 'Clears its reverse relations on set when the reverse relation is loaded (one-way hasMany)', (done) ->
-      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+      Owner.cursor().include('reverses').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -668,7 +717,7 @@ runTests = (options, cache, embed, callback) ->
             done()
 
     it 'Clears its reverse relations on save (one-way hasMany)', (done) ->
-      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+      Owner.cursor().include('reverses').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -690,7 +739,7 @@ runTests = (options, cache, embed, callback) ->
               done()
 
     it 'Clears its reverse relations on delete when the reverse relation is loaded (one-way hasMany)', (done) ->
-      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+      Owner.cursor().include('reverses').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -900,7 +949,7 @@ runTests = (options, cache, embed, callback) ->
     backlinkTests(true)
 
     it 'does not serialize virtual attributes', (done) ->
-      Owner.cursor({$one: true}).include('flats').toModels (err, owner) ->
+      Owner.cursor().include('flats').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'Reverse found model')
 

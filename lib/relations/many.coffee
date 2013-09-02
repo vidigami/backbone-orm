@@ -24,7 +24,7 @@ module.exports = class Many extends require('./relation')
     @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
   initializeModel: (model) ->
-    model.setLoaded(@key, false)
+    model.setLoaded(@key, false) unless model.isLoadedExists(@key) # it may have been set before initialize is called
     @_bindBacklinks(model)
 
   releaseModel: (model) ->
@@ -119,51 +119,50 @@ module.exports = class Many extends require('./relation')
     return callback(new Error "Many.patchAdd: missing model for: #{@key}") unless relateds
 
     relateds = [relateds] unless _.isArray(relateds)
-    if model.isLoaded(@key) # NOTE: only if it is loaded, will it update the in-memory representation
-      collection = @_ensureCollection(model)
-      collection.add(relateds)
-
-    related_ids = []
-    queue = new Queue(1)
+    collection = @_ensureCollection(model)
+    relateds = ((if related_model = collection.get(Utils.dataId(item)) then Utils.updateModel(related_model, item) else Utils.updateOrNew(item, @reverse_model_type)) for item in relateds)
+    related_ids = (Utils.dataId(related) for related in relateds)
+    collection.add(relateds)
+    if model.isLoaded(@key) # check for needing load
+      (model.setLoaded(@key, false); break) for related in relateds when not related.isLoaded()
 
     # patch in store
-    for related in relateds
-      do (related) => queue.defer (callback) =>
-        return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id = Utils.dataId(related)
+    if @join_table
+      queue = new Queue(1)
 
-        if @join_table
-          attributes = {}
-          attributes[@foreign_key] = model.id
-          attributes[@reverse_relation.foreign_key] = related_id
-          # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
-          join = new @join_table(attributes)
-          join.save {}, bbCallback callback
-        else
-          if related instanceof Backbone.Model
-            related_json = related.toJSON() if related.isLoaded()
-          else if _.isObject(related)
-            related_json = related
+      for related_id in related_ids
+        do (related_id) => queue.defer (callback) =>
+          return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
 
-          unless related_json
-            related_ids.push(related_id)
-            return callback()
+          add = (callback) =>
+            attributes = {}
+            attributes[@foreign_key] = model.id
+            attributes[@reverse_relation.foreign_key] = related_id
+            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+            join = new @join_table(attributes)
+            join.save {}, bbCallback callback
 
-          related_json[@reverse_relation.foreign_key] = model.id
-          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+          # just create another entry
+          return add(callback) if @reverse_relation.type is 'hasMany'
 
-    queue.await (err) =>
-      return callback(err) if err
-      return callback() unless related_ids.length
+          # check for changes
+          (query = {})[@reverse_relation.foreign_key] = related_id
+          return @join_table.find query, (err, join_table_json) =>
+            return callback(err) if err
+            return add(callback) unless join_table_json # create a new join table entry
+            return callback() if join_table_json[@foreign_key] is model.id # already related
 
-      query = {}
-      query[@reverse_relation.foreign_key] = model.id
-      query.id = {$in: related_ids}
-      @reverse_model_type.cursor(query).toJSON (err, json) =>
-        return callback(err) if err
+            # update existing relationship
+            join_table_json[@foreign_key] = model.id
+            Utils.modelJSONSave(join_table_json, @join_table, callback)
 
-        # save reverses
+      queue.await callback
+
+    else
+      query = {id: $in: related_ids}
+      @reverse_model_type.cursor(query).toJSON (err, related_jsons) =>
         queue = new Queue(1)
-        for related_json in json
+        for related_json in related_jsons
           do (related_json) => queue.defer (callback) =>
             related_json[@reverse_relation.foreign_key] = model.id
             Utils.modelJSONSave(related_json, @reverse_model_type, callback)

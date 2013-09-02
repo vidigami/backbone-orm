@@ -20,7 +20,7 @@ module.exports = class One extends require('./relation')
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
 
   initializeModel: (model) ->
-    model.setLoaded(@key, !!(@embed or @reverse_relation?.embed))
+    model.setLoaded(@key, !!(@embed or @reverse_relation?.embed)) unless model.isLoadedExists(@key) # it may have been set before initialize is called
     @_bindBacklinks(model)
 
   releaseModel: (model) ->
@@ -99,6 +99,11 @@ module.exports = class One extends require('./relation')
     return callback(new Error "One.patchAdd: should be provided with one model only for key: #{@key}") if _.isArray(related)
     return callback(new Error "One.patchAdd: cannot add a new model. Please save first.") unless related_id = Utils.dataId(related)
 
+    # look up in the cache
+    if @reverse_model_type.cache and not (related instanceof Backbone.Model)
+      if found_related = @reverse_model_type.cache.get(related_id)
+        Utils.updateModel(found_related, related)
+        related = found_related
     model.set(@key, related) # set the model
 
     # belongs to, update the model

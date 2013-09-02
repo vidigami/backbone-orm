@@ -172,8 +172,12 @@ module.exports = (model_type) ->
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
     needs_load = Utils.orSet(@, 'needs_load', {})
-    return delete needs_load[key] if is_loaded
-    needs_load[key] = true
+    (delete needs_load[key]; return) if is_loaded and Utils.get(@, 'is_initialized') # after initialized, delete needs_load
+    needs_load[key] = !is_loaded
+
+  model_type::isLoadedExists = (key) ->
+    key = '__model__' if arguments.length is 0
+    Utils.orSet(@, 'needs_load', {}).hasOwnProperty(key)
 
   model_type::isPartial = ->
     !!Utils.get(@, 'partial')
@@ -240,6 +244,12 @@ module.exports = (model_type) ->
     initialize: ->
       if model_type.schema and (schema = model_type.schema())
         relation.initializeModel(@) for key, relation of schema.relations
+
+        # mark as initialized and clear out needs_load flags
+        needs_load = Utils.orSet(@, 'needs_load', {})
+        delete needs_load[key] for key, value of needs_load when value
+        Utils.set(@, 'is_initialized', true)
+
       return model_type::_orm_original_fns.initialize.apply(@, arguments)
 
     fetch: (options) ->
@@ -263,10 +273,11 @@ module.exports = (model_type) ->
         attributes = key; options = value
 
       simple_attributes = {}
+      model_type::_orm_original_fns.set.call(@, {id: attributes.id}, options) if attributes.id
       for key, value of attributes
         if relation = schema.relation(key)
           relation.set(@, key, value, options)
-        else
+        else if key isnt 'id'
           simple_attributes[key] = value
       model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes) # call all simple attributes one time given all of the additional setup
 
