@@ -211,6 +211,8 @@ module.exports = class Many extends require('./relation')
 
     # REMOVE SOME
     return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
+    return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
+    relateds = [relateds] unless _.isArray(relateds)
     collection = @_ensureCollection(model)
 
     # destroy in memory
