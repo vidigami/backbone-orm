@@ -73,7 +73,13 @@ module.exports = class One extends require('./relation')
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)
-        model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
+
+        # already set, merge
+        previous_related_model = model.get(@key)
+        if previous_related_model and (previous_related_model.id is json.id)
+          Utils.updateModel(previous_related_model, json)
+        else
+          model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
         callback(null, returnValue())
 
     # synchronous path
@@ -100,10 +106,11 @@ module.exports = class One extends require('./relation')
       if model.isLoaded(@key)
         model.save {}, bbCallback callback
       else
-        model.fetch bbCallback (err) =>
+        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
           return callback(err) if err
-          (attributes = {})[@key] = related
-          model.save attributes, bbCallback callback
+          return callback(new Error "Failed to fetch model with id: #{model.id}") unless model_json
+          model_json[@foreign_key] = related_id
+          Utils.modelJSONSave(model_json, @model_type, callback)
 
     # not belongs to, update the related
     else
