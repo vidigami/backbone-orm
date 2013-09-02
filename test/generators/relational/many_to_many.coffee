@@ -131,6 +131,154 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(_.difference(owner_ids, (test.id for test in owners)).length, 0, "expected owners: #{_.difference(owner_ids, (owner.id for owner in owners))}")
             done()
 
+    it 'Can manually add a relationship by related_id (hasMany)', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.cursor().include('reverses').toModel (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+        reverses = owner.get('reverses').models
+        assert.equal(reverses.length, 2, "loaded correct models.")
+        reverse_ids = (reverse.id for reverse in reverses)
+
+        Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(another_owner, "loaded another model.")
+          assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
+
+          another_reverses = another_owner.get('reverses').models
+          assert.equal(another_reverses.length, 2, "loaded correct models.")
+          another_reverse_ids = (reverse.id for reverse in another_reverses)
+          shared_reverse_id = another_reverse_ids[0]
+          shared_reverse_json = another_reverses[0].toJSON()
+
+          owner.patchAdd 'reverses', shared_reverse_id, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            updated_reverses = owner.get('reverses').models
+            updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+            assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+            assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+
+            Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              updated_another_reverses = another_owner.get('reverses').models
+              updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+              assert.equal(updated_another_reverse_ids.length, 2, "Kept the reverse from previous. Expected: #{2}. Actual: #{updated_another_reverse_ids.length}")
+              assert.ok(_.contains(updated_another_reverse_ids, shared_reverse_id), "Moved the reverse_id from previous")
+
+              owner.get 'reverses', (err, updated_reverses) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+                updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
+
+                assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                done()
+
+    it 'Can manually add a relationship by related json (hasMany)', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.cursor().include('reverses').toModel (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+        reverses = owner.get('reverses').models
+        assert.equal(reverses.length, 2, "loaded correct models.")
+        reverse_ids = (reverse.id for reverse in reverses)
+
+        Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(another_owner, "loaded another model.")
+          assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
+
+          another_reverses = another_owner.get('reverses').models
+          assert.equal(another_reverses.length, 2, "loaded correct models.")
+          another_reverse_ids = (reverse.id for reverse in another_reverses)
+          shared_reverse_id = another_reverse_ids[0]
+          shared_reverse_json = another_reverses[0].toJSON()
+
+          owner.patchAdd 'reverses', shared_reverse_json, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            updated_reverses = owner.get('reverses').models
+            updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+            assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+            assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+
+            Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              updated_another_reverses = another_owner.get('reverses').models
+              updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+              assert.equal(updated_another_reverse_ids.length, 2, "Kept the reverse from previous. Expected: #{2}. Actual: #{updated_another_reverse_ids.length}")
+              assert.ok(_.contains(updated_another_reverse_ids, shared_reverse_id), "Moved the reverse_id from previous")
+
+              owner.get 'reverses', (err, updated_reverses) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+                updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
+
+                assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                done()
+
+    it 'Can manually add a relationship by related model (hasMany)', (done) ->
+      # TODO: implement embedded find
+      return done() if embed
+
+      Owner.cursor().include('reverses').toModel (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'found owners')
+        reverses = owner.get('reverses').models
+        assert.equal(reverses.length, 2, "loaded correct models.")
+        reverse_ids = (reverse.id for reverse in reverses)
+
+        Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(another_owner, "loaded another model.")
+          assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
+
+          another_reverses = another_owner.get('reverses').models
+          assert.equal(another_reverses.length, 2, "loaded correct models.")
+          another_reverse_ids = (reverse.id for reverse in another_reverses)
+          shared_reverse_id = another_reverse_ids[0]
+          shared_reverse = another_reverses[0]
+          shared_reverse_json = shared_reverse.toJSON()
+
+          owner.patchAdd 'reverses', shared_reverse, (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            updated_reverses = owner.get('reverses').models
+            updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+            assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+            assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+
+            Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              assert.ok(!err, "No errors: #{err}")
+              updated_another_reverses = another_owner.get('reverses').models
+              updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+              assert.equal(updated_another_reverse_ids.length, 2, "Kept the reverse from previous. Expected: #{2}. Actual: #{updated_another_reverse_ids.length}")
+              assert.ok(_.contains(updated_another_reverse_ids, shared_reverse_id), "Moved the reverse_id from previous")
+
+              owner.get 'reverses', (err, updated_reverses) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
+                updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
+
+                assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                done()
+
     it 'Can manually delete a relationship by related_id (hasMany)', (done) ->
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")

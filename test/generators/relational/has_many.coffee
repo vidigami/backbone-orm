@@ -403,6 +403,7 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(another_owner, "loaded another model.")
             assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
+            another_owner_json = another_owner.toJSON()
 
             reverse.patchAdd 'owner', another_owner, (err) ->
               assert.ok(!err, "No errors: #{err}")
