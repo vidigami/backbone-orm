@@ -132,7 +132,7 @@ module.exports = class Utils
   ##############################
 
   # @private
-  @dataId: (data) -> return if (data instanceof Backbone.Model) or _.isObject(data) then data.id else data
+  @dataId: (data) -> return if _.isObject(data) then data.id else data
 
   @dataIsSameModel: (data1, data2) ->
     return Utils.dataId(data1) is Utils.dataId(data2) if Utils.dataId(data1) or Utils.dataId(data2)
