@@ -136,7 +136,7 @@ runTests = (options, cache, embed, callback) ->
             done()
 
     patchAddTests = (unload) ->
-      it "Can manually add a relationship by related_id (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -169,7 +169,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-      it "Can manually add a relationship by related json (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -202,7 +202,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-      it "Can manually add a relationship by related model (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -235,7 +235,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-      it "Can manually add a relationship by related_id (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -268,7 +268,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
-      it "Can manually add a relationship by related json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -301,7 +301,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
-      it "Can manually add a relationship by related model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -338,7 +338,7 @@ runTests = (options, cache, embed, callback) ->
     patchAddTests(true)
 
     patchRemoveTests = (unload) ->
-      it "Can manually delete a relationship by related_id (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -372,7 +372,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!reverse, "loaded correct models.")
                     done()
 
-      it "Can manually delete a relationship by related_json (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -405,7 +405,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!reverse, "loaded correct models.")
                     done()
 
-      it "Can manually delete a relationship by related model (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -438,7 +438,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!reverse, "loaded correct models.")
                     done()
 
-      it "Can manually delete a relationship by array related of model (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by array related of model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -471,7 +471,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!reverse, "loaded correct models.")
                     done()
 
-      it "Can manually delete a relationship by related_id (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -505,7 +505,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!owner, 'destroyed correct model')
                     done()
 
-      it "Can manually delete a relationship by related_json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -539,7 +539,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!owner, 'destroyed correct model')
                     done()
 
-      it "Can manually delete a relationship by related_model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -573,7 +573,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(!owner, 'destroyed correct model')
                     done()
 
-      it "Can manually delete a relationship by array of related_model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by array of related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 

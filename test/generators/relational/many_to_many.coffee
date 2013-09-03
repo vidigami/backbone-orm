@@ -133,7 +133,7 @@ runTests = (options, cache, embed, callback) ->
             done()
 
     patchAddTests = (unload) ->
-      it "Can manually add a relationship by related_id (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related_id (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -187,7 +187,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(shared_reverse_json, OMIT_KEYS))}")
                     done()
 
-      it "Can manually add a relationship by related json (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related json (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -241,7 +241,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(shared_reverse_json, OMIT_KEYS))}")
                     done()
 
-      it "Can manually add a relationship by related model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually add a relationship by related model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -301,7 +301,7 @@ runTests = (options, cache, embed, callback) ->
     patchAddTests(true)
 
     patchRemoveTests = (unload) ->
-      it "Can manually delete a relationship by related_id (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_id (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
@@ -337,7 +337,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
                     done()
 
-      it "Can manually delete a relationship by related_json (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_json (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
@@ -373,7 +373,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
                     done()
 
-      it "Can manually delete a relationship by related_model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
@@ -409,7 +409,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(other_model.id, reverses[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{reverses[0].id}")
                     done()
 
-      it "Can manually delete a relationship by array of related_model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by array of related_model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
@@ -441,7 +441,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(0, reverses.length, "loaded correct models. Expected: #{0}. Actual: #{reverses.length}")
                     done()
 
-      it "Can manually delete a relationship by related_id (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_id (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
@@ -472,7 +472,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(0, owners.length, "correct number of models remaining.")
                     done()
 
-      it "Can manually delete a relationship by related_json (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_json (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
@@ -503,7 +503,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(0, owners.length, "correct number of models remaining.")
                     done()
 
-      it "Can manually delete a relationship by related_model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
@@ -534,7 +534,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(0, owners.length, "correct number of models remaining.")
                     done()
 
-      it "Can manually delete a relationship by array of related_model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by array of related_model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
