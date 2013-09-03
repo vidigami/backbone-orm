@@ -273,7 +273,7 @@ module.exports = (model_type) ->
         attributes = key; options = value
 
       simple_attributes = {}
-      model_type::_orm_original_fns.set.call(@, {id: attributes.id}, options) if attributes.id
+      model_type::_orm_original_fns.set.call(@, {id: attributes.id}, options) if attributes.hasOwnProperty('id')
       for key, value of attributes
         if relation = schema.relation(key)
           relation.set(@, key, value, options)
