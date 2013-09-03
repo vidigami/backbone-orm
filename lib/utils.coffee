@@ -135,10 +135,8 @@ module.exports = class Utils
   @dataId: (data) -> return data?.id or data
 
   @dataIsSameModel: (data1, data2) ->
-    return _.isEqual(data1, data2) if not data1 or not data2
     return Utils.dataId(data1) is Utils.dataId(data2) if Utils.dataId(data1) or Utils.dataId(data2)
-    return _.isEqual(data1, data2) if _.isObject(data1) and _.isObject(data2)
-    return false
+    return _.isEqual(data1, data2)
 
   # @private
   @dataToModel: (data, model_type) ->
