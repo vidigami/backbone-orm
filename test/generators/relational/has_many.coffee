@@ -282,7 +282,7 @@ runTests = (options, cache, embed, callback) ->
 
                   owner.get 'reverses', (err, updated_reverses) ->
                     assert.ok(!err, "No errors: #{err}")
-                    assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                    assert.equal(updated_reverses.length, 3, "loaded correct models. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
                     updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
                     assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
