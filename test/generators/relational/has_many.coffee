@@ -190,7 +190,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
           reverses = owner.get('reverses').models
-          assert.equal(reverses.length, 2, "loaded correct models.")
+          assert.equal(reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{reverses.length}.")
           reverse_ids = (reverse.id for reverse in reverses)
 
           Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
@@ -199,7 +199,7 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
 
             another_reverses = another_owner.get('reverses').models
-            assert.equal(another_reverses.length, 2, "loaded correct models.")
+            assert.equal(another_reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{another_reverses.length}.")
             another_reverse_ids = (reverse.id for reverse in another_reverses)
             moved_reverse_id = another_reverse_ids[0]
             moved_reverse_json = another_reverses[0].toJSON()
@@ -228,10 +228,10 @@ runTests = (options, cache, embed, callback) ->
 
                   owner.get 'reverses', (err, updated_reverses) ->
                     assert.ok(!err, "No errors: #{err}")
-                    assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                    assert.equal(updated_reverses.length, 3, "loaded correct models. Expected: #{3}. Actual: #{updated_reverses.length}.")
                     updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
                     assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
                     updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
@@ -246,7 +246,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
           reverses = owner.get('reverses').models
-          assert.equal(reverses.length, 2, "loaded correct models.")
+          assert.equal(reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{reverses.length}.")
           reverse_ids = (reverse.id for reverse in reverses)
 
           Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
@@ -255,7 +255,7 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
 
             another_reverses = another_owner.get('reverses').models
-            assert.equal(another_reverses.length, 2, "loaded correct models.")
+            assert.equal(another_reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{another_reverses.length}.")
             another_reverse_ids = (reverse.id for reverse in another_reverses)
             moved_reverse_id = another_reverse_ids[0]
             moved_reverse_json = another_reverses[0].toJSON()
@@ -285,7 +285,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.equal(updated_reverses.length, 3, "loaded correct models.")
                     updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
                     assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
                     updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
@@ -300,7 +300,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
           reverses = owner.get('reverses').models
-          assert.equal(reverses.length, 2, "loaded correct models.")
+          assert.equal(reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{reverses.length}.")
           reverse_ids = (reverse.id for reverse in reverses)
 
           Owner.cursor({id: {$ne: owner.id}}).include('reverses').toModel (err, another_owner) ->
@@ -309,7 +309,7 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
 
             another_reverses = another_owner.get('reverses').models
-            assert.equal(another_reverses.length, 2, "loaded correct models.")
+            assert.equal(another_reverses.length, 2, "loaded correct models. Expected: #{2}. Actual: #{another_reverses.length}.")
             another_reverse_ids = (reverse.id for reverse in another_reverses)
             moved_reverse_id = another_reverse_ids[0]
             moved_reverse_json = another_reverses[0].toJSON()
