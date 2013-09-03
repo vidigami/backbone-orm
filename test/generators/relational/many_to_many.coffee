@@ -14,6 +14,7 @@ runTests = (options, cache, embed, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
   require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+  OMIT_KEYS = ['owner_id', '_rev', 'updated_at']
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
@@ -183,7 +184,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(shared_reverse_json, OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -237,7 +238,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(shared_reverse_json, OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (hasMany) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -293,7 +294,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), 'owner_id'), _.omit(shared_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(shared_reverse_json, 'owner_id'))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{util.inspect(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(shared_reverse_json, OMIT_KEYS))}")
                     done()
 
     patchAddTests(false)
