@@ -388,22 +388,21 @@ runTests = (options, cache, embed, callback) ->
               require('../../../lib/cache').reset() # reset cache
               owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model.toJSON(), (err) ->
-            assert.ok(!err, "No errors: #{err}")
-
-            assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
-
-            owner.get 'reverse', (err, reverse) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!reverse, "loaded correct models.")
+              assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
 
-              Owner.findOne owner.id, (err, owner) ->
+              owner.get 'reverse', (err, reverse) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(owner, 'found owners')
+                assert.ok(!reverse, "loaded correct models.")
 
-                owner.get 'reverse', (err, reverse) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!reverse, "loaded correct models.")
-                  done()
+                  assert.ok(owner, 'found owners')
+
+                  owner.get 'reverse', (err, reverse) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!reverse, "loaded correct models.")
+                    done()
 
       it "Can manually delete a relationship by related model (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find

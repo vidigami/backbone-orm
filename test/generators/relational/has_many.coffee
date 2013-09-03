@@ -208,32 +208,36 @@ runTests = (options, cache, embed, callback) ->
               owner = new Owner({id: owner.id})
             owner.patchAdd 'reverses', moved_reverse_id, (err) ->
               assert.ok(!err, "No errors: #{err}")
-              updated_reverses = owner.get('reverses').models
-              updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-              assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
-              assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-
-              Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              owner.get 'reverses', (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_another_reverses = another_owner.get('reverses').models
-                updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
-                assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
-                assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
 
-                owner.get 'reverses', (err, updated_reverses) ->
+                updated_reverses = owner.get('reverses').models
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+                assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+
+                Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.equal(updated_reverses.length, 3, "loaded correct models.")
-                  updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+                  updated_another_reverses = another_owner.get('reverses').models
+                  updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+                  assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
+                  assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
 
-                  assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
-                  assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-                  updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
+                  owner.get 'reverses', (err, updated_reverses) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                    updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                  assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
-                  done()
+                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                    assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+                    updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
-      it "Can manually add a relationship by related_id (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
+                    done()
+
+      it "Can manually add a relationship by related json (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -260,32 +264,34 @@ runTests = (options, cache, embed, callback) ->
               owner = new Owner({id: owner.id})
             owner.patchAdd 'reverses', moved_reverse_json, (err) ->
               assert.ok(!err, "No errors: #{err}")
-              updated_reverses = owner.get('reverses').models
-              updated_reverse_ids = (reverse.id for reverse in updated_reverses)
-
-              assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
-              assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-
-              Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              owner.get 'reverses', (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_another_reverses = another_owner.get('reverses').models
-                updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
-                assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
-                assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
+                updated_reverses = owner.get('reverses').models
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                owner.get 'reverses', (err, updated_reverses) ->
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+                assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+
+                Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.equal(updated_reverses.length, 3, "loaded correct models.")
-                  updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+                  updated_another_reverses = another_owner.get('reverses').models
+                  updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+                  assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
+                  assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
 
-                  assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
-                  assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-                  updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
+                  owner.get 'reverses', (err, updated_reverses) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                    updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                  assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
-                  done()
+                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                    assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+                    updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
-      it "Can manually add a relationship by related_id (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
+                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
+                    done()
+
+      it "Can manually add a relationship by related model (hasOne) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if embed
 
@@ -312,30 +318,32 @@ runTests = (options, cache, embed, callback) ->
               owner = new Owner({id: owner.id})
             owner.patchAdd 'reverses', another_reverses[0], (err) ->
               assert.ok(!err, "No errors: #{err}")
-              updated_reverses = owner.get('reverses').models
-              updated_reverse_ids = (reverse.id for reverse in updated_reverses)
-
-              assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
-              assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-
-              Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
+              owner.get 'reverses', (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_another_reverses = another_owner.get('reverses').models
-                updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
-                assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
-                assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
+                updated_reverses = owner.get('reverses').models
+                updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                owner.get 'reverses', (err, updated_reverses) ->
+                assert.equal(updated_reverse_ids.length, 3, "Moved the reverse. Expected: #{3}. Actual: #{updated_reverse_ids.length}")
+                assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+
+                Owner.cursor({id: another_owner.id}).include('reverses').toModel (err, another_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.equal(updated_reverses.length, 3, "loaded correct models.")
-                  updated_reverse_ids = (reverse.id for reverse in updated_reverses)
+                  updated_another_reverses = another_owner.get('reverses').models
+                  updated_another_reverse_ids = (reverse.id for reverse in updated_another_reverses)
+                  assert.equal(updated_another_reverse_ids.length, 1, "Moved the reverse from previous. Expected: #{1}. Actual: #{updated_another_reverse_ids.length}")
+                  assert.ok(!_.contains(updated_another_reverse_ids, moved_reverse_id), "Moved the reverse_id from previous")
 
-                  assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
-                  assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
-                  updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
+                  owner.get 'reverses', (err, updated_reverses) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.equal(updated_reverses.length, 3, "loaded correct models.")
+                    updated_reverse_ids = (reverse.id for reverse in updated_reverses)
 
-                  assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
-                  done()
+                    assert.equal(updated_reverse_ids.length, 3, "Moved the reverse")
+                    assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
+                    updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
+
+                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), 'owner_id'), _.omit(moved_reverse_json, 'owner_id')), "Set the id:. Expected: #{util.inspect(_.omit(updated_moved_reverse.toJSON(), 'owner_id'))}. Actual: #{util.inspect(_.omit(moved_reverse_json, 'owner_id'))}")
+                    done()
 
       it "Can manually add a relationship by related_id (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
@@ -359,16 +367,18 @@ runTests = (options, cache, embed, callback) ->
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_owner = reverse.get('owner')
-                assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
-
-                reverse.get 'owner', (err, updated_owner) ->
+                reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(updated_owner, "loaded another model.")
+                  updated_owner = reverse.get('owner')
+                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
-                  assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                  assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
-                  done()
+                  reverse.get 'owner', (err, updated_owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(updated_owner, "loaded another model.")
+
+                    assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
+                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    done()
 
       it "Can manually add a relationship by related json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
@@ -392,16 +402,18 @@ runTests = (options, cache, embed, callback) ->
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_owner = reverse.get('owner')
-                assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
-
-                reverse.get 'owner', (err, updated_owner) ->
+                reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(updated_owner, "loaded another model.")
+                  updated_owner = reverse.get('owner')
+                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
-                  assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                  assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
-                  done()
+                  reverse.get 'owner', (err, updated_owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(updated_owner, "loaded another model.")
+
+                    assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
+                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    done()
 
       it "Can manually add a relationship by related model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
@@ -426,16 +438,18 @@ runTests = (options, cache, embed, callback) ->
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                updated_owner = reverse.get('owner')
-                assert.ok(updated_owner.id is another_owner.id, "Set the id: #{err}. Expected: #{another_owner.id}. Actual: #{updated_owner.id}")
-
-                reverse.get 'owner', (err, updated_owner) ->
+                reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(updated_owner, "loaded another model.")
+                  updated_owner = reverse.get('owner')
+                  assert.ok(updated_owner.id is another_owner.id, "Set the id: #{err}. Expected: #{another_owner.id}. Actual: #{updated_owner.id}")
 
-                  assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                  assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
-                  done()
+                  reverse.get 'owner', (err, updated_owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(updated_owner, "loaded another model.")
+
+                    assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
+                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    done()
 
     patchAddTests(false)
     patchAddTests(true)
@@ -458,8 +472,9 @@ runTests = (options, cache, embed, callback) ->
             owner.patchRemove 'reverses', destroyed_model.id, (err) ->
               assert.ok(!err, "No errors: #{err}")
 
-              assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
-              assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+              unless unload
+                assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
+                assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
 
               owner.get 'reverses', (err, reverses) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -493,8 +508,9 @@ runTests = (options, cache, embed, callback) ->
             owner.patchRemove 'reverses', destroyed_model.toJSON(), (err) ->
               assert.ok(!err, "No errors: #{err}")
 
-              assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
-              assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+              unless unload
+                assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
+                assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
 
               owner.get 'reverses', (err, reverses) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -528,8 +544,9 @@ runTests = (options, cache, embed, callback) ->
             owner.patchRemove 'reverses', destroyed_model, (err) ->
               assert.ok(!err, "No errors: #{err}")
 
-              assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
-              assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+              unless unload
+                assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
+                assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
 
               owner.get 'reverses', (err, reverses) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -563,8 +580,9 @@ runTests = (options, cache, embed, callback) ->
             owner.patchRemove 'reverses', [destroyed_model], (err) ->
               assert.ok(!err, "No errors: #{err}")
 
-              assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
-              assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
+              unless unload
+                assert.equal(1, owner.get('reverses').models.length, "destroyed in memory relationship. Expected: #{1}. Actual: #{owner.get('reverses').models.length}")
+                assert.equal(other_model.id, owner.get('reverses').models[0].id, "other remains in relationship. Expected: #{other_model.id}. Actual: #{owner.get('reverses').models[0].id}")
 
               owner.get 'reverses', (err, reverses) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -1214,7 +1232,7 @@ runTests = (options, cache, embed, callback) ->
 module.exports = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> runTests(options, false, false, callback)
-  # queue.defer (callback) -> runTests(options, true, false, callback)
-  # not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
-  # not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
+  queue.defer (callback) -> runTests(options, true, false, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
+  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
   queue.await callback
