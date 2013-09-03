@@ -108,14 +108,12 @@ module.exports = class One extends require('./relation')
 
     # belongs to, update the model
     if @type is 'belongsTo'
-      if model.isLoaded(@key)
-        model.save {}, bbCallback callback
-      else
-        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
-          return callback(err) if err
-          return callback(new Error "Failed to fetch model with id: #{model.id}") unless model_json
-          model_json[@foreign_key] = related_id
-          Utils.modelJSONSave(model_json, @model_type, callback)
+      # need to fetch or cases where just setting the id could delete data and _rev could be out of date - TODO: write an incremental insert
+      @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+        return callback(err) if err
+        return callback(new Error "Failed to fetch model with id: #{model.id}") unless model_json
+        model_json[@foreign_key] = related_id
+        model.save model_json, bbCallback callback
 
     # not belongs to, update the related
     else
