@@ -15,7 +15,7 @@ runTests = (options, cache, embed, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
   require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
-  OMIT_KEYS = ['owner_id', '_rev', 'updated_at']
+  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -371,14 +371,14 @@ runTests = (options, cache, embed, callback) ->
                 reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
                   updated_owner = reverse.get('owner')
-                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
+                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
                   reverse.get 'owner', (err, updated_owner) ->
                     assert.ok(!err, "No errors: #{err}")
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -406,14 +406,14 @@ runTests = (options, cache, embed, callback) ->
                 reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
                   updated_owner = reverse.get('owner')
-                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id: #{err}. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
+                  assert.ok(updated_owner.id is another_owner_json.id, "Set the id. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
                   reverse.get 'owner', (err, updated_owner) ->
                     assert.ok(!err, "No errors: #{err}")
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -442,14 +442,14 @@ runTests = (options, cache, embed, callback) ->
                 reverse.get 'owner', (err) ->
                   assert.ok(!err, "No errors: #{err}")
                   updated_owner = reverse.get('owner')
-                  assert.ok(updated_owner.id is another_owner.id, "Set the id: #{err}. Expected: #{another_owner.id}. Actual: #{updated_owner.id}")
+                  assert.ok(updated_owner.id is another_owner.id, "Set the id. Expected: #{another_owner.id}. Actual: #{updated_owner.id}")
 
                   reverse.get 'owner', (err, updated_owner) ->
                     assert.ok(!err, "No errors: #{err}")
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
     patchAddTests(false)

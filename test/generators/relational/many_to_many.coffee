@@ -14,7 +14,7 @@ runTests = (options, cache, embed, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
   require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
-  OMIT_KEYS = ['owner_id', '_rev', 'updated_at']
+  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
