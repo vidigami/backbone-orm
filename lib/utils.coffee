@@ -157,7 +157,7 @@ module.exports = class Utils
   @updateModel: (model, data) ->
     return model if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
-    if _.isObject(data)
+    if Utils.dataId(data) isnt data
       model.setLoaded(true)
       model.set(data)
 
@@ -181,6 +181,7 @@ module.exports = class Utils
 
   @modelJSONSave: (model_json, model_type, callback) ->
     model = new Backbone.Model(model_json)
+    model._orm_never_cache = true
     model.urlRoot = =>
       try url = _.result(model_type.prototype, 'url') catch e
       return url
