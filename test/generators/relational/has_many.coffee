@@ -378,7 +378,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -413,7 +413,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -449,7 +449,7 @@ runTests = (options, cache, embed, callback) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(updated_owner.toJSON(), another_owner_json), "Set the id: #{err}. Expected: #{util.inspect(another_owner_json)}. Actual: #{util.inspect(updated_owner.toJSON())}")
+                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                     done()
 
     patchAddTests(false)
