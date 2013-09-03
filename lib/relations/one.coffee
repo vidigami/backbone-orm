@@ -119,15 +119,15 @@ module.exports = class One extends require('./relation')
 
     # not belongs to, update the related
     else
-      @cursor(model, @key).toJSON (err, current_related_model) =>
+      @cursor(model, @key).toJSON (err, current_related_json) =>
         return callback(err) if err
-        return callback() if current_related_model and (related_id is current_related_model.id) # already set
+        return callback() if current_related_json and (related_id is current_related_json.id) # already set
 
         queue = new Queue(1)
 
         # clear previous
-        unless current_related_model
-          queue.defer (callback) => @patchRemove(model, current_related_model, callback)
+        if current_related_json
+          queue.defer (callback) => @patchRemove(model, current_related_json, callback)
 
         # set new
         queue.defer (callback) =>
@@ -181,9 +181,6 @@ module.exports = class One extends require('./relation')
     if current_related_model = model.get(@key)
       for related in relateds
         (model.set(@key, null); break) if Utils.dataIsSameModel(current_related_model, related) # match
-
-    # no id yet
-    return callback() if model.isNew()
 
     related_ids = (Utils.dataId(related) for related in relateds)
 
