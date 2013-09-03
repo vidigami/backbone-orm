@@ -272,14 +272,19 @@ module.exports = (model_type) ->
       else
         attributes = key; options = value
 
+      # first set simple attributes
       simple_attributes = {}
-      model_type::_orm_original_fns.set.call(@, {id: attributes.id}, options) if attributes.hasOwnProperty('id')
+      relational_attributes = {}
       for key, value of attributes
         if relation = schema.relation(key)
-          relation.set(@, key, value, options)
-        else if key isnt 'id'
+          relational_attributes[key] = relation
+        else
           simple_attributes[key] = value
-      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes) # call all simple attributes one time given all of the additional setup
+      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes)
+
+      # then set relationships
+      for key, relation of relational_attributes
+        relation.set(@, key, attributes[key], options)
 
       # model_type.cache.set(@id, @) if model_type.cache and @isLoaded() and @id # update the cache: TODO: look at the partial models code
       return @
