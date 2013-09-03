@@ -265,7 +265,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), 'reverse_id'), _.omit(another_owner_json, 'reverse_id')), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, 'reverse_id'))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), 'reverse_id'))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -298,7 +298,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), 'reverse_id'), _.omit(another_owner_json, 'reverse_id')), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, 'reverse_id'))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), 'reverse_id'))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (belongsTo) #{if unload then 'with unloaded model' else ''}", (done) ->
@@ -331,7 +331,7 @@ runTests = (options, cache, embed, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), 'reverse_id'), _.omit(another_owner.toJSON(), 'reverse_id')), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner.toJSON(), 'reverse_id'))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), 'reverse_id'))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id: #{err}. Expected: #{util.inspect(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
     patchAddTests(false)
