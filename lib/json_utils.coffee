@@ -89,7 +89,8 @@ module.exports = class JSONUtils
     # many
     else
       results = []
-      queue = new Queue()
+      # Render in series to preserve order - a better way would be nice
+      queue = new Queue(1)
       for model in models
         do (model) -> queue.defer (callback) ->
           JSONUtils.renderTemplate model, template, options, (err, related_json) ->
