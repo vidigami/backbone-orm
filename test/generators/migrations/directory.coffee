@@ -143,7 +143,7 @@ runTests = (options, cache, embed, callback) ->
       related_key = 'reverses'
       related_id_accessor = 'reverse_ids'
 
-      Owner.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+      Owner.cursor().include(related_key).toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner_id = owner.id
@@ -259,7 +259,7 @@ runTests = (options, cache, embed, callback) ->
           done()
 
     it 'Clears its reverse relations on delete when the reverse relation is loaded', (done) ->
-      Owner.cursor({$one: true, $include: 'reverses'}).toModels (err, owner) ->
+      Owner.cursor().include('reverses').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -275,7 +275,7 @@ runTests = (options, cache, embed, callback) ->
               done()
 
     it 'Clears its reverse relations on delete when the reverse relation isnt loaded (one-way hasMany)', (done) ->
-      Owner.cursor({$one: true}).toModels (err, owner) ->
+      Owner.cursor().toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner.get 'reverses', (err, reverses) ->
@@ -510,7 +510,7 @@ runTests = (options, cache, embed, callback) ->
     backlinkTests(true)
 
     it 'does not serialize virtual attributes', (done) ->
-      Owner.cursor({$one: true}).include('reverses').toModels (err, owner) ->
+      Owner.cursor().include('reverses').toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'Reverse found model')
 

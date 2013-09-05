@@ -106,11 +106,11 @@ module.exports = class Utils
       model_type::sync = sync(model_type)
     return model_type
 
-  @destroyRelationsByJSON: (model_type, model_json, callback) ->
+  @patchRemoveByJSON: (model_type, model_json, callback) ->
     return callback() unless schema = model_type.schema()
     queue = new Queue(1)
     for key, relation in schema
-      do (relation) -> queue.defer (callback) -> relation.destroy(model_json, callback)
+      do (relation) -> queue.defer (callback) -> relation.patchRemove(model_json, callback)
     queue.await callback
 
   @presaveBelongsToRelationships: (model, callback) ->
@@ -132,13 +132,11 @@ module.exports = class Utils
   ##############################
 
   # @private
-  @dataId: (data) -> return data?.id or data
+  @dataId: (data) -> return if _.isObject(data) then data.id else data
 
   @dataIsSameModel: (data1, data2) ->
-    return _.isEqual(data1, data2) if not data1 or not data2
-    return true if Utils.dataId(data1) is Utils.dataId(data1)
-    return _.isEqual(data1, data2) if _.isObject(data1) and _.isObject(data2)
-    return false
+    return Utils.dataId(data1) is Utils.dataId(data2) if Utils.dataId(data1) or Utils.dataId(data2)
+    return _.isEqual(data1, data2)
 
   # @private
   @dataToModel: (data, model_type) ->
@@ -146,17 +144,18 @@ module.exports = class Utils
     return (Utils.dataToModel(item, model_type) for item in data) if _.isArray(data)
     if data instanceof Backbone.Model
       model = data
-    else if _.isObject(data)
+    else if Utils.dataId(data) isnt data
       model = new model_type(model_type::parse(data))
     else
       model = new model_type({id: data})
       model.setLoaded(false)
+
     return model
 
   @updateModel: (model, data) ->
     return model if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if data instanceof Backbone.Model
-    if _.isObject(data)
+    if Utils.dataId(data) isnt data
       model.setLoaded(true)
       model.set(data)
 
@@ -180,6 +179,7 @@ module.exports = class Utils
 
   @modelJSONSave: (model_json, model_type, callback) ->
     model = new Backbone.Model(model_json)
+    model._orm_never_cache = true
     model.urlRoot = =>
       try url = _.result(model_type.prototype, 'url') catch e
       return url

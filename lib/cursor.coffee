@@ -56,17 +56,21 @@ module.exports = class Cursor
   ##############################################
   # Execution of the Query
   ##############################################
-  count: (callback) -> @execWithCursorQuery('$count', callback)
-  exists: (callback) -> @execWithCursorQuery('$exists', callback)
-  execWithCursorQuery: (key, callback) ->
+  count: (callback) -> @execWithCursorQuery('$count', 'toJSON', callback)
+  exists: (callback) -> @execWithCursorQuery('$exists', 'toJSON', callback)
+  toModel: (callback) -> @execWithCursorQuery('$one', 'toModels', callback)
+
+  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
+  execWithCursorQuery: (key, method, callback) ->
     value = @_cursor[key]
     @_cursor[key] = true
-    @toJSON (err, json) =>
+    @[method] (err, json) =>
       if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
       callback(err, json)
-  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
+    console.trace "toModels: #{util.inspect(callback)}" unless _.isFunction(callback)
+
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
 
     # a cache candidate

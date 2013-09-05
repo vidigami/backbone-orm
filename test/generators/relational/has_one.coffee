@@ -15,6 +15,7 @@ runTests = (options, cache, embed, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
   require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -134,276 +135,486 @@ runTests = (options, cache, embed, callback) ->
             assert.equal(flat_id, flat.id, 'Loaded model is correct')
             done()
 
-    it 'Can create a model and load a related model by id (belongsTo)', (done) ->
-      Flat.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
+    patchAddTests = (unload) ->
+      it "Can manually add a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-        flat_id = test_model.id
-        new_model = new Owner({flat: flat_id})
-
-        new_model.save {}, bbCallback (err) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found owners')
 
-          new_model.get 'flat', (err, flat) ->
+          owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(flat, 'found related model')
-            assert.equal(flat_id, flat.id, 'Loaded model is correct')
-            done()
+            assert.ok(reverse, "loaded correct model.")
 
-    it 'Can manually delete a relationship by related_id (hasOne)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
-
-      Owner.findOne (err, owner) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'found owners')
-
-        owner.get 'reverse', (err, reverse) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, "loaded correct model.")
-
-          destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model.id, (err) ->
-            assert.ok(!err, "No errors: #{err}")
-
-            assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
-
-            owner.get 'reverse', (err, reverse) ->
+            Reverse.cursor({id: {$ne: reverse.id}, $one: true}).toJSON (err, another_reverse_json) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!reverse, "loaded correct models.")
+              assert.ok(another_reverse_json, "loaded another model.")
+              assert.ok(reverse.id isnt another_reverse_json.id, "loaded a model with a different id.")
 
-              Owner.findOne owner.id, (err, owner) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                owner = new Owner({id: owner.id})
+              owner.patchAdd 'reverse', another_reverse_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(owner, 'found owners')
+                updated_reverse = owner.get('reverse')
+                assert.ok(updated_reverse.id is another_reverse_json.id, "Set the id. Expected: #{another_reverse_json.id}. Actual: #{updated_reverse.id}")
 
-                owner.get 'reverse', (err, reverse) ->
+                owner.get 'reverse', (err, updated_reverse) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!reverse, "loaded correct models.")
+                  assert.ok(updated_reverse, "loaded another model.")
+                  assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
+
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by related_json (hasOne)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+      it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-      Owner.findOne (err, owner) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'found owners')
-
-        owner.get 'reverse', (err, reverse) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, "loaded correct model.")
+          assert.ok(owner, 'found owners')
 
-          destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model.toJSON(), (err) ->
+          owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, "loaded correct model.")
 
-            assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
-
-            owner.get 'reverse', (err, reverse) ->
+            Reverse.cursor({id: {$ne: reverse.id}, $one: true}).toJSON (err, another_reverse_json) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!reverse, "loaded correct models.")
+              assert.ok(another_reverse_json, "loaded another model.")
+              assert.ok(reverse.id isnt another_reverse_json.id, "loaded a model with a different id.")
 
-              Owner.findOne owner.id, (err, owner) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                owner = new Owner({id: owner.id})
+              owner.patchAdd 'reverse', another_reverse_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(owner, 'found owners')
+                updated_reverse = owner.get('reverse')
+                assert.ok(updated_reverse.id is another_reverse_json.id, "Set the id. Expected: #{another_reverse_json.id}. Actual: #{updated_reverse.id}")
 
-                owner.get 'reverse', (err, reverse) ->
+                owner.get 'reverse', (err, updated_reverse) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!reverse, "loaded correct models.")
+                  assert.ok(updated_reverse, "loaded another model.")
+                  assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
+
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by related_model (hasOne)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+      it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-      Owner.findOne (err, owner) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'found owners')
-
-        owner.get 'reverse', (err, reverse) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, "loaded correct model.")
+          assert.ok(owner, 'found owners')
 
-          destroyed_model = reverse
-          owner.destroyRelations 'reverse', destroyed_model, (err) ->
+          owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, "loaded correct model.")
 
-            assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
-
-            owner.get 'reverse', (err, reverse) ->
+            Reverse.cursor({id: {$ne: reverse.id}}).toModel (err, another_reverse) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!reverse, "loaded correct models.")
+              assert.ok(another_reverse, "loaded another model.")
+              assert.ok(reverse.id isnt another_reverse.id, "loaded a model with a different id.")
 
-              Owner.findOne owner.id, (err, owner) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                owner = new Owner({id: owner.id})
+              owner.patchAdd 'reverse', another_reverse, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(owner, 'found owners')
+                updated_reverse = owner.get('reverse')
+                assert.ok(updated_reverse.id is another_reverse.id, "Set the id. Expected: #{another_reverse.id}. Actual: #{updated_reverse.id}")
 
-                owner.get 'reverse', (err, reverse) ->
+                owner.get 'reverse', (err, updated_reverse) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!reverse, "loaded correct models.")
+                  assert.ok(updated_reverse, "loaded another model.")
+                  assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
+
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by array of related_model (hasOne)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+      it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-      Owner.findOne (err, owner) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'found owners')
-
-        owner.get 'reverse', (err, reverse) ->
+        Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(reverse, "loaded correct model.")
+          assert.ok(reverse, 'found reverse')
 
-          destroyed_model = reverse
-          owner.destroyRelations 'reverse', [destroyed_model], (err) ->
+          reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, "loaded correct model.")
 
-            assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
-
-            owner.get 'reverse', (err, reverse) ->
+            Owner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!reverse, "loaded correct models.")
+              assert.ok(another_owner_json, "loaded another model.")
+              assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
 
-              Owner.findOne owner.id, (err, owner) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                reverse = new Reverse({id: reverse.id})
+              reverse.patchAdd 'owner', another_owner_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(owner, 'found owners')
+                updated_owner = reverse.get('owner')
+                assert.ok(updated_owner.id is another_owner_json.id, "Set the id. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
-                owner.get 'reverse', (err, reverse) ->
+                reverse.get 'owner', (err, updated_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!reverse, "loaded correct models.")
+                  assert.ok(updated_owner, "loaded another model.")
+
+                  assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by related_id (belongsTo)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+      it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found reverse')
-
-        reverse.get 'owner', (err, owner) ->
+        Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, "loaded correct model")
+          assert.ok(reverse, 'found reverse')
 
-          destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model.id, (err) ->
+          reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+            assert.ok(owner, "loaded correct model.")
 
-            reverse.get 'owner', (err, owner) ->
+            Owner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!owner, 'destroyed correct model')
+              assert.ok(another_owner_json, "loaded another model.")
+              assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
 
-              Reverse.findOne reverse.id, (err, reverse) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                reverse = new Reverse({id: reverse.id})
+              reverse.patchAdd 'owner', another_owner_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(reverse, 'found reverse')
-                assert.ok(!reverse.get('owner'), 'destroyed correct model')
+                updated_owner = reverse.get('owner')
+                assert.ok(updated_owner.id is another_owner_json.id, "Set the id. Expected: #{another_owner_json.id}. Actual: #{updated_owner.id}")
 
-                reverse.get 'owner', (err, owner) ->
+                reverse.get 'owner', (err, updated_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!owner, 'destroyed correct model')
+                  assert.ok(updated_owner, "loaded another model.")
+
+                  assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by related_json (belongsTo)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+      it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found reverse')
-
-        reverse.get 'owner', (err, owner) ->
+        Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, "loaded correct model")
+          assert.ok(reverse, 'found reverse')
 
-          destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model.toJSON(), (err) ->
+          reverse.get 'owner', (err, owner) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+            assert.ok(owner, "loaded correct model.")
 
-            reverse.get 'owner', (err, owner) ->
+            Owner.cursor({id: {$ne: owner.id}}).toModel (err, another_owner) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!owner, 'destroyed correct model')
+              assert.ok(another_owner, "loaded another model.")
+              assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
 
-              Reverse.findOne reverse.id, (err, reverse) ->
+              if unload
+                require('../../../lib/cache').reset() # reset cache
+                reverse = new Reverse({id: reverse.id})
+              reverse.patchAdd 'owner', another_owner, (err) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(reverse, 'found reverse')
-                assert.ok(!reverse.get('owner'), 'destroyed correct model')
+                updated_owner = reverse.get('owner')
+                assert.ok(updated_owner.id is another_owner.id, "Set the id. Expected: #{another_owner.id}. Actual: #{updated_owner.id}")
 
-                reverse.get 'owner', (err, owner) ->
+                reverse.get 'owner', (err, updated_owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!owner, 'destroyed correct model')
+                  assert.ok(updated_owner, "loaded another model.")
+
+                  assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
-    it 'Can manually delete a relationship by related_model (belongsTo)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+    patchAddTests(false)
+    patchAddTests(true)
 
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found reverse')
+    patchRemoveTests = (unload) ->
+      it "Can manually delete a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-        reverse.get 'owner', (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, "loaded correct model")
+          assert.ok(owner, 'found owners')
 
-          destroyed_model = owner
-          reverse.destroyRelations 'owner', destroyed_model, (err) ->
+          owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+            assert.ok(reverse, "loaded correct model.")
 
-            reverse.get 'owner', (err, owner) ->
+            destroyed_model = reverse
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              owner = new Owner({id: owner.id})
+            owner.patchRemove 'reverse', destroyed_model.id, (err) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!owner, 'destroyed correct model')
 
-              Reverse.findOne reverse.id, (err, reverse) ->
+              assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
+
+              owner.get 'reverse', (err, reverse) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(reverse, 'found reverse')
-                assert.ok(!reverse.get('owner'), 'destroyed correct model')
+                assert.ok(!reverse, "loaded correct models.")
 
-                reverse.get 'owner', (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!owner, 'destroyed correct model')
-                  done()
+                  assert.ok(owner, 'found owners')
 
-    it 'Can manually delete a relationship by array of related_model (belongsTo)', (done) ->
-      # TODO: implement embedded find
-      return done() if embed
+                  owner.get 'reverse', (err, reverse) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!reverse, "loaded correct models.")
+                    done()
 
-      Reverse.findOne (err, reverse) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(reverse, 'found reverse')
+      it "Can manually delete a relationship by related_json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
 
-        reverse.get 'owner', (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, "loaded correct model")
+          assert.ok(owner, 'found owners')
 
-          destroyed_model = owner
-          reverse.destroyRelations 'owner', [destroyed_model], (err) ->
+          owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+            assert.ok(reverse, "loaded correct model.")
 
-            reverse.get 'owner', (err, owner) ->
+            destroyed_model = reverse
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              owner = new Owner({id: owner.id})
+            owner.patchRemove 'reverse', destroyed_model.toJSON(), (err) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!owner, 'destroyed correct model')
+              assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
 
-              Reverse.findOne reverse.id, (err, reverse) ->
+              owner.get 'reverse', (err, reverse) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(reverse, 'found reverse')
-                assert.ok(!reverse.get('owner'), 'destroyed correct model')
+                assert.ok(!reverse, "loaded correct models.")
 
-                reverse.get 'owner', (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!owner, 'destroyed correct model')
-                  done()
+                  assert.ok(owner, 'found owners')
+
+                  owner.get 'reverse', (err, reverse) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!reverse, "loaded correct models.")
+                    done()
+
+      it "Can manually delete a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Owner.findOne (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found owners')
+
+          owner.get 'reverse', (err, reverse) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, "loaded correct model.")
+
+            destroyed_model = reverse
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              owner = new Owner({id: owner.id})
+            owner.patchRemove 'reverse', destroyed_model, (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
+
+              owner.get 'reverse', (err, reverse) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!reverse, "loaded correct models.")
+
+                Owner.findOne owner.id, (err, owner) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(owner, 'found owners')
+
+                  owner.get 'reverse', (err, reverse) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!reverse, "loaded correct models.")
+                    done()
+
+      it "Can manually delete a relationship by array related of model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Owner.findOne (err, owner) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(owner, 'found owners')
+
+          owner.get 'reverse', (err, reverse) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(reverse, "loaded correct model.")
+
+            destroyed_model = reverse
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              owner = new Owner({id: owner.id})
+            owner.patchRemove 'reverse', [destroyed_model], (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
+
+              owner.get 'reverse', (err, reverse) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!reverse, "loaded correct models.")
+
+                Owner.findOne owner.id, (err, owner) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(owner, 'found owners')
+
+                  owner.get 'reverse', (err, reverse) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!reverse, "loaded correct models.")
+                    done()
+
+      it "Can manually delete a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Reverse.findOne (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found reverse')
+
+          reverse.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, "loaded correct model")
+
+            destroyed_model = owner
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              reverse = new Reverse({id: reverse.id})
+            reverse.patchRemove 'owner', destroyed_model.id, (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+
+              reverse.get 'owner', (err, owner) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!owner, 'destroyed correct model')
+
+                Reverse.findOne reverse.id, (err, reverse) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(reverse, 'found reverse')
+                  assert.ok(!reverse.get('owner'), 'destroyed correct model')
+
+                  reverse.get 'owner', (err, owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!owner, 'destroyed correct model')
+                    done()
+
+      it "Can manually delete a relationship by related_json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Reverse.findOne (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found reverse')
+
+          reverse.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, "loaded correct model")
+
+            destroyed_model = owner
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              reverse = new Reverse({id: reverse.id})
+            reverse.patchRemove 'owner', destroyed_model.toJSON(), (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+
+              reverse.get 'owner', (err, owner) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!owner, 'destroyed correct model')
+
+                Reverse.findOne reverse.id, (err, reverse) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(reverse, 'found reverse')
+                  assert.ok(!reverse.get('owner'), 'destroyed correct model')
+
+                  reverse.get 'owner', (err, owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!owner, 'destroyed correct model')
+                    done()
+
+      it "Can manually delete a relationship by related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Reverse.findOne (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found reverse')
+
+          reverse.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, "loaded correct model")
+
+            destroyed_model = owner
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              reverse = new Reverse({id: reverse.id})
+            reverse.patchRemove 'owner', destroyed_model, (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+
+              reverse.get 'owner', (err, owner) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!owner, 'destroyed correct model')
+
+                Reverse.findOne reverse.id, (err, reverse) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(reverse, 'found reverse')
+                  assert.ok(!reverse.get('owner'), 'destroyed correct model')
+
+                  reverse.get 'owner', (err, owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!owner, 'destroyed correct model')
+                    done()
+
+      it "Can manually delete a relationship by array of related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
+        # TODO: implement embedded find
+        return done() if embed
+
+        Reverse.findOne (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(reverse, 'found reverse')
+
+          reverse.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, "loaded correct model")
+
+            destroyed_model = owner
+            if unload
+              require('../../../lib/cache').reset() # reset cache
+              reverse = new Reverse({id: reverse.id})
+            reverse.patchRemove 'owner', [destroyed_model], (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(!reverse.get('owner'), "destroyed in memory relationship.")
+
+              reverse.get 'owner', (err, owner) ->
+                assert.ok(!err, "No errors: #{err}")
+                assert.ok(!owner, 'destroyed correct model')
+
+                Reverse.findOne reverse.id, (err, reverse) ->
+                  assert.ok(!err, "No errors: #{err}")
+                  assert.ok(reverse, 'found reverse')
+                  assert.ok(!reverse.get('owner'), 'destroyed correct model')
+
+                  reverse.get 'owner', (err, owner) ->
+                    assert.ok(!err, "No errors: #{err}")
+                    assert.ok(!owner, 'destroyed correct model')
+                    done()
+
+    patchRemoveTests(false)
+    patchRemoveTests(true)
 
     it 'Can create a model and update the relationship (belongsTo)', (done) ->
       related_key = 'flat'
       related_id_accessor = 'flat_id'
 
-      Owner.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+      Owner.cursor().include(related_key).toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner_id = owner.id
@@ -462,7 +673,7 @@ runTests = (options, cache, embed, callback) ->
       related_key = 'reverse'
       related_id_accessor = 'reverse_id'
 
-      Owner.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+      Owner.cursor().include(related_key).toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         related = owner.get(related_key)
@@ -633,7 +844,7 @@ runTests = (options, cache, embed, callback) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 
-          reverse = fetched_owner.get 'reverse', (err, reverse) ->
+          fetched_owner.get 'reverse', (err, reverse) ->
             if fetched_owner.relationIsEmbedded('reverse')
               assert.ok(!err, "No errors: #{err}")
               assert.ok(!reverse, 'Cannot yet load the model') # TODO: implement a fetch from the related model

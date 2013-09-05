@@ -172,8 +172,12 @@ module.exports = (model_type) ->
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
     needs_load = Utils.orSet(@, 'needs_load', {})
-    return delete needs_load[key] if is_loaded
-    needs_load[key] = true
+    (delete needs_load[key]; return) if is_loaded and Utils.get(@, 'is_initialized') # after initialized, delete needs_load
+    needs_load[key] = !is_loaded
+
+  model_type::isLoadedExists = (key) ->
+    key = '__model__' if arguments.length is 0
+    Utils.orSet(@, 'needs_load', {}).hasOwnProperty(key)
 
   model_type::isPartial = ->
     !!Utils.get(@, 'partial')
@@ -191,26 +195,29 @@ module.exports = (model_type) ->
     #   relation.releaseModel(@) for key, relation of schema.relations
     # return
 
-  model_type::destroyRelations = (key, relateds, callback) ->
+  model_type::patchAdd = (key, relateds, callback) ->
+    return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
+    return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds
+    return relation.patchAdd(@, relateds, callback)
+
+  model_type::patchRemove = (key, relateds, callback) ->
     if arguments.length is 1
       callback = key
       schema = model_type.schema()
       queue = new Queue(1)
       for key, relation of schema.relations
-        do (relation) => queue.defer (callback) => relation.destroyAll(@, callback)
+        do (relation) => queue.defer (callback) => relation.patchRemove(@, callback)
       queue.await callback
 
     else
-      return callback(new Error("destroyRelation: relation '#{key}' unrecognized")) unless relation = @relation(key)
+      return callback(new Error("patchRemove: relation '#{key}' unrecognized")) unless relation = @relation(key)
       if arguments.length is 2
         callback = relateds
-        relation.destroyAll(@, callback)
+        relation.patchRemove(@, callback)
 
       else
-        return callback(new Error("destroyRelation: missing relateds for '#{key}'")) unless relateds
-        relateds = [relateds] unless _.isArray(relateds)
-        return relation.destroySome(@, relateds, callback)
-
+        return callback(new Error("patchRemove: missing relateds for '#{key}'")) unless relateds
+        return relation.patchRemove(@, relateds, callback)
 
   ###################################
   # Backbone ORM - Relationship Query
@@ -237,6 +244,12 @@ module.exports = (model_type) ->
     initialize: ->
       if model_type.schema and (schema = model_type.schema())
         relation.initializeModel(@) for key, relation of schema.relations
+
+        # mark as initialized and clear out needs_load flags
+        needs_load = Utils.orSet(@, 'needs_load', {})
+        delete needs_load[key] for key, value of needs_load when !value
+        Utils.set(@, 'is_initialized', true)
+
       return model_type::_orm_original_fns.initialize.apply(@, arguments)
 
     fetch: (options) ->
@@ -259,13 +272,19 @@ module.exports = (model_type) ->
       else
         attributes = key; options = value
 
+      # first set simple attributes
       simple_attributes = {}
+      relational_attributes = {}
       for key, value of attributes
         if relation = schema.relation(key)
-          relation.set(@, key, value, options)
+          relational_attributes[key] = relation
         else
           simple_attributes[key] = value
-      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes) # call all simple attributes one time given all of the additional setup
+      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes)
+
+      # then set relationships
+      for key, relation of relational_attributes
+        relation.set(@, key, attributes[key], options)
 
       # model_type.cache.set(@id, @) if model_type.cache and @isLoaded() and @id # update the cache: TODO: look at the partial models code
       return @
@@ -352,7 +371,7 @@ module.exports = (model_type) ->
         --@_orm.destroy
         return options.error?(@, resp, options) if err
 
-        @destroyRelations (err) =>
+        @patchRemove (err) =>
           return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
           options.success?(model, resp, options)
       ))

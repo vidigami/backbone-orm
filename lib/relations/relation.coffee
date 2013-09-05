@@ -10,8 +10,8 @@ bbCallback = Utils.bbCallback
 module.exports = class Relation
   # hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
   # isManyToMany: -> return @type is 'hasMany' and @reverse_relation and @reverse_relation.type is 'hasMany'
-  isEmbedded: -> return !!@embed or (@reverse_relation and @reverse_relation.embed)
-  isVirtual: -> return !!@virtual or (@reverse_relation and @reverse_relation.virtual)
+  isEmbedded: -> return !!(@embed or (@reverse_relation and @reverse_relation.embed))
+  isVirtual: -> return !!(@virtual or (@reverse_relation and @reverse_relation.virtual))
 
   findOrGenerateJoinTable: ->
     # already exists
