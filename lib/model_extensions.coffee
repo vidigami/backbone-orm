@@ -398,7 +398,7 @@ module.exports = (model_type) ->
       for key, value of @attributes
         if value instanceof Backbone.Collection
           clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
-          clone.attributes[key].values = (_findOrClone(model, options) for model in value.models)
+          clone.attributes[key].models = (_findOrClone(model, options) for model in value.models)
 
         else if value instanceof Backbone.Model
           clone.attributes[key] = _findOrClone(value, options)
