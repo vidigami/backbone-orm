@@ -305,8 +305,9 @@ module.exports = (model_type) ->
       @_orm.json or= 0; @_orm.json++
 
       json = {}
-      attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
-      for key, value of attributes
+      keys = options.keys or @whitelist or _.keys(@attributes)
+      for key in keys
+        value = @attributes[key]
         if schema and (relation = schema.relation(key))
           relation.appendJSON(json, @, key)
 
@@ -395,10 +396,12 @@ module.exports = (model_type) ->
         clone = new @constructor()
       clone.id = @attributes.id if @attributes.id
 
-      for key, value of @attributes
+      keys = options.keys or _.keys(@attributes)
+      for key in keys
+        value = @attributes[key]
         if value instanceof Backbone.Collection
           clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
-          clone.attributes[key].values = (_findOrClone(model, options) for model in value.models)
+          clone.attributes[key].models = (_findOrClone(model, options) for model in value.models)
 
         else if value instanceof Backbone.Model
           clone.attributes[key] = _findOrClone(value, options)

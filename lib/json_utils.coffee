@@ -5,6 +5,17 @@ Queue = require 'queue-async'
 
 module.exports = class JSONUtils
 
+  # Parse an a request's parameters whose values are still JSON stringified (for example, ids as strings).
+  #
+  # @example
+  #   method: (req, res) ->
+  #     params = JSONUtils.parseParams(req.params)
+  #
+  @parseParams: (params) ->
+    result = {}
+    result[key] = JSON.parse(value) for key, value of params
+    return result
+
   # Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format).
   #
   # @example

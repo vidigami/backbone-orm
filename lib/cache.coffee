@@ -14,6 +14,7 @@ class ModelCache
   get: (id) -> @cache.get(id)
   del: (id) -> @cache.del(id)
   reset: -> @cache.reset()
+  forEach: (fn, thisp) -> @cache.forEach(fn, thisp)
 
 # @private
 class Cache
