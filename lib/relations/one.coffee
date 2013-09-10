@@ -202,12 +202,11 @@ module.exports = class One extends require('./relation')
         related_json[@reverse_relation.foreign_key] = null
         Utils.modelJSONSave(related_json, @reverse_model_type, callback)
 
-  appendJSON: (json, model, key) ->
-    return if key is @virtual_id_accessor # only write the relationships
+  appendJSON: (json, model) ->
     return if @isVirtual() # skip virtual attributes
 
-    json_key = if @embed then key else @foreign_key
-    unless related_model = model.attributes[key]
+    json_key = if @embed then @key else @foreign_key
+    unless related_model = model.attributes[@key]
       json[json_key] = null if @embed or @type is 'belongsTo'
       return
     return json[json_key] = related_model.toJSON() if @embed

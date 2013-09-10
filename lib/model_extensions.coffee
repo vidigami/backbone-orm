@@ -309,7 +309,7 @@ module.exports = (model_type) ->
       for key in keys
         value = @attributes[key]
         if schema and (relation = schema.relation(key))
-          relation.appendJSON(json, @, key)
+          relation.appendJSON(json, @)
 
         else if value instanceof Backbone.Collection
           json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
