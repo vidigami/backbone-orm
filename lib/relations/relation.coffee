@@ -35,7 +35,7 @@ module.exports = class Relation
     return reverse_relation
 
   _saveRelated: (model, related_models, callback) ->
-    return callback() if @embed or not @reverse_relation or (@reverse_relation.type is 'hasOne') # no foriegn key, no save required
+    return callback() if @embed or not @reverse_relation or (@type is 'belongsTo') # no foriegn key, no save required
     return callback() if @isVirtual() # skip virtual attributes
 
     @cursor(model, @key).toJSON (err, json) =>
