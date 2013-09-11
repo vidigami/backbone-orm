@@ -119,7 +119,7 @@ module.exports = class Utils
     schema = model.schema()
 
     for key, relation of schema.relations
-      continue if relation.type isnt 'belongsTo' or relation.virtual or not (value = model.get(key))
+      continue if relation.type isnt 'belongsTo' or relation.isVirtual() or not (value = model.get(key))
       related_models = if value.models then value.models else [value]
       for related_model in related_models
         continue if related_model.id # belongsTo require an id
