@@ -69,7 +69,7 @@ module.exports = class One extends require('./relation')
       return if key is @virtual_id_accessor then related_model.id else related_model
 
     # asynchronous path, needs load
-    if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key) or not model.id) # already loaded or not loadable)
+    if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key)) # already loaded
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)
@@ -219,12 +219,14 @@ module.exports = class One extends require('./relation')
       if @type is 'belongsTo'
         query.$zero = true unless query.id = model.attributes[@key]?.id
       else
+        throw new Error 'Cannot create cursor for non-loaded model' unless model.id
         query[@reverse_relation.foreign_key] = model.id
     else
       # json
       if @type is 'belongsTo'
         query.$zero = true unless query.id = model[@foreign_key]
       else
+        throw new Error 'Cannot create cursor for non-loaded model' unless model.id
         query[@reverse_relation.foreign_key] = model.id
 
     query.$values = ['id'] if key is @virtual_id_accessor
