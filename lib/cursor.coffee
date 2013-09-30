@@ -13,8 +13,15 @@ module.exports = class Cursor
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
+  @validateQuery = (query, memo) =>
+    for key, value of query
+      continue unless _.isUndefined(value) or _.isObject(value)
+      full_key = if memo then "#{memo}.#{key}" else key
+      throw new Error "Unexpected undefined for query key '#{full_key}'" if _.isUndefined(value)
+      @validateQuery(value, full_key) if _.isObject(value)
+
   # @private
-  @parseQuery: (query) ->
+  @parseQuery: (query) =>
     if not query
       return {find: {}, cursor: {}}
     else if not _.isObject(query)
@@ -22,6 +29,7 @@ module.exports = class Cursor
     else if query.find or query.cursor
       return {find: query.find or {}, cursor: query.cursor or {}}
     else
+      @validateQuery(query)
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
         if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)

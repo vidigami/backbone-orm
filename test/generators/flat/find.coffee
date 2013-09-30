@@ -383,6 +383,20 @@ runTests = (options, cache, callback) ->
         assert.equal(models.length, 0, "Found no models:\nExpected: #{0}, Actual: #{models.length}")
         done()
 
+    it 'Throws an error for an undefined $ids query', (done) ->
+      try
+        Flat.find {$ids: undefined}, (err, models) ->
+      catch e
+        assert.ok(e, "Error thrown")
+        done()
+
+    it 'Throws an error for an undefined find $in query', (done) ->
+      try
+        Flat.find {name: {$in: undefined}}, (err, models) ->
+      catch e
+        assert.ok(e, "Error thrown")
+        done()
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run
