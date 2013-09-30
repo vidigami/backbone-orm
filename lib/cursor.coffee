@@ -13,6 +13,7 @@ module.exports = class Cursor
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
+  # @private
   @validateQuery = (query, memo) =>
     for key, value of query
       continue unless _.isUndefined(value) or _.isObject(value)
