@@ -30,7 +30,10 @@ module.exports = class Cursor
     else if query.find or query.cursor
       return {find: query.find or {}, cursor: query.cursor or {}}
     else
-      @validateQuery(query)
+      try
+        @validateQuery(query)
+      catch e
+        throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
         if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
