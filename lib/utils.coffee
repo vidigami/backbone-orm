@@ -285,8 +285,8 @@ module.exports = class Utils
 
     batch_cursor = _.extend({
       $limit: options.$limit or BATCH_DEFAULT_LIMIT
-      $offset: parsed_query.$offset or 0
-      $sort: parsed_query.$sort or 'id' # TODO: generalize sort for different types of sync
+      $offset: parsed_query.cursor.$offset or 0
+      $sort: parsed_query.cursor.$sort or 'id' # TODO: generalize sort for different types of sync
     }, parsed_query.find) # add find parameters
     runBatch(batch_cursor, callback)
 
