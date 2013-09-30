@@ -7,22 +7,22 @@ module.exports = class Cursor
   # @private
   constructor: (query, options) ->
     @[key] = value for key, value of options
-    parsed_query = Cursor.parseQuery(query)
+    parsed_query = Cursor.parseQuery(query, @model_type)
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
   # @private
-  @validateQuery = (query, memo) =>
+  @validateQuery = (query, memo, model_type) =>
     for key, value of query
       continue unless _.isUndefined(value) or _.isObject(value)
       full_key = if memo then "#{memo}.#{key}" else key
-      throw new Error "Unexpected undefined for query key '#{full_key}'" if _.isUndefined(value)
-      @validateQuery(value, full_key) if _.isObject(value)
+      throw new Error "Unexpected undefined for query key '#{full_key}' on #{model_type?.model_name}" if _.isUndefined(value)
+      @validateQuery(value, full_key, model_type) if _.isObject(value)
 
   # @private
-  @parseQuery: (query) =>
+  @parseQuery: (query, model_type) =>
     if not query
       return {find: {}, cursor: {}}
     else if not _.isObject(query)
@@ -31,7 +31,7 @@ module.exports = class Cursor
       return {find: query.find or {}, cursor: query.cursor or {}}
     else
       try
-        @validateQuery(query)
+        @validateQuery(query, null, model_type)
       catch e
         throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
