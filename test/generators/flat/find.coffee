@@ -371,6 +371,17 @@ runTests = (options, cache, callback) ->
                 assert.ok(model.get('name') isnt NAME, 'not name attribute')
               done()
 
+    it 'Handles an empty $ids query', (done) ->
+      Flat.find {$ids: []}, (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(models.length, 0, "Found no models:\nExpected: #{0}, Actual: #{models.length}")
+        done()
+
+    it 'Handles an empty find $in query', (done) ->
+      Flat.find {name: {$in: []}}, (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(models.length, 0, "Found no models:\nExpected: #{0}, Actual: #{models.length}")
+        done()
 
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
