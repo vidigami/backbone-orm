@@ -12,7 +12,7 @@ runTests = (options, cache, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -103,7 +103,7 @@ runTests = (options, cache, callback) ->
           assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
           done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

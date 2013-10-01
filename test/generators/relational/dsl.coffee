@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 runTests = (options, cache, callback) ->
@@ -13,7 +14,7 @@ runTests = (options, cache, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -84,7 +85,7 @@ runTests = (options, cache, callback) ->
               flat: MODELS.flat.pop()
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
-            owner.save {}, Utils.bbCallback callback
+            owner.save {}, bbCallback callback
 
         save_queue.await callback
 
@@ -520,7 +521,7 @@ runTests = (options, cache, callback) ->
           done()
 
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

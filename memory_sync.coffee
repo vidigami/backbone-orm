@@ -6,8 +6,8 @@ Queue = require 'queue-async'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
-bbCallback = Utils.bbCallback
 
+DESTROY_BATCH_LIMIT = 1000
 STORES = {}
 
 # Backbone Sync for in-memory models.
@@ -36,18 +36,18 @@ class MemorySync
 
   # @private
   read: (model, options) ->
-    options.success(if model.models then (json for id, json of @store) else @store[model.id])
+    options.success(if model.models then (Utils.deepClone(model_json) for id, model_json of @store) else Utils.deepClone(@store[model.id]))
 
   # @private
   create: (model, options) ->
     model.set(id: Utils.guid())
     model_json = @store[model.id] = model.toJSON()
-    options.success(_.clone(model_json))
+    options.success(Utils.deepClone(model_json))
 
   # @private
   update: (model, options) ->
     @store[model.id] = model_json = model.toJSON()
-    options.success(_.clone(model_json))
+    options.success(Utils.deepClone(model_json))
 
   # @private
   delete: (model, options) ->
@@ -60,28 +60,17 @@ class MemorySync
   ###################################
 
   # @private
-  resetSchema: (options, callback) ->
-    queue = new Queue(1)
-    for id, model_json of @store
-      do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
-    queue.await callback
+  resetSchema: (options, callback) -> @destroy({}, callback)
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    unless (keys = _.keys(query)).length
-      # destroy backlinks
-     return @resetSchema({}, callback)
-
-    else
-      # destroy specific records
-      queue = new Queue(1)
-      for id, model_json of @store
-        if _.isEqual(_.pick(model_json, keys), query)
-          do (id, model_json) => queue.defer (callback) => (new @model_type(model_json)).destroy bbCallback(callback); delete @store[id] # destroy backlinks
-      queue.await callback
+    @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
+      Utils.patchRemoveByJSON @model_type, model_json, (err) =>
+        delete @store[model_json.id] unless err
+        callback(err)
 
 module.exports = (type) ->
   if (new type()) instanceof Backbone.Collection # collection

@@ -6,13 +6,14 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 
 runTests = (options, cache, embed, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
@@ -62,7 +63,7 @@ runTests = (options, cache, embed, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, Utils.bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, bbCallback callback
 
         save_queue.await callback
 
@@ -99,7 +100,6 @@ runTests = (options, cache, embed, callback) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-# TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

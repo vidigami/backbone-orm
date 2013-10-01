@@ -14,7 +14,13 @@ module.exports = class Cursor
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
   # @private
-  @parseQuery: (query) ->
+  @validateQuery = (query) =>
+    for key, value of query
+      throw new Error("Unexpected undefined for query key") if _.isUndefined(value)
+      @validateQuery(value) if _.isObject(value)
+
+  # @private
+  @parseQuery: (query) =>
     if not query
       return {find: {}, cursor: {}}
     else if not _.isObject(query)
@@ -22,6 +28,10 @@ module.exports = class Cursor
     else if query.find or query.cursor
       return {find: query.find or {}, cursor: query.cursor or {}}
     else
+      try
+        @validateQuery(query)
+      catch e
+        throw new Error "#{e.message}, model: #{@model_type?.name}, query: #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
         if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
@@ -56,17 +66,21 @@ module.exports = class Cursor
   ##############################################
   # Execution of the Query
   ##############################################
-  count: (callback) -> @execWithCursorQuery('$count', callback)
-  exists: (callback) -> @execWithCursorQuery('$exists', callback)
-  execWithCursorQuery: (key, callback) ->
+  count: (callback) -> @execWithCursorQuery('$count', 'toJSON', callback)
+  exists: (callback) -> @execWithCursorQuery('$exists', 'toJSON', callback)
+  toModel: (callback) -> @execWithCursorQuery('$one', 'toModels', callback)
+
+  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
+  execWithCursorQuery: (key, method, callback) ->
     value = @_cursor[key]
     @_cursor[key] = true
-    @toJSON (err, json) =>
+    @[method] (err, json) =>
       if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
       callback(err, json)
-  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
   toModels: (callback) ->
+    console.trace "toModels: #{util.inspect(callback)}" unless _.isFunction(callback)
+
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
 
     # a cache candidate
@@ -100,11 +114,13 @@ module.exports = class Cursor
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
       json = [json] unless _.isArray(json)
-      if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
-        models = (Utils.updateOrNew(item, @model_type) for item in json)
-      else
-        models = (model = new @model_type(@model_type::parse(item)); model.setLoaded(false); model for item in json)
-      return callback(null, if @_cursor.$one then models[0] else models)
+
+      @prepareIncludes json, (err, json) =>
+        if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
+          models = (Utils.updateOrNew(item, @model_type) for item in json)
+        else
+          models = (model = new @model_type(@model_type::parse(item)); model.setPartial(true); model for item in json)
+        return callback(null, if @_cursor.$one then models[0] else models)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
@@ -131,12 +147,41 @@ module.exports = class Cursor
 
     return json
 
-  selectFromModels: (models) ->
+  selectFromModels: (models, callback) ->
     if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setLoaded(false); model for item in models)
+      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setPartial(true); model for item in models)
 
     else if @_cursor.$white_list
-      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setLoaded(false); model for item in models)
+      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setPartial(true); model for item in models)
 
     return models
+
+  prepareIncludes: (json, callback) ->
+    return callback(null, json) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
+    schema = @model_type.schema()
+    shared_related_models = {}
+
+    findOrNew = (related_json, reverse_model_type) =>
+      unless shared_related_models[related_json.id]
+        if reverse_model_type.cache
+          unless shared_related_models[related_json.id] = reverse_model_type.cache.get(related_json.id)
+            reverse_model_type.cache.set(related_json.id, shared_related_models[related_json.id] = new reverse_model_type(related_json))
+        else
+          shared_related_models[related_json.id] = new reverse_model_type(related_json)
+      return shared_related_models[related_json.id]
+
+    for include in @_cursor.$include
+      relation = schema.relation(include)
+      shared_related_models = {} # reset
+
+      for model_json in json
+        # many
+        if _.isArray(related_json = model_json[include])
+          model_json[include] = (findOrNew(item, relation.reverse_model_type) for item in related_json)
+
+        # one
+        else if related_json
+          model_json[include] = findOrNew(related_json, relation.reverse_model_type)
+
+    callback(null, json)

@@ -14,7 +14,7 @@ runTests = (options, cache, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
@@ -371,7 +371,32 @@ runTests = (options, cache, callback) ->
                 assert.ok(model.get('name') isnt NAME, 'not name attribute')
               done()
 
-# TODO: explain required set up
+    it 'Handles an empty $ids query', (done) ->
+      Flat.find {$ids: []}, (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(models.length, 0, "Found no models:\nExpected: #{0}, Actual: #{models.length}")
+        done()
+
+    it 'Handles an empty find $in query', (done) ->
+      Flat.find {name: {$in: []}}, (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(models.length, 0, "Found no models:\nExpected: #{0}, Actual: #{models.length}")
+        done()
+
+    it 'Throws an error for an undefined $ids query', (done) ->
+      try
+        Flat.find {$ids: undefined}, (err, models) ->
+      catch e
+        assert.ok(e, "Error thrown")
+        done()
+
+    it 'Throws an error for an undefined find $in query', (done) ->
+      try
+        Flat.find {name: {$in: undefined}}, (err, models) ->
+      catch e
+        assert.ok(e, "Error thrown")
+        done()
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

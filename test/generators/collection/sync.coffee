@@ -13,7 +13,7 @@ runTests = (options, cache, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Model extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/models"
@@ -94,7 +94,33 @@ runTests = (options, cache, callback) ->
       else
         runTest()
 
-# TODO: explain required set up
+    it 'fetch models using upgraded model', (done) ->
+      class Collection extends Backbone.Collection
+        url: "#{DATABASE_URL}/models"
+        model: Model
+        sync: SYNC(Collection)
+
+      runTest = (err) ->
+        return done(err) if err
+
+        Model.all (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(models.length, 'Found models')
+
+          collection = new Collection(model.toJSON() for model in models)
+          for model in models
+            found_model = collection.get(model.id)
+            if cache
+              assert.equal(model, found_model, "Model found in cache")
+            else
+              assert.notEqual(model, found_model, "Model not found in cache")
+          done()
+
+      if options.before
+        options.before([Collection::model], runTest)
+      else
+        runTest()
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

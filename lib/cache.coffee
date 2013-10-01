@@ -6,6 +6,16 @@ LRU = require 'lru-cache'
 
 Utils = require './utils'
 
+class ModelCache
+  constructor: (options) -> @cache = new LRU(options)
+  set: (id, model) ->
+    return @ if model._orm_never_cache # skip cache
+    @cache.set(id, model)
+  get: (id) -> @cache.get(id)
+  del: (id) -> @cache.del(id)
+  reset: -> @cache.reset()
+  forEach: (fn, thisp) -> @cache.forEach(fn, thisp)
+
 # @private
 class Cache
   constructor: ->
@@ -44,7 +54,6 @@ class Cache
     # clear the full cache
     if arguments.length is 0
       value.reset() for key, value of @caches
-      @caches = {}
       return @
 
     return @ unless model_cache = @caches[model_type.model_name] # no caching
@@ -56,17 +65,22 @@ class Cache
     model_cache.del(id) for id in ids
     return @
 
+  hardReset: ->
+    @configure()
+    delete @caches[key] for key, value of @caches
+    return @
+
   getOrCreateModelCache: (model_name) ->
     throw new Error "Missing model name for cache" unless model_name
     return model_cache if model_cache = @caches[model_name]
 
     # there are options
     if options = @options.modelTypes[model_name]
-      return @caches[model_name] = LRU(options)
+      return @caches[model_name] = new ModelCache(options)
 
     # there are global options
     else if @options.max or @options.maxAge
-      return @caches[model_name] = LRU(_.pick(@options, 'max', 'maxAge', 'length', 'dispose', 'stale'))
+      return @caches[model_name] = new ModelCache(_.pick(@options, 'max', 'maxAge', 'length', 'dispose', 'stale'))
 
     return null
 

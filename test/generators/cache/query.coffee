@@ -42,7 +42,7 @@ runTests = (options, embed, callback) ->
       it 'TODO', (done) ->
           done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

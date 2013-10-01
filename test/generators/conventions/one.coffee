@@ -6,6 +6,7 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 runTests = (options, cache, embed, callback) ->
@@ -13,7 +14,7 @@ runTests = (options, cache, embed, callback) ->
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -73,7 +74,7 @@ runTests = (options, cache, embed, callback) ->
         reverses = MODELS.reverse.slice()
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, Utils.bbCallback callback
+            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, bbCallback callback
 
         save_queue.await callback
 
@@ -86,18 +87,18 @@ runTests = (options, cache, embed, callback) ->
         assert.ok(test_model, 'found model')
 
         fetched_owner = new Owner({id: test_model.id})
-        fetched_owner.fetch Utils.bbCallback (err) ->
+        fetched_owner.fetch bbCallback (err) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 
-          reverse = fetched_owner.get 'reverse', (err, reverse) ->
+          fetched_owner.get 'reverse', (err, reverse) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(reverse, 'loaded the model lazily')
             assert.equal(reverse.get('owner_id'), test_model.id)
             done()
   #          assert.equal(reverse, null, 'has not loaded the model initially')
 
-    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
+   it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -189,7 +190,6 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(!related_json.updated_at, "flat doesn't have updated_at")
             done()
 
-# TODO: explain required set up
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

@@ -7,13 +7,14 @@ moment = require 'moment'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 
 runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -49,7 +50,7 @@ runTests = (options, cache, callback) ->
         bob = new Flat({name: 'Bob'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
+        queue.defer (callback) -> bob.save {}, bbCallback(callback)
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->
@@ -73,8 +74,8 @@ runTests = (options, cache, callback) ->
         fred = new Flat({name: 'Fred'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, Utils.bbCallback(callback)
-        queue.defer (callback) -> fred.save {}, Utils.bbCallback(callback)
+        queue.defer (callback) -> bob.save {}, bbCallback(callback)
+        queue.defer (callback) -> fred.save {}, bbCallback(callback)
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->
@@ -119,22 +120,22 @@ runTests = (options, cache, callback) ->
 
           Flat.exists {name: model.get('name')}, (err, exists) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(exists, 'the model exists by name')
+            assert.ok(exists, "the model exists by name. Expected: #{true}. Actual: #{exists}")
 
             Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
               assert.ok(!err, "No errors: #{err}")
-              assert.ok(!exists, 'the model does not exist by bad name')
+              assert.ok(!exists, "the model does not exist by bad name. Expected: #{false}. Actual: #{exists}")
 
               Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
                 assert.ok(!err, "No errors: #{err}")
-                assert.ok(exists, 'the model exists by created_at')
+                assert.ok(exists, "the model exists by created_at. Expected: #{true}. Actual: #{exists}")
 
                 Flat.exists {created_at: moment('01/01/2001').toDate()}, (err, exists) ->
                   assert.ok(!err, "No errors: #{err}")
-                  assert.ok(!exists, 'the model does not exist by bad created_at')
+                  assert.ok(!exists, "the model does not exist by bad created_at. Expected: #{false}. Actual: #{exists}")
                   done()
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

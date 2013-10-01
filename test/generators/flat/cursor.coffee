@@ -6,13 +6,14 @@ Queue = require 'queue-async'
 
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
+bbCallback = Utils.bbCallback
 
 runTests = (options, cache, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').configure(if cache then {max: 100} else null) # configure caching
+  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -82,7 +83,7 @@ runTests = (options, cache, callback) ->
           assert.equal(models.length, limit, 'found models')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can chain limit and offset', (done) ->
       ALBUM_NAME = 'Test2'
@@ -97,7 +98,7 @@ runTests = (options, cache, callback) ->
           assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can select fields', (done) ->
       ALBUM_NAME = 'Test3'
@@ -113,7 +114,7 @@ runTests = (options, cache, callback) ->
             assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -130,7 +131,7 @@ runTests = (options, cache, callback) ->
             assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can select the intersection of a whitelist and fields', (done) ->
       ALBUM_NAME = 'Test3'
@@ -149,7 +150,7 @@ runTests = (options, cache, callback) ->
             assert.equal(json['name'], ALBUM_NAME, 'gets the correct value')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can select the intersection of a whitelist and values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -168,7 +169,7 @@ runTests = (options, cache, callback) ->
             assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, Utils.bbCallback callback
+      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, bbCallback callback
 
     it 'Cursor can perform an $in query', (done) ->
       Flat.findOne (err, test_model) ->
@@ -193,7 +194,7 @@ runTests = (options, cache, callback) ->
         done()
 
 
-# TODO: explain required set up
+
 
 # each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
 # beforeEach should return the models_json for the current run

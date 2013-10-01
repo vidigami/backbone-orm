@@ -2,6 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Queue = require 'queue-async'
 moment = require 'moment'
+inflection = require 'inflection'
 
 Utils = require './utils'
 Cursor = require './cursor'
@@ -37,35 +38,29 @@ IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 # @private
 module.exports = class MemoryCursor extends Cursor
   toJSON: (callback) ->
+    return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
+
     exists = @hasCursorQuery('$exists')
 
     @buildFindQuery (err, find_query) =>
       return callback(err) if err
 
-      keys = _.keys(find_query)
       json = []
+      keys = _.keys(find_query)
       queue = new Queue(1)
-
-      # only the count
-      if @hasCursorQuery('$count')
-        json_count = @_count(find_query, keys)
-        start_index = @_cursor.$offset or 0
-        if @_cursor.$one
-          json_count = Math.max(0, json_count - start_index)
-        else if @_cursor.$limit
-          json_count = Math.min(Math.max(0, json_count - start_index), @_cursor.$limit)
-        return callback(null, json_count)
 
       queue.defer (callback) =>
         ins = {}
         (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
         ins_size = _.size(ins)
 
+        # NOTE: we clone the data out of the store since the caller could modify it
+
         # use find
         if keys.length or ins_size
           if @_cursor.$ids
             for id, model_json of @store
-              json.push(model_json) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(Utils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
@@ -80,7 +75,7 @@ module.exports = class MemoryCursor extends Cursor
                   return callback(err) if err
                   return callback() unless is_match
                   if not find_keys.length or (exists and (keys.length isnt find_keys.length)) # exists only needs one result
-                    json.push(model_json)
+                    json.push(Utils.deepClone(model_json))
                     return callback()
 
                   # check next key
@@ -97,9 +92,9 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(model_json) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json.push(Utils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
           else
-            json = (model_json for id, model_json of @store)
+            json = (Utils.deepClone(model_json) for id, model_json of @store)
           callback()
 
       if not exists
@@ -123,6 +118,7 @@ module.exports = class MemoryCursor extends Cursor
         queue.defer (callback) => @fetchIncludes(json, callback)
 
       queue.await =>
+        return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
         if @_cursor.$one
           return callback(null, null) unless json.length
@@ -130,11 +126,13 @@ module.exports = class MemoryCursor extends Cursor
 
         json = @selectResults(json)
         if @hasCursorQuery('$page')
-          callback(null, {
-            offset: @_cursor.$offset
-            total_rows: @_count(find_query, keys)
-            rows: json
-          })
+          count_cursor = new MemoryCursor(@_find, _.extend(_.pick(@, ['model_type', 'store'])))
+          count_cursor.count (err, count) =>
+            callback(null, {
+              offset: @_cursor.$offset or 0
+              total_rows: count
+              rows: json
+            })
         else
           callback(null, json)
 
@@ -147,14 +145,25 @@ module.exports = class MemoryCursor extends Cursor
     for key, value of @_find
       if (key.indexOf('.') < 0)
         (find_query[key] = value; continue) unless reverse_relation = @model_type.reverseRelation(key)
-        (find_query[key] = value; continue) unless reverse_relation.join_table
+        (find_query[key] = value; continue) if not reverse_relation.embed and not reverse_relation.join_table
         do (key, value, reverse_relation) => queue.defer (callback) =>
-          (related_query = {})[key] = value
-          related_query.$values = reverse_relation.reverse_relation.foreign_key
-          reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
-            return callback(err) if err
-            find_query.id = {$in: model_ids}
-            callback()
+          if reverse_relation.embed
+
+            # TODO: should a cursor be returned instead of a find_query?
+            throw Error "Embedded find is not yet supported. @_find: #{util.inspect(@_find)}"
+
+            (related_query = {}).id = value
+            reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
+              return callback(err) if err
+              find_query._json = _.map(models_json, (test) -> test[reverse_relation.key])
+              callback()
+          else
+            (related_query = {})[key] = value
+            related_query.$values = reverse_relation.reverse_relation.join_key
+            reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
+              return callback(err) if err
+              find_query.id = {$in: model_ids}
+              callback()
         continue
 
       [relation_key, value_key] = key.split('.')
@@ -175,14 +184,14 @@ module.exports = class MemoryCursor extends Cursor
             return callback(err) if err
 
             if relation.join_table
-              (join_query = {})[relation.reverse_relation.foreign_key] = {$in: related_ids}
+              (join_query = {})[relation.reverse_relation.join_key] = {$in: _.compact(related_ids)}
               join_query.$values = relation.foreign_key
               relation.join_table.cursor(join_query).toJSON (err, model_ids) =>
                 return callback(err) if err
-                find_query.id = {$in: model_ids}
+                find_query.id = {$in: _.compact(model_ids)}
                 callback()
             else
-              find_query[relation.foreign_key] = {$in: related_ids}
+              find_query[relation.foreign_key] = {$in: _.compact(related_ids)}
               callback()
 
         # foreign key is on this model
@@ -192,7 +201,7 @@ module.exports = class MemoryCursor extends Cursor
           relation.reverse_model_type.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
 
-            find_query.id = {$in: model_ids}
+            find_query.id = {$in: _.compact(model_ids)}
             callback()
 
     queue.await (err) =>
@@ -210,6 +219,7 @@ module.exports = class MemoryCursor extends Cursor
       continue if @model_type.relationIsEmbedded(key)
       return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
 
+      # TODO: optimize by grouping included keys, fetching once, and then updating all relationships
       # Load the included models
       for model_json in json
         do (key, model_json) => load_queue.defer (callback) =>
@@ -225,12 +235,6 @@ module.exports = class MemoryCursor extends Cursor
   ##########################################
   # Internal
   ##########################################
-  _count: (find_query, keys) ->
-    if keys.length
-      json_count = _.reduce(@store, ((memo, model_json) => return if _.isEqual(_.pick(model_json, keys), find_query) then memo + 1 else memo), 0)
-    else
-      json_count = _.size(@store)
-
   _valueIsMatch: (find_query, key_path, model_json, callback) ->
     key_components = key_path.split('.')
     model_type = @model_type

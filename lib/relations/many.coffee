@@ -5,29 +5,35 @@ inflection = require 'inflection'
 Queue = require 'queue-async'
 
 Utils = require '../utils'
+bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @ids_accessor or= "#{inflection.singularize(@key)}_ids"
+    @virtual_id_accessor or= "#{inflection.singularize(@key)}_ids"
+    @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     @collection_type = Backbone.Collection unless @collection_type
 
   initialize: ->
-    @reverse_relation = Utils.findOrGenerateReverseRelation(@)
+    @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
 
     # check for join table
-    @join_table = Utils.findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
+    @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
 
-  initializeModel: (model, key) ->
-    model.setLoaded(@key, false)
+  initializeModel: (model) ->
+    model.setLoaded(@key, false) unless model.isLoadedExists(@key) # it may have been set before initialize is called
     @_bindBacklinks(model)
 
+  releaseModel: (model) ->
+    @_unbindBacklinks(model)
+    delete model._orm
+
   set: (model, key, value, options) ->
-    throw new Error "Many::set: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "Many.set: Unexpected key #{key}. Expecting: #{@key} or #{@virtual_id_accessor} or #{@foreign_key}" unless ((key is @key) or (key is @virtual_id_accessor) or (key is @foreign_key))
     collection = @_bindBacklinks(model)
 
     value = value.models if value instanceof Backbone.Collection
@@ -49,17 +55,15 @@ module.exports = class Many extends require('./relation')
     return @
 
   get: (model, key, callback) ->
-    throw new Error "Many::get: Unexpected key #{key}. Expecting: #{@key} or #{@ids_accessor}" unless (key is @key or key is @ids_accessor)
+    throw new Error "Many.get: Unexpected key #{key}. Expecting: #{@key} or #{@virtual_id_accessor} or #{@foreign_key}" unless ((key is @key) or (key is @virtual_id_accessor) or (key is @foreign_key))
     collection = @_ensureCollection(model)
     returnValue = =>
-      return if key is @ids_accessor then _.map(collection.models, (related_model) -> related_model.id) else collection
+      return if key is @virtual_id_accessor then (related_model.id for related_model in collection.models) else collection
 
     # asynchronous path, needs load
-    if callback and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
-
+    if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key))
       # fetch
-      (query = {})[@foreign_key] = model.id
-      @reverse_model_type.cursor(query).toJSON (err, json) =>
+      @cursor(model, @key).toJSON (err, json) =>
         return callback(err) if err
         model.setLoaded(@key, true)
 
@@ -81,26 +85,28 @@ module.exports = class Many extends require('./relation')
     callback(null, if result.models then result.models else result) if callback and (is_loaded or @manual_fetch)
     return result
 
-  save: (model, key, callback) ->
-    return callback() if not @reverse_relation or not @_hasChanged(model)
+  save: (model, callback) ->
+    return callback() if not @_hasChanged(model)
     delete Utils.orSet(model, 'rel_dirty', {})[@key]
+    collection = @_ensureCollection(model)
+    @_saveRelated(model, _.clone(collection.models), callback)
+
+  appendJSON: (json, model) ->
+    return if @isVirtual() # skip virtual attributes
 
     collection = @_ensureCollection(model)
-    related_models = _.clone(collection.models)
-    @_saveRelated(model, related_models, callback)
-
-  appendJSON: (json, model, key) ->
-    return if key is @ids_accessor # only write the relationships
-
-    collection = @_ensureCollection(model)
-    json_key = if @embed then key else @ids_accessor
+    json_key = if @embed then @key else @virtual_id_accessor
     return json[json_key] = collection.toJSON() if @embed
 
   add: (model, related_model) ->
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
-    throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
+
+    # TODO: this is needed for model lifecycle - not knowing when a model is actually disposed and not wanting to remove a model from a relationship
+    # throw new Error "\nModel added twice: #{util.inspect(current_related_model)}\nand\n#{util.inspect(related_model)}" if current_related_model
+    collection.remove(current_related_model) if current_related_model
+    @reverse_model_type.cache.set(related_model.id, related_model) if @reverse_model_type.cache and related_model.id # make sure the latest model is in the cache
     collection.add(related_model)
 
   remove: (model, related_model) ->
@@ -108,40 +114,142 @@ module.exports = class Many extends require('./relation')
     return unless current_related_model = collection.get(related_model.id)
     collection.remove(current_related_model)
 
-  destroy: (model, callback) ->
-    return callback() if not @reverse_relation
-    delete Utils.orSet(model, 'rel_dirty', {})[@key]
-    if model instanceof Backbone.Model
-      collection = @_ensureCollection(model)
-      related_models = _.clone(collection.models)
-    else
-      related_models = (new @reverse_model_type(json) for json in (model[@key] or []))
-    use_join = not @reverse_model_type::sync('isRemote') and (@reverse_relation.type is 'hasMany')
+  patchAdd: (model, relateds, callback) ->
+    return callback(new Error "Many.patchAdd: model has null id for: #{@key}") unless model.id
+    return callback(new Error "Many.patchAdd: missing model for: #{@key}") unless relateds
 
-    # clear in memory
-    for related_model in related_models
-      related_model.set(@foreign_key, null)
-      cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
+    relateds = [relateds] unless _.isArray(relateds)
+    collection = @_ensureCollection(model)
+    relateds = ((if related_model = collection.get(Utils.dataId(item)) then Utils.updateModel(related_model, item) else Utils.updateOrNew(item, @reverse_model_type)) for item in relateds)
+    related_ids = (Utils.dataId(related) for related in relateds)
+    collection.add(relateds)
+    if model.isLoaded(@key) # check for needing load
+      (model.setLoaded(@key, false); break) for related in relateds when not related.isLoaded()
 
-    # clear in store through join table
-    (query = {})[@foreign_key] = model.id
-    return @join_table.destroy(query, callback) if use_join
-
-    # clear back links on models and save
-    (query = {})[@foreign_key] = model.id
-    @reverse_model_type.cursor(query).toJSON (err, json) =>
-      return callback(err) if err
-
-      # clear reverses
+    # patch in store
+    if @join_table
       queue = new Queue(1)
-      for related_json in json
-        do (related_json) => queue.defer (callback) => @_clearAndSaveRelatedBacklink(model, new @reverse_model_type(related_json), callback)
+
+      for related_id in related_ids
+        do (related_id) => queue.defer (callback) =>
+          return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
+
+          add = (callback) =>
+            attributes = {}
+            attributes[@foreign_key] = model.id
+            attributes[@reverse_relation.foreign_key] = related_id
+            # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+            join = new @join_table(attributes)
+            join.save {}, bbCallback callback
+
+          # just create another entry
+          return add(callback) if @reverse_relation.type is 'hasMany'
+
+          # check for changes
+          (query = {})[@reverse_relation.foreign_key] = related_id
+          return @join_table.find query, (err, join_table_json) =>
+            return callback(err) if err
+            return add(callback) unless join_table_json # create a new join table entry
+            return callback() if join_table_json[@foreign_key] is model.id # already related
+
+            # update existing relationship
+            join_table_json[@foreign_key] = model.id
+            Utils.modelJSONSave(join_table_json, @join_table, callback)
+
       queue.await callback
 
+    else
+      query = {id: $in: related_ids}
+      @reverse_model_type.cursor(query).toJSON (err, related_jsons) =>
+        queue = new Queue(1)
+        for related_json in related_jsons
+          do (related_json) => queue.defer (callback) =>
+            related_json[@reverse_relation.foreign_key] = model.id
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        queue.await callback
+
+  patchRemove: (model, relateds, callback) ->
+    return callback(new Error "Many.patchRemove: model has null id for: #{@key}") unless model.id
+
+    # REMOVE ALL
+    if arguments.length is 2
+      callback = relateds
+
+      return callback() if not @reverse_relation
+      if model instanceof Backbone.Model
+        delete Utils.orSet(model, 'rel_dirty', {})[@key]
+        collection = @_ensureCollection(model)
+        related_models = _.clone(collection.models)
+      else
+        related_models = (new @reverse_model_type(json) for json in (model[@key] or []))
+
+      # clear in memory
+      for related_model in related_models
+        related_model.set(@foreign_key, null)
+        cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
+
+      # clear in store through join table
+      if @join_table
+        (query = {})[@join_key] = model.id
+        return @join_table.destroy(query, callback)
+
+      # clear back links on models and save
+      else
+        (query = {})[@reverse_relation.foreign_key] = model.id
+        @reverse_model_type.cursor(query).toJSON (err, json) =>
+          return callback(err) if err
+
+          # clear reverses
+          queue = new Queue(1)
+          for related_json in json
+            do (related_json) => queue.defer (callback) =>
+              related_json[@reverse_relation.foreign_key] = null
+              Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+          queue.await callback
+      return
+
+    # REMOVE SOME
+    return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
+    return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
+    relateds = [relateds] unless _.isArray(relateds)
+    collection = @_ensureCollection(model)
+
+    # destroy in memory
+    for related in relateds
+      for current_related_model in collection.models
+        (collection.remove(current_related_model); break) if Utils.dataIsSameModel(current_related_model, related) # a match
+
+    related_ids = (Utils.dataId(related) for related in relateds)
+
+    # clear in store through join table
+    if @join_table # can directly destroy the join table entry
+      query = {}
+      query[@join_key] = model.id
+      query[@reverse_relation.join_key] = {$in: related_ids}
+      @join_table.destroy query, callback
+
+    # clear back links on models and save
+    else
+      query = {}
+      query[@reverse_relation.foreign_key] = model.id
+      query.id = {$in: related_ids}
+      @reverse_model_type.cursor(query).toJSON (err, json) =>
+        return callback(err) if err
+
+        # clear reverses
+        queue = new Queue(1)
+        for related_json in json
+          do (related_json) => queue.defer (callback) =>
+            related_json[@reverse_relation.foreign_key] = null
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        queue.await callback
+
   cursor: (model, key, query) ->
+    # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
+
     json = if model instanceof Backbone.Model then model.attributes else model
-    (query = _.clone(query or {}))[@foreign_key] = json.id
-    (query.$values or= []).push('id') if key is @ids_accessor
+    (query = _.clone(query or {}))[if @join_table then @join_key else @reverse_relation.foreign_key] = json.id
+    (query.$values or= []).push('id') if key is @virtual_id_accessor
     return @reverse_model_type.cursor(query)
 
   ####################################
@@ -152,33 +260,47 @@ module.exports = class Many extends require('./relation')
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
 
-    # TODO: how should destroying the collection work?
     events = Utils.set(collection, 'events', {})
     events.add = (related_model) =>
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
-        related_model.set(@reverse_relation.key, model) unless related_model.get(@reverse_relation.key) is model
+        current_model = related_model.get(@reverse_relation.key)
+        is_current = model.id and (Utils.dataId(current_model) is model.id)
+        related_model.set(@reverse_relation.key, model) if not is_current or (is_current and not current_model.isLoaded())
 
     events.remove = (related_model) =>
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
-        related_model.set(@reverse_relation.key, null) unless related_model.get(@reverse_relation.key) is null
+        current_model = related_model.get(@reverse_relation.key)
+        related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id
 
     events.reset = (collection, options) =>
       current_models = collection.models
       previous_models = options.previousModels or []
-
       changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
-      added = if changes.kept then _.select(current_models, (test) -> !!_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
+      added = if changes.kept then _.select(current_models, (test) -> !_.find(changes.kept, (keep_model) -> keep_model.id is test.id)) else current_models
 
       # update back links
       (events.remove(related_model) for related_model in changes.removed) if changes.removed
       (events.add(related_model) for related_model in added)
 
-    collection.on(method, events[method]) for method in ['add', 'remove', 'reset']
+    collection.on(method, events[method]) for method in ['add', 'remove', 'reset'] # bind
+
     return collection
+
+  _unbindBacklinks: (model) ->
+    return unless events = Utils.get(model, 'events') # already unbound
+    Utils.unset(model, 'events')
+
+    collection = model.attributes[@key]
+    collection.models.splice()
+    events = _.clone()
+    for method in ['add', 'remove', 'reset'] # unbind
+      collection.off(method, events[method])
+      events[method] = null
+    return
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
   _hasChanged: (model) ->

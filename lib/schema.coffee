@@ -10,7 +10,7 @@ Utils = require './utils'
 module.exports = class Schema
   constructor: (@model_type) ->
     @raw = _.clone(_.result(@model_type, 'schema') or {})
-    @fields ={}; @relations ={}; @ids_accessor = {}
+    @fields ={}; @relations ={}; @virtual_accessors = {}
 
   initialize: ->
     return if @is_initialized; @is_initialized = true
@@ -20,14 +20,21 @@ module.exports = class Schema
     relation.initialize() for key, relation of @relations
     return
 
-  relation: (key) -> return @relations[key] or @ids_accessor[key]
+  relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
-    return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.foreign_key is reverse_key)
+    return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
     return null
 
-  generateBelongsTo: (model_type, reverse_model_type) ->
+  generateBelongsTo: (reverse_model_type) ->
     key = inflection.underscore(reverse_model_type.model_name)
-    throw "Schema for '#{model_type.model_name}' already has relation '#{key}'" if @raw[key]
+    return relation if relation = @relations[key] # already exists
+
+    if @raw[key] # not intitialized yet, intialize now
+      relation = @_parseField(key, @raw[key])
+      relation.initialize()
+      return relation
+
+    # generate new
     relation = @_parseField(key, @raw[key] = ['belongsTo', reverse_model_type, manual_fetch: true])
     relation.initialize()
     return relation
@@ -39,8 +46,8 @@ module.exports = class Schema
 
   generateJoinTable: (relation) ->
     schema = {}
-    schema[relation.foreign_key] = ['Integer', indexed: true]
-    schema[relation.reverse_relation.foreign_key] = ['Integer', indexed: true]
+    schema[relation.join_key] = ['Integer', indexed: true]
+    schema[relation.reverse_relation.join_key] = ['Integer', indexed: true]
     url = Schema.joinTableURL(relation)
     name = inflection.pluralize(inflection.classify(url))
 
@@ -59,13 +66,9 @@ module.exports = class Schema
 
     return JoinTable
 
-  initializeModel: (model) ->
-    relation.initializeModel(model, key) for key, relation of @relations
-
   allColumns: ->
     columns = _.keys(@fields)
-    for name, relation of @relations
-      columns.push(relation.foreign_key) if relation.type is 'belongsTo'
+    columns.push(relation.foreign_key) for key, relation of @relations when relation.type is 'belongsTo'
     return columns
 
   #################################
@@ -80,8 +83,9 @@ module.exports = class Schema
     switch type
       when 'hasOne', 'belongsTo', 'hasMany'
         options.type = type
-        relation = @relations[key] = if (type is 'hasMany') then new Many(@model_type, key, options) else new One(@model_type, key, options)
-        @ids_accessor[relation.ids_accessor] = relation if relation.ids_accessor
+        relation = @relations[key] = if type is 'hasMany' then new Many(@model_type, key, options) else new One(@model_type, key, options)
+        @virtual_accessors[relation.virtual_id_accessor] = relation if relation.virtual_id_accessor
+        @virtual_accessors[relation.foreign_key] = relation if type is 'belongsTo'
         return relation
       else
         throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)

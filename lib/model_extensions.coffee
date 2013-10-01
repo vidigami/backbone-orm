@@ -5,6 +5,7 @@ moment = require 'moment'
 Queue = require 'queue-async'
 
 Utils = require './utils'
+require './collection_extensions' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
 
@@ -155,6 +156,7 @@ module.exports = (model_type) ->
   # Backbone ORM - Helpers
   ###################################
 
+  model_type::modelName = -> return model_type.model_name
   model_type::cache = -> model_type.cache
   model_type::schema = model_type.schema = -> model_type::sync('schema')
   model_type::tableName = model_type.tableName = -> model_type::sync('tableName')
@@ -169,151 +171,248 @@ module.exports = (model_type) ->
   model_type::setLoaded = (key, is_loaded) ->
     [key, is_loaded] = ['__model__', key] if arguments.length is 1
     needs_load = Utils.orSet(@, 'needs_load', {})
-    return delete needs_load[key] if is_loaded
-    needs_load[key] = true
+    (delete needs_load[key]; return) if is_loaded and Utils.get(@, 'is_initialized') # after initialized, delete needs_load
+    needs_load[key] = !is_loaded
+
+  model_type::isLoadedExists = (key) ->
+    key = '__model__' if arguments.length is 0
+    Utils.orSet(@, 'needs_load', {}).hasOwnProperty(key)
+
+  model_type::isPartial = ->
+    !!Utils.get(@, 'partial')
+
+  model_type::setPartial = (is_partial) ->
+    if is_partial then Utils.set(@, 'partial', true) else Utils.unset(@, 'partial')
 
   ###################################
-  # Backbone ORM - Model Overrides
+  # Backbone ORM - Model Lifecyle
   ###################################
 
-  _original_initialize = model_type::initialize
-  model_type::initialize = ->
-    schema.initializeModel(@) if model_type.schema and (schema = model_type.schema())
-    return _original_initialize.apply(@, arguments)
+  model_type::release = ->
+    throw "release: experimental and incomplete"
+    # if model_type.schema and (schema = model_type.schema())
+    #   relation.releaseModel(@) for key, relation of schema.relations
+    # return
 
-  model_type::modelName = -> return model_type.model_name
+  model_type::patchAdd = (key, relateds, callback) ->
+    return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
+    return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds
+    return relation.patchAdd(@, relateds, callback)
 
-  _original_set = model_type::set
-  model_type::set = (key, value, options) ->
-    return _original_set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
-
-    if _.isString(key)
-      (attributes = {})[key] = value;
-    else
-      attributes = key; options = value
-
-    for key, value of attributes
-      if relation = schema.relation(key)
-        relation.set(@, key, value, options)
-      else
-        _original_set.call(@, key, value, options)
-    return @
-
-  _original_get = model_type::get
-  model_type::get = (key, callback) ->
-    schema = model_type.schema() if model_type.schema
-
-    return relation.get(@, key, callback) if schema and (relation = schema.relation(key))
-    value = _original_get.call(@, key)
-    callback(null, value) if callback
-    return value
-
-  _original_toJSON = model_type::toJSON
-  model_type::toJSON = (options={}) ->
-    schema = model_type.schema() if model_type.schema
-
-    @_orm or= {}
-    return @id if @_orm.json > 0
-    @_orm.json or= 0; @_orm.json++
-
-    json = {}
-    attributes = if @whitelist then _.pick(@attributes, @whitelist) else @attributes
-    for key, value of attributes
-      if schema and (relation = schema.relation(key))
-        relation.appendJSON(json, @, key)
-
-      else if value instanceof Backbone.Collection
-        json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
-
-      else if value instanceof Backbone.Model
-        json[key] = value.toJSON(options)
-
-      else
-        json[key] = value
-
-    --@_orm.json
-    return json
-
-  _original_save = model_type::save
-  model_type::save = (key, value, options) ->
-    @_orm or= {}
-    throw new Error "Model is in a save loop: #{model_type.model_name}" if @_orm.save > 0
-    @_orm.save or= 0; @_orm.save++
-
-    return _original_save.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
-
-    # multiple signatures
-    if key is null or _.isObject(key)
-      attributes = key
-      options = value
-    else
-      (attributes = {})[key] = value;
-
-    return _original_save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
-      --@_orm.save
-      return options.error?(@, resp, options) if err
-
+  model_type::patchRemove = (key, relateds, callback) ->
+    if arguments.length is 1
+      callback = key
+      schema = model_type.schema()
       queue = new Queue(1)
-
-      # now save relations
       for key, relation of schema.relations
-        do (relation) => queue.defer (callback) => relation.save(@, key, callback)
+        do (relation) => queue.defer (callback) => relation.patchRemove(@, callback)
+      queue.await callback
 
-      queue.await (err) =>
-        return options.error?(@, Error "Failed to save relations. #{err}", options) if err
-        options.success?(@, resp, options)
-    ))
-
-  _original_destroy = model_type::destroy
-  model_type::destroy = (options) ->
-    cache.del(@id) if cache = @cache() # clear out of the cache
-    return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
-
-    @_orm or= {}
-    throw new Error "Model is in a destroy loop: #{model_type.model_name}" if @_orm.destroy > 0
-    @_orm.destroy or= 0; @_orm.destroy++
-
-    return _original_destroy.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
-      --@_orm.destroy
-      return options.error?(@, resp, options) if err
-
-      queue = new Queue(1)
-
-      # now remove relations
-      for key, relation of schema.relations
-        do (relation) => queue.defer (callback) => relation.destroy(@, callback)
-
-      queue.await (err) =>
-        return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
-        options.success?(model, resp, options)
-    ))
-
-  _original_clone = model_type::clone
-  model_type::clone = (key, value, options) ->
-    return _original_clone.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
-
-    @_orm or= {}
-    return @id if @_orm.clone > 0
-    @_orm.clone or= 0; @_orm.clone++
-
-    json = {}
-    for key, value of @attributes
-
-      if value instanceof Backbone.Collection
-        json[key] = new value.constructor(model.clone() for model in value.models)
-
-      else if value instanceof Backbone.Model
-        json[key] = value.clone()
+    else
+      return callback(new Error("patchRemove: relation '#{key}' unrecognized")) unless relation = @relation(key)
+      if arguments.length is 2
+        callback = relateds
+        relation.patchRemove(@, callback)
 
       else
-        json[key] = value
+        return callback(new Error("patchRemove: missing relateds for '#{key}'")) unless relateds
+        return relation.patchRemove(@, relateds, callback)
 
-    --@_orm.clone
-    return new @constructor(json)
-
+  ###################################
+  # Backbone ORM - Relationship Query
+  ###################################
   model_type::cursor = (key, query={}) ->
     schema = model_type.schema() if model_type.schema
     if schema and (relation = schema.relation(key))
       return relation.cursor(@, key, query)
     else
       throw new Error "#{schema.model_name}::cursor: Unexpected key: #{key} is not a relation"
+
+  ###################################
+  # Backbone ORM - Model Overrides
+  ###################################
+
+  # clone helper
+  _findOrClone = (model, options) ->
+    return model.clone(options) if model.isNew() or not model.modelName
+    cache = options._cache[model.modelName()] or= {}
+    clone = cache[model.id] = model.clone(options) unless clone = cache[model.id]
+    return clone
+
+  overrides =
+    initialize: ->
+      if model_type.schema and (schema = model_type.schema())
+        relation.initializeModel(@) for key, relation of schema.relations
+
+        # mark as initialized and clear out needs_load flags
+        needs_load = Utils.orSet(@, 'needs_load', {})
+        delete needs_load[key] for key, value of needs_load when !value
+        Utils.set(@, 'is_initialized', true)
+
+      return model_type::_orm_original_fns.initialize.apply(@, arguments)
+
+    fetch: (options) ->
+      return model_type::_orm_original_fns.fetch.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
+        return options.error?(@, resp, options) if err
+        @setLoaded(true)
+        options.success?(model, resp, options)
+      ))
+
+    unset: (key) ->
+      id = @id
+      model_type::_orm_original_fns.unset.apply(@, arguments)
+      model_type.cache.del(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
+
+    set: (key, value, options) ->
+      return model_type::_orm_original_fns.set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+      if _.isString(key)
+        (attributes = {})[key] = value;
+      else
+        attributes = key; options = value
+
+      # first set simple attributes
+      simple_attributes = {}
+      relational_attributes = {}
+      for key, value of attributes
+        if relation = schema.relation(key)
+          relational_attributes[key] = relation
+        else
+          simple_attributes[key] = value
+      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes)
+
+      # then set relationships
+      for key, relation of relational_attributes
+        relation.set(@, key, attributes[key], options)
+
+      # model_type.cache.set(@id, @) if model_type.cache and @isLoaded() and @id # update the cache: TODO: look at the partial models code
+      return @
+
+    get: (key, callback) ->
+      schema = model_type.schema() if model_type.schema
+
+      return relation.get(@, key, callback) if schema and (relation = schema.relation(key))
+      value = model_type::_orm_original_fns.get.call(@, key)
+      callback(null, value) if callback
+      return value
+
+    toJSON: (options={}) ->
+      schema = model_type.schema() if model_type.schema
+
+      @_orm or= {}
+      return @id if @_orm.json > 0
+      @_orm.json or= 0; @_orm.json++
+
+      json = {}
+      keys = options.keys or @whitelist or _.keys(@attributes)
+      for key in keys
+        value = @attributes[key]
+        if schema and (relation = schema.relation(key))
+          relation.appendJSON(json, @)
+
+        else if value instanceof Backbone.Collection
+          json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
+
+        else if value instanceof Backbone.Model
+          json[key] = value.toJSON(options)
+
+        else
+          json[key] = value
+
+      --@_orm.json
+      return json
+
+    save: (key, value, options) ->
+      # multiple signatures
+      if key is null or _.isObject(key)
+        attributes = key
+        options = value
+      else
+        (attributes = {})[key] = value;
+
+      return options.error?(@, new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
+
+      @_orm or= {}
+      return options.error?(@, new Error "Model is in a save loop: #{model_type.model_name}") if @_orm.save > 0
+      @_orm.save or= 0; @_orm.save++
+
+      # set the attributes
+      @set(attributes, options)
+      attributes = {}
+
+      Utils.presaveBelongsToRelationships @, (err) =>
+        return options.error?(@, err) if err
+
+        return model_type::_orm_original_fns.save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
+          --@_orm.save
+          return options.error?(@, resp, options) if err
+          queue = new Queue(1)
+
+          # now save relations
+          if model_type.schema
+            schema = model_type.schema()
+            for key, relation of schema.relations
+              do (relation) => queue.defer (callback) => relation.save(@, callback)
+
+          queue.await (err) =>
+            return options.error?(@, Error "Failed to save relations. #{err}", options) if err
+            options.success?(@, resp, options)
+        ))
+
+    destroy: (options) ->
+      cache.del(@id) if cache = @cache() # clear out of the cache
+      return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+
+      @_orm or= {}
+      throw new Error "Model is in a destroy loop: #{model_type.model_name}" if @_orm.destroy > 0
+      @_orm.destroy or= 0; @_orm.destroy++
+
+      return model_type::_orm_original_fns.destroy.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
+        --@_orm.destroy
+        return options.error?(@, resp, options) if err
+
+        @patchRemove (err) =>
+          return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
+          options.success?(model, resp, options)
+      ))
+
+    clone: (options) ->
+      return model_type::_orm_original_fns.clone.apply(@, arguments) unless model_type.schema
+
+      options or= {}
+      options._cache or= {}
+      cache = options._cache[@modelName()] or= {}
+
+      @_orm or= {}
+      if @_orm.clone > 0 # TODO: how to handle recursion
+        return if @id then cache[@id] else model_type::_orm_original_fns.clone.apply(@, arguments)
+      @_orm.clone or= 0; @_orm.clone++
+
+      # create a shell to refer to
+      if @id
+        cache[@id] = clone = new @constructor() unless clone = cache[@id]
+      else
+        clone = new @constructor()
+      clone.id = @attributes.id if @attributes.id
+
+      keys = options.keys or _.keys(@attributes)
+      for key in keys
+        value = @attributes[key]
+        if value instanceof Backbone.Collection
+          clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
+          clone.attributes[key].models = (_findOrClone(model, options) for model in value.models)
+
+        else if value instanceof Backbone.Model
+          clone.attributes[key] = _findOrClone(value, options)
+
+        else
+          clone.attributes[key] = value
+
+      --@_orm.clone
+      return clone
+
+  if not model_type::_orm_original_fns
+    model_type::_orm_original_fns = {}
+    for key, fn of overrides
+      model_type::_orm_original_fns[key] = model_type::[key]
+      model_type::[key] = fn
