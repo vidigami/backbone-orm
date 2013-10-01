@@ -76,7 +76,7 @@ module.exports = class One extends require('./relation')
 
         # already set, merge
         previous_related_model = model.get(@key)
-        if previous_related_model and (previous_related_model.id is json.id)
+        if json and previous_related_model and (previous_related_model.id is json.id)
           Utils.updateModel(previous_related_model, json)
         else
           model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
