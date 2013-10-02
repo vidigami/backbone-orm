@@ -76,7 +76,7 @@ module.exports = class One extends require('./relation')
 
         # already set, merge
         previous_related_model = model.get(@key)
-        if previous_related_model and (previous_related_model.id is json.id)
+        if json and previous_related_model and (previous_related_model.id is json.id)
           Utils.updateModel(previous_related_model, json)
         else
           model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
@@ -217,14 +217,14 @@ module.exports = class One extends require('./relation')
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
-        query.$zero = true unless query.id = model.attributes[@key]?.id
+        (query.$zero = true; delete query.id) unless query.id = model.attributes[@key]?.id
       else
         throw new Error 'Cannot create cursor for non-loaded model' unless model.id
         query[@reverse_relation.foreign_key] = model.id
     else
       # json
       if @type is 'belongsTo'
-        query.$zero = true unless query.id = model[@foreign_key]
+        (query.$zero = true; delete query.id) unless query.id = model[@foreign_key]
       else
         throw new Error 'Cannot create cursor for non-loaded model' unless model.id
         query[@reverse_relation.foreign_key] = model.id
