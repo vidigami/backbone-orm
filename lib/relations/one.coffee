@@ -153,11 +153,11 @@ module.exports = class One extends require('./relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
+    (callback = relateds; relateds = undefined) if arguments.length is 2
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
     if arguments.length is 2
-      callback = relateds
       return callback() if not @reverse_relation
       delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
 
