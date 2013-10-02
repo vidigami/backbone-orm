@@ -158,7 +158,6 @@ module.exports = (model_type) ->
 
   model_type::modelName = -> return model_type.model_name
   model_type::cache = -> model_type.cache
-  model_type::tableName = model_type.tableName = -> model_type::sync('tableName')
   model_type::schema = model_type.schema = -> model_type::sync('schema')
   model_type::tableName = model_type.tableName = -> model_type::sync('tableName')
   model_type::relation = model_type.relation = (key) -> if schema = model_type::sync('schema') then schema.relation(key) else return undefined
