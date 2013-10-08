@@ -9,12 +9,14 @@ Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
-runTests = (options, cache, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -40,12 +42,13 @@ runTests = (options, cache, callback) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSON DSL (cache: #{cache})", ->
+  describe "JSON DSL (cache: #{options.cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       MODELS = {}
 
       queue = new Queue(1)
@@ -520,13 +523,3 @@ runTests = (options, cache, callback) ->
 
           done()
 
-
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, callback)
-  queue.defer (callback) -> runTests(options, true, callback)
-  queue.await callback

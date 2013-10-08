@@ -9,12 +9,15 @@ Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
-runTests = (options, cache, embed, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
+
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Flat extends Backbone.Model
@@ -47,12 +50,13 @@ runTests = (options, cache, embed, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "hasMany (cache: #{cache} embed: #{embed})", ->
+  describe "hasMany (cache: #{options.cache} embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
@@ -184,7 +188,7 @@ runTests = (options, cache, embed, callback) ->
     patchAddTests = (unload) ->
       it "Can manually add a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.cursor().include('reverses').toModel (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -240,7 +244,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.cursor().include('reverses').toModel (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -294,7 +298,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.cursor().include('reverses').toModel (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -348,7 +352,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -383,7 +387,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -418,7 +422,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -1226,14 +1230,3 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, owner.get('flats').length, "Virtual flat is not saved. Expected: #{0}. Actual: #{owner.get('flats').length}")
             done()
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, false, callback)
-  queue.defer (callback) -> runTests(options, true, false, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
-  queue.await callback

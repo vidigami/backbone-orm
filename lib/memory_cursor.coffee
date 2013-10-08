@@ -37,7 +37,7 @@ IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @private
 module.exports = class MemoryCursor extends Cursor
-  toJSON: (callback) ->
+  queryToJSON: (callback) ->
     return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
 
     exists = @hasCursorQuery('$exists')

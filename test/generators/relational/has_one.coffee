@@ -9,12 +9,15 @@ Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
-runTests = (options, cache, embed, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
+
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Flat extends Backbone.Model
@@ -42,19 +45,20 @@ runTests = (options, cache, embed, callback) ->
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
-      flat: -> ['belongsTo', Flat, embed: embed]
-      reverse: -> ['hasOne', Reverse, embed: embed]
-      reverse_as: -> ['hasOne', Reverse, as: 'owner_as', embed: embed]
+      flat: -> ['belongsTo', Flat, embed: options.embed]
+      reverse: -> ['hasOne', Reverse, embed: options.embed]
+      reverse_as: -> ['hasOne', Reverse, as: 'owner_as', embed: options.embed]
       foreign_reverse: -> ['hasOne', ForeignReverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "hasOne (cache: #{cache} embed: #{embed})", ->
+  describe "hasOne (cache: #{options.cache} embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       relation = Owner.relation('flat')
       delete relation.virtual
       MODELS = {}
@@ -138,7 +142,7 @@ runTests = (options, cache, embed, callback) ->
     patchAddTests = (unload) ->
       it "Can manually add a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -171,7 +175,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -204,7 +208,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -237,7 +241,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -270,7 +274,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -303,7 +307,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -340,7 +344,7 @@ runTests = (options, cache, embed, callback) ->
     patchRemoveTests = (unload) ->
       it "Can manually delete a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -374,7 +378,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by related_json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -407,7 +411,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -440,7 +444,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by array related of model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
@@ -473,7 +477,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -507,7 +511,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by related_json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -541,7 +545,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -575,7 +579,7 @@ runTests = (options, cache, embed, callback) ->
 
       it "Can manually delete a relationship by array of related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
-        return done() if embed
+        return done() if options.embed
 
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
@@ -668,7 +672,7 @@ runTests = (options, cache, embed, callback) ->
 
     it 'Can create a model and update the relationship (hasOne)', (done) ->
       # TODO: implement embedded set - should clone in set or the caller needed to clone? (problem is sharing an in memory instance)
-      return done() if embed
+      return done() if options.embed
 
       related_key = 'reverse'
       related_id_accessor = 'reverse_id'
@@ -979,7 +983,7 @@ runTests = (options, cache, embed, callback) ->
 
     it 'Should be able to count relationships', (done) ->
       # TODO: implement embedded find
-      return done() if embed
+      return done() if options.embed
 
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
@@ -992,7 +996,7 @@ runTests = (options, cache, embed, callback) ->
 
     it 'Should be able to count relationships with paging', (done) ->
       # TODO: implement embedded find
-      return done() if embed
+      return done() if options.embed
 
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
@@ -1007,7 +1011,7 @@ runTests = (options, cache, embed, callback) ->
     backlinkTests = (virtual) ->
       it "Should update backlinks using set (#{if virtual then 'virtual' else 'no modifiers'})", (done) ->
         # TODO: implement embedded
-        return done() if embed
+        return done() if options.embed
 
         checkReverseFn = (reverse, expected_owner) -> return (callback) ->
           assert.ok(reverse, 'Reverse exists')
@@ -1087,7 +1091,7 @@ runTests = (options, cache, embed, callback) ->
     backlinkTests(true)
 
     it 'does not serialize virtual attributes', (done) ->
-      json_key = if embed then 'flat' else 'flat_id'
+      json_key = if options.embed then 'flat' else 'flat_id'
 
       Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
@@ -1118,14 +1122,3 @@ runTests = (options, cache, embed, callback) ->
         #     assert.ok(!err, "No errors: #{err}")
         #     assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')
         #     done()
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, false, callback)
-  queue.defer (callback) -> runTests(options, true, false, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
-  queue.await callback

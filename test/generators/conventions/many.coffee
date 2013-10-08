@@ -8,12 +8,14 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-runTests = (options, cache, embed, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
@@ -29,12 +31,13 @@ runTests = (options, cache, embed, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Many (cache: #{cache} embed: #{embed})", ->
+  describe "Many (cache: #{options.cache} embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       MODELS = {}
 
       queue = new Queue(1)
@@ -100,11 +103,3 @@ runTests = (options, cache, embed, callback) ->
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, false, callback)
-  queue.defer (callback) -> runTests(options, true, false, callback)
-  queue.await callback

@@ -9,12 +9,14 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-runTests = (options, cache, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}) # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
@@ -27,12 +29,13 @@ runTests = (options, cache, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Flat)
 
-  describe "Model.find (cache: #{cache})", ->
+  describe "Model.find (cache: #{options.cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       queue = new Queue(1)
 
       queue.defer (callback) -> Flat.resetSchema(callback)
@@ -396,12 +399,3 @@ runTests = (options, cache, callback) ->
       catch e
         assert.ok(e, "Error thrown")
         done()
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, callback)
-  queue.defer (callback) -> runTests(options, true, callback)
-  queue.await callback
