@@ -39,7 +39,7 @@ module.exports = (options, callback) ->
   }, BASE_SCHEMA)
   Owner::sync = SYNC(Owner)
 
-  describe "Many to Many with resetSchemasByDirectory (cache: #{options.cache} embed: #{options.embed})", ->
+  describe "Many to Many with resetSchemasByDirectory (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()

@@ -52,7 +52,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "hasOne (cache: #{options.cache} embed: #{options.embed})", ->
+  describe "hasOne (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()

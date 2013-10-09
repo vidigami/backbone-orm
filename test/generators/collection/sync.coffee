@@ -22,7 +22,7 @@ module.exports = (options, callback) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Backbone.Collection (cache: #{options.cache})", ->
+  describe "Backbone.Collection (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Model], done)
     after (done) -> callback(); done()

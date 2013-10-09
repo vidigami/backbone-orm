@@ -31,7 +31,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Many (cache: #{options.cache} embed: #{options.embed})", ->
+  describe "Many (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()

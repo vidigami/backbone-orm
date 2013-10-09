@@ -38,7 +38,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "One (cache: #{options.cache} embed: #{options.embed})", ->
+  describe "One (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     after (done) -> callback(); done()
@@ -101,7 +101,7 @@ module.exports = (options, callback) ->
             done()
   #          assert.equal(reverse, null, 'has not loaded the model initially')
 
-   it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
+    it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')

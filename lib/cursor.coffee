@@ -8,8 +8,9 @@ module.exports = class Cursor
   # @private
   constructor: (query, options) ->
     @[key] = value for key, value of options
-    @parsed_query = Cursor.parseQuery(query, @model_type)
-    @_find = @parsed_query.find; @_cursor = @parsed_query.cursor
+    parsed_query = Cursor.parseQuery(query, @model_type)
+    @_find = parsed_query.find; @_cursor = parsed_query.cursor
+    @parsed_query = _.extend({}, @_cursor, @_find)
 
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
@@ -126,10 +127,12 @@ module.exports = class Cursor
         return callback(null, if @_cursor.$one then models[0] else models)
 
   toJSON: (callback) ->
-    # check cache
+    #    @queryToJSON(callback)
+
+#    # check cache
     return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, @parsed_query))
 
-    model_types = @modelTypesInQuery()
+    model_types = @relatedModelTypesInQuery()
     # Get model types
 
 #    console.log '------------------------------------------'
@@ -140,6 +143,7 @@ module.exports = class Cursor
     @queryToJSON (err, json) =>
       return callback(err) if err
 
+#      console.log @model_type.name
       QueryCache.set(@model_type, @parsed_query, model_types, json)
       callback(null, json)
       # Add to cache
@@ -152,24 +156,29 @@ module.exports = class Cursor
   # Helpers
   ##############################################
 
-  modelTypesInQuery: =>
+  relatedModelTypesInQuery: =>
     related_fields = []
-    related_model_types = [@model_type]
+    related_model_types = []
 
     for key, value of @_find
 
       # A dot indicates a condition on a related model
       if key.indexOf('.') > 0
-        [relation, key] = key.split('.')
-        related_fields.push(relation)
+        [relation_key, key] = key.split('.')
+        related_fields.push(relation_key)
 
       # Many to Many relationships may be queried on the foreign key of the join table
       else if (reverse_relation = @model_type.reverseRelation(key)) and reverse_relation.join_table
         related_model_types.push(reverse_relation.model_type)
+        related_model_types.push(reverse_relation.join_table)
 
     related_fields = related_fields.concat(@_cursor.$include) if @_cursor?.$include
-    related_model_types.push(@model_type.relation(relation).reverse_model_type) for relation in related_fields
+    for relation_key in related_fields
+      relation = @model_type.relation(relation_key)
+      related_model_types.push(relation.reverse_model_type)
+      related_model_types.push(relation.join_table) if relation.join_table
 
+#    console.log (m.name for m in related_model_types)
     return related_model_types
 
   selectResults: (json) ->
