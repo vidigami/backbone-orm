@@ -6,7 +6,7 @@ mocha = new Mocha(
   reporter: 'spec'
   ui: 'bdd'
   timeout: 999999
-  bail: true
+#  bail: true
 )
 
 mocha.addFile('./test/suite.coffee')

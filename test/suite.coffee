@@ -1,22 +1,25 @@
+_ = require 'underscore'
 Queue = require 'queue-async'
 
 args = process.argv.slice(2)
 
 options =
+  none: '-n' in args
   cache: '-c' in args
   query_cache: '-q' in args
   embed: '-e' in args
   all: '-a' in args
-  none: '-n' in args
 
 runTests = (options, callback) ->
   console.log "\nBackbone ORM: Running tests:\n", options
   queue = new Queue(1)
   queue.defer (callback) -> require('./unit/all_generators')(options, callback)
-#  queue.defer (callback) -> require('./unit/fabricator')(options, callback)
+  queue.defer (callback) -> require('./unit/fabricator')(options, callback)
   queue.await (err) -> console.log "\nBackbone ORM: Completed tests:", options; callback()
 
-if options.all or (not options.cache and not options.query_cache and not options.embed and not options.none)
+options.all or= (not options.cache and not options.query_cache and not options.embed and not options.none)
+
+if options.all
   queue = new Queue(1)
   queue.defer (callback) -> runTests({}, callback)
 

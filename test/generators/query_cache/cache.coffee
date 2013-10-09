@@ -115,21 +115,21 @@ module.exports = (options, callback) ->
         done()
 
     it 'Can perform the same query twice with a cache hit the second time with a many to many include', (done) ->
-      query = {$one: true}
-      Owner.cursor(query).include('reverses').toJSON (err, flat) ->
+      query = {$one: true, $include: ['reverses']}
+      Owner.cursor(query).toJSON (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
 
         misses = QueryCache.misses
         assert.equal(0, QueryCache.hits, "No hits after one query")
-        Owner.cursor(query).include('reverses').toJSON (err, flat) ->
+        Owner.cursor(query).toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(misses, QueryCache.misses, "No more misses after second query, Expected: #{misses}, Actual: #{QueryCache.misses}")
           assert.notEqual(0, QueryCache.hits, "At least one hit after second query, Expected: >0, Actual: #{QueryCache.hits}")
           done()
 
     it 'Stores the correct models with the cache result with a many to many include', (done) ->
-      query = {$one: true}
-      Owner.cursor(query).include('reverses').toJSON (err, flat) ->
+      query = {$one: true, $include: ['reverses']}
+      Owner.cursor(query).toJSON (err, owner) ->
         assert.ifError(err, "No errors: #{err}")
 
         result = QueryCache.getRaw(Owner, query)
@@ -143,8 +143,8 @@ module.exports = (options, callback) ->
         done()
 
     it 'Clears the correct models with the cache result with a many to many include', (done) ->
-      query = {$one: true}
-      Owner.cursor(query).include('reverses').toJSON (err, flat) ->
+      query = {$one: true, $include: ['reverses']}
+      Owner.cursor(query).toJSON (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
 
         misses = QueryCache.misses
@@ -154,9 +154,8 @@ module.exports = (options, callback) ->
         assert.equal(count, QueryCache.clears, "Cleared all the keys after resetting Owner, Expected: #{count}, Actual: #{QueryCache.clears}")
         assert.equal(0, QueryCache.count(), "No keys after reset, Expected: #{0}, Actual: #{QueryCache.count()}")
 
-        Owner.cursor(query).include('reverses').toJSON (err, flat) ->
+        Owner.cursor(query).toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(2*misses, QueryCache.misses, "Same amount of misses after resetting Owner, Expected: #{2*misses}, Actual: #{QueryCache.misses}")
           assert.equal(0, QueryCache.hits, "Still no hits after reset")
-
-        done()
+          done()

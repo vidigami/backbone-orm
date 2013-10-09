@@ -83,23 +83,23 @@ module.exports = (options, callback) ->
 
       queue.await done
 
-    # TODO: delay the returning of memory models related models to test lazy loading properly
-    it 'Fetches a relation from the store if not present', (done) ->
-      Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(test_model, 'found model')
-
-        fetched_owner = new Owner({id: test_model.id})
-        fetched_owner.fetch bbCallback (err) ->
-          assert.ok(!err, "No errors: #{err}")
-          delete fetched_owner.attributes.reverse
-
-          fetched_owner.get 'reverse', (err, reverse) ->
-            assert.ok(!err, "No errors: #{err}")
-            assert.ok(reverse, 'loaded the model lazily')
-            assert.equal(reverse.get('owner_id'), test_model.id)
-            done()
-  #          assert.equal(reverse, null, 'has not loaded the model initially')
+#    # TODO: delay the returning of memory models related models to test lazy loading properly
+#    it 'Fetches a relation from the store if not present', (done) ->
+#      Owner.findOne (err, test_model) ->
+#        assert.ok(!err, "No errors: #{err}")
+#        assert.ok(test_model, 'found model')
+#
+#        fetched_owner = new Owner({id: test_model.id})
+#        fetched_owner.fetch bbCallback (err) ->
+#          assert.ok(!err, "No errors: #{err}")
+#          delete fetched_owner.attributes.reverse
+#
+#          fetched_owner.get 'reverse', (err, reverse) ->
+#            assert.ok(!err, "No errors: #{err}")
+#            assert.ok(reverse, 'loaded the model lazily')
+#            assert.equal(reverse.get('owner_id'), test_model.id)
+#            done()
+#  #          assert.equal(reverse, null, 'has not loaded the model initially')
 
     it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
       Owner.findOne (err, test_model) ->

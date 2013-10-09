@@ -10,7 +10,6 @@ module.exports = class Cursor
     @[key] = value for key, value of options
     parsed_query = Cursor.parseQuery(query, @model_type)
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
-    @parsed_query = _.extend({}, @_cursor, @_find)
 
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
@@ -127,26 +126,14 @@ module.exports = class Cursor
         return callback(null, if @_cursor.$one then models[0] else models)
 
   toJSON: (callback) ->
-    #    @queryToJSON(callback)
-
-#    # check cache
-    return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, @parsed_query))
-
+    parsed_query = _.extend({}, @_cursor, @_find)
+    return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, parsed_query)) # Check query cache
     model_types = @relatedModelTypesInQuery()
-    # Get model types
 
-#    console.log '------------------------------------------'
-#    console.log @model_type.name
-#    console.log (rel.name for rel in model_types)
-#    console.log '------------------------------------------'
-    # queryToJSON
     @queryToJSON (err, json) =>
       return callback(err) if err
-
-#      console.log @model_type.name
-      QueryCache.set(@model_type, @parsed_query, model_types, json)
+      QueryCache.set(@model_type, parsed_query, model_types, json) # Update query cache
       callback(null, json)
-      # Add to cache
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->

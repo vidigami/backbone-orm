@@ -1,11 +1,9 @@
-util = require 'util'
 _ = require 'underscore'
 inflection = require 'inflection'
 LRU = require 'lru-cache'
 
 Utils = require './utils'
 
-# @private
 class QueryCache
   constructor: ->
     @enabled = false
@@ -17,9 +15,7 @@ class QueryCache
     @hardReset() # Clear previous cache, reset counts
 
     lru_options = {}
-    for key, value of options
-      key = @normalizeKey(key)
-      lru_options[key] = value
+    (lru_options[inflection.camelize(key)] = value) for key, value of options
 
     @cache = new LRU(lru_options)
     return @
@@ -28,9 +24,7 @@ class QueryCache
 
   set: (model_type, query, related_model_types, value) =>
     return @ unless @enabled
-    if @verbose
-      console.log '*SET', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value)
-      console.log '-----------'
+    console.log '*SET', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
     model_types = [model_type].concat(related_model_types or [])
     @cache.set(@cacheKey(model_type, query), {model_types: model_types, value: value})
     return @
@@ -38,11 +32,9 @@ class QueryCache
   _got: (model_type, query, value) =>
     if value
       @hits++
-      if @verbose
-        console.log '+HIT', @cacheKey(model_type, query), value, '\n-----------'
+      console.log '+HIT', @cacheKey(model_type, query), value, '\n-----------' if @verbose
     else
-      if @verbose
-        console.log '-MISS', @cacheKey(model_type, query), value, '\n-----------'
+      console.log '-MISS', @cacheKey(model_type, query), value, '\n-----------' if @verbose
       @misses++
     return value
 
@@ -75,29 +67,19 @@ class QueryCache
         related_model_types.push(relation.join_table) if relation.join_table
     model_types = model_types.concat(related_model_types)
 
-#    console.log 'clearing', @cache.keys().length, (m.name for m in model_types)
-
+    # Clear everything depending on the given model_type(s)
     to_clear = []
-    pre_clears = @clears
-    # Clear everything depending on the given model_type
     @cache.forEach (value, key, cache) =>
       for model_type in model_types
         to_clear.push(key) if model_type in value.model_types
-        if @verbose
-          console.log 'CLEARED?', (model_type.name), (m.name for m in value.model_types), model_type in value.model_types, key, JSON.stringify(value)
-          console.log '-----------'
+        console.log 'CLEARED?', model_type in value.model_types, (model_type.name), (m.name for m in value.model_types), key, JSON.stringify(value), '\n-----------' if @verbose
 
     for key in _.uniq(to_clear)
       @clears++
       @cache.del(key)
 
-#    console.log 'c', cleard, @cache.keys().length
     return @
 
   count: => @cache?.keys().length
 
-  normalizeKey: (key) -> inflection.camelize(key)
-
 module.exports = cache = new QueryCache()
-
-#cache.configure({enabled: true})
