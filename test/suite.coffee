@@ -1,14 +1,7 @@
 _ = require 'underscore'
 Queue = require 'queue-async'
 
-args = process.argv.slice(2)
-
-options =
-  none: '-n' in args
-  cache: '-c' in args
-  query_cache: '-q' in args
-  embed: '-e' in args
-  all: '-a' in args
+option_sets = require('./option_sets')
 
 runTests = (options, callback) ->
   console.log "\nBackbone ORM: Running tests:\n", options
@@ -17,23 +10,8 @@ runTests = (options, callback) ->
   queue.defer (callback) -> require('./unit/fabricator')(options, callback)
   queue.await (err) -> console.log "\nBackbone ORM: Completed tests:", options; callback()
 
-options.all or= (not options.cache and not options.query_cache and not options.embed and not options.none)
+queue = new Queue(1)
+for options in option_sets
+  do (options) -> queue.defer (callback) -> runTests(options, callback)
 
-if options.all
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests({}, callback)
-
-  queue.defer (callback) -> runTests({cache: true}, callback)
-  queue.defer (callback) -> runTests({query_cache: true}, callback)
-  queue.defer (callback) -> runTests({embed: true}, callback)
-
-  queue.defer (callback) -> runTests({cache: true, query_cache: true}, callback)
-  queue.defer (callback) -> runTests({cache: true, embed: true}, callback)
-  queue.defer (callback) -> runTests({query_cache: true, embed: true}, callback)
-
-  queue.defer (callback) -> runTests({cache: true, query_cache: true, embed: true}, callback)
-
-  queue.await (err) -> console.log "\nAll test combinations completed"
-
-else
-  runTests(options, -> console.log "\nAll test combinations completed")
+queue.await (err) -> console.log "\nAll test combinations completed"
