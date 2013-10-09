@@ -76,7 +76,7 @@ module.exports = class One extends require('./relation')
 
         # already set, merge
         previous_related_model = model.get(@key)
-        if previous_related_model and (previous_related_model.id is json.id)
+        if json and previous_related_model and (previous_related_model.id is json.id)
           Utils.updateModel(previous_related_model, json)
         else
           model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
@@ -153,7 +153,7 @@ module.exports = class One extends require('./relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
-    (callback = relateds; relateds = undefined) if arguments.length is 2
+    (callback = relateds; relateds = null) if arguments.length is 2
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL

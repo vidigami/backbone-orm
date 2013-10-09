@@ -30,7 +30,7 @@ class QueryCache
     return @
 
   _got: (model_type, query, value) =>
-    if value
+    unless _.isUndefined(value)
       @hits++
       console.log '+HIT', @cacheKey(model_type, query), value, '\n-----------' if @verbose
     else
