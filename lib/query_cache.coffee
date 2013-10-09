@@ -1,6 +1,7 @@
 _ = require 'underscore'
 inflection = require 'inflection'
 LRU = require 'lru-cache'
+clone = require 'clone'
 
 Utils = require './utils'
 
@@ -26,7 +27,7 @@ class QueryCache
     return @ unless @enabled
     console.log '*SET', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
     model_types = [model_type].concat(related_model_types or [])
-    @cache.set(@cacheKey(model_type, query), {model_types: model_types, value: value})
+    @cache.set(@cacheKey(model_type, query), {model_types: model_types, value: clone(value)})
     return @
 
   _got: (model_type, query, value) =>
@@ -34,9 +35,9 @@ class QueryCache
       @hits++
       console.log '+HIT', @cacheKey(model_type, query), value, '\n-----------' if @verbose
     else
-      console.log '-MISS', @cacheKey(model_type, query), value, '\n-----------' if @verbose
       @misses++
-    return value
+      console.log '-MISS', @cacheKey(model_type, query), value, '\n-----------' if @verbose
+    return clone(value)
 
   get: (model_type, query) =>
     return null unless @enabled

@@ -159,3 +159,16 @@ module.exports = (options, callback) ->
           assert.equal(2*misses, QueryCache.misses, "Same amount of misses after resetting Owner, Expected: #{2*misses}, Actual: #{QueryCache.misses}")
           assert.equal(0, QueryCache.hits, "Still no hits after reset")
           done()
+
+    it "Clones data so altering models after retrieval doesn't alter the cached data", (done) ->
+      query = {$one: true, $include: ['reverses']}
+      Owner.cursor(query).toJSON (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        owner.foo = 'bar'
+        second_json = QueryCache.get(Owner, query)
+        assert.ok(!second_json.foo, "Cached object does not have altered property: #{second_json.foo}")
+        second_json.bar = 'test2'
+        third_json = QueryCache.get(Owner, query)
+        assert.ok(!third_json.foo, "Cached object does not have altered property: #{third_json.foo}")
+        assert.ok(!third_json.bar, "Cached object does not have altered property: #{third_json.bar}")
+        done()
