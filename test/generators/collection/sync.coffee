@@ -8,24 +8,27 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-runTests = (options, cache, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   class Model extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/models"
     @schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Backbone.Collection (cache: #{cache})", ->
+  describe "Backbone.Collection (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Model], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       queue = new Queue(1)
 
       queue.defer (callback) -> Model.resetSchema(callback)
@@ -110,7 +113,7 @@ runTests = (options, cache, callback) ->
           collection = new Collection(model.toJSON() for model in models)
           for model in models
             found_model = collection.get(model.id)
-            if cache
+            if options.cache
               assert.equal(model, found_model, "Model found in cache")
             else
               assert.notEqual(model, found_model, "Model not found in cache")
@@ -120,12 +123,3 @@ runTests = (options, cache, callback) ->
         options.before([Collection::model], runTest)
       else
         runTest()
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, callback)
-  queue.defer (callback) -> runTests(options, true, callback)
-  queue.await callback

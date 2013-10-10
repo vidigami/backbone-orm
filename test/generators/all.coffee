@@ -4,6 +4,7 @@ Queue = require 'queue-async'
 # beforeEach should return the models_json for the current run
 module.exports = (options, callback) ->
   queue = new Queue(1)
+  queue.defer (callback) -> require('./query_cache/cache')(options, callback)
   queue.defer (callback) -> require('./all_cache')(options, callback)
   queue.defer (callback) -> require('./all_collection')(options, callback)
   queue.defer (callback) -> require('./all_conventions')(options, callback)

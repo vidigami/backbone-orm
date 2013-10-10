@@ -1,8 +1,10 @@
+_ = require 'underscore'
+
 module.exports = (options, callback) ->
-  test_parameters =
+  test_parameters = _.defaults
     database_url: ''
     schema: {}
     sync: require('../../memory_sync')
-    embed: true
+  , options
 
   require('../generators/all')(test_parameters, callback)

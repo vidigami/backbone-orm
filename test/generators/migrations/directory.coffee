@@ -11,12 +11,14 @@ bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 NodeUtils = require '../../../lib/node_utils'
 
-runTests = (options, cache, embed, callback) ->
+module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-  require('../../../lib/cache').hardReset().configure(if cache then {max: 100} else null) # configure caching
+
+  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
+  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   # manually clear the cache so the model can be rebootstrapped
   delete require.cache[require.resolve('./directory/nested/reverse')]
@@ -37,12 +39,13 @@ runTests = (options, cache, embed, callback) ->
   }, BASE_SCHEMA)
   Owner::sync = SYNC(Owner)
 
-  describe "Many to Many with resetSchemasByDirectory (cache: #{cache} embed: #{embed})", ->
+  describe "Many to Many with resetSchemasByDirectory (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset() # reset cache
+      require('../../../lib/query_cache').reset()  # reset cache
+      require('../../../lib/cache').reset()
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
@@ -529,14 +532,3 @@ runTests = (options, cache, embed, callback) ->
             assert.ok(!err, "No errors: #{err}")
             assert.equal(0, owner.get('reverses').length, "Virtual flat is not saved. Expected: #{0}. Actual: #{owner.get('reverses').length}")
             done()
-
-
-# each model should have available attribute 'id', 'name', 'created_at', 'updated_at', etc....
-# beforeEach should return the models_json for the current run
-module.exports = (options, callback) ->
-  queue = new Queue(1)
-  queue.defer (callback) -> runTests(options, false, false, callback)
-  queue.defer (callback) -> runTests(options, true, false, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, false, true, callback)
-  not options.embed or queue.defer (callback) -> runTests(options, true, true, callback)
-  queue.await callback

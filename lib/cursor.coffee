@@ -1,7 +1,10 @@
 util = require 'util'
 _ = require 'underscore'
 
+QueryCache = require './query_cache'
 Utils = require './utils'
+
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']
 
 module.exports = class Cursor
   # @private
@@ -36,7 +39,7 @@ module.exports = class Cursor
         throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
-        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
+        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value if key in CURSOR_KEYS)
       return parsed_query
 
   offset: (offset) -> @_cursor.$offset = offset; return @
@@ -124,12 +127,49 @@ module.exports = class Cursor
           models = (model = new @model_type(@model_type::parse(item)); model.setPartial(true); model for item in json)
         return callback(null, if @_cursor.$one then models[0] else models)
 
+  toJSON: (callback) ->
+    parsed_query = _.extend({}, @_cursor, @_find)
+    return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, parsed_query)) # Check query cache
+    model_types = @relatedModelTypesInQuery()
+
+    @queryToJSON (err, json) =>
+      return callback(err) if err
+      QueryCache.set(@model_type, parsed_query, model_types, json) # Update query cache
+      callback(null, json)
+
   # @abstract Provided by a concrete cursor for a Backbone Sync type
-  toJSON: (callback) -> throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
+  queryToJSON: (callback) ->
+    throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
 
   ##############################################
   # Helpers
   ##############################################
+
+  relatedModelTypesInQuery: =>
+    related_fields = []
+    related_model_types = []
+
+    for key, value of @_find
+
+      # A dot indicates a condition on a related model
+      if key.indexOf('.') > 0
+        [relation_key, key] = key.split('.')
+        related_fields.push(relation_key)
+
+      # Many to Many relationships may be queried on the foreign key of the join table
+      else if (reverse_relation = @model_type.reverseRelation(key)) and reverse_relation.join_table
+        related_model_types.push(reverse_relation.model_type)
+        related_model_types.push(reverse_relation.join_table)
+
+    related_fields = related_fields.concat(@_cursor.$include) if @_cursor?.$include
+    for relation_key in related_fields
+      relation = @model_type.relation(relation_key)
+      related_model_types.push(relation.reverse_model_type)
+      related_model_types.push(relation.join_table) if relation.join_table
+
+#    console.log (m.name for m in related_model_types)
+    return related_model_types
+
   selectResults: (json) ->
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
@@ -147,7 +187,7 @@ module.exports = class Cursor
     else if @_cursor.$white_list
       json = (_.pick(item, @_cursor.$white_list) for item in json)
 
-    return json
+    return if @_cursor.$one then (json[0] or null) else json
 
   selectFromModels: (models, callback) ->
     if @_cursor.$select

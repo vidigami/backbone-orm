@@ -78,6 +78,8 @@ module.exports = (model_type) ->
     query = {id: query} unless _.isObject(query)
     model_type::sync('destroy', query, callback)
 
+  model_type.db = -> model_type::sync('db')
+
   ###################################
   # Backbone ORM - Convenience Functions
   ###################################
