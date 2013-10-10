@@ -4,6 +4,8 @@ _ = require 'underscore'
 QueryCache = require './query_cache'
 Utils = require './utils'
 
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']
+
 module.exports = class Cursor
   # @private
   constructor: (query, options) ->
@@ -37,7 +39,7 @@ module.exports = class Cursor
         throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
-        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
+        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value if key in CURSOR_KEYS)
       return parsed_query
 
   offset: (offset) -> @_cursor.$offset = offset; return @

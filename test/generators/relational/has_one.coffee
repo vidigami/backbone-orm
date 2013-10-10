@@ -46,8 +46,8 @@ module.exports = (options, callback) ->
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       flat: -> ['belongsTo', Flat, embed: options.embed]
-      reverse: -> ['hasOne', Reverse, embed: options.embed]
-      reverse_as: -> ['hasOne', Reverse, as: 'owner_as', embed: options.embed]
+      reverse: -> ['hasOne', Reverse]
+      reverse_as: -> ['hasOne', Reverse, as: 'owner_as']
       foreign_reverse: -> ['hasOne', ForeignReverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner)

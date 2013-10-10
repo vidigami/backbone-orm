@@ -22,6 +22,7 @@ module.exports = (options, callback) ->
     urlRoot: "#{DATABASE_URL}/flats"
     @schema: _.defaults({
       boolean: 'Boolean'
+      owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Flat)
 
@@ -36,6 +37,7 @@ module.exports = (options, callback) ->
     urlRoot: "#{DATABASE_URL}/owners"
     @schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
+      flat: -> ['belongsTo', Flat]
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
@@ -80,7 +82,7 @@ module.exports = (options, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()], flat: MODELS.flat.pop()}, bbCallback callback
 
         save_queue.await callback
 

@@ -40,7 +40,7 @@ module.exports = class One extends require('./relation')
 
     # update loaded state
     if (previous_related_id isnt new_related_id) or not model.isLoaded(@key)
-      if (is_model and (value.isLoaded())) or (new_related_id isnt value)
+      if (is_model and (value.isLoaded())) and (new_related_id isnt value)
         model.setLoaded(@key, true)
       else
         model.setLoaded(@key, _.isNull(value))
@@ -72,14 +72,15 @@ module.exports = class One extends require('./relation')
     if callback and not @isVirtual() and not @manual_fetch and not (is_loaded = model.isLoaded(@key)) # already loaded
       @cursor(model, key).toJSON (err, json) =>
         return callback(err) if err
-        model.setLoaded(@key, true)
+        model.setLoaded(@key, true) if key isnt @virtual_id_accessor
 
         # already set, merge
         previous_related_model = model.get(@key)
-        if json and previous_related_model and (previous_related_model.id is json.id)
+        if previous_related_model and (previous_related_model.id is json.id)
           Utils.updateModel(previous_related_model, json)
         else
-          model.set(@key, related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null)
+          related_model = if json then Utils.updateOrNew(json, @reverse_model_type) else null
+          model.set(@key, related_model)
         callback(null, returnValue())
 
     # synchronous path
@@ -153,7 +154,7 @@ module.exports = class One extends require('./relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
-    (callback = relateds; relateds = null) if arguments.length is 2
+    (callback = relateds; relateds = undefined) if arguments.length is 2
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
