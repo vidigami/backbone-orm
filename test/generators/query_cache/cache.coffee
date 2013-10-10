@@ -55,7 +55,7 @@ module.exports = (options, callback) ->
       queue = new Queue(1)
 
       # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
