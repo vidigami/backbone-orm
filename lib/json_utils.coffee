@@ -249,7 +249,7 @@ module.exports = class JSONUtils
 
       queue.await (err) -> callback(err, if err then undefined else results)
 
-  @deepClone = (obj, depth) ->
+  @deepClone = (obj, depth) =>
     return obj if not obj or (typeof obj isnt "object")   # a value
     return String::slice.call(obj) if _.isString(obj)     # a string
     return new Date(obj.valueOf()) if _.isDate(obj)       # a date
@@ -264,6 +264,6 @@ module.exports = class JSONUtils
       clone = _.extend({}, obj)
 
     # keep cloning deeper
-    ((clone[key] = _.deepClone(clone[key], depth - 1)) for key of clone) if not _.isUndefined(depth) and (depth > 0)
+    ((clone[key] = @deepClone(clone[key], depth - 1)) for key of clone) if not _.isUndefined(depth) and (depth > 0)
 
     return clone

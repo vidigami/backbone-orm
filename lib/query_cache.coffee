@@ -27,7 +27,7 @@ class QueryCache
     return @ unless @enabled
     console.log '*SET', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
     model_types = [model_type].concat(related_model_types or [])
-    @cache.set(@cacheKey(model_type, query), {model_types: model_types, value: JSONUtils.deepClone(value)})
+    @cache.set(@cacheKey(model_type, query), {model_types: model_types, value: JSONUtils.deepClone(value, 2)})
     return @
 
   _got: (model_type, query, value) =>
@@ -37,7 +37,7 @@ class QueryCache
     else
       @misses++
       console.log '-MISS', @cacheKey(model_type, query), value, '\n-----------' if @verbose
-    return JSONUtils.deepClone(value)
+    return JSONUtils.deepClone(value, 2)
 
   get: (model_type, query) =>
     return null unless @enabled
