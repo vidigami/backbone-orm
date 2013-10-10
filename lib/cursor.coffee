@@ -185,7 +185,7 @@ module.exports = class Cursor
     else if @_cursor.$white_list
       json = (_.pick(item, @_cursor.$white_list) for item in json)
 
-    return json
+    return if @_cursor.$one then (json[0] or null) else json
 
   selectFromModels: (models, callback) ->
     if @_cursor.$select

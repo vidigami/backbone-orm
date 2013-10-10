@@ -120,9 +120,6 @@ module.exports = class MemoryCursor extends Cursor
       queue.await =>
         return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
-        if @_cursor.$one
-          return callback(null, null) unless json.length
-          return callback(null, @selectResults([json[0]])[0])
 
         json = @selectResults(json)
         if @hasCursorQuery('$page')
