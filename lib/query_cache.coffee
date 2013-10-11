@@ -16,7 +16,7 @@ class QueryCache
     @hardReset() # Clear previous cache, reset counts
 
     lru_options = {}
-    (lru_options[inflection.camelize(key)] = value) for key, value of options
+    (lru_options[inflection.camelize(key, true)] = value) for key, value of options
 
     @cache = new LRU(lru_options)
     return @
