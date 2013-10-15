@@ -8,15 +8,13 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-QueryCache = require '../../../lib/query_cache'
+QueryCache = require '../../../lib/query_cache/query_cache'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-
-  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -46,13 +44,15 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      QueryCache.configure({enabled: true, verbose: false}).reset() # configure query cache
       require('../../../lib/cache').reset()
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
+
+      # reset query cache
+      queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
@@ -86,8 +86,10 @@ module.exports = (options, callback) ->
 
         save_queue.await callback
 
+      # reset query cache
+      queue.defer (callback) -> QueryCache.reset(callback) # Reset after models created
+
       queue.await ->
-        QueryCache.reset()  # reset cache
         QueryCache.verbose = false
         console.log '\n'
         done()
@@ -110,11 +112,12 @@ module.exports = (options, callback) ->
       Flat.cursor(query).toJSON (err, flat) ->
         assert.ok(!err, "No errors: #{err}")
 
-        result = QueryCache.getRaw(Flat, query)
-        assert.ok(result, "Cache hit: #{result}")
-        assert.equal(1, result.model_types.length, "Has one model stored for query, Expected: 1, Actual: #{result.model_types.length}")
-        assert.equal(Flat, result.model_types[0], "Has the correct model stored for query, Expected: Flat, Actual: #{result.model_types[0].name}")
-        done()
+        QueryCache.getRaw Flat, query, (err, result) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(result, "Cache hit: #{result}")
+          assert.equal(1, result.model_types.length, "Has one model stored for query, Expected: 1, Actual: #{result.model_types.length}")
+          assert.equal(Flat, result.model_types[0], "Has the correct model stored for query, Expected: Flat, Actual: #{result.model_types[0].name}")
+          done()
 
     it 'Can perform the same query twice with a cache hit the second time with a many to many include', (done) ->
       query = {$one: true, $include: ['reverses']}
@@ -134,15 +137,16 @@ module.exports = (options, callback) ->
       Owner.cursor(query).toJSON (err, owner) ->
         assert.ifError(err, "No errors: #{err}")
 
-        result = QueryCache.getRaw(Owner, query)
+        QueryCache.getRaw Owner, query, (err, result) ->
+          assert.ifError(err, "No errors: #{err}")
 
-        assert.ok(result, "Cache hit: #{result}")
-        assert.equal(3, result.model_types.length, "Has three models stored for query, Expected: 3, Actual: #{result.model_types.length}")
-        assert.ok(Owner in result.model_types, "Contains an Owner")
-        assert.ok(Reverse in result.model_types, "Contains a Reverse")
-        JoinTable = Owner.schema().relation('reverses').join_table
-        assert.ok(JoinTable in result.model_types, "Contains the JoinTable")
-        done()
+          assert.ok(result, "Cache hit: #{result}")
+          assert.equal(3, result.model_types.length, "Has three models stored for query, Expected: 3, Actual: #{result.model_types.length}")
+          assert.ok(Owner in result.model_types, "Contains an Owner")
+          assert.ok(Reverse in result.model_types, "Contains a Reverse")
+          JoinTable = Owner.schema().relation('reverses').join_table
+          assert.ok(JoinTable in result.model_types, "Contains the JoinTable")
+          done()
 
     it 'Clears the correct models with the cache result with a many to many include', (done) ->
       query = {$one: true, $include: ['reverses']}
@@ -151,26 +155,33 @@ module.exports = (options, callback) ->
 
         misses = QueryCache.misses
         count = QueryCache.count()
-        QueryCache.reset(Owner)
-
-        assert.equal(count, QueryCache.clears, "Cleared all the keys after resetting Owner, Expected: #{count}, Actual: #{QueryCache.clears}")
-        assert.equal(0, QueryCache.count(), "No keys after reset, Expected: #{0}, Actual: #{QueryCache.count()}")
-
-        Owner.cursor(query).toJSON (err, owner) ->
+        QueryCache.reset Owner, (err) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.equal(2*misses, QueryCache.misses, "Same amount of misses after resetting Owner, Expected: #{2*misses}, Actual: #{QueryCache.misses}")
-          assert.equal(0, QueryCache.hits, "Still no hits after reset")
-          done()
+
+          assert.equal(count, QueryCache.clears, "Cleared all the keys after resetting Owner, Expected: #{count}, Actual: #{QueryCache.clears}")
+          assert.equal(0, QueryCache.count(), "No keys after reset, Expected: #{0}, Actual: #{QueryCache.count()}")
+
+          Owner.cursor(query).toJSON (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(2*misses, QueryCache.misses, "Same amount of misses after resetting Owner, Expected: #{2*misses}, Actual: #{QueryCache.misses}")
+            assert.equal(0, QueryCache.hits, "Still no hits after reset")
+            done()
 
     it "Clones data so altering models after retrieval doesn't alter the cached data", (done) ->
       query = {$one: true, $include: ['reverses']}
       Owner.cursor(query).toJSON (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         owner.foo = 'bar'
-        second_json = QueryCache.get(Owner, query)
-        assert.ok(!second_json.foo, "Cached object does not have altered property: #{second_json.foo}")
-        second_json.bar = 'test2'
-        third_json = QueryCache.get(Owner, query)
-        assert.ok(!third_json.foo, "Cached object does not have altered property: #{third_json.foo}")
-        assert.ok(!third_json.bar, "Cached object does not have altered property: #{third_json.bar}")
-        done()
+
+        QueryCache.get Owner, query, (err, second_json) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          assert.ok(!second_json.foo, "Cached object does not have altered property: #{second_json.foo}")
+          second_json.bar = 'test2'
+
+          QueryCache.get Owner, query, (err, third_json) ->
+            assert.ok(!err, "No errors: #{err}")
+
+            assert.ok(!third_json.foo, "Cached object does not have altered property: #{third_json.foo}")
+            assert.ok(!third_json.bar, "Cached object does not have altered property: #{third_json.bar}")
+            done()

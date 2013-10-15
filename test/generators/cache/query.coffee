@@ -5,6 +5,7 @@ Backbone = require 'backbone'
 Queue = require 'queue-async'
 moment = require 'moment'
 
+QueryCache = require '../../../lib/query_cache/query_cache'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 
@@ -14,7 +15,6 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
   require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   class Flat extends Backbone.Model
@@ -27,9 +27,11 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/query_cache').reset()  # reset cache
       require('../../../lib/cache').reset()
       queue = new Queue(1)
+
+      # reset query cache
+      queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       queue.defer (callback) -> Flat.resetSchema(callback)
 

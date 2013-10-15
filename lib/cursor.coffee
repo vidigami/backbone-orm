@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 
-QueryCache = require './query_cache'
+QueryCache = require './query_cache/query_cache'
 Utils = require './utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']
@@ -129,13 +129,15 @@ module.exports = class Cursor
 
   toJSON: (callback) ->
     parsed_query = _.extend({}, @_cursor, @_find)
-    return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, parsed_query)) # Check query cache
-    model_types = @relatedModelTypesInQuery()
-
-    @queryToJSON (err, json) =>
+    # Check query cache
+    QueryCache.get @model_type, parsed_query, (err, cached_result) =>
       return callback(err) if err
-      QueryCache.set(@model_type, parsed_query, model_types, json) # Update query cache
-      callback(null, json)
+      return callback(null, cached_result) if cached_result
+      model_types = @relatedModelTypesInQuery()
+      @queryToJSON (err, json) =>
+        return callback(err) if err
+        QueryCache.set(@model_type, parsed_query, model_types, json, (err) -> console.log "Error setting query cache: #{err}" if err) # Update query cache, ignore errors
+        callback(null, json)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->

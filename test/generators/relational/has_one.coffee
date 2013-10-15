@@ -4,6 +4,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
 
+QueryCache = require '../../../lib/query_cache/query_cache'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
@@ -15,7 +16,6 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
   require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
@@ -57,12 +57,14 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/query_cache').reset()  # reset cache
       require('../../../lib/cache').reset()
       relation = Owner.relation('flat')
       delete relation.virtual
       MODELS = {}
       queue = new Queue(1)
+
+      # reset query cache
+      queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
