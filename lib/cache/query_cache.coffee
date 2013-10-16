@@ -11,7 +11,7 @@ RedisStore = require './stores/redis'
 
 CLONE_DEPTH = 2
 
-class QueryCache
+module.exports = class QueryCache
   constructor: ->
     @enabled = false
 
@@ -114,5 +114,3 @@ class QueryCache
       queue.await callback
 
   count: => @store?.keys().length
-
-module.exports = cache = new QueryCache()

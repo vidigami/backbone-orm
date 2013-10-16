@@ -1,24 +1,13 @@
 util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
-inflection = require 'inflection'
-LRU = require 'lru-cache'
 
 Utils = require './utils'
 
-class ModelCache
-  constructor: (options) -> @cache = new LRU(options)
-  set: (id, model) ->
-    return @ if model._orm_never_cache # skip cache
-    @cache.set(id, model)
-  get: (id) -> @cache.get(id)
-  del: (id) -> @cache.del(id)
-  reset: -> @cache.reset()
-  forEach: (fn, thisp) -> @cache.forEach(fn, thisp)
-
 # @private
-class Cache
+module.exports = class ModelCache
   constructor: ->
+    @enabled = false
     @caches = {}
     @options = {modelTypes: {}}
     @verbose = false
@@ -32,6 +21,7 @@ class Cache
   #   model_types/modelTypes: {'ModelName': options}
   #
   configure: (options) ->
+    @enabled = options.enabled
     @reset()
     (@options = {modelTypes: {}}; return @) unless options # clear all options
 
@@ -83,11 +73,3 @@ class Cache
       return @caches[model_name] = new ModelCache(_.pick(@options, 'max', 'maxAge', 'length', 'dispose', 'stale'))
 
     return null
-
-  normalizeKey: (key) ->
-    key = inflection.underscore(key)
-    return key.toLowerCase() if key.indexOf('_') < 0
-    return inflection.camelize(key)
-
-# singleton
-module.exports = new Cache()

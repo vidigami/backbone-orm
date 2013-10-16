@@ -8,7 +8,7 @@ Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-QueryCache = require '../../../lib/query_cache/query_cache'
+QueryCache = require '../../../lib/query_cache'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

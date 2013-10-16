@@ -215,7 +215,7 @@ module.exports = class One extends require('./relation')
 
   cursor: (model, key, query) ->
     query = _.extend({$one:true}, query or {})
-    # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
+
     if model instanceof Backbone.Model
       if @type is 'belongsTo'
         (query.$zero = true; delete query.id) unless query.id = model.attributes[@key]?.id

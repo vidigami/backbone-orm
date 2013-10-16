@@ -5,6 +5,7 @@ module.exports = class MemoryStore
     @cache = {}
 
   set: (key, value, callback) =>
+    return callback(null, value) if value._orm_never_cache # skip cache
     @cache[key] = value
     callback(null, value)
 

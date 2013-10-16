@@ -4,7 +4,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
 
-QueryCache = require '../../../lib/query_cache/query_cache'
+QueryCache = require '../../../lib/query_cache'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
@@ -166,7 +166,7 @@ module.exports = (options, callback) ->
             require('../../../lib/cache').reset() # reset cache
             owner = new Owner({id: owner.id})
           console.log 'PATCHing'
-#          require('../../../lib/query_cache/query_cache').reset()
+#          require('../../../lib/query_cache').reset()
           owner.patchAdd 'reverses', shared_reverse_id, (err) ->
             assert.ok(!err, "No errors: #{err}")
             owner.get 'reverses', (err) ->

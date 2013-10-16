@@ -6,7 +6,7 @@ Queue = require 'queue-async'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
-QueryCache = require './lib/query_cache/query_cache'
+QueryCache = require './lib/query_cache'
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}

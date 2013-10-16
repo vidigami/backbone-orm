@@ -16,6 +16,7 @@ module.exports = class RedisStore
     @client.auth(password) if password
 
   set: (key, value, callback) =>
+    return callback(null, value) if value._orm_never_cache # skip cache
     @client.set(key, JSON.stringify(value), callback)
 
   get: (key, callback) =>

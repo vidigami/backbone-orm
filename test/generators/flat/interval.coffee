@@ -5,7 +5,7 @@ Backbone = require 'backbone'
 moment = require 'moment'
 Queue = require 'queue-async'
 
-QueryCache = require '../../../lib/query_cache/query_cache'
+QueryCache = require '../../../lib/query_cache'
 Fabricator = require '../../../fabricator'
 Utils = require '../../../lib/utils'
 
