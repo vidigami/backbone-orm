@@ -36,7 +36,7 @@ module.exports = class Many extends require('./relation')
     throw new Error "Many.set: Unexpected key #{key}. Expecting: #{@key} or #{@virtual_id_accessor} or #{@foreign_key}" unless ((key is @key) or (key is @virtual_id_accessor) or (key is @foreign_key))
     collection = @_bindBacklinks(model)
 
-    value = value.models if value instanceof Backbone.Collection
+    value = value.models if Utils.isCollection(value)
     value = [] if _.isUndefined(value) # Backbone clear or reset
     throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
@@ -176,7 +176,7 @@ module.exports = class Many extends require('./relation')
       callback = relateds
 
       return callback() if not @reverse_relation
-      if model instanceof Backbone.Model
+      if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
         collection = @_ensureCollection(model)
         related_models = _.clone(collection.models)
@@ -247,7 +247,7 @@ module.exports = class Many extends require('./relation')
   cursor: (model, key, query) ->
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
 
-    json = if model instanceof Backbone.Model then model.attributes else model
+    json = if Utils.isModel(model) then model.attributes else model
     (query = _.clone(query or {}))[if @join_table then @join_key else @reverse_relation.foreign_key] = json.id
     (query.$values or= []).push('id') if key is @virtual_id_accessor
     return @reverse_model_type.cursor(query)
@@ -256,7 +256,7 @@ module.exports = class Many extends require('./relation')
   # Internal
   ####################################
   _bindBacklinks: (model) ->
-    return collection if ((collection = model.attributes[@key]) instanceof @collection_type)
+    return collection if Utils.isCollection(collection = model.attributes[@key])
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
 

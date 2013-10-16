@@ -33,7 +33,7 @@ module.exports = class One extends require('./relation')
     value = null if _.isUndefined(value) # Backbone clear or reset
 
     return @ if value is (previous_related_model = model.get(@key)) # no change
-    is_model = (value instanceof Backbone.Model)
+    is_model = Utils.isModel(value)
     new_related_id = Utils.dataId(value)
     previous_related_id = Utils.dataId(previous_related_model)
     Utils.orSet(model, 'rel_dirty', {})[@key] = true
@@ -101,7 +101,7 @@ module.exports = class One extends require('./relation')
     return callback(new Error "One.patchAdd: cannot add a new model. Please save first.") unless related_id = Utils.dataId(related)
 
     # look up in the cache
-    if @reverse_model_type.cache and not (related instanceof Backbone.Model)
+    if @reverse_model_type.cache and not Utils.isModel(related)
       if found_related = @reverse_model_type.cache.get(related_id)
         Utils.updateModel(found_related, related)
         related = found_related
@@ -130,7 +130,7 @@ module.exports = class One extends require('./relation')
 
         # set new
         queue.defer (callback) =>
-          if related instanceof Backbone.Model
+          if Utils.isModel(related)
             related_json = related.toJSON() if related.isLoaded()
           else if related_id isnt related
             related_json = related
@@ -160,7 +160,7 @@ module.exports = class One extends require('./relation')
     # REMOVE ALL
     if arguments.length is 2
       return callback() if not @reverse_relation
-      delete Utils.orSet(model, 'rel_dirty', {})[@key] if model instanceof Backbone.Model
+      delete Utils.orSet(model, 'rel_dirty', {})[@key] if Utils.isModel(model)
 
       @cursor(model, @key).toJSON (err, related_json) =>
         return callback(err) if err
@@ -216,7 +216,7 @@ module.exports = class One extends require('./relation')
   cursor: (model, key, query) ->
     query = _.extend({$one:true}, query or {})
     # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
-    if model instanceof Backbone.Model
+    if Utils.isModel(model)
       if @type is 'belongsTo'
         (query.$zero = true; delete query.id) unless query.id = model.attributes[@key]?.id
       else

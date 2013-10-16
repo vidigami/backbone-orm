@@ -10,7 +10,7 @@ module.exports = class VirtualCursor extends Cursor
     return callback(new Error 'Cannot perform a find on a virtual cursor') if _.size(@_find)
     return callback(new Error 'Cannot perform cursor operations on a virtual cursor') if _.size(@_cursor) and not @hasCursorQuery('$one')
 
-    if @model instanceof Backbone.Model
+    if Utils.isModel(@model)
       value = @model.get(@relation.key)
       return callback(null, if value then value.toJSON() else null) if @hasCursorQuery('$one')
       callback(null, value.toJSON())

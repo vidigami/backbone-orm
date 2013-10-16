@@ -20,6 +20,10 @@ module.exports = class Utils
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
+  # use signatures as a check in case multiple versions of Backbone have been included
+  @isModel: (obj) -> return obj and obj.attributes and (obj instanceof Backbone.Model or (obj.parse and obj.fetch))
+  @isCollection: (obj) -> return obj and obj.models and (obj instanceof Backbone.Collection or (obj.reset and obj.fetch))
+
   @deepClone: (obj) ->
     return obj if not obj or (typeof obj isnt 'object')
     return String::slice.call(obj) if _.isString(obj)
@@ -142,7 +146,7 @@ module.exports = class Utils
   @dataToModel: (data, model_type) ->
     return null unless data
     return (Utils.dataToModel(item, model_type) for item in data) if _.isArray(data)
-    if data instanceof Backbone.Model
+    if Utils.isModel(data)
       model = data
     else if Utils.dataId(data) isnt data
       model = new model_type(model_type::parse(data))
@@ -154,7 +158,7 @@ module.exports = class Utils
 
   @updateModel: (model, data) ->
     return model if not data or (model is data) or data._orm_needs_load
-    data = data.toJSON() if data instanceof Backbone.Model
+    data = data.toJSON() if Utils.isModel(data)
     if Utils.dataId(data) isnt data
       model.setLoaded(true)
       model.set(data)
@@ -173,7 +177,7 @@ module.exports = class Utils
     if (cache = model_type.cache) and (id = Utils.dataId(data))
       Utils.updateModel(model, data) if model = cache.get(id)
     unless model
-      model = if data instanceof Backbone.Model then data else Utils.dataToModel(data, model_type)
+      model = if Utils.isModel(data) then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache
     return model
 
