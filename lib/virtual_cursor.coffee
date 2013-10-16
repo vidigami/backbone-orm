@@ -3,6 +3,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 
 Cursor = require './cursor'
+Utils = require './utils'
 
 # @private
 module.exports = class VirtualCursor extends Cursor

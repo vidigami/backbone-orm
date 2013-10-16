@@ -21,8 +21,8 @@ module.exports = class Utils
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
   # use signatures as a check in case multiple versions of Backbone have been included
-  @isModel: (obj) -> return obj and obj.attributes and (obj instanceof Backbone.Model or (obj.parse and obj.fetch))
-  @isCollection: (obj) -> return obj and obj.models and (obj instanceof Backbone.Collection or (obj.reset and obj.fetch))
+  @isModel: (obj) -> return obj and obj.attributes and ((obj instanceof Backbone.Model) or (obj.parse and obj.fetch))
+  @isCollection: (obj) -> return obj and obj.models and ((obj instanceof Backbone.Collection) or (obj.reset and obj.fetch))
 
   @deepClone: (obj) ->
     return obj if not obj or (typeof obj isnt 'object')
