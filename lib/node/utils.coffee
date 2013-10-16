@@ -4,6 +4,7 @@ path = require 'path'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require 'queue-async'
+Utils = require './utils'
 
 module.exports = class NodeUtils
 
@@ -31,7 +32,7 @@ module.exports = class NodeUtils
               try
                 model_path = path.join(directory, file)
                 model_type = require(model_path)
-                return callback() unless (model_type and _.isFunction(model_type) and ((new model_type()) instanceof Backbone.Model) and model_type.resetSchema)
+                return callback() unless (model_type and _.isFunction(model_type) and Utils.isModel(new model_type()) and model_type.resetSchema)
                 model_type.path = model_path if options.append_path
                 model_types.push(model_type)
                 callback()

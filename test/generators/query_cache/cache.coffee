@@ -55,7 +55,7 @@ module.exports = (options, callback) ->
       queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
       # create all
       queue.defer (callback) ->
