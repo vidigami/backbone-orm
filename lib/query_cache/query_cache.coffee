@@ -23,15 +23,39 @@ class QueryCache
     return @
 
   cacheKey: (model_type, query) -> "#{_.result(model_type.prototype, 'url')}_#{JSON.stringify(query)}"
+  cacheKeyMeta: (model_type) -> "meta_#{_.result(model_type.prototype, 'url')}"
+
+  getKeysForModelTypes: (model_types, callback) =>
+    all_keys = []
+    queue = new Queue(1)
+    for model_type in model_types
+      do (model_type) => queue.defer (callback) =>
+        model_type_key = @cacheKeyMeta(model_type)
+        @store.get model_type_key, (err, keys) =>
+          return callback(err) if err or not keys
+          all_keys = all_keys.concat(keys)
+          callback()
+    queue.await (err) -> callback(err, all_keys)
+
+  storeKeyForModelTypes: (model_types, cache_key, callback) =>
+    queue = new Queue(1)
+    for model_type in model_types
+      do (model_type) => queue.defer (callback) =>
+        model_type_key = @cacheKeyMeta(model_type)
+        @store.get model_type_key, (err, keys) =>
+          return callback(err) if err
+          (keys or= []).push(cache_key)
+          @store.set model_type_key, _.uniq(keys), callback
+    queue.await callback
 
   set: (model_type, query, related_model_types, value, callback) =>
     return callback() unless @enabled
     console.log 'QueryCache:set', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
     model_types = [model_type].concat(related_model_types or [])
     cache_key = @cacheKey(model_type, query)
-    @store.set cache_key, {model_types: model_types, value: JSONUtils.deepClone(value, CLONE_DEPTH)}, (err) =>
+    @store.set cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (err) =>
       return callback(err) if err
-      @storeKeyForModelTypes cache_key, model_types, callback
+      @storeKeyForModelTypes model_types, cache_key, callback
 
   _got: (model_type, query, value) =>
     unless _.isUndefined(value)
@@ -77,18 +101,17 @@ class QueryCache
 
     # Clear everything depending on the given model_type(s)
     to_clear = []
-#    @store.forEach (value, key, cache) =>
-#      for model_type in model_types
-#        to_clear.push(key) if model_type in value.model_types
-#        console.log 'QueryCache:clear', model_type in value.model_types, (model_type.name), (m.name for m in value.model_types), key, JSON.stringify(value), '\n-----------' if @verbose
+    @getKeysForModelTypes model_types, (err, to_clear) =>
+      return callback(err) if err
 
-    queue = new Queue()
-    for key in _.uniq(to_clear)
-      do (key) => queue.defer (callback) =>
-        @clears++
-        @store.del(key, callback)
+      queue = new Queue()
+      for key in _.uniq(to_clear)
+        do (key) => queue.defer (callback) =>
+          console.log 'QueryCache:cleared', model_type.name, key, '\n-----------' if @verbose
+          @clears++
+          @store.del(key, callback)
 
-    queue.await callback
+      queue.await callback
 
   count: => @store?.keys().length
 
