@@ -2,7 +2,7 @@ util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
 
-Utils = require './utils'
+Utils = require '../utils'
 
 # @private
 module.exports = class ModelCache

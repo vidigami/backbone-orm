@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 
-QueryCache = require './query_cache'
+QueryCache = require('./cache/singletons').QueryCache
 Utils = require './utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']

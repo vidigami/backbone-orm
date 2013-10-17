@@ -6,7 +6,7 @@ Queue = require 'queue-async'
 MemoryCursor = require './lib/memory_cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
-QueryCache = require './lib/query_cache'
+QueryCache = require('./lib/cache/singletons').QueryCache
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}
@@ -100,4 +100,4 @@ module.exports = (type) ->
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
   require('./lib/model_extensions')(type)
-  return require('./lib/cache').configureSync(type, sync_fn)
+  return require('./lib/cache/singletons').ModelCache.configureSync(type, sync_fn)

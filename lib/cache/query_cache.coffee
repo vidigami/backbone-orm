@@ -2,12 +2,9 @@ _ = require 'underscore'
 inflection = require 'inflection'
 Queue = require 'queue-async'
 
-Utils = require './../utils'
-JSONUtils = require './../json_utils'
+JSONUtils = require '../json_utils'
 
-LRUStore = require './stores/lru'
-MemoryStore = require './stores/memory'
-RedisStore = require './stores/redis'
+MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
 
