@@ -39,7 +39,7 @@ module.exports = class Cursor
         throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
-        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value if key in CURSOR_KEYS)
+        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
       return parsed_query
 
   offset: (offset) -> @_cursor.$offset = offset; return @
@@ -128,7 +128,7 @@ module.exports = class Cursor
         return callback(null, if @_cursor.$one then models[0] else models)
 
   toJSON: (callback) ->
-    parsed_query = _.extend({}, @_cursor, @_find)
+    parsed_query = _.extend({}, _.pick(@_cursor, CURSOR_KEYS), @_find)
     # Check query cache
     QueryCache.get @model_type, parsed_query, (err, cached_result) =>
       return callback(err) if err
