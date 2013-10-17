@@ -14,7 +14,9 @@ module.exports = class Many extends require('./relation')
     @virtual_id_accessor or= "#{inflection.singularize(@key)}_ids"
     @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
-    @collection_type = Backbone.Collection unless @collection_type
+    unless @collection_type
+      @collection_type = class Collection extends Backbone.Collection
+        model: @reverse_model_type
 
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)
@@ -254,7 +256,7 @@ module.exports = class Many extends require('./relation')
   # Internal
   ####################################
   _bindBacklinks: (model) ->
-    return collection if Utils.isCollection(collection = model.attributes[@key])
+    return collection if (collection = model.attributes[@key]) instanceof @collection_type
     collection = model.attributes[@key] = new @collection_type()
     return collection unless @reverse_relation # no back links
 
