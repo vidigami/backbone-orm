@@ -1,7 +1,7 @@
 util = require 'util'
 Backbone = require 'backbone'
 
-Utils = require './utils'
+Utils = require '../utils'
 
 _original__prepareModel = Backbone.Collection::_prepareModel
 Backbone.Collection::_prepareModel = (attrs, options) ->

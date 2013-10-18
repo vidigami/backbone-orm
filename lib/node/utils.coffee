@@ -3,7 +3,7 @@ fs = require 'fs'
 path = require 'path'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require '../queue'
 Utils = require './utils'
 
 module.exports = class NodeUtils

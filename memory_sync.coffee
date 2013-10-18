@@ -1,12 +1,15 @@
 util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require './lib/queue'
 
-MemoryCursor = require './lib/memory_cursor'
+MemoryCursor = require './lib/memory/cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
+
+ModelCache = require('./lib/cache/singletons').ModelCache
 QueryCache = require('./lib/cache/singletons').QueryCache
+modelExtensions = require './lib/extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}
@@ -99,5 +102,5 @@ module.exports = (type) ->
     return undefined if method is 'tableName'
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
-  require('./lib/model_extensions')(type)
-  return require('./lib/cache/singletons').ModelCache.configureSync(type, sync_fn)
+  modelExtensions(type)
+  return ModelCache.configureSync(type, sync_fn)

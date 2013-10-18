@@ -2,13 +2,14 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require '../../../lib/queue'
 
-Fabricator = require '../../../fabricator'
+Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-QueryCache = require '../../../lib/query_cache'
+ModelCache = require('./lib/cache/singletons').ModelCache
+QueryCache = require('./lib/cache/singletons').QueryCache
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -44,14 +45,14 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset()
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
 
-      # reset query cache
+      # reset caches
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
       queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       # destroy all

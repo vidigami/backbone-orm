@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require './queue'
 
 module.exports = class JSONUtils
 

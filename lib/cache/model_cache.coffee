@@ -1,6 +1,7 @@
 util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
+Queue = require '../queue'
 
 Utils = require '../utils'
 
@@ -40,20 +41,11 @@ module.exports = class ModelCache
     model_type.cache = cache
     return require('./cache_sync')(model_type, sync_fn)
 
-  reset: (model_type, ids) ->
-    # clear the full cache
-    if arguments.length is 0
-      value.reset() for key, value of @caches
-      return @
-
-    return @ unless model_cache = @caches[model_type.model_name] # no caching
-
-    (model_cache.reset(); return @) if arguments.length is 1 # clear a model cache
-
-    # clear specific ids from a model cache
-    ids = [ids] unless _.isArray(ids)
-    model_cache.del(id) for id in ids
-    return @
+  reset: (callback) ->
+    queue = new Queue()
+    for key, value of @caches
+      do (value) -> queue.defer (callback) value.reset(callback)
+    queue.await callback
 
   hardReset: ->
     @configure()

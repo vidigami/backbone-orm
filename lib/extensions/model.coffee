@@ -2,10 +2,10 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
-Utils = require './utils'
-require './collection_extensions' # ensure collection extensions are loaded
+Utils = require '../utils'
+require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
 

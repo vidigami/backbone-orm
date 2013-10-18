@@ -1,6 +1,6 @@
 _ = require 'underscore'
 inflection = require 'inflection'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
 JSONUtils = require '../json_utils'
 

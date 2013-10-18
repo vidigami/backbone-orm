@@ -2,7 +2,7 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
 Utils = require '../utils'
 bbCallback = Utils.bbCallback
