@@ -5,8 +5,8 @@ Backbone = require 'backbone'
 moment = require 'moment'
 Queue = require '../../../lib/queue'
 
-ModelCache = require('./lib/cache/singletons').ModelCache
-QueryCache = require('./lib/cache/singletons').QueryCache
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 

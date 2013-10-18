@@ -3,7 +3,6 @@ inflection = require 'inflection'
 Queue = require '../queue'
 
 JSONUtils = require '../json_utils'
-
 MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
@@ -48,6 +47,7 @@ module.exports = class QueryCache
   set: (model_type, query, related_model_types, value, callback) =>
     return callback() unless @enabled
     console.log 'QueryCache:set', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
+
     model_types = [model_type].concat(related_model_types or [])
     cache_key = @cacheKey(model_type, query)
     @store.set cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (err) =>

@@ -1,9 +1,9 @@
 util = require 'util'
 _ = require 'underscore'
 
-CacheCursor = require './cache_cursor'
-Schema = require './schema'
-Utils = require './utils'
+CacheCursor = require './cursor'
+Schema = require '../schema'
+Utils = require '../utils'
 bbCallback = Utils.bbCallback
 
 DEFAULT_LIMIT = 1000
@@ -51,8 +51,9 @@ class CacheSync
   # Backbone ORM - Class Extensions
   ###################################
   resetSchema: (options, callback) ->
-    @model_type.cache.reset()
-    @wrapped_sync_fn('resetSchema', options, callback)
+    @model_type.cache.reset (err) =>
+      return callback(err) if err
+      @wrapped_sync_fn('resetSchema', options, callback)
 
   cursor: (query={}) -> return new CacheCursor(query, _.pick(@, ['model_type', 'wrapped_sync_fn']))
 

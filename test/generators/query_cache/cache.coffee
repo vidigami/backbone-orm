@@ -8,8 +8,8 @@ Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
-ModelCache = require('./lib/cache/singletons').ModelCache
-QueryCache = require('./lib/cache/singletons').QueryCache
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

@@ -7,17 +7,20 @@ module.exports = class MemoryStore
   set: (key, value, callback) =>
     return callback(null, value) if value._orm_never_cache # skip cache
     @cache[key] = value
-    callback(null, value)
+    callback?(null, value)
+    return @
 
   get: (key, callback) =>
-    callback(null, @cache[key])
+    value = @cache[key]
+    callback?(null, value)
+    return value
 
   reset: (callback) =>
     @cache = {}
-    callback()
+    callback?()
+    return @
 
   del: (key, callback) =>
     delete @cache[key]
-    callback()
-
-  keys: => _.keys(@cache)
+    callback?()
+    return @

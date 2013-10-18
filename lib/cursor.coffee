@@ -118,8 +118,8 @@ module.exports = class Cursor
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
-      json = [json] unless _.isArray(json)
 
+      json = [json] unless _.isArray(json)
       @prepareIncludes json, (err, json) =>
         if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
           models = (Utils.updateOrNew(item, @model_type) for item in json)
@@ -133,10 +133,12 @@ module.exports = class Cursor
     QueryCache.get @model_type, parsed_query, (err, cached_result) =>
       return callback(err) if err
       return callback(null, cached_result) if cached_result
+
       model_types = @relatedModelTypesInQuery()
       @queryToJSON (err, json) =>
         return callback(err) if err
-        QueryCache.set(@model_type, parsed_query, model_types, json, (err) -> console.log "Error setting query cache: #{err}" if err) # Update query cache, ignore errors
+        if json
+          QueryCache.set(@model_type, parsed_query, model_types, json, (err) -> console.log "Error setting query cache: #{err}" if err) # TODO: Update query cache, ignore errors
         callback(null, json)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type

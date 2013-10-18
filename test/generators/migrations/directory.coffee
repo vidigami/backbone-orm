@@ -5,13 +5,13 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require '../../../lib/queue'
 
-ModelCache = require('./lib/cache/singletons').ModelCache
-QueryCache = require('./lib/cache/singletons').QueryCache
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
-NodeUtils = require '../../../lib/node_utils'
+NodeUtils = require '../../../lib/node/utils'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

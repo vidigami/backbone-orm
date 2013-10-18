@@ -3,6 +3,8 @@ Backbone = require 'backbone'
 _ = require 'underscore'
 Queue = require '../queue'
 
+MemoryStore = require './memory_store'
+MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy']
 Utils = require '../utils'
 
 # @private
@@ -21,30 +23,28 @@ module.exports = class ModelCache
   #   max_age/maxAge: default maximum number of items or max size of the cache
   #   model_types/modelTypes: {'ModelName': options}
   #
-  configure: (options) ->
+  configure: (options={}) ->
     @enabled = options.enabled
-    @reset()
     (@options = {modelTypes: {}}; return @) unless options # clear all options
 
     for key, value of options
-      key = @normalizeKey(key)
       if _.isObject(value)
         @options[key] or= {}
         values = @options[key]
-        values[@normalizeKey(value_key)] = value_value for value_key, value_value of value
+        values[value_key] = value_value for value_key, value_value of value
       else
         @options[key] = value
     return @
 
   configureSync: (model_type, sync_fn) ->
-    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateModelCache(model_type.model_name))
+    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateCache(model_type.model_name))
     model_type.cache = cache
-    return require('./cache_sync')(model_type, sync_fn)
+    return require('./sync')(model_type, sync_fn)
 
   reset: (callback) ->
     queue = new Queue()
     for key, value of @caches
-      do (value) -> queue.defer (callback) value.reset(callback)
+      do (value) -> queue.defer (callback) -> value.reset(callback)
     queue.await callback
 
   hardReset: ->
@@ -52,16 +52,16 @@ module.exports = class ModelCache
     delete @caches[key] for key, value of @caches
     return @
 
-  getOrCreateModelCache: (model_name) ->
+  getOrCreateCache: (model_name) ->
     throw new Error "Missing model name for cache" unless model_name
     return model_cache if model_cache = @caches[model_name]
 
     # there are options
     if options = @options.modelTypes[model_name]
-      return @caches[model_name] = new ModelCache(options)
+      return @caches[model_name] = options.store?() or new MemoryStore(_.pick(options, MEMORY_STORE_KEYS))
 
     # there are global options
-    else if @options.max or @options.maxAge
-      return @caches[model_name] = new ModelCache(_.pick(@options, 'max', 'maxAge', 'length', 'dispose', 'stale'))
+    else if @options.store or @options.max or @options.max_age
+      return @caches[model_name] = @options.store?() or new MemoryStore(_.pick(@options, MEMORY_STORE_KEYS))
 
     return null
