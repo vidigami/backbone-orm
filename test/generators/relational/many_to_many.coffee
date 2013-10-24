@@ -47,7 +47,7 @@ module.exports = (options, callback) ->
 
       # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
-      queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
+      queue.defer (callback) -> QueryCache.configure({enabled: !!options.query_cache, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback

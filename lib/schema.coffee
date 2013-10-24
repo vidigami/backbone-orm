@@ -25,6 +25,14 @@ module.exports = class Schema
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
     return null
 
+  # All relations, including join tables
+  allRelations: ->
+    related_model_types = []
+    for key, relation of @relations
+      related_model_types.push(relation.reverse_model_type)
+      related_model_types.push(relation.join_table) if relation.join_table
+    return related_model_types
+
   generateBelongsTo: (reverse_model_type) ->
     key = inflection.underscore(reverse_model_type.model_name)
     return relation if relation = @relations[key] # already exists

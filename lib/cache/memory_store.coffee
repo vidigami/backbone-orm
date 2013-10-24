@@ -13,17 +13,20 @@ module.exports = class MemoryStore
     @cache = new LRU(normalized_options)
 
   set: (key, value, callback) =>
-    return callback(null, value) if value._orm_never_cache # skip cache
+#    console.log 'set, ', key, value
+    return callback?(null, value) if value._orm_never_cache # skip cache
     @cache.set(key, value)
     callback?(null, value)
     return @
 
   get: (key, callback) =>
     value = @cache.get(key)
+#    console.log 'get, ', key, value
     callback?(null, value)
     return value
 
   destroy: (key, callback) =>
+#    console.log 'destroy, ', key
     @cache.del(key)
     callback?()
     return @
