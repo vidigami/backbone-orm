@@ -3,7 +3,7 @@ assert = require 'assert'
 _ = require 'underscore'
 moment = require 'moment'
 
-Fabricator = require '../../fabricator'
+Fabricator = require '../fabricator'
 
 runTests = (options, callback) ->
 

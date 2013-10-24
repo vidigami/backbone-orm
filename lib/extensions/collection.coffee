@@ -1,11 +1,11 @@
 util = require 'util'
 Backbone = require 'backbone'
 
-Utils = require './utils'
+Utils = require '../utils'
 
 _original__prepareModel = Backbone.Collection::_prepareModel
 Backbone.Collection::_prepareModel = (attrs, options) ->
-  if not (attrs instanceof Backbone.Model) and (id = Utils.dataId(attrs))
+  if not Utils.isModel(attrs) and (id = Utils.dataId(attrs))
     is_new = !!@model.cache.get(id) if @model.cache
     model = Utils.updateOrNew(attrs, @model)
     if is_new and not model._validate(attrs, options)

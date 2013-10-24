@@ -2,10 +2,10 @@ util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
-Utils = require './utils'
-require './collection_extensions' # ensure collection extensions are loaded
+Utils = require '../utils'
+require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
 
@@ -104,7 +104,7 @@ module.exports = (model_type) ->
     model_type::sync('cursor', query).toModels(callback)
 
   model_type.findOrCreate = (data, callback) ->
-    throw 'findOrCreate requires object data' if not _.isObject(data) or (data instanceof Backbone.Model) or (data instanceof Backbone.Collection)
+    throw 'findOrCreate requires object data' if not _.isObject(data) or Utils.isModel(data) or Utils.isCollection(data)
 
     query = _.extend({$one: true}, data)
     model_type::sync('cursor', query).toModels (err, model) ->
@@ -263,7 +263,7 @@ module.exports = (model_type) ->
     unset: (key) ->
       id = @id
       model_type::_orm_original_fns.unset.apply(@, arguments)
-      model_type.cache.del(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
+      model_type.cache.destroy(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
 
     set: (key, value, options) ->
       return model_type::_orm_original_fns.set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
@@ -284,8 +284,7 @@ module.exports = (model_type) ->
       model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes)
 
       # then set relationships
-      for key, relation of relational_attributes
-        relation.set(@, key, attributes[key], options)
+      relation.set(@, key, attributes[key], options) for key, relation of relational_attributes
 
       # model_type.cache.set(@id, @) if model_type.cache and @isLoaded() and @id # update the cache: TODO: look at the partial models code
       return @
@@ -312,10 +311,10 @@ module.exports = (model_type) ->
         if schema and (relation = schema.relation(key))
           relation.appendJSON(json, @)
 
-        else if value instanceof Backbone.Collection
+        else if Utils.isCollection(value)
           json[key] = _.map(value.models, (model) -> if model then model.toJSON(options) else null)
 
-        else if value instanceof Backbone.Model
+        else if Utils.isModel(value)
           json[key] = value.toJSON(options)
 
         else
@@ -362,7 +361,7 @@ module.exports = (model_type) ->
         ))
 
     destroy: (options) ->
-      cache.del(@id) if cache = @cache() # clear out of the cache
+      cache.destroy(@id) if cache = @cache() # clear out of the cache
       return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
       @_orm or= {}
@@ -400,11 +399,11 @@ module.exports = (model_type) ->
       keys = options.keys or _.keys(@attributes)
       for key in keys
         value = @attributes[key]
-        if value instanceof Backbone.Collection
+        if Utils.isCollection(value)
           clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
           clone.attributes[key].models = (_findOrClone(model, options) for model in value.models)
 
-        else if value instanceof Backbone.Model
+        else if Utils.isModel(value)
           clone.attributes[key] = _findOrClone(value, options)
 
         else

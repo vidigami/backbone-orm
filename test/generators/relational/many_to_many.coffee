@@ -2,10 +2,11 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require '../../../lib/queue'
 
-QueryCache = require '../../../lib/query_cache/query_cache'
-Fabricator = require '../../../fabricator'
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
+Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
@@ -15,7 +16,7 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
+  ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
@@ -38,14 +39,14 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/cache').reset()
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
 
-      # reset query cache
+      # reset caches
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
       queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
@@ -163,10 +164,10 @@ module.exports = (options, callback) ->
           shared_reverse_json = another_reverses[0].toJSON()
 
           if unload
-            require('../../../lib/cache').reset() # reset cache
+            ModelCache.reset(->) # TODO: make async # reset cache
             owner = new Owner({id: owner.id})
           console.log 'PATCHing'
-#          require('../../../lib/query_cache/query_cache').reset()
+#          require('../../../lib/cache/query_cache').reset()
           owner.patchAdd 'reverses', shared_reverse_id, (err) ->
             assert.ok(!err, "No errors: #{err}")
             owner.get 'reverses', (err) ->
@@ -219,7 +220,7 @@ module.exports = (options, callback) ->
 #            shared_reverse_json = another_reverses[0].toJSON()
 #
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchAdd 'reverses', shared_reverse_json, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -274,7 +275,7 @@ module.exports = (options, callback) ->
 #            shared_reverse_json = shared_reverse.toJSON()
 #
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchAdd 'reverses', shared_reverse, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -322,7 +323,7 @@ module.exports = (options, callback) ->
 #            destroyed_model = reverses[0]
 #            other_model = reverses[1]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchRemove 'reverses', destroyed_model.id, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -358,7 +359,7 @@ module.exports = (options, callback) ->
 #            destroyed_model = reverses[0]
 #            other_model = reverses[1]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchRemove 'reverses', destroyed_model.toJSON(), (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -394,7 +395,7 @@ module.exports = (options, callback) ->
 #            destroyed_model = reverses[0]
 #            other_model = reverses[1]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchRemove 'reverses', destroyed_model, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -430,7 +431,7 @@ module.exports = (options, callback) ->
 #            destroyed_model = reverses[0]
 #            other_model = reverses[1]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              owner = new Owner({id: owner.id})
 #            owner.patchRemove 'reverses', [destroyed_model, other_model], (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -461,7 +462,7 @@ module.exports = (options, callback) ->
 #
 #            destroyed_model = owners[0]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              reverse = new Reverse({id: reverse.id})
 #            reverse.patchRemove 'owners', destroyed_model.id, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -492,7 +493,7 @@ module.exports = (options, callback) ->
 #
 #            destroyed_model = owners[0]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              reverse = new Reverse({id: reverse.id})
 #            reverse.patchRemove 'owners', destroyed_model.toJSON(), (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -523,7 +524,7 @@ module.exports = (options, callback) ->
 #
 #            destroyed_model = owners[0]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              reverse = new Reverse({id: reverse.id})
 #            reverse.patchRemove 'owners', destroyed_model, (err) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -554,7 +555,7 @@ module.exports = (options, callback) ->
 #
 #            destroyed_model = owners[0]
 #            if unload
-#              require('../../../lib/cache').reset() # reset cache
+#              ModelCache.reset(->) # TODO: make async # reset cache
 #              reverse = new Reverse({id: reverse.id})
 #            reverse.patchRemove 'owners', [destroyed_model], (err) ->
 #              assert.ok(!err, "No errors: #{err}")

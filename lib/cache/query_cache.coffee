@@ -1,17 +1,13 @@
 _ = require 'underscore'
 inflection = require 'inflection'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
-Utils = require './../utils'
-JSONUtils = require './../json_utils'
-
-LRUStore = require './stores/lru'
-MemoryStore = require './stores/memory'
-RedisStore = require './stores/redis'
+JSONUtils = require '../json_utils'
+MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
 
-class QueryCache
+module.exports = class QueryCache
   constructor: ->
     @enabled = false
 
@@ -51,6 +47,7 @@ class QueryCache
   set: (model_type, query, related_model_types, value, callback) =>
     return callback() unless @enabled
     console.log 'QueryCache:set', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
+
     model_types = [model_type].concat(related_model_types or [])
     cache_key = @cacheKey(model_type, query)
     @store.set cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (err) =>
@@ -109,10 +106,8 @@ class QueryCache
         do (key) => queue.defer (callback) =>
           console.log 'QueryCache:cleared', model_type.name, key, '\n-----------' if @verbose
           @clears++
-          @store.del(key, callback)
+          @store.destroy(key, callback)
 
       queue.await callback
 
   count: => @store?.keys().length
-
-module.exports = cache = new QueryCache()

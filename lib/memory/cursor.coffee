@@ -1,11 +1,11 @@
 util = require 'util'
 _ = require 'underscore'
-Queue = require 'queue-async'
 moment = require 'moment'
 inflection = require 'inflection'
+Queue = require '../queue'
 
-Utils = require './utils'
-Cursor = require './cursor'
+Utils = require '../utils'
+Cursor = require '../cursor'
 
 IS_MATCH_FNS =
   $ne: (mv, tv) -> return not _.isEqual(mv, tv)

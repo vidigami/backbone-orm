@@ -1,5 +1,5 @@
 _ = require 'underscore'
-Queue = require 'queue-async'
+Queue = require '../lib/queue'
 
 option_sets = require('./option_sets')
 
