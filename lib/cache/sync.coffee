@@ -42,7 +42,7 @@ class CacheSync
       options.success(json)
 
   delete: (model, options) ->
-    @model_type.cache.del(model.id) # remove from the cache
+    @model_type.cache.destroy(model.id) # remove from the cache
     @wrapped_sync_fn 'delete', model, bbCallback (err, json) =>
       return options.error(err) if err
       options.success(json)

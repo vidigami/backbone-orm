@@ -24,7 +24,7 @@ module.exports = class RedisStore
       return callback(err) if err
       callback(null, JSON.parse(result))
 
-  del: (key, callback) =>
-    @client.del(key, callback)
+  destroy: (key, callback) =>
+    @client.destroy(key, callback)
 
   reset: (callback) -> callback()

@@ -106,7 +106,7 @@ module.exports = class QueryCache
         do (key) => queue.defer (callback) =>
           console.log 'QueryCache:cleared', model_type.name, key, '\n-----------' if @verbose
           @clears++
-          @store.del(key, callback)
+          @store.destroy(key, callback)
 
       queue.await callback
 
