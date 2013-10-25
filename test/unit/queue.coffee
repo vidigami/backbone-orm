@@ -118,5 +118,22 @@ runTests = (options, callback) ->
         assert.deepEqual(results, ['1.0', '2.0', '1.1', '3.0', '2.1'])
         done()
 
+    it 'catches await added twice', (done) ->
+      queue = new Queue(1)
+
+      results = []
+      queue.defer (callback) -> results.push('1.0'); _.delay (-> results.push('1.1'); callback()), 1*10
+      queue.defer (callback) -> results.push('2.0'); _.delay (-> results.push('2.1'); callback(new Error('error'))), 2*10
+      queue.defer (callback) -> results.push('3.0'); _.delay (-> results.push('3.1'); callback()), 3*10
+      queue.await (err) ->
+        assert.ok(err, "Has error: #{err}")
+        assert.deepEqual(results, ['1.0', '1.1', '2.0', '2.1'])
+        done()
+      try
+        queue.await (err) ->
+      catch err
+        assert.ok(err, "Has error: #{err}")
+        assert.ok(err.toString().indexOf('Error: Awaiting callback was added twice') is 0, 'Expected message')
+
 module.exports = (options, callback) ->
   runTests(options, callback)
