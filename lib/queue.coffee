@@ -1,29 +1,28 @@
 #module.exports = class Queue
 class Queue
-  constructor: ->
-    @deferred_callbacks = []
-    @awaiting_callbacks = []
-    @error = @current = null
+  constructor: (@parallelism) ->
+    @parallelism or= Infinity
+    @tasks = []; @running_count = 0; @error = null
+    @await_callback = null
 
-  defer: (callback) ->
-    return @_callAwaiting() if @error # in an error state
-
-    @deferred_callbacks.push(callback)
-    @_next() unless @current
+  defer: (callback) -> @tasks.push(callback); @_runTasks()
 
   await: (callback) ->
-    @awaiting_callbacks.push(callback)
-    return @_callAwaiting() if @error or not @deferred_callbacks.length
+    throw new Error "Awaiting callback was added twice: #{callback}" if @await_callback or @await_called
+    @await_callback = callback
+    @_callAwaiting() unless (@tasks.length + @running_count)
 
-  _next: (err) =>
-    @current = null
-    return @_callAwaiting() if @error or not @deferred_callbacks.length
+  _doneTask: (err) => @error or= err; @_runTasks()
+  _runTasks: ->
+    return @_callAwaiting() if @error or (@tasks.length + @running_count)
 
-    @current = @deferred_callbacks.shift()
-    @current(@_next)
+    while @running_count < @parallelism
+      return unless @tasks.length
+      current = @tasks.shift(); @running_count++
+      current(@_doneTask)
 
   _callAwaiting: ->
-    awaiting = @awaiting_callbacks.splice(0)
-    callback(@error) for callback in awaiting
+    return if @await_called or not @await_callback
+    @await_called = true; @await_callback(@error)
 
 module.exports = require 'queue-async'

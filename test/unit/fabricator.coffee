@@ -9,7 +9,7 @@ runTests = (options, callback) ->
 
   describe 'Fabricator', ->
 
-    before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
+    before (done) -> return done() unless options.before; options.before([], done)
     after (done) -> callback(); done()
 
     describe 'value', ->

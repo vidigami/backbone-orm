@@ -1,4 +1,3 @@
-util = require 'util'
 URL = require 'url'
 Backbone = require 'backbone'
 _ = require 'underscore'

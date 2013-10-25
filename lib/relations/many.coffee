@@ -1,4 +1,3 @@
-util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
 inflection = require 'inflection'

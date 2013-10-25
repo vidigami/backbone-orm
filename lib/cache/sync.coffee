@@ -1,4 +1,3 @@
-util = require 'util'
 _ = require 'underscore'
 
 CacheCursor = require './cursor'

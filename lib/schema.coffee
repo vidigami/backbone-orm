@@ -1,4 +1,3 @@
-util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 One = require './relations/one'

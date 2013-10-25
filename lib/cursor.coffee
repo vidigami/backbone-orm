@@ -1,4 +1,3 @@
-util = require 'util'
 _ = require 'underscore'
 
 QueryCache = require('./cache/singletons').QueryCache

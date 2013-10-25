@@ -1,4 +1,3 @@
-util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
 inflection = require 'inflection'
