@@ -1,5 +1,5 @@
 util = require 'util'
-URL = require 'url'
+URL = require '../vendor/url'
 Backbone = require 'backbone'
 _ = require 'underscore'
 moment = require 'moment'
