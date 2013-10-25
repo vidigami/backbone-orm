@@ -3,9 +3,11 @@ assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require '../../../lib/queue'
 
-Fabricator = require '../../../fabricator'
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
+Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 
 module.exports = (options, callback) ->
@@ -14,8 +16,7 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 50
 
-  require('../../../lib/query_cache').configure({enabled: options.query_cache}).reset() # configure query cache
-  require('../../../lib/cache').hardReset().configure(if options.cache then {max: 100} else null) # configure model cache
+  ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
   DATE_STEP_MS = 1000
@@ -30,9 +31,11 @@ module.exports = (options, callback) ->
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      require('../../../lib/query_cache').reset()  # reset cache
-      require('../../../lib/cache').reset()
       queue = new Queue(1)
+
+      # reset caches
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
+      queue.defer (callback) -> QueryCache.configure({enabled: !!options.query_cache, verbose: false}).reset(callback) # configure query cache
 
       queue.defer (callback) -> Flat.resetSchema(callback)
 

@@ -1,11 +1,10 @@
-util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
-Utils = require './utils'
-require './collection_extensions' # ensure collection extensions are loaded
+Utils = require '../utils'
+require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
 
@@ -263,7 +262,7 @@ module.exports = (model_type) ->
     unset: (key) ->
       id = @id
       model_type::_orm_original_fns.unset.apply(@, arguments)
-      model_type.cache.del(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
+      model_type.cache.destroy(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
 
     set: (key, value, options) ->
       return model_type::_orm_original_fns.set.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
@@ -361,7 +360,7 @@ module.exports = (model_type) ->
         ))
 
     destroy: (options) ->
-      cache.del(@id) if cache = @cache() # clear out of the cache
+      cache.destroy(@id) if cache = @cache() # clear out of the cache
       return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
 
       @_orm or= {}

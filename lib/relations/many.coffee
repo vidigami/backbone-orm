@@ -1,8 +1,7 @@
-util = require 'util'
 Backbone = require 'backbone'
 _ = require 'underscore'
 inflection = require 'inflection'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
 Utils = require '../utils'
 bbCallback = Utils.bbCallback
@@ -247,8 +246,6 @@ module.exports = class Many extends require('./relation')
         queue.await callback
 
   cursor: (model, key, query) ->
-    # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
-
     json = if Utils.isModel(model) then model.attributes else model
     (query = _.clone(query or {}))[if @join_table then @join_key else @reverse_relation.foreign_key] = json.id
     (query.$values or= []).push('id') if key is @virtual_id_accessor
