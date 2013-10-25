@@ -4,7 +4,7 @@ Backbone = require 'backbone'
 One = require './relations/one'
 Many = require './relations/many'
 inflection = require 'inflection'
-Utils = require './utils'
+DatabaseURL = require './database_url'
 
 # @private
 module.exports = class Schema
@@ -54,7 +54,7 @@ module.exports = class Schema
     try
       class JoinTable extends Backbone.Model
         @model_name: name
-        urlRoot: "#{Utils.parseUrl(_.result(relation.model_type.prototype, 'url')).database_path}/#{url}"
+        urlRoot: "#{(new DatabaseURL(_.result(relation.model_type.prototype, 'url'))).format({exclude_table: true})}/#{url}"
         @schema: schema
         sync: relation.model_type.createSync(JoinTable)
     catch
