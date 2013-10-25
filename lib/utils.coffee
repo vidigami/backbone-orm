@@ -1,9 +1,9 @@
-URL = require 'url'
 Backbone = require 'backbone'
 _ = require 'underscore'
 moment = require 'moment'
 inflection = require 'inflection'
 Queue = require './queue'
+URL = require '../vendor/url'
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 

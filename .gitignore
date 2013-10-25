@@ -3,6 +3,5 @@ node_modules/
 _build/
 _docs/
 .DS_Store
-*.js
 *.map
 _docs/
