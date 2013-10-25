@@ -53,7 +53,6 @@ module.exports = (options, callback) ->
           done()
 
       it 'counts by query', (done) ->
-        QueryCache.verbose = true
         bob = new Flat({name: 'Bob'})
 
         queue = new Queue(1)
