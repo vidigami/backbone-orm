@@ -14,7 +14,7 @@ module.exports = class MemoryStore
 
   set: (key, value, callback) =>
 #    console.log 'set, ', key, value
-    return callback?(null, value) if value._orm_never_cache # skip cache
+    return callback?(null, value) or @ if value._orm_never_cache # skip cache
     @cache.set(key, value)
     callback?(null, value)
     return @

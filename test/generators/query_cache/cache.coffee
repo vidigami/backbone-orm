@@ -52,7 +52,7 @@ module.exports = (options, callback) ->
       queue = new Queue(1)
 
       # reset caches
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
       queue.defer (callback) ->
         query_cache_options = _.extend({enabled: true, verbose: false}, options.query_cache_options or {})
         QueryCache.configure(query_cache_options).reset(callback) # configure query cache
