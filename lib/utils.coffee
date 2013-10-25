@@ -1,4 +1,3 @@
-util = require 'util'
 URL = require '../vendor/url'
 DatabaseURL = require './database_url'
 Backbone = require 'backbone'
