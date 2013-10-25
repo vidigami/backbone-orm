@@ -8,7 +8,11 @@ module.exports = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> require('./query_cache/cache')(options, callback)
   queue.defer (callback) ->
-    RedisStore = require 'store-redis'
-    options.query_cache_options = {store: new RedisStore({url: 'redis://localhost:6379'})}
-    require('./query_cache/cache')(options, callback)
+    try
+      RedisStore = require('store-redis')
+      options.query_cache_options = {store: new RedisStore({url: 'redis://localhost:6379'})}
+      require('./query_cache/cache')(options, callback)
+    catch e
+      console.error('Redis not installed, skipping')
+      callback()
   queue.await callback
