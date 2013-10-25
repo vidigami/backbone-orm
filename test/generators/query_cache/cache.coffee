@@ -40,7 +40,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Query cache (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "Query cache (cache: #{options.cache}, embed: #{options.embed}, redis: #{!!options.query_cache_options?.store})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     after (done) -> callback(); done()
@@ -113,7 +113,6 @@ module.exports = (options, callback) ->
 
     it 'Stores the correct models with the cache result for a query on one model', (done) ->
       query = {$one: true}
-      QueryCache.verbose = true
       Flat.cursor(query).toJSON (err, flat) ->
         assert.ok(!err, "No errors: #{err}")
 

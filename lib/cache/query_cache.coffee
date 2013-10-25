@@ -39,13 +39,14 @@ module.exports = class QueryCache
     return callback() unless @enabled
     @store.get key, (err, value) =>
       return callback(err) if err
-      unless _.isUndefined(value)
-        @hits++
-        console.log 'QueryCache:hit', key, value, '\n-----------' if @verbose
-      else
+      if _.isUndefined(value) or _.isNull(value)
         @misses++
         console.log 'QueryCache:miss', key, value, '\n-----------' if @verbose
-      callback(null, JSONUtils.deepClone(value, CLONE_DEPTH))
+        callback()
+      else
+        @hits++
+        console.log 'QueryCache:hit', key, value, '\n-----------' if @verbose
+        callback(null, JSONUtils.deepClone(value, CLONE_DEPTH))
 
   getMeta: (model_type, callback) =>
     return callback() unless @enabled
