@@ -1,8 +1,7 @@
-util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
-Queue = require 'queue-async'
+Queue = require '../queue'
 
 Utils = require '../utils'
 bbCallback = Utils.bbCallback
@@ -215,7 +214,6 @@ module.exports = class One extends require('./relation')
 
   cursor: (model, key, query) ->
     query = _.extend({$one:true}, query or {})
-    # return VirtualCursor(query, {model: model, relation: @}) if @manual_fetch # TODO: need to write tests and generalize the checks isFetchable
     if Utils.isModel(model)
       if @type is 'belongsTo'
         (query.$zero = true; delete query.id) unless query.id = model.attributes[@key]?.id

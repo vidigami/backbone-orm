@@ -1,10 +1,9 @@
-util = require 'util'
-URL = require '../vendor/url'
-DatabaseURL = require './database_url'
+URL = require 'url'
 Backbone = require 'backbone'
 _ = require 'underscore'
 moment = require 'moment'
-Queue = require 'queue-async'
+inflection = require 'inflection'
+Queue = require './queue'
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
@@ -12,6 +11,7 @@ BATCH_DEFAULT_LIMIT = 1500
 BATCH_DEFAULT_PARALLELISM = 1
 
 INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
+
 
 module.exports = class Utils
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
@@ -37,6 +37,30 @@ module.exports = class Utils
   # @private
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
+  # @private
+  @parseUrl: (url) ->
+    url_parts = URL.parse(url)
+    database_parts = url_parts.pathname.split('/')
+    table = database_parts.pop()
+    database = database_parts[database_parts.length-1]
+    url_parts.pathname = database_parts.join('/')
+
+    result = {
+      host: url_parts.hostname
+      port: url_parts.port
+      database_path: URL.format(url_parts)
+      database: database
+      table: table
+      model_name: inflection.classify(inflection.singularize(table))
+    }
+
+    if url_parts.auth
+      auth_parts = url_parts.auth.split(':')
+      result.user = auth_parts[0]
+      result.password = if auth_parts.length > 1 then auth_parts[1] else null
+
+    return result
+
   @get: (model, key, default_value) ->
     model._orm or= {}
     return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
@@ -61,7 +85,7 @@ module.exports = class Utils
   @findOrGenerateModelName: (model_type) ->
     return model_type.model_name if model_type.model_name
     if url = _.result(model_type.prototype, 'url')
-      return model_name if model_name = (new DatabaseURL(url)).model_name
+      return model_name if model_name = Utils.parseUrl(url).model_name
     return model_type.name if model_type.name
     throw "Could not find or generate model name for #{model_type}"
 
