@@ -1,7 +1,6 @@
-util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
-Queue = require 'queue-async'
+Queue = require './queue'
 
 module.exports = class JSONUtils
 
@@ -250,7 +249,7 @@ module.exports = class JSONUtils
       queue.await (err) -> callback(err, if err then undefined else results)
 
   @deepClone = (obj, depth) =>
-    return obj if not obj or (typeof obj isnt "object")   # a value
+    return obj if not obj or (typeof obj isnt 'object')   # a value
     return String::slice.call(obj) if _.isString(obj)     # a string
     return new Date(obj.valueOf()) if _.isDate(obj)       # a date
     return obj.clone() if _.isFunction(obj.clone)         # a specialized clone function

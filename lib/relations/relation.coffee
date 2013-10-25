@@ -1,7 +1,6 @@
-util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require '../queue'
 inflection = require 'inflection'
 
 Utils = require '../utils'

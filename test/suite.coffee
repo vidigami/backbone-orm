@@ -1,5 +1,5 @@
 _ = require 'underscore'
-Queue = require 'queue-async'
+Queue = require '../lib/queue'
 
 option_sets = require('./option_sets')
 
@@ -8,6 +8,7 @@ runTests = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> require('./unit/all_generators')(options, callback)
   queue.defer (callback) -> require('./unit/fabricator')(options, callback)
+  queue.defer (callback) -> require('./unit/queue')(options, callback)
   queue.await (err) -> console.log "\nBackbone ORM: Completed tests:", options; callback()
 
 queue = new Queue(1)

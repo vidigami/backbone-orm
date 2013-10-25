@@ -1,12 +1,14 @@
-util = require 'util'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require 'queue-async'
+Queue = require './lib/queue'
 
-MemoryCursor = require './lib/memory_cursor'
+MemoryCursor = require './lib/memory/cursor'
 Schema = require './lib/schema'
 Utils = require './lib/utils'
-QueryCache = require './lib/query_cache'
+
+ModelCache = require('./lib/cache/singletons').ModelCache
+QueryCache = require('./lib/cache/singletons').QueryCache
+modelExtensions = require './lib/extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}
@@ -41,23 +43,26 @@ class MemorySync
 
   # @private
   create: (model, options) ->
-    QueryCache.reset(@model_type)
-    model.set(id: Utils.guid())
-    model_json = @store[model.id] = model.toJSON()
-    options.success(Utils.deepClone(model_json))
+    QueryCache.reset @model_type, (err) =>
+      return options.error?(err) if err
+      model.set(id: Utils.guid())
+      model_json = @store[model.id] = model.toJSON()
+      options.success(Utils.deepClone(model_json))
 
   # @private
   update: (model, options) ->
-    QueryCache.reset(@model_type)
-    @store[model.id] = model_json = model.toJSON()
-    options.success(Utils.deepClone(model_json))
+    QueryCache.reset @model_type, (err) =>
+      return options.error?(err) if err
+      @store[model.id] = model_json = model.toJSON()
+      options.success(Utils.deepClone(model_json))
 
   # @private
   delete: (model, options) ->
-    QueryCache.reset(@model_type)
-    return options.error(new Error('Model not found')) unless @store[model.id]
-    delete @store[model.id]
-    options.success()
+    QueryCache.reset @model_type, (err) =>
+      return options.error?(err) if err
+      return options.error(new Error('Model not found')) unless @store[model.id]
+      delete @store[model.id]
+      options.success()
 
   ###################################
   # Backbone ORM - Class Extensions
@@ -65,22 +70,24 @@ class MemorySync
 
   # @private
   resetSchema: (options, callback) ->
-    QueryCache.reset(@model_type)
-    @destroy({}, callback)
+    QueryCache.reset @model_type, (err) =>
+      return callback(err) if err
+      @destroy({}, callback)
 
   # @private
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @private
   destroy: (query, callback) ->
-    QueryCache.reset(@model_type)
-    @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
-      Utils.patchRemoveByJSON @model_type, model_json, (err) =>
-        delete @store[model_json.id] unless err
-        callback(err)
+    QueryCache.reset @model_type, (err) =>
+      return callback(err) if err
+      @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
+        Utils.patchRemoveByJSON @model_type, model_json, (err) =>
+          delete @store[model_json.id] unless err
+          callback(err)
 
 module.exports = (type) ->
-  if (new type()) instanceof Backbone.Collection # collection
+  if Utils.isCollection(new type()) # collection
     model_type = Utils.configureCollectionModelType(type, module.exports)
     return type::sync = model_type::sync
 
@@ -94,5 +101,5 @@ module.exports = (type) ->
     return undefined if method is 'tableName'
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
-  require('./lib/model_extensions')(type)
-  return require('./lib/cache').configureSync(type, sync_fn)
+  modelExtensions(type)
+  return ModelCache.configureSync(type, sync_fn)

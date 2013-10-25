@@ -1,7 +1,6 @@
-util = require 'util'
 _ = require 'underscore'
 
-QueryCache = require './query_cache'
+QueryCache = require('./cache/singletons').QueryCache
 Utils = require './utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']
@@ -39,7 +38,7 @@ module.exports = class Cursor
         throw new Error "#{e}, #{util.inspect(query)}"
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
-        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value if key in CURSOR_KEYS)
+        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
       return parsed_query
 
   offset: (offset) -> @_cursor.$offset = offset; return @
@@ -128,14 +127,21 @@ module.exports = class Cursor
         return callback(null, if @_cursor.$one then models[0] else models)
 
   toJSON: (callback) ->
-    parsed_query = _.extend({}, @_cursor, @_find)
-    return callback(null, cached_result) if (cached_result = QueryCache.get(@model_type, parsed_query)) # Check query cache
-    model_types = @relatedModelTypesInQuery()
-
-    @queryToJSON (err, json) =>
+    parsed_query = _.extend({}, _.pick(@_cursor, CURSOR_KEYS), @_find)
+    # Check query cache
+    QueryCache.get @model_type, parsed_query, (err, cached_result) =>
       return callback(err) if err
-      QueryCache.set(@model_type, parsed_query, model_types, json) # Update query cache
-      callback(null, json)
+      return callback(null, cached_result) unless _.isUndefined(cached_result)
+
+      model_types = @relatedModelTypesInQuery()
+      @queryToJSON (err, json) =>
+        return callback(err) if err
+        unless _.isNull(json)
+          QueryCache.set @model_type, parsed_query, model_types, json, (err) ->
+            console.log "Error setting query cache: #{err}" if err # TODO: Update query cache, ignore errors
+            callback(null, json)
+        else
+          callback(null, json)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->
