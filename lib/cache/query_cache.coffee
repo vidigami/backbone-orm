@@ -15,7 +15,7 @@ module.exports = class QueryCache
     @enabled = options.enabled
     @verbose = options.verbose
     @hits = @misses = @clears = 0
-    @store = options.store?() or new MemoryStore()
+    @store = options.store or new MemoryStore()
     return @
 
   cacheKey: (model_type, query) -> "#{_.result(model_type.prototype, 'url')}_#{JSON.stringify(query)}"

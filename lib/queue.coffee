@@ -1,4 +1,5 @@
-module.exports = class Queue
+#module.exports = class Queue
+class Queue
   constructor: ->
     @deferred_callbacks = []
     @awaiting_callbacks = []
@@ -24,3 +25,5 @@ module.exports = class Queue
   _callAwaiting: ->
     awaiting = @awaiting_callbacks.splice(0)
     callback(@error) for callback in awaiting
+
+module.exports = require 'queue-async'

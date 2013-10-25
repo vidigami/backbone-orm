@@ -53,7 +53,9 @@ module.exports = (options, callback) ->
 
       # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure query cache
-      queue.defer (callback) -> QueryCache.configure({enabled: true, verbose: false}).reset(callback) # configure query cache
+      queue.defer (callback) ->
+        query_cache_options = _.extend({enabled: true, verbose: false}, options.query_cache_options or {})
+        QueryCache.configure(query_cache_options).reset(callback) # configure query cache
 
       # destroy all
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
@@ -111,17 +113,18 @@ module.exports = (options, callback) ->
 
     it 'Stores the correct models with the cache result for a query on one model', (done) ->
       query = {$one: true}
+      QueryCache.verbose = true
       Flat.cursor(query).toJSON (err, flat) ->
         assert.ok(!err, "No errors: #{err}")
 
         QueryCache.get Flat, query, (err, result) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(result, "Cache hit: #{result}")
+          assert.ok(result, "Query cache hit: #{result}")
 
           meta_key = QueryCache.cacheKeyMeta(Flat)
           QueryCache.getKey meta_key, (err, meta_result) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(meta_result, "Cache hit: #{meta_result}")
+            assert.ok(meta_result, "Meta cache hit: #{meta_result}")
 
             query_key = QueryCache.cacheKey(Flat, query)
             assert.equal(1, meta_result.length, "Has one model stored for meta query, Expected: 1, Actual: #{meta_result.length}")

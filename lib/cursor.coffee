@@ -138,8 +138,11 @@ module.exports = class Cursor
       @queryToJSON (err, json) =>
         return callback(err) if err
         if json
-          QueryCache.set(@model_type, parsed_query, model_types, json, (err) -> console.log "Error setting query cache: #{err}" if err) # TODO: Update query cache, ignore errors
-        callback(null, json)
+          QueryCache.set @model_type, parsed_query, model_types, json, (err) ->
+            console.log "Error setting query cache: #{err}" if err # TODO: Update query cache, ignore errors
+            callback(null, json)
+        else
+          callback(null, null)
 
   # @abstract Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->
