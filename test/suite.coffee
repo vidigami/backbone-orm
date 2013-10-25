@@ -2,6 +2,8 @@ _ = require 'underscore'
 Queue = require '../lib/queue'
 
 option_sets = require('./option_sets')
+# option_sets = option_sets.slice(0, 4)
+option_sets = option_sets.slice(0, 1)
 
 runTests = (options, callback) ->
   console.log "\nBackbone ORM: Running tests:\n", options
