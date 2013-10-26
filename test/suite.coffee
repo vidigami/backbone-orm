@@ -4,7 +4,7 @@ Queue = require '../lib/queue'
 option_sets = require('./option_sets')
 
 runTests = (options, callback) ->
-  console.log "\nBackbone ORM: Running tests:\n", options
+  console.log "\nBackbone ORM: Running tests: ", options
   queue = new Queue(1)
   queue.defer (callback) -> require('./unit/all_generators')(options, callback)
   queue.defer (callback) -> require('./unit/fabricator')(options, callback)
