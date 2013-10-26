@@ -1,14 +1,17 @@
+_ = require 'underscore'
+
+OPTIONS =
+  all: '-a'
+  none: '-n'
+  cache: '-c'
+  query_cache: '-q'
+  embed: '-e'
 
 args = process.argv.slice(2)
-options =
-  none: '-n' in args
-  cache: '-c' in args
-  query_cache: '-q' in args
-  embed: '-e' in args
-  all: '-a' in args
-options.all or= (not options.cache and not options.query_cache and not options.embed and not options.none)
 
-OPTIONS = ['cache', 'query_cache', 'embed']
+options = {}; options[key] = value in args for key, value of OPTIONS
+options_keys = _.keys(OPTIONS)
+
 gen = (keys) ->
   results = {}
   results[key] = true for key in keys
@@ -22,4 +25,7 @@ combos = (array) ->
     (keys.push(item); results.push(gen(keys))) for item in array
   return results
 
-module.exports = if options.all then combos(OPTIONS) else [options]
+options.all or= _.every(_.without(options_keys, 'all'), (key) -> not options[key])
+module.exports = if options.all then combos(_.without(options_keys, 'all', 'none')) else [options]
+
+console.log module.exports
