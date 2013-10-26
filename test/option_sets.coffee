@@ -8,20 +8,20 @@ options =
   all: '-a' in args
 options.all or= (not options.cache and not options.query_cache and not options.embed and not options.none)
 
-option_sets = []
-if options.all
-  option_sets.push({})
+OPTIONS = ['cache', 'query_cache', 'embed']
+gen = (keys) ->
+  results = {}
+  results[key] = true for key in keys
+  return results
 
-  option_sets.push({cache: true})
-  option_sets.push({query_cache: true})
-  option_sets.push({embed: true})
+combos = (array) ->
+  results = [{}]
+  results.push(gen([key])) for key in array # start with single keys
+  while array.length
+    keys = [array.pop()]
+    (keys.push(item); results.push(gen(keys))) for item in array
+  return results
 
-  option_sets.push({cache: true, query_cache: true})
-  option_sets.push({cache: true, embed: true})
-  option_sets.push({query_cache: true, embed: true})
+module.exports = if options.all then combos(OPTIONS) else [options]
 
-  option_sets.push({cache: true, query_cache: true, embed: true})
-else
-  option_sets = [options]
-
-module.exports = option_sets
+console.log module.exports
