@@ -23,5 +23,3 @@ combos = (array) ->
   return results
 
 module.exports = if options.all then combos(OPTIONS) else [options]
-
-console.log module.exports
