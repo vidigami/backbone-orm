@@ -3,12 +3,9 @@ assert = require 'assert'
 Queue = require '../../lib/queue'
 _ = require 'underscore'
 
-runTests = (options, callback) ->
+module.exports = (options, callback) ->
 
   describe 'Queue', ->
-
-    before (done) -> return done() unless options.before; options.before([], done)
-    after (done) -> callback(); done()
 
     it 'infinite parallelism', (done) ->
       queue = new Queue()
@@ -134,6 +131,3 @@ runTests = (options, callback) ->
       catch err
         assert.ok(err, "Has error: #{err}")
         assert.ok(err.toString().indexOf('Error: Awaiting callback was added twice') is 0, 'Expected message')
-
-module.exports = (options, callback) ->
-  runTests(options, callback)

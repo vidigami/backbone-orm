@@ -16,5 +16,3 @@ arrayToOptions = (keys) -> results = {}; results[key] = (key in keys) for key in
 
 options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 module.exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
-
-console.log module.exports

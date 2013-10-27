@@ -5,12 +5,9 @@ moment = require 'moment'
 
 Fabricator = require '../fabricator'
 
-runTests = (options, callback) ->
+module.exports = (options, callback) ->
 
   describe 'Fabricator', ->
-
-    before (done) -> return done() unless options.before; options.before([], done)
-    after (done) -> callback(); done()
 
     describe 'value', ->
 
@@ -103,6 +100,3 @@ runTests = (options, callback) ->
         assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
         assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
         done()
-
-module.exports = (options, callback) ->
-  runTests(options, callback)
