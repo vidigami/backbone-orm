@@ -1,7 +1,6 @@
 node_modules/
 .idea/
 _build/
-_docs/
 .DS_Store
 *.map
 _docs/
