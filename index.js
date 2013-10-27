@@ -1,6 +1,5 @@
 module.exports = {
-  MemorySync: require('./lib/memory/sync'),
-  MemoryCursor: require('./lib/memory/cursor'),
+  sync: require('./lib/memory/sync'),
 
   Utils: require('./lib/utils'),
   JSONUtils: require('./lib/json_utils'),
