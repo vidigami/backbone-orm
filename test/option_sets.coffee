@@ -16,10 +16,11 @@ gen = (keys) -> results = {}; results[key] = (key in keys) for key in OPTION_KEY
 combos = (array) ->
   results = [gen([])]
   results.push(gen([key])) for key in array # start with single keys
+  array = _.clone(array)
   while array.length
     keys = [array.pop()]
-    (keys.push(item); results.push(gen(keys))) for item in array
+    results.push(gen(keys = keys.concat([item]))) for item in array
   return results
 
 options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
-module.exports = if options.all then combos(_.clone(OPTION_KEYS)) else [options]
+module.exports = if options.all then combos(OPTION_KEYS) else [options]
