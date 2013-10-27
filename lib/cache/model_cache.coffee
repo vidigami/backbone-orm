@@ -24,6 +24,7 @@ module.exports = class ModelCache
   #
   configure: (options={}) ->
     @enabled = options.enabled
+    @reset(->)
     (@options = {modelTypes: {}}; return @) unless options # clear all options
 
     for key, value of options
@@ -52,6 +53,7 @@ module.exports = class ModelCache
     return @
 
   getOrCreateCache: (model_name) ->
+    return null unless @enabled
     throw new Error "Missing model name for cache" unless model_name
     return model_cache if model_cache = @caches[model_name]
 
