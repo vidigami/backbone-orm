@@ -1,14 +1,14 @@
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require './lib/queue'
+Queue = require '../queue'
 
-MemoryCursor = require './lib/memory/cursor'
-Schema = require './lib/schema'
-Utils = require './lib/utils'
+MemoryCursor = require './cursor'
+Schema = require '../schema'
+Utils = require '../utils'
 
-ModelCache = require('./lib/cache/singletons').ModelCache
-QueryCache = require('./lib/cache/singletons').QueryCache
-modelExtensions = require './lib/extensions/model'
+ModelCache = require('../cache/singletons').ModelCache
+QueryCache = require('../cache/singletons').QueryCache
+modelExtensions = require '../extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}
@@ -18,12 +18,12 @@ STORES = {}
 # @example How to configure using a model name
 #   class Thing extends Backbone.Model
 #     @model_name: 'Thing'
-#     sync: require('backbone-orm/memory_sync')(Thing)
+#     sync: require('backbone-orm/lib/memory/sync')(Thing)
 #
 # @example How to configure using a url
 #   class Thing extends Backbone.Model
 #     url: '/things'
-#     sync: require('backbone-orm/memory_sync')(Thing)
+#     sync: require('backbone-orm/lib/memory/sync')(Thing)
 #
 class MemorySync
   # @private

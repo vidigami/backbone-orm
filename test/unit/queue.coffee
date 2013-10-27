@@ -1,6 +1,6 @@
 assert = require 'assert'
 
-Queue = require '../../lib/queue'
+Queue = require '../../src/queue'
 _ = require 'underscore'
 
 module.exports = (options, callback) ->

@@ -1,4 +1,4 @@
-Queue = require '../../lib/queue'
+Queue = require '../../src/queue'
 _ = require 'underscore'
 
 # each model should be fabricated with 'id', 'name', 'created_at', 'updated_at'
