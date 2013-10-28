@@ -5,7 +5,10 @@
   Dependencies: Backbone.js and Underscore.js.
 */
 (function() {
-  /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
+var globals = {};
+
+/* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
+(function() {
   'use strict';
 
   var modules = {};
@@ -41,7 +44,7 @@
     var _require = function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return require(absolute, path);
+      return globals.require(absolute, path);
     };
     _require.register = require.register;
     return _require;
@@ -80,7 +83,12 @@
     }
   };
 
-  require.register = define;
+  globals.require = require;
+  globals.require.define = define;
+  globals.require.register = define;
+}).call(this);
+var require = globals.require;
+
 require.register("backbone-orm/node/browserify/_shims", function(exports, require, module) {
 //
 // The shims in this file are not fully implemented shims for the ES5
@@ -1719,60 +1727,6 @@ module.exports = ModelCache = (function() {
 
 });
 
-;require.register("backbone-orm/lib/cache/model_type_id", function(exports, require, module) {
-/*
-  backbone-orm.js 0.0.1
-  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js and Underscore.js.
-*/
-
-var ModelTypeID, crypto, _,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-_ = require('underscore');
-
-crypto = require('crypto');
-
-module.exports = ModelTypeID = (function() {
-  function ModelTypeID() {
-    this.generate = __bind(this.generate, this);
-    this.modelID = __bind(this.modelID, this);
-    this.reset = __bind(this.reset, this);
-    this.ids = {};
-  }
-
-  ModelTypeID.prototype.reset = function() {
-    return this.ids = {};
-  };
-
-  ModelTypeID.prototype.modelID = function(model_type) {
-    var e, name_url, url;
-    try {
-      url = _.result(model_type.prototype, 'url');
-    } catch (_error) {
-      e = _error;
-    }
-    name_url = "" + (url || '') + "_" + model_type.model_name;
-    return crypto.createHash('md5').update(name_url).digest('hex');
-  };
-
-  ModelTypeID.prototype.generate = function(model_type) {
-    var id;
-    id = this.modelID(model_type);
-    if (this.ids[id] && this.ids[id] !== model_type) {
-      throw new Error("Duplicate model name / url combination: " + model_type.model_name + ", " + (_.result(model_type.prototype, 'url')) + ". Set a unique model_name property on one of the conflicting models.");
-    }
-    this.ids[id] = model_type;
-    return id;
-  };
-
-  return ModelTypeID;
-
-})();
-
-});
-
 ;require.register("backbone-orm/lib/cache/query_cache", function(exports, require, module) {
 /*
   backbone-orm.js 0.0.1
@@ -2045,11 +1999,18 @@ module.exports = QueryCache = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
+var e;
+
 module.exports = {
   ModelCache: new (require('./model_cache'))(),
-  QueryCache: new (require('./query_cache'))(),
-  ModelTypeID: new (require('./model_type_id'))()
+  QueryCache: new (require('./query_cache'))()
 };
+
+try {
+  module.exports.ModelTypeID = new (require('../node/model_type_id'))();
+} catch (_error) {
+  e = _error;
+}
 
 });
 
@@ -3600,6 +3561,7 @@ ClientUtils.loadDependencies([
 
 module.exports = {
   sync: require('./memory/sync'),
+  Cursor: require('./cursor'),
   Utils: require('./utils'),
   JSONUtils: require('./json_utils'),
   DatabaseURL: require('./database_url'),
@@ -4459,7 +4421,7 @@ module.exports = MemoryCursor = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, ModelTypeID, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
+var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
 
 _ = require('underscore');
 
@@ -4477,8 +4439,6 @@ ModelCache = require('../cache/singletons').ModelCache;
 
 QueryCache = require('../cache/singletons').QueryCache;
 
-ModelTypeID = require('../cache/singletons').ModelTypeID;
-
 modelExtensions = require('../extensions/model');
 
 DESTROY_BATCH_LIMIT = 1000;
@@ -4490,7 +4450,6 @@ MemorySync = (function() {
     var _name;
     this.model_type = model_type;
     this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
-    this.model_type.model_id = ModelTypeID.generate(this.model_type);
     this.schema = new Schema(this.model_type);
     this.store = this.model_type.store = STORES[_name = this.model_type.model_name] || (STORES[_name] = {});
   }

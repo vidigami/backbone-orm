@@ -18,6 +18,7 @@ ClientUtils.loadDependencies([
 module.exports =
   sync: require './memory/sync'
 
+  Cursor: require './cursor'
   Utils: require './utils'
   JSONUtils: require './json_utils'
   DatabaseURL: require './database_url'
