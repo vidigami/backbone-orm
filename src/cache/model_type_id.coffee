@@ -16,7 +16,7 @@ module.exports = class ModelTypeID
     @ids = {}
 
   modelID: (model_type) =>
-    try url = _.result(model_type.prototype, 'url') catch err then {}
+    try url = _.result(model_type.prototype, 'url') catch e
     name_url = "#{url or ''}_#{model_type.model_name}"
     return crypto.createHash('md5').update(name_url).digest('hex')
 
