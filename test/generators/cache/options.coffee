@@ -7,6 +7,7 @@ moment = require 'moment'
 
 ModelCache = require('../../../src/cache/singletons').ModelCache
 QueryCache = require('../../../src/cache/singletons').QueryCache
+ModelTypeID = require('../../../src/cache/singletons').ModelTypeID
 Fabricator = require '../../fabricator'
 Utils = require '../../../src/utils'
 
@@ -16,6 +17,7 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
+  ModelTypeID.reset()
   ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   class Flat extends Backbone.Model

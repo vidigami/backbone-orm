@@ -25,12 +25,12 @@ module.exports = class QueryCache
     @store = options.store or new MemoryStore()
     return @
 
-  cacheKey: (model_type, query) -> "#{_.result(model_type.prototype, 'url')}_#{JSON.stringify(query)}"
-  cacheKeyMeta: (model_type) -> "meta_#{_.result(model_type.prototype, 'url')}"
+  cacheKey: (model_type, query) -> "#{model_type.model_id}_#{JSON.stringify(query)}"
+  cacheKeyMeta: (model_type) -> "meta_#{model_type.model_id}"
 
   set: (model_type, query, related_model_types, value, callback) =>
     return callback() unless @enabled
-    console.log 'QueryCache:set', model_type.name, (m.name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
+    console.log 'QueryCache:set', model_type.model_name, (m.model_name for m in related_model_types), @cacheKey(model_type, query), JSON.stringify(value), '\n-----------' if @verbose
 
     model_types = [model_type].concat(related_model_types or [])
     cache_key = @cacheKey(model_type, query)
@@ -103,7 +103,7 @@ module.exports = class QueryCache
     queue = new Queue()
     for model_type in model_types
       do (model_type) => queue.defer (callback) =>
-        console.log 'QueryCache:meta cleared', model_type.name, '\n-----------' if @verbose
+        console.log 'QueryCache:meta cleared', model_type.model_name, '\n-----------' if @verbose
         @store.destroy @cacheKeyMeta(model_type), callback
     queue.await callback
 
