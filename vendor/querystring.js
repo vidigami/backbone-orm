@@ -39,10 +39,6 @@ return c.charCodeAt(0);
 
 // TODO support returning arbitrary buffers.
 
-return out.slice(0, outIndex - 1);
-};
-
-
 QueryString.unescape = function(s, decodeSpaces) {
 return decodeURIComponent(s/*, decodeSpaces*/);
 };
@@ -144,3 +140,4 @@ for (var i = 0; i < len; ++i) {
 }
 
 return obj;
+};
