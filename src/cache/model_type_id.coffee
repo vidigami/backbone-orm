@@ -5,7 +5,7 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 _ = require 'underscore'
-crypto = require('crypto');
+crypto = require 'crypto'
 
 module.exports = class ModelTypeID
 
@@ -16,7 +16,8 @@ module.exports = class ModelTypeID
     @ids = {}
 
   modelID: (model_type) =>
-    name_url = "#{_.result(model_type.prototype, 'url')}_#{model_type.model_name}"
+    try url = _.result(model_type.prototype, 'url') catch err then {}
+    name_url = "#{url or ''}_#{model_type.model_name}"
     return crypto.createHash('md5').update(name_url).digest('hex')
 
   generate: (model_type) =>
