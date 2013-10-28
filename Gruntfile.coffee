@@ -1,4 +1,5 @@
-WRAPPERS = require './client/config_wrap_js'
+LIBRARY_WRAPPERS = require './client/config_library_wrap'
+VENDOR_WRAPPERS = require './client/config_vendor_wrap'
 
 module.exports = (grunt) ->
 
@@ -19,21 +20,21 @@ module.exports = (grunt) ->
         expand: true
         src: ['backbone-orm.js'],
         dest: '_build/',
-        options: {wrapper: [WRAPPERS.library_start, WRAPPERS.library_end]}
+        options: {wrapper: [LIBRARY_WRAPPERS.start, LIBRARY_WRAPPERS.end]}
 
       license:
         cwd: '_build/'
         expand: true
         src: ['backbone-orm*.js'],
         dest: 'client/',
-        options: {wrapper: [WRAPPERS.library_license, '']}
+        options: {wrapper: [LIBRARY_WRAPPERS.license, '']}
 
       vendor:
         cwd: 'client/'
         expand: true
         src: ['bborm-vendor.js'],
         dest: 'client/',
-        options: {wrapper: [WRAPPERS.vendor_start, WRAPPERS.vendor_end]}
+        options: {wrapper: [VENDOR_WRAPPERS.start, VENDOR_WRAPPERS.end]}
 
     replace:
       vendor:

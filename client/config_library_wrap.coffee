@@ -1,6 +1,6 @@
 module.exports =
 
-  library_license: """
+  license: """
     /*
       backbone-orm.js 0.0.1
       Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
@@ -9,11 +9,11 @@ module.exports =
     */
     """
 
-  library_start: """
+  start: """
     (function() {
     """
 
-  library_end: """
+  end: """
     if (typeof exports == 'object') {
       module.exports = require('src/index');
     } else if (typeof define == 'function' && define.amd) {
