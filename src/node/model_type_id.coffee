@@ -10,10 +10,16 @@ crypto = require 'crypto'
 module.exports = class ModelTypeID
 
   constructor: ->
+    @strict = true
     @ids = {}
+
+  configure: (options={}) =>
+    @strict = options.strict
+    return @
 
   reset: =>
     @ids = {}
+    return @
 
   modelID: (model_type) =>
     try url = _.result(model_type.prototype, 'url') catch e
@@ -22,7 +28,7 @@ module.exports = class ModelTypeID
 
   generate: (model_type) =>
     id = @modelID(model_type)
-    if @ids[id] and @ids[id] isnt model_type
+    if @strict and @ids[id] and @ids[id] isnt model_type
       throw new Error("Duplicate model name / url combination: #{model_type.model_name}, #{_.result(model_type.prototype, 'url')}. Set a unique model_name property on one of the conflicting models.")
     @ids[id] = model_type
     return id

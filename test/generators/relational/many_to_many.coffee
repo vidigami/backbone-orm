@@ -2,13 +2,12 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../../../src/queue'
+Queue = require '../../../lib/queue'
 
-ModelCache = require('../../../src/cache/singletons').ModelCache
-QueryCache = require('../../../src/cache/singletons').QueryCache
-ModelTypeID = require('../../../src/cache/singletons').ModelTypeID
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
-Utils = require '../../../src/utils'
+Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
@@ -17,7 +16,6 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelTypeID.reset()
   ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
