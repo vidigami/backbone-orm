@@ -9,7 +9,7 @@
 ClientUtils = require './client_utils'
 
 ClientUtils.loadDependencies([
-  {symbol: '_', path: 'lodash', optional: true}, {symbol: '_', path: 'underscore'}
+  {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
   {symbol: 'Backbone', path: 'backbone'}
   {symbol: 'moment', path: 'moment'}
   {symbol: 'inflection', path: 'inflection'}

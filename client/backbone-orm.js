@@ -5,11 +5,8 @@
   Dependencies: Backbone.js and Underscore.js.
 */
 (function() {
-(function(/*! Brunch !*/) {
+  /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
   'use strict';
-
-  var globals = typeof window !== 'undefined' ? window : global;
-  if ((typeof globals.require === 'function') && globals.require.register) return;
 
   var modules = {};
   var cache = {};
@@ -41,11 +38,13 @@
   };
 
   var localRequire = function(path) {
-    return function(name) {
+    var _require = function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return globals.require(absolute, path);
+      return require(absolute, path);
     };
+    _require.register = require.register;
+    return _require;
   };
 
   var initModule = function(name, definition) {
@@ -81,22 +80,7 @@
     }
   };
 
-  var list = function() {
-    var result = [];
-    for (var item in modules) {
-      if (has(modules, item)) {
-        result.push(item);
-      }
-    }
-    return result;
-  };
-
-  globals.require = require;
-  globals.require.define = define;
-  globals.require.register = define;
-  globals.require.list = list;
-  globals.require.brunch = true;
-})();
+  require.register = define;
 require.register("backbone-orm/node/browserify/_shims", function(exports, require, module) {
 //
 // The shims in this file are not fully implemented shims for the ES5
@@ -1493,6 +1477,13 @@ return Object.prototype.toString.call(o);
 });
 
 ;require.register("backbone-orm/lib/cache/cursor", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var CacheCursor, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1518,6 +1509,13 @@ module.exports = CacheCursor = (function(_super) {
 });
 
 ;require.register("backbone-orm/lib/cache/memory_store", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var LRU, MemoryStore, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1600,6 +1598,13 @@ module.exports = MemoryStore = (function() {
 });
 
 ;require.register("backbone-orm/lib/cache/model_cache", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, Utils, _;
 
 Backbone = require('backbone');
@@ -1714,7 +1719,68 @@ module.exports = ModelCache = (function() {
 
 });
 
+;require.register("backbone-orm/lib/cache/model_type_id", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
+var ModelTypeID, crypto, _,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+_ = require('underscore');
+
+crypto = require('crypto');
+
+module.exports = ModelTypeID = (function() {
+  function ModelTypeID() {
+    this.generate = __bind(this.generate, this);
+    this.modelID = __bind(this.modelID, this);
+    this.reset = __bind(this.reset, this);
+    this.ids = {};
+  }
+
+  ModelTypeID.prototype.reset = function() {
+    return this.ids = {};
+  };
+
+  ModelTypeID.prototype.modelID = function(model_type) {
+    var e, name_url, url;
+    try {
+      url = _.result(model_type.prototype, 'url');
+    } catch (_error) {
+      e = _error;
+    }
+    name_url = "" + (url || '') + "_" + model_type.model_name;
+    return crypto.createHash('md5').update(name_url).digest('hex');
+  };
+
+  ModelTypeID.prototype.generate = function(model_type) {
+    var id;
+    id = this.modelID(model_type);
+    if (this.ids[id] && this.ids[id] !== model_type) {
+      throw new Error("Duplicate model name / url combination: " + model_type.model_name + ", " + (_.result(model_type.prototype, 'url')) + ". Set a unique model_name property on one of the conflicting models.");
+    }
+    this.ids[id] = model_type;
+    return id;
+  };
+
+  return ModelTypeID;
+
+})();
+
+});
+
 ;require.register("backbone-orm/lib/cache/query_cache", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1758,11 +1824,11 @@ module.exports = QueryCache = (function() {
   };
 
   QueryCache.prototype.cacheKey = function(model_type, query) {
-    return "" + (_.result(model_type.prototype, 'url')) + "_" + (JSON.stringify(query));
+    return "" + model_type.model_id + "_" + (JSON.stringify(query));
   };
 
   QueryCache.prototype.cacheKeyMeta = function(model_type) {
-    return "meta_" + (_.result(model_type.prototype, 'url'));
+    return "meta_" + model_type.model_id;
   };
 
   QueryCache.prototype.set = function(model_type, query, related_model_types, value, callback) {
@@ -1772,12 +1838,12 @@ module.exports = QueryCache = (function() {
       return callback();
     }
     if (this.verbose) {
-      console.log('QueryCache:set', model_type.name, (function() {
+      console.log('QueryCache:set', model_type.model_name, (function() {
         var _i, _len, _results;
         _results = [];
         for (_i = 0, _len = related_model_types.length; _i < _len; _i++) {
           m = related_model_types[_i];
-          _results.push(m.name);
+          _results.push(m.model_name);
         }
         return _results;
       })(), this.cacheKey(model_type, query), JSON.stringify(value), '\n-----------');
@@ -1904,7 +1970,7 @@ module.exports = QueryCache = (function() {
     _fn = function(model_type) {
       return queue.defer(function(callback) {
         if (_this.verbose) {
-          console.log('QueryCache:meta cleared', model_type.name, '\n-----------');
+          console.log('QueryCache:meta cleared', model_type.model_name, '\n-----------');
         }
         return _this.store.destroy(_this.cacheKeyMeta(model_type), callback);
       });
@@ -1972,14 +2038,29 @@ module.exports = QueryCache = (function() {
 });
 
 ;require.register("backbone-orm/lib/cache/singletons", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 module.exports = {
   ModelCache: new (require('./model_cache'))(),
-  QueryCache: new (require('./query_cache'))()
+  QueryCache: new (require('./query_cache'))(),
+  ModelTypeID: new (require('./model_type_id'))()
 };
 
 });
 
 ;require.register("backbone-orm/lib/cache/sync", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var CacheCursor, CacheSync, DEFAULT_LIMIT, DEFAULT_PARALLELISM, Schema, Utils, bbCallback, _;
 
 _ = require('underscore');
@@ -2131,6 +2212,13 @@ module.exports = function(model_type, wrapped_sync_fn) {
 });
 
 ;require.register("backbone-orm/lib/client_utils", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var ClientUtils, isArray;
 
 isArray = require('../node/util').isArray;
@@ -2140,7 +2228,7 @@ module.exports = ClientUtils = (function() {
 
   ClientUtils.loadDependencies = function(info) {
     var item, _fn, _i, _len;
-    if (!(typeof window !== "undefined" && window !== null ? window.require.register : void 0)) {
+    if (typeof window === "undefined" || window === null) {
       return;
     }
     if (!isArray(info)) {
@@ -2149,21 +2237,32 @@ module.exports = ClientUtils = (function() {
     _fn = function(item) {
       var dep, err;
       try {
-        if (dep = require(item.path)) {
+        if (require(item.path)) {
           return;
         }
       } catch (_error) {
         err = _error;
       }
-      if (!(dep = this[item.symbol])) {
+      try {
+        dep = typeof window.require === "function" ? window.require(item.path) : void 0;
+      } catch (_error) {
+        err = _error;
+      }
+      dep || (dep = window[item.symbol]);
+      if (!dep) {
         if (item.optional) {
           return;
         }
         throw new Error("Missing dependency: " + item.path);
       }
-      return window.require.register(item.path, function(exports, require, module) {
+      require.register(item.path, (function(exports, require, module) {
         return module.exports = dep;
-      });
+      }));
+      if (item.alias) {
+        return require.register(item.alias, (function(exports, require, module) {
+          return module.exports = dep;
+        }));
+      }
     };
     for (_i = 0, _len = info.length; _i < _len; _i++) {
       item = info[_i];
@@ -2178,6 +2277,13 @@ module.exports = ClientUtils = (function() {
 });
 
 ;require.register("backbone-orm/lib/connection_pool", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var MemoryStore;
 
 MemoryStore = require('./cache/memory_store');
@@ -2191,6 +2297,13 @@ module.exports = new MemoryStore({
 });
 
 ;require.register("backbone-orm/lib/cursor", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var CURSOR_KEYS, Cursor, QueryCache, Utils, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -2630,6 +2743,13 @@ module.exports = Cursor = (function() {
 });
 
 ;require.register("backbone-orm/lib/database_url", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var DatabaseURL, SUPPORTED_KEYS, URL, inflection, _;
 
 _ = require('underscore');
@@ -2745,33 +2865,79 @@ module.exports = DatabaseURL = (function() {
 });
 
 ;require.register("backbone-orm/lib/extensions/collection", function(exports, require, module) {
-var Backbone, Utils, _original__prepareModel;
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
+var Backbone, Utils, collection_type, fn, key, overrides, _;
+
+_ = require('underscore');
 
 Backbone = require('backbone');
 
 Utils = require('../utils');
 
-_original__prepareModel = Backbone.Collection.prototype._prepareModel;
+collection_type = Backbone.Collection;
 
-Backbone.Collection.prototype._prepareModel = function(attrs, options) {
-  var id, is_new, model;
-  if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
-    if (this.model.cache) {
-      is_new = !!this.model.cache.get(id);
+overrides = {
+  fetch: function(options) {
+    var callback,
+      _this = this;
+    if (_.isFunction(callback = arguments[arguments.length - 1])) {
+      switch (arguments.length) {
+        case 1:
+          options = Utils.wrapOptions({}, callback);
+          break;
+        case 2:
+          options = Utils.wrapOptions(options, callback);
+      }
     }
-    model = Utils.updateOrNew(attrs, this.model);
-    if (is_new && !model._validate(attrs, options)) {
-      this.trigger('invalid', this, attrs, options);
-      return false;
+    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, function(err, model, resp, options) {
+      if (err) {
+        return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
+      }
+      return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
+    }));
+  },
+  _prepareModel: function(attrs, options) {
+    var id, is_new, model;
+    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
+      if (this.model.cache) {
+        is_new = !!this.model.cache.get(id);
+      }
+      model = Utils.updateOrNew(attrs, this.model);
+      if (is_new && !model._validate(attrs, options)) {
+        this.trigger('invalid', this, attrs, options);
+        return false;
+      }
+      return model;
     }
-    return model;
+    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
   }
-  return _original__prepareModel.call(this, attrs, options);
 };
+
+if (!collection_type.prototype._orm_original_fns) {
+  collection_type.prototype._orm_original_fns = {};
+  for (key in overrides) {
+    fn = overrides[key];
+    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
+    collection_type.prototype[key] = fn;
+  }
+}
 
 });
 
 ;require.register("backbone-orm/lib/extensions/model", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, Queue, Utils, moment, _;
 
 _ = require('underscore');
@@ -3110,7 +3276,17 @@ module.exports = function(model_type) {
       return model_type.prototype._orm_original_fns.initialize.apply(this, arguments);
     },
     fetch: function(options) {
-      var _this = this;
+      var callback,
+        _this = this;
+      if (_.isFunction(callback = arguments[arguments.length - 1])) {
+        switch (arguments.length) {
+          case 1:
+            options = Utils.wrapOptions({}, callback);
+            break;
+          case 2:
+            options = Utils.wrapOptions(options, callback);
+        }
+      }
       return model_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, function(err, model, resp, options) {
         if (err) {
           return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
@@ -3210,13 +3386,33 @@ module.exports = function(model_type) {
       return json;
     },
     save: function(key, value, options) {
-      var attributes, _base,
+      var attributes, callback, _base,
         _this = this;
-      if (key === null || _.isObject(key)) {
-        attributes = key;
-        options = value;
+      if (_.isFunction(callback = arguments[arguments.length - 1])) {
+        switch (arguments.length) {
+          case 1:
+            attributes = {};
+            options = Utils.wrapOptions({}, callback);
+            break;
+          case 2:
+            attributes = key;
+            options = Utils.wrapOptions({}, callback);
+            break;
+          case 3:
+            attributes = key;
+            options = Utils.wrapOptions(value, callback);
+            break;
+          case 4:
+            (attributes = {})[key] = value;
+            options = Utils.wrapOptions(options, callback);
+        }
       } else {
-        (attributes = {})[key] = value;
+        if (key === null || _.isObject(key)) {
+          attributes = key;
+          options = value;
+        } else {
+          (attributes = {})[key] = value;
+        }
       }
       if (!this.isLoaded()) {
         return typeof options.error === "function" ? options.error(this, new Error("An unloaded model is trying to be saved: " + model_type.model_name)) : void 0;
@@ -3263,13 +3459,22 @@ module.exports = function(model_type) {
       });
     },
     destroy: function(options) {
-      var cache, schema, _base,
+      var cache, callback, schema, _base,
         _this = this;
+      if (_.isFunction(callback = arguments[arguments.length - 1])) {
+        switch (arguments.length) {
+          case 1:
+            options = Utils.wrapOptions({}, callback);
+            break;
+          case 2:
+            options = Utils.wrapOptions(options, callback);
+        }
+      }
       if (cache = this.cache()) {
         cache.destroy(this.id);
       }
       if (!(model_type.schema && (schema = model_type.schema()))) {
-        return _original_destroy.apply(this, arguments);
+        return model_type.prototype._orm_original_fns.destroy.call(this, options);
       }
       this._orm || (this._orm = {});
       if (this._orm.destroy > 0) {
@@ -3361,6 +3566,13 @@ module.exports = function(model_type) {
 });
 
 ;require.register("backbone-orm/lib/index", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var ClientUtils;
 
 ClientUtils = require('./client_utils');
@@ -3369,6 +3581,7 @@ ClientUtils.loadDependencies([
   {
     symbol: '_',
     path: 'lodash',
+    alias: 'underscore',
     optional: true
   }, {
     symbol: '_',
@@ -3398,6 +3611,13 @@ module.exports = {
 });
 
 ;require.register("backbone-orm/lib/json_utils", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var JSONUtils, Queue, moment, _;
 
 _ = require('underscore');
@@ -3790,6 +4010,13 @@ module.exports = JSONUtils = (function() {
 });
 
 ;require.register("backbone-orm/lib/memory/cursor", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, MemoryCursor, Queue, Utils, inflection, moment, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4225,7 +4452,14 @@ module.exports = MemoryCursor = (function(_super) {
 });
 
 ;require.register("backbone-orm/lib/memory/sync", function(exports, require, module) {
-var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
+var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, ModelTypeID, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
 
 _ = require('underscore');
 
@@ -4243,6 +4477,8 @@ ModelCache = require('../cache/singletons').ModelCache;
 
 QueryCache = require('../cache/singletons').QueryCache;
 
+ModelTypeID = require('../cache/singletons').ModelTypeID;
+
 modelExtensions = require('../extensions/model');
 
 DESTROY_BATCH_LIMIT = 1000;
@@ -4254,6 +4490,7 @@ MemorySync = (function() {
     var _name;
     this.model_type = model_type;
     this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
+    this.model_type.model_id = ModelTypeID.generate(this.model_type);
     this.schema = new Schema(this.model_type);
     this.store = this.model_type.store = STORES[_name = this.model_type.model_name] || (STORES[_name] = {});
   }
@@ -4268,16 +4505,23 @@ MemorySync = (function() {
 
   MemorySync.prototype.read = function(model, options) {
     var id, model_json;
-    return options.success(model.models ? (function() {
-      var _ref, _results;
-      _ref = this.store;
-      _results = [];
-      for (id in _ref) {
-        model_json = _ref[id];
-        _results.push(Utils.deepClone(model_json));
+    if (model.models) {
+      return options.success((function() {
+        var _ref, _results;
+        _ref = this.store;
+        _results = [];
+        for (id in _ref) {
+          model_json = _ref[id];
+          _results.push(Utils.deepClone(model_json));
+        }
+        return _results;
+      }).call(this));
+    } else {
+      if (_.isUndefined(this.store[model.id])) {
+        return options.error(new Error("Model not found with id: " + model.id));
       }
-      return _results;
-    }).call(this) : Utils.deepClone(this.store[model.id]));
+      return options.success(Utils.deepClone(this.store[model.id]));
+    }
   };
 
   MemorySync.prototype.create = function(model, options) {
@@ -4402,6 +4646,13 @@ module.exports = function(type) {
 });
 
 ;require.register("backbone-orm/lib/queue", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Queue,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -4467,6 +4718,13 @@ module.exports = Queue = (function() {
 });
 
 ;require.register("backbone-orm/lib/relations/many", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, Many, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5043,6 +5301,13 @@ module.exports = Many = (function(_super) {
 });
 
 ;require.register("backbone-orm/lib/relations/one", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, One, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5503,6 +5768,13 @@ module.exports = One = (function(_super) {
 });
 
 ;require.register("backbone-orm/lib/relations/relation", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, Queue, Relation, Utils, bbCallback, inflection, _;
 
 _ = require('underscore');
@@ -5679,6 +5951,13 @@ module.exports = Relation = (function() {
 });
 
 ;require.register("backbone-orm/lib/schema", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var Backbone, DatabaseURL, Many, One, Schema, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5923,6 +6202,13 @@ module.exports = Schema = (function() {
 });
 
 ;require.register("backbone-orm/lib/utils", function(exports, require, module) {
+/*
+  backbone-orm.js 0.0.1
+  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Dependencies: Backbone.js and Underscore.js.
+*/
+
 var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6577,8 +6863,8 @@ if (typeof exports == 'object') {
   define('backbone-orm', ['underscore', 'backbone', 'moment', 'inflection'], function(){ return require('backbone-orm/lib/index'); });
 } else {
   var Backbone = this.Backbone;
-  if (!Backbone && (typeof require == 'function')) {
-    try { Backbone = require('backbone'); } catch (_error) { Backbone = this.Backbone = {}; }
+  if (!Backbone && (typeof window.require == 'function')) {
+    try { Backbone = window.require('backbone'); } catch (_error) { Backbone = this.Backbone = {}; }
   }
   Backbone.ORM = require('backbone-orm/lib/index');
 }

@@ -6,6 +6,7 @@ exports.config =
     public: './_build'
     watched: ['src', 'node']
   modules:
+    definition: false
     nameCleaner: (path) ->
       path = path.replace(/^src\//, 'backbone-orm/lib/')
       path = path.replace(/^node\//, 'backbone-orm/node/')

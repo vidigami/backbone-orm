@@ -9,14 +9,17 @@ isArray = require('../node/util').isArray
 
 module.exports = class ClientUtils
   @loadDependencies: (info) ->
-    return unless window?.require.register
+    return unless window?
 
     info = [info] unless isArray(info)
     for item in info
       do (item) ->
-        try return if dep = require(item.path) catch err then
-        unless dep = @[item.symbol]
+        try return if require(item.path) catch err # already required
+        try dep = window.require?(item.path) catch err
+        dep or= window[item.symbol]
+        unless dep
           return if item.optional
           throw new Error("Missing dependency: #{item.path}")
-        window.require.register item.path, (exports, require, module) -> module.exports = dep
+        require.register item.path, ((exports, require, module) -> module.exports = dep)
+        require.register item.alias, ((exports, require, module) -> module.exports = dep) if item.alias
     return
