@@ -1,4 +1,4 @@
-URL = require '../vendor/url'
+URL = require '../node/url'
 DatabaseURL = require './database_url'
 Backbone = require 'backbone'
 _ = require 'underscore'

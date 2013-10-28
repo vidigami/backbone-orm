@@ -1,6 +1,6 @@
 _ = require 'underscore'
 inflection = require 'inflection'
-URL = require '../vendor/url'
+URL = require '../node/url'
 
 SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href']
 

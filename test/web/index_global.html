@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+  <title>Backbone-ORM</title>
+  <script type="text/javascript" src="../../node_modules/underscore/underscore.js"></script>
+  <script type="text/javascript" src="../../node_modules/backbone/backbone.js"></script>
+  <script type="text/javascript" src="../../node_modules/moment/moment.js"></script>
+  <script type="text/javascript" src="../../node_modules/inflection/lib/inflection.js"></script>
+  <script type="text/javascript" src="../../client/backbone-orm.js"></script>
+  <script type="text/javascript">
+    var Test = Backbone.Model.extend({
+      urlRoot: '/api/tests',
+      model_name: 'Test'
+    });
+    Test.prototype.sync = bborm.sync(Test);
+
+    var test = new Test();
+    test.fetch({success: function(){}})
+
+  </script>
+</head>

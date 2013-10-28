@@ -1,5 +1,5 @@
 _ = require 'underscore'
-LRU = require 'lru-cache'
+LRU = require '../../node/lru-cache'
 inflection = require 'inflection'
 
 module.exports = class MemoryStore

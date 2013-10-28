@@ -1,37 +1,61 @@
+WRAPPERS = require './client/config_wrap_js'
+
 module.exports = (grunt) ->
 
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
-    copy:
-      all:
+    shell:
+      library:
+        options: {stdout: true}
+        command: 'brunch build -c client/config.coffee'
+      vendor:
+        options: {stdout: true}
+        command: 'browserify -r underscore -r backbone -r moment -r inflection > client/bborm-vendor.js'
+
+    wrap:
+      library:
+        cwd: '_build/'
         expand: true
-        src: ['**/*', '!_build', '!_build/**/*', '!**/*.coffee']
-        dest: '_build'
+        src: ['backbone-orm.js'],
+        dest: '_build/',
+        options: {wrapper: [WRAPPERS.library_start, WRAPPERS.library_end]}
 
-    watch:
-      coffee:
-        files: ['**/*.coffee', '!_build/**/*', '!node_modules/**/*']
-        tasks: ['coffee:map']
-        options:
-          nospawn: true
-
-    coffee:
-      map:
-        options:
-          sourceMap: true
+      license:
+        cwd: '_build/'
         expand: true
-        src: ['**/*.coffee', '!_build/**/*', '!node_modules/eco/**/*', '!node_modules/codo/**/*']
-        dest: '_build'
-        ext: '.js'
+        src: ['backbone-orm*.js'],
+        dest: 'client/',
+        options: {wrapper: [WRAPPERS.library_license, '']}
 
-  grunt.loadNpmTasks 'grunt-contrib-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-copy'
-  grunt.loadNpmTasks 'grunt-contrib-watch'
+      vendor:
+        cwd: 'client/'
+        expand: true
+        src: ['bborm-vendor.js'],
+        dest: 'client/',
+        options: {wrapper: [WRAPPERS.vendor_start, WRAPPERS.vendor_end]}
 
-  grunt.registerTask 'default', ['copy:all', 'coffee:map', 'watch:coffee']
+    replace:
+      vendor:
+        src: ['client/bborm-vendor.js']
+        dest: 'client/'
+        replacements: [{
+          from: 'require=(function'
+          to: 'var require=(function'
+        }]
 
-  # On watch events, inject only the changed files into the config
-  grunt.event.on 'watch', (action, filepath) ->
-    grunt.config(['coffee', 'map', 'src'], [filepath])
+    uglify:
+      library: {expand: true, cwd: '_build/', src: ['*.js'], dest: '_build/', ext: '-min.js'}
+      vendor: {expand: true, cwd: 'client/', src: ['bborm-vendor.js'], dest: 'client/', ext: '-min.js'}
 
+    clean:
+      build: ['_build']
+
+  grunt.loadNpmTasks 'grunt-shell'
+  grunt.loadNpmTasks 'grunt-wrap'
+  grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-text-replace'
+
+  grunt.registerTask 'default', ['shell:library', 'wrap:library', 'uglify:library', 'wrap:license', 'clean:build']
+  grunt.registerTask 'vendor', ['shell:vendor', 'replace:vendor', 'wrap:vendor', 'uglify:vendor', 'clean:build']
