@@ -15,7 +15,6 @@ Utils = require '../utils'
 
 ModelCache = require('../cache/singletons').ModelCache
 QueryCache = require('../cache/singletons').QueryCache
-modelExtensions = require '../extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
 STORES = {}
@@ -25,12 +24,12 @@ STORES = {}
 # @example How to configure using a model name
 #   class Thing extends Backbone.Model
 #     @model_name: 'Thing'
-#     sync: require('backbone-orm/lib/memory/sync')(Thing)
+#     sync: require('backbone-orm').sync(Thing)
 #
 # @example How to configure using a url
 #   class Thing extends Backbone.Model
 #     url: '/things'
-#     sync: require('backbone-orm/lib/memory/sync')(Thing)
+#     sync: require('backbone-orm').sync(Thing)
 #
 class MemorySync
   # @private
@@ -112,5 +111,5 @@ module.exports = (type) ->
     return undefined if method is 'tableName'
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
-  modelExtensions(type)
+  Utils.configureModelType(type)
   return ModelCache.configureSync(type, sync_fn)

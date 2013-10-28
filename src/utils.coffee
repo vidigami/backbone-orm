@@ -12,6 +12,7 @@ _ = require 'underscore'
 inflection = require 'inflection'
 moment = require 'moment'
 Queue = require './queue'
+modelExtensions = null
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
@@ -92,6 +93,10 @@ module.exports = class Utils
       model_type::url = modelURL
       model_type::sync = sync(model_type)
     return model_type
+
+  @configureModelType: (type) ->
+    modelExtensions = require('./extensions/model') unless modelExtensions # break dependency cycle
+    modelExtensions(type)
 
   @patchRemoveByJSON: (model_type, model_json, callback) ->
     return callback() unless schema = model_type.schema()

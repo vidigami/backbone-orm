@@ -4423,7 +4423,7 @@ module.exports = MemoryCursor = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
+var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, _;
 
 _ = require('underscore');
 
@@ -4440,8 +4440,6 @@ Utils = require('../utils');
 ModelCache = require('../cache/singletons').ModelCache;
 
 QueryCache = require('../cache/singletons').QueryCache;
-
-modelExtensions = require('../extensions/model');
 
 DESTROY_BATCH_LIMIT = 1000;
 
@@ -4600,7 +4598,7 @@ module.exports = function(type) {
       return void 0;
     }
   };
-  modelExtensions(type);
+  Utils.configureModelType(type);
   return ModelCache.configureSync(type, sync_fn);
 };
 
@@ -6170,7 +6168,7 @@ module.exports = Schema = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, moment, _,
+var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, modelExtensions, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6187,6 +6185,8 @@ inflection = require('inflection');
 moment = require('moment');
 
 Queue = require('./queue');
+
+modelExtensions = null;
 
 S4 = function() {
   return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -6348,6 +6348,13 @@ module.exports = Utils = (function() {
       model_type.prototype.sync = sync(model_type);
     }
     return model_type;
+  };
+
+  Utils.configureModelType = function(type) {
+    if (!modelExtensions) {
+      modelExtensions = require('./extensions/model');
+    }
+    return modelExtensions(type);
   };
 
   Utils.patchRemoveByJSON = function(model_type, model_json, callback) {

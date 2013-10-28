@@ -20,8 +20,8 @@ module.exports =
   JSONUtils: require './json_utils'
   Queue: require './queue'
   DatabaseURL: require './database_url'
+
   Cursor: require './cursor'
   Schema: require './schema'
-
   ConnectionPool: require './connection_pool'
   CacheSingletons: require './cache/singletons'
