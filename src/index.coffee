@@ -6,9 +6,7 @@
 ###
 
 # ensure the client symbols are resolved
-ClientUtils = require './client_utils'
-
-ClientUtils.loadDependencies([
+require('./client_utils').loadDependencies([
   {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
   {symbol: 'Backbone', path: 'backbone'}
   {symbol: 'moment', path: 'moment'}
@@ -18,11 +16,12 @@ ClientUtils.loadDependencies([
 module.exports =
   sync: require './memory/sync'
 
-  Cursor: require './cursor'
   Utils: require './utils'
   JSONUtils: require './json_utils'
-  DatabaseURL: require './database_url'
   Queue: require './queue'
+  DatabaseURL: require './database_url'
+  Cursor: require './cursor'
+  Schema: require './schema'
 
   ConnectionPool: require './connection_pool'
   CacheSingletons: require './cache/singletons'

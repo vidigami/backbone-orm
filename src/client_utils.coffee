@@ -5,21 +5,17 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
-isArray = require('../node/util').isArray
-
 module.exports = class ClientUtils
-  @loadDependencies: (info) ->
+  @loadDependency: (item) ->
     return unless window?
+    try return if require(item.path) catch err # already required
 
-    info = [info] unless isArray(info)
-    for item in info
-      do (item) ->
-        try return if require(item.path) catch err # already required
-        try dep = window.require?(item.path) catch err
-        dep or= window[item.symbol]
-        unless dep
-          return if item.optional
-          throw new Error("Missing dependency: #{item.path}")
-        require.register item.path, ((exports, require, module) -> module.exports = dep)
-        require.register item.alias, ((exports, require, module) -> module.exports = dep) if item.alias
-    return
+    try dep = window.require?(item.path) catch err
+    unless dep
+      dep = window
+      break for key in item.symbol.split('.') when not dep = dep[key]
+    (return if item.optional; throw new Error("Missing dependency: #{item.path}")) unless dep
+    require.register item.path, ((exports, require, module) -> module.exports = dep)
+    require.register item.alias, ((exports, require, module) -> module.exports = dep) if item.alias
+
+  @loadDependencies: (info) -> @loadDependency(item) for item in info; return

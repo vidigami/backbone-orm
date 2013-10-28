@@ -2180,54 +2180,59 @@ module.exports = function(model_type, wrapped_sync_fn) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var ClientUtils, isArray;
-
-isArray = require('../node/util').isArray;
+var ClientUtils;
 
 module.exports = ClientUtils = (function() {
   function ClientUtils() {}
 
-  ClientUtils.loadDependencies = function(info) {
-    var item, _fn, _i, _len;
+  ClientUtils.loadDependency = function(item) {
+    var dep, err, key, _i, _len, _ref;
     if (typeof window === "undefined" || window === null) {
       return;
     }
-    if (!isArray(info)) {
-      info = [info];
+    try {
+      if (require(item.path)) {
+        return;
+      }
+    } catch (_error) {
+      err = _error;
     }
-    _fn = function(item) {
-      var dep, err;
-      try {
-        if (require(item.path)) {
-          return;
+    try {
+      dep = typeof window.require === "function" ? window.require(item.path) : void 0;
+    } catch (_error) {
+      err = _error;
+    }
+    if (!dep) {
+      dep = window;
+      _ref = item.symbol.split('.');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        if (!(dep = dep[key])) {
+          break;
         }
-      } catch (_error) {
-        err = _error;
       }
-      try {
-        dep = typeof window.require === "function" ? window.require(item.path) : void 0;
-      } catch (_error) {
-        err = _error;
+    }
+    if (!dep) {
+      if (item.optional) {
+        return;
       }
-      dep || (dep = window[item.symbol]);
-      if (!dep) {
-        if (item.optional) {
-          return;
-        }
-        throw new Error("Missing dependency: " + item.path);
-      }
-      require.register(item.path, (function(exports, require, module) {
+      throw new Error("Missing dependency: " + item.path);
+    }
+    require.register(item.path, (function(exports, require, module) {
+      return module.exports = dep;
+    }));
+    if (item.alias) {
+      return require.register(item.alias, (function(exports, require, module) {
         return module.exports = dep;
       }));
-      if (item.alias) {
-        return require.register(item.alias, (function(exports, require, module) {
-          return module.exports = dep;
-        }));
-      }
-    };
+    }
+  };
+
+  ClientUtils.loadDependencies = function(info) {
+    var item, _i, _len;
     for (_i = 0, _len = info.length; _i < _len; _i++) {
       item = info[_i];
-      _fn(item);
+      this.loadDependency(item);
     }
   };
 
@@ -3534,11 +3539,7 @@ module.exports = function(model_type) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var ClientUtils;
-
-ClientUtils = require('./client_utils');
-
-ClientUtils.loadDependencies([
+require('./client_utils').loadDependencies([
   {
     symbol: '_',
     path: 'lodash',
@@ -3561,11 +3562,12 @@ ClientUtils.loadDependencies([
 
 module.exports = {
   sync: require('./memory/sync'),
-  Cursor: require('./cursor'),
   Utils: require('./utils'),
   JSONUtils: require('./json_utils'),
-  DatabaseURL: require('./database_url'),
   Queue: require('./queue'),
+  DatabaseURL: require('./database_url'),
+  Cursor: require('./cursor'),
+  Schema: require('./schema'),
   ConnectionPool: require('./connection_pool'),
   CacheSingletons: require('./cache/singletons')
 };
