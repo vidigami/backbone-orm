@@ -10,15 +10,12 @@ bbCallback = Utils.bbCallback
 
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
-ModelTypeID = require('../../../lib/cache/singletons').ModelTypeID
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
-
-  ModelTypeID.reset()
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"

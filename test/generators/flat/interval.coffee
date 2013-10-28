@@ -7,7 +7,6 @@ Queue = require '../../../lib/queue'
 
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
-ModelTypeID = require('../../../lib/cache/singletons').ModelTypeID
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 
@@ -17,7 +16,6 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 50
 
-  ModelTypeID.reset()
   ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()

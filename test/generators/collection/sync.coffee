@@ -6,7 +6,6 @@ Queue = require '../../../lib/queue'
 
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
-ModelTypeID = require('../../../lib/cache/singletons').ModelTypeID
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
 bbCallback = Utils.bbCallback
@@ -17,7 +16,6 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelTypeID.reset()
   ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
 
   class Model extends Backbone.Model
@@ -31,7 +29,6 @@ module.exports = (options, callback) ->
     after (done) -> callback(); done()
     beforeEach (done) ->
 
-      ModelTypeID.reset()
       queue = new Queue(1)
 
       # reset caches
