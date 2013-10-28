@@ -1,9 +1,9 @@
 util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
-Queue = require '../src/queue'
+Queue = require '../lib/queue'
 
-Utils = require '../src/utils'
+Utils = require '../lib/utils'
 bbCallback = Utils.bbCallback
 
 # Fabricator to generate test data.

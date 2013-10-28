@@ -1,5 +1,5 @@
 _ = require 'underscore'
-Queue = require '../src/queue'
+Queue = require '../lib/queue'
 
 option_sets = require('./option_sets')
 option_sets = option_sets.slice(0, 1)

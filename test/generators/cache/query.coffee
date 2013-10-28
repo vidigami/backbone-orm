@@ -2,14 +2,14 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../../../src/queue'
+Queue = require '../../../lib/queue'
 moment = require 'moment'
 
-ModelCache = require('../../../src/cache/singletons').ModelCache
-QueryCache = require('../../../src/cache/singletons').QueryCache
-ModelTypeID = require('../../../src/cache/singletons').ModelTypeID
+ModelCache = require('../../../lib/cache/singletons').ModelCache
+QueryCache = require('../../../lib/cache/singletons').QueryCache
+ModelTypeID = require('../../../lib/cache/singletons').ModelTypeID
 Fabricator = require '../../fabricator'
-Utils = require '../../../src/utils'
+Utils = require '../../../lib/utils'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

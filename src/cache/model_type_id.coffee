@@ -5,7 +5,7 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 _ = require 'underscore'
-crypto = require('crypto');
+crypto = require 'crypto'
 
 module.exports = class ModelTypeID
 
