@@ -96,9 +96,9 @@ module.exports =
     })();
     """
 
-  end: """
+  end: (modules) -> """
       var MODULES, module_name, _fn, _i, _len;
-      MODULES = ['underscore', 'backbone', 'inflection', 'moment'];
+      MODULES = #{JSON.stringify(modules)};
 
       _fn = function(module_name) {
         window.require.register(module_name, function(exports, brunch_require, module) {

@@ -34,7 +34,7 @@ module.exports = (grunt) ->
         expand: true
         src: ['bborm-vendor.js'],
         dest: 'client/',
-        options: {wrapper: [VENDOR_WRAPPERS.start, VENDOR_WRAPPERS.end]}
+        options: {wrapper: [VENDOR_WRAPPERS.start, VENDOR_WRAPPERS.end(['underscore', 'backbone', 'inflection', 'moment'])]}
 
     replace:
       vendor:

@@ -4965,7 +4965,7 @@ module.exports=require('Lbg7CE');
 },{}]},{},[])
 ;
   var MODULES, module_name, _fn, _i, _len;
-  MODULES = ['underscore', 'backbone', 'inflection', 'moment'];
+  MODULES = ["underscore","backbone","inflection","moment"];
 
   _fn = function(module_name) {
     window.require.register(module_name, function(exports, brunch_require, module) {
