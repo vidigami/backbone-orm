@@ -1492,7 +1492,7 @@ return Object.prototype.toString.call(o);
 
 });
 
-;require.register("src/cache/cursor", function(exports, require, module) {
+;require.register("bborm/cache/cursor", function(exports, require, module) {
 var CacheCursor, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1517,7 +1517,7 @@ module.exports = CacheCursor = (function(_super) {
 
 });
 
-;require.register("src/cache/memory_store", function(exports, require, module) {
+;require.register("bborm/cache/memory_store", function(exports, require, module) {
 var LRU, MemoryStore, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1599,7 +1599,7 @@ module.exports = MemoryStore = (function() {
 
 });
 
-;require.register("src/cache/model_cache", function(exports, require, module) {
+;require.register("bborm/cache/model_cache", function(exports, require, module) {
 var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, Utils, _;
 
 Backbone = require('backbone');
@@ -1714,7 +1714,7 @@ module.exports = ModelCache = (function() {
 
 });
 
-;require.register("src/cache/query_cache", function(exports, require, module) {
+;require.register("bborm/cache/query_cache", function(exports, require, module) {
 var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1971,7 +1971,7 @@ module.exports = QueryCache = (function() {
 
 });
 
-;require.register("src/cache/singletons", function(exports, require, module) {
+;require.register("bborm/cache/singletons", function(exports, require, module) {
 module.exports = {
   ModelCache: new (require('./model_cache'))(),
   QueryCache: new (require('./query_cache'))()
@@ -1979,7 +1979,7 @@ module.exports = {
 
 });
 
-;require.register("src/cache/sync", function(exports, require, module) {
+;require.register("bborm/cache/sync", function(exports, require, module) {
 var CacheCursor, CacheSync, DEFAULT_LIMIT, DEFAULT_PARALLELISM, Schema, Utils, bbCallback, _;
 
 _ = require('underscore');
@@ -2130,7 +2130,54 @@ module.exports = function(model_type, wrapped_sync_fn) {
 
 });
 
-;require.register("src/connection_pool", function(exports, require, module) {
+;require.register("bborm/client_utils", function(exports, require, module) {
+var ClientUtils, isArray;
+
+isArray = require('../node/util').isArray;
+
+module.exports = ClientUtils = (function() {
+  function ClientUtils() {}
+
+  ClientUtils.loadDependencies = function(info) {
+    var item, _fn, _i, _len;
+    if (!(typeof window !== "undefined" && window !== null ? window.require.register : void 0)) {
+      return;
+    }
+    if (!isArray(info)) {
+      info = [info];
+    }
+    _fn = function(item) {
+      var dep, err;
+      try {
+        if (dep = require(item.path)) {
+          return;
+        }
+      } catch (_error) {
+        err = _error;
+      }
+      if (!(dep = this[item.symbol])) {
+        if (item.optional) {
+          return;
+        }
+        throw new Error("Missing dependency: " + item.path);
+      }
+      return window.require.register(item.path, function(exports, require, module) {
+        return module.exports = dep;
+      });
+    };
+    for (_i = 0, _len = info.length; _i < _len; _i++) {
+      item = info[_i];
+      _fn(item);
+    }
+  };
+
+  return ClientUtils;
+
+})();
+
+});
+
+;require.register("bborm/connection_pool", function(exports, require, module) {
 var MemoryStore;
 
 MemoryStore = require('./cache/memory_store');
@@ -2143,7 +2190,7 @@ module.exports = new MemoryStore({
 
 });
 
-;require.register("src/cursor", function(exports, require, module) {
+;require.register("bborm/cursor", function(exports, require, module) {
 var CURSOR_KEYS, Cursor, QueryCache, Utils, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -2582,7 +2629,7 @@ module.exports = Cursor = (function() {
 
 });
 
-;require.register("src/database_url", function(exports, require, module) {
+;require.register("bborm/database_url", function(exports, require, module) {
 var DatabaseURL, SUPPORTED_KEYS, URL, inflection, _;
 
 _ = require('underscore');
@@ -2697,7 +2744,7 @@ module.exports = DatabaseURL = (function() {
 
 });
 
-;require.register("src/extensions/collection", function(exports, require, module) {
+;require.register("bborm/extensions/collection", function(exports, require, module) {
 var Backbone, Utils, _original__prepareModel;
 
 Backbone = require('backbone');
@@ -2724,7 +2771,7 @@ Backbone.Collection.prototype._prepareModel = function(attrs, options) {
 
 });
 
-;require.register("src/extensions/model", function(exports, require, module) {
+;require.register("bborm/extensions/model", function(exports, require, module) {
 var Backbone, Queue, Utils, moment, _;
 
 _ = require('underscore');
@@ -3313,53 +3360,26 @@ module.exports = function(model_type) {
 
 });
 
-;require.register("src/index", function(exports, require, module) {
-var loadDependency;
-
-loadDependency = function(info) {
-  var dep, err;
-  try {
-    dep = require(info.path);
-  } catch (_error) {
-    err = _error;
-  }
-  if (dep) {
-    return dep;
-  }
-  if (!(dep = this[info.symbol])) {
-    if (info.optional) {
-      return;
-    }
-    throw new Error("Missing dependency: " + info.path);
-  }
-  return window.require.register(info.path, function(exports, require, module) {
-    return module.exports = dep;
-  });
-};
-
-if (typeof window !== "undefined" && window !== null ? window.require.register : void 0) {
-  loadDependency({
+;require.register("bborm/index", function(exports, require, module) {
+require('./client_utils').loadDependencies([
+  {
     symbol: '_',
     path: 'lodash',
     optional: true
-  });
-  loadDependency({
+  }, {
     symbol: '_',
     path: 'underscore'
-  });
-  loadDependency({
+  }, {
     symbol: 'Backbone',
     path: 'backbone'
-  });
-  loadDependency({
+  }, {
     symbol: 'moment',
     path: 'moment'
-  });
-  loadDependency({
+  }, {
     symbol: 'inflection',
     path: 'inflection'
-  });
-}
+  }
+]);
 
 module.exports = {
   sync: require('./memory/sync'),
@@ -3373,7 +3393,7 @@ module.exports = {
 
 });
 
-;require.register("src/json_utils", function(exports, require, module) {
+;require.register("bborm/json_utils", function(exports, require, module) {
 var JSONUtils, Queue, moment, _;
 
 _ = require('underscore');
@@ -3765,7 +3785,7 @@ module.exports = JSONUtils = (function() {
 
 });
 
-;require.register("src/memory/cursor", function(exports, require, module) {
+;require.register("bborm/memory/cursor", function(exports, require, module) {
 var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, MemoryCursor, Queue, Utils, inflection, moment, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4200,7 +4220,7 @@ module.exports = MemoryCursor = (function(_super) {
 
 });
 
-;require.register("src/memory/sync", function(exports, require, module) {
+;require.register("bborm/memory/sync", function(exports, require, module) {
 var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
 
 _ = require('underscore');
@@ -4377,7 +4397,7 @@ module.exports = function(type) {
 
 });
 
-;require.register("src/queue", function(exports, require, module) {
+;require.register("bborm/queue", function(exports, require, module) {
 var Queue,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -4442,7 +4462,7 @@ module.exports = Queue = (function() {
 
 });
 
-;require.register("src/relations/many", function(exports, require, module) {
+;require.register("bborm/relations/many", function(exports, require, module) {
 var Backbone, Many, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5018,7 +5038,7 @@ module.exports = Many = (function(_super) {
 
 });
 
-;require.register("src/relations/one", function(exports, require, module) {
+;require.register("bborm/relations/one", function(exports, require, module) {
 var Backbone, One, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5478,7 +5498,7 @@ module.exports = One = (function(_super) {
 
 });
 
-;require.register("src/relations/relation", function(exports, require, module) {
+;require.register("bborm/relations/relation", function(exports, require, module) {
 var Backbone, Queue, Relation, Utils, bbCallback, inflection, _;
 
 _ = require('underscore');
@@ -5654,7 +5674,7 @@ module.exports = Relation = (function() {
 
 });
 
-;require.register("src/schema", function(exports, require, module) {
+;require.register("bborm/schema", function(exports, require, module) {
 var Backbone, DatabaseURL, Many, One, Schema, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5898,7 +5918,7 @@ module.exports = Schema = (function() {
 
 });
 
-;require.register("src/utils", function(exports, require, module) {
+;require.register("bborm/utils", function(exports, require, module) {
 var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6548,10 +6568,10 @@ module.exports = Utils = (function() {
 
 ;
 if (typeof exports == 'object') {
-  module.exports = require('src/index');
+  module.exports = require('bborm/index');
 } else if (typeof define == 'function' && define.amd) {
-  define('bborm', ['underscore', 'backbone'], function(){ return require('src/index'); });
+  define('bborm', ['underscore', 'backbone', 'moment', 'inflection'], function(){ return require('bborm/index'); });
 } else {
-  this['bborm'] = require('src/index');
+  this['bborm'] = require('bborm/index');
 }
 }).call(this);

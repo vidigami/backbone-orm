@@ -1,5 +1,5 @@
 # ensure the client symbols are resolved
-require('./client_utils').loadDependency([
+require('./client_utils').loadDependencies([
   {symbol: '_', path: 'lodash', optional: true}, {symbol: '_', path: 'underscore'}
   {symbol: 'Backbone', path: 'backbone'}
   {symbol: 'moment', path: 'moment'}

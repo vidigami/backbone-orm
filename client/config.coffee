@@ -5,6 +5,8 @@ exports.config =
   paths:
     public: './_build'
     watched: ['src', 'node']
+  modules:
+    nameCleaner: (path) -> path.replace(/^src\//, 'bborm/')
   conventions:
     ignored: (path) -> return startsWith(path, 'src/node')
   files:

@@ -8,10 +8,10 @@ module.exports = (grunt) ->
 
     shell:
       library:
-        options: {stdout: true}
+        options: {stdout: true, stderr: true}
         command: 'brunch build -c client/config.coffee'
       vendor:
-        options: {stdout: true}
+        options: {stdout: true, stderr: true}
         command: 'browserify -r underscore -r backbone -r moment -r inflection > client/bborm-vendor.js'
 
     wrap:
