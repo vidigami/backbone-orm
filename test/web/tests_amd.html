@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+  <title>Backbone-ORM</title>
+  <script type="text/javascript" src="require.js"></script>
+  <script type="text/javascript">
+    require.config({
+        paths: {
+          'underscore': "../../node_modules/underscore/underscore",
+          'backbone': "../../node_modules/backbone/backbone",
+          'moment': "../../node_modules/moment/moment",
+          'inflection': "../../node_modules/inflection/lib/inflection",
+          'backbone-orm': "../../client/backbone-orm"
+        }
+    });
+
+    require(['underscore', 'backbone', 'backbone-orm'], function(_, Backbone, bborm) {
+      var Backbone = window.Backbone;
+      var Test = Backbone.Model.extend({
+        urlRoot: '/api/tests',
+        model_name: 'Test'
+      });
+      Test.prototype.sync = bborm.sync(Test);
+
+      var test = new Test();
+      test.fetch({success: function(){}})
+    });
+  </script>
+
+  </script>
+</head>

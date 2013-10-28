@@ -9,7 +9,7 @@
   'use strict';
 
   var globals = typeof window !== 'undefined' ? window : global;
-  if (typeof globals.require === 'function') return;
+  if ((typeof globals.require === 'function') && globals.require.register) return;
 
   var modules = {};
   var cache = {};
