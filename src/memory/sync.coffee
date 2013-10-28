@@ -15,7 +15,6 @@ Utils = require '../utils'
 
 ModelCache = require('../cache/singletons').ModelCache
 QueryCache = require('../cache/singletons').QueryCache
-ModelTypeID = require('../cache/singletons').ModelTypeID
 modelExtensions = require '../extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
@@ -37,7 +36,6 @@ class MemorySync
   # @private
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
-    @model_type.model_id = ModelTypeID.generate(@model_type)
     @schema = new Schema(@model_type)
     @store = @model_type.store = STORES[@model_type.model_name] or= {}
 
@@ -48,7 +46,11 @@ class MemorySync
 
   # @private
   read: (model, options) ->
-    options.success(if model.models then (Utils.deepClone(model_json) for id, model_json of @store) else Utils.deepClone(@store[model.id]))
+    if model.models
+      options.success(Utils.deepClone(model_json) for id, model_json of @store)
+    else
+      return options.error(new Error("Model not found with id: #{model.id}")) if _.isUndefined(@store[model.id])
+      options.success(Utils.deepClone(@store[model.id]))
 
   # @private
   create: (model, options) ->

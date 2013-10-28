@@ -8,4 +8,5 @@
 module.exports =
   ModelCache: new (require('./model_cache'))()
   QueryCache: new (require('./query_cache'))()
-  ModelTypeID: new (require('./model_type_id'))()
+
+try module.exports.ModelTypeID = new (require('../node/model_type_id'))() catch e

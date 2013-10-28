@@ -12,7 +12,7 @@ module.exports = (grunt) ->
         command: 'brunch build -c client/config.coffee'
       vendor:
         options: {stdout: true, stderr: true}
-        command: 'browserify -r underscore -r backbone -r moment -r inflection > client/bborm-vendor.js'
+        command: 'browserify -r underscore -r backbone -r moment -r inflection > client/backbone-orm-vendor.js'
 
     wrap:
       library:
@@ -32,13 +32,13 @@ module.exports = (grunt) ->
       vendor:
         cwd: 'client/'
         expand: true
-        src: ['bborm-vendor.js'],
+        src: ['backbone-orm-vendor.js'],
         dest: 'client/',
         options: {wrapper: [VENDOR_WRAPPERS.start, VENDOR_WRAPPERS.end(['underscore', 'backbone', 'inflection', 'moment'])]}
 
     replace:
       vendor:
-        src: ['client/bborm-vendor.js']
+        src: ['client/backbone-orm-vendor.js']
         dest: 'client/'
         replacements: [{
           from: 'require=(function'
@@ -47,7 +47,7 @@ module.exports = (grunt) ->
 
     uglify:
       library: {expand: true, cwd: '_build/', src: ['*.js'], dest: '_build/', ext: '-min.js'}
-      vendor: {expand: true, cwd: 'client/', src: ['bborm-vendor.js'], dest: 'client/', ext: '-min.js'}
+      vendor: {expand: true, cwd: 'client/', src: ['backbone-orm-vendor.js'], dest: 'client/', ext: '-min.js'}
 
     clean:
       build: ['_build']

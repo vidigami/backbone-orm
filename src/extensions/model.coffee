@@ -260,6 +260,12 @@ module.exports = (model_type) ->
       return model_type::_orm_original_fns.initialize.apply(@, arguments)
 
     fetch: (options) ->
+      # callback signature
+      if _.isFunction(callback = arguments[arguments.length-1])
+        switch arguments.length
+          when 1 then options = Utils.wrapOptions({}, callback)
+          when 2 then options = Utils.wrapOptions(options, callback)
+
       return model_type::_orm_original_fns.fetch.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
         return options.error?(@, resp, options) if err
         @setLoaded(true)
@@ -329,13 +335,20 @@ module.exports = (model_type) ->
       --@_orm.json
       return json
 
+    # callback possible
     save: (key, value, options) ->
-      # multiple signatures
-      if key is null or _.isObject(key)
-        attributes = key
-        options = value
+      # callback signature
+      if _.isFunction(callback = arguments[arguments.length-1])
+        switch arguments.length
+          when 1 then attributes = {}; options = Utils.wrapOptions({}, callback)
+          when 2 then attributes = key; options = Utils.wrapOptions({}, callback)
+          when 3 then attributes = key; options = Utils.wrapOptions(value, callback)
+          when 4 then (attributes = {})[key] = value; options = Utils.wrapOptions(options, callback)
       else
-        (attributes = {})[key] = value;
+        if key is null or _.isObject(key)
+          attributes = key; options = value
+        else
+          (attributes = {})[key] = value;
 
       return options.error?(@, new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
 
@@ -367,8 +380,14 @@ module.exports = (model_type) ->
         ))
 
     destroy: (options) ->
+      # callback signature
+      if _.isFunction(callback = arguments[arguments.length-1])
+        switch arguments.length
+          when 1 then options = Utils.wrapOptions({}, callback)
+          when 2 then options = Utils.wrapOptions(options, callback)
+
       cache.destroy(@id) if cache = @cache() # clear out of the cache
-      return _original_destroy.apply(@, arguments) unless model_type.schema and (schema = model_type.schema())
+      return model_type::_orm_original_fns.destroy.call(@, options) unless model_type.schema and (schema = model_type.schema())
 
       @_orm or= {}
       throw new Error "Model is in a destroy loop: #{model_type.model_name}" if @_orm.destroy > 0
