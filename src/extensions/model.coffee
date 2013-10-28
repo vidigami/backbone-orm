@@ -346,7 +346,7 @@ module.exports = (model_type) ->
           when 4 then (attributes = {})[key] = value; options = Utils.wrapOptions(options, callback)
       else
         if key is null or _.isObject(key)
-          attributes = null; options = value
+          attributes = key; options = value
         else
           (attributes = {})[key] = value;
 
