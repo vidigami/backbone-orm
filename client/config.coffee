@@ -6,7 +6,9 @@ exports.config =
     public: './_build'
     watched: ['src', 'node']
   modules:
-    nameCleaner: (path) -> path.replace(/^src\//, 'bborm/')
+    nameCleaner: (path) ->
+      path = path.replace(/^src\//, 'backbone-orm/lib/')
+      path = path.replace(/^node\//, 'backbone-orm/node/')
   conventions:
     ignored: (path) -> return startsWith(path, 'src/node')
   files:

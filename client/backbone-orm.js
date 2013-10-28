@@ -97,7 +97,7 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-require.register("node/browserify/_shims", function(exports, require, module) {
+require.register("backbone-orm/node/browserify/_shims", function(exports, require, module) {
 //
 // The shims in this file are not fully implemented shims for the ES5
 // features, but do work for the particular usecases there is in
@@ -314,7 +314,7 @@ if (typeof Object.getOwnPropertyDescriptor === 'function') {
 }
 });
 
-;require.register("node/lru-cache", function(exports, require, module) {
+;require.register("backbone-orm/node/lru-cache", function(exports, require, module) {
 ;(function () { // closure for web browsers
 
 if (typeof module === 'object' && module.exports) {
@@ -581,7 +581,7 @@ function Entry (key, value, mru, len, age) {
 
 });
 
-;require.register("node/querystring", function(exports, require, module) {
+;require.register("backbone-orm/node/querystring", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -727,7 +727,7 @@ return obj;
 };
 });
 
-;require.register("node/url", function(exports, require, module) {
+;require.register("backbone-orm/node/url", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1425,7 +1425,7 @@ Url.prototype.parseHost = function() {
 
 });
 
-;require.register("node/util", function(exports, require, module) {
+;require.register("backbone-orm/node/util", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1492,7 +1492,7 @@ return Object.prototype.toString.call(o);
 
 });
 
-;require.register("bborm/cache/cursor", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/cursor", function(exports, require, module) {
 var CacheCursor, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1517,7 +1517,7 @@ module.exports = CacheCursor = (function(_super) {
 
 });
 
-;require.register("bborm/cache/memory_store", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/memory_store", function(exports, require, module) {
 var LRU, MemoryStore, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1599,7 +1599,7 @@ module.exports = MemoryStore = (function() {
 
 });
 
-;require.register("bborm/cache/model_cache", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/model_cache", function(exports, require, module) {
 var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, Utils, _;
 
 Backbone = require('backbone');
@@ -1714,7 +1714,7 @@ module.exports = ModelCache = (function() {
 
 });
 
-;require.register("bborm/cache/query_cache", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/query_cache", function(exports, require, module) {
 var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1971,7 +1971,7 @@ module.exports = QueryCache = (function() {
 
 });
 
-;require.register("bborm/cache/singletons", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/singletons", function(exports, require, module) {
 module.exports = {
   ModelCache: new (require('./model_cache'))(),
   QueryCache: new (require('./query_cache'))()
@@ -1979,7 +1979,7 @@ module.exports = {
 
 });
 
-;require.register("bborm/cache/sync", function(exports, require, module) {
+;require.register("backbone-orm/lib/cache/sync", function(exports, require, module) {
 var CacheCursor, CacheSync, DEFAULT_LIMIT, DEFAULT_PARALLELISM, Schema, Utils, bbCallback, _;
 
 _ = require('underscore');
@@ -2130,7 +2130,7 @@ module.exports = function(model_type, wrapped_sync_fn) {
 
 });
 
-;require.register("bborm/client_utils", function(exports, require, module) {
+;require.register("backbone-orm/lib/client_utils", function(exports, require, module) {
 var ClientUtils, isArray;
 
 isArray = require('../node/util').isArray;
@@ -2177,7 +2177,7 @@ module.exports = ClientUtils = (function() {
 
 });
 
-;require.register("bborm/connection_pool", function(exports, require, module) {
+;require.register("backbone-orm/lib/connection_pool", function(exports, require, module) {
 var MemoryStore;
 
 MemoryStore = require('./cache/memory_store');
@@ -2190,7 +2190,7 @@ module.exports = new MemoryStore({
 
 });
 
-;require.register("bborm/cursor", function(exports, require, module) {
+;require.register("backbone-orm/lib/cursor", function(exports, require, module) {
 var CURSOR_KEYS, Cursor, QueryCache, Utils, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -2629,7 +2629,7 @@ module.exports = Cursor = (function() {
 
 });
 
-;require.register("bborm/database_url", function(exports, require, module) {
+;require.register("backbone-orm/lib/database_url", function(exports, require, module) {
 var DatabaseURL, SUPPORTED_KEYS, URL, inflection, _;
 
 _ = require('underscore');
@@ -2744,7 +2744,7 @@ module.exports = DatabaseURL = (function() {
 
 });
 
-;require.register("bborm/extensions/collection", function(exports, require, module) {
+;require.register("backbone-orm/lib/extensions/collection", function(exports, require, module) {
 var Backbone, Utils, _original__prepareModel;
 
 Backbone = require('backbone');
@@ -2771,7 +2771,7 @@ Backbone.Collection.prototype._prepareModel = function(attrs, options) {
 
 });
 
-;require.register("bborm/extensions/model", function(exports, require, module) {
+;require.register("backbone-orm/lib/extensions/model", function(exports, require, module) {
 var Backbone, Queue, Utils, moment, _;
 
 _ = require('underscore');
@@ -3360,8 +3360,12 @@ module.exports = function(model_type) {
 
 });
 
-;require.register("bborm/index", function(exports, require, module) {
-require('./client_utils').loadDependencies([
+;require.register("backbone-orm/lib/index", function(exports, require, module) {
+var ClientUtils;
+
+ClientUtils = require('./client_utils');
+
+ClientUtils.loadDependencies([
   {
     symbol: '_',
     path: 'lodash',
@@ -3393,7 +3397,7 @@ module.exports = {
 
 });
 
-;require.register("bborm/json_utils", function(exports, require, module) {
+;require.register("backbone-orm/lib/json_utils", function(exports, require, module) {
 var JSONUtils, Queue, moment, _;
 
 _ = require('underscore');
@@ -3785,7 +3789,7 @@ module.exports = JSONUtils = (function() {
 
 });
 
-;require.register("bborm/memory/cursor", function(exports, require, module) {
+;require.register("backbone-orm/lib/memory/cursor", function(exports, require, module) {
 var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, MemoryCursor, Queue, Utils, inflection, moment, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4220,7 +4224,7 @@ module.exports = MemoryCursor = (function(_super) {
 
 });
 
-;require.register("bborm/memory/sync", function(exports, require, module) {
+;require.register("backbone-orm/lib/memory/sync", function(exports, require, module) {
 var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, modelExtensions, _;
 
 _ = require('underscore');
@@ -4397,7 +4401,7 @@ module.exports = function(type) {
 
 });
 
-;require.register("bborm/queue", function(exports, require, module) {
+;require.register("backbone-orm/lib/queue", function(exports, require, module) {
 var Queue,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -4462,7 +4466,7 @@ module.exports = Queue = (function() {
 
 });
 
-;require.register("bborm/relations/many", function(exports, require, module) {
+;require.register("backbone-orm/lib/relations/many", function(exports, require, module) {
 var Backbone, Many, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5038,7 +5042,7 @@ module.exports = Many = (function(_super) {
 
 });
 
-;require.register("bborm/relations/one", function(exports, require, module) {
+;require.register("backbone-orm/lib/relations/one", function(exports, require, module) {
 var Backbone, One, Queue, Utils, bbCallback, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5498,7 +5502,7 @@ module.exports = One = (function(_super) {
 
 });
 
-;require.register("bborm/relations/relation", function(exports, require, module) {
+;require.register("backbone-orm/lib/relations/relation", function(exports, require, module) {
 var Backbone, Queue, Relation, Utils, bbCallback, inflection, _;
 
 _ = require('underscore');
@@ -5674,7 +5678,7 @@ module.exports = Relation = (function() {
 
 });
 
-;require.register("bborm/schema", function(exports, require, module) {
+;require.register("backbone-orm/lib/schema", function(exports, require, module) {
 var Backbone, DatabaseURL, Many, One, Schema, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5918,7 +5922,7 @@ module.exports = Schema = (function() {
 
 });
 
-;require.register("bborm/utils", function(exports, require, module) {
+;require.register("backbone-orm/lib/utils", function(exports, require, module) {
 var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6568,10 +6572,14 @@ module.exports = Utils = (function() {
 
 ;
 if (typeof exports == 'object') {
-  module.exports = require('bborm/index');
+  module.exports = require('backbone-orm/lib/index');
 } else if (typeof define == 'function' && define.amd) {
-  define('bborm', ['underscore', 'backbone', 'moment', 'inflection'], function(){ return require('bborm/index'); });
+  define('backbone-orm', ['underscore', 'backbone', 'moment', 'inflection'], function(){ return require('backbone-orm/lib/index'); });
 } else {
-  this['bborm'] = require('bborm/index');
+  var Backbone = this.Backbone;
+  if (!Backbone && (typeof require == 'function')) {
+    try { Backbone = require('backbone'); } catch (_error) { Backbone = this.Backbone = {}; }
+  }
+  Backbone.ORM = require('backbone-orm/lib/index');
 }
 }).call(this);

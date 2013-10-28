@@ -13,7 +13,7 @@
       urlRoot: '/api/tests',
       model_name: 'Test'
     });
-    Test.prototype.sync = bborm.sync(Test);
+    Test.prototype.sync = Backbone.ORM.sync(Test);
 
     var test = new Test();
     test.fetch({success: function(){}})
