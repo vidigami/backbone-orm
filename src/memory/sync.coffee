@@ -15,6 +15,7 @@ Utils = require '../utils'
 
 ModelCache = require('../cache/singletons').ModelCache
 QueryCache = require('../cache/singletons').QueryCache
+ModelTypeID = require('../cache/singletons').ModelTypeID
 modelExtensions = require '../extensions/model'
 
 DESTROY_BATCH_LIMIT = 1000
@@ -36,6 +37,7 @@ class MemorySync
   # @private
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
+    @model_type.model_id = ModelTypeID.generate(@model_type)
     @schema = new Schema(@model_type)
     @store = @model_type.store = STORES[@model_type.model_name] or= {}
 
