@@ -201,12 +201,6 @@ module.exports = (model_type) ->
   # Backbone ORM - Model Lifecyle
   ###################################
 
-  model_type::release = ->
-    throw "release: experimental and incomplete"
-    # if model_type.schema and (schema = model_type.schema())
-    #   relation.releaseModel(@) for key, relation of schema.relations
-    # return
-
   model_type::patchAdd = (key, relateds, callback) ->
     return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
     return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds

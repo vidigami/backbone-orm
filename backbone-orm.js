@@ -3176,9 +3176,6 @@ module.exports = function(model_type) {
       return Utils.unset(this, 'partial');
     }
   };
-  model_type.prototype.release = function() {
-    throw "release: experimental and incomplete";
-  };
   model_type.prototype.patchAdd = function(key, relateds, callback) {
     var relation;
     if (!(relation = this.relation(key))) {
@@ -6737,6 +6734,9 @@ module.exports = Utils = (function() {
             return callback(err);
           }
           if (parsed_query.cursor.$limit && (processed_count >= parsed_query.cursor.$limit)) {
+            return callback(null, processed_count);
+          }
+          if (models.length < batch_cursor.$limit) {
             return callback(null, processed_count);
           }
           batch_cursor.$offset += batch_cursor.$limit;

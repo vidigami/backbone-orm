@@ -268,10 +268,9 @@ module.exports = class Utils
           processed_count++
           break if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
         queue.await (err) ->
-          # model.release() for model in models # clean up memory
-
           return callback(err) if err
           return callback(null, processed_count) if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
+          return callback(null, processed_count) if models.length < batch_cursor.$limit
           batch_cursor.$offset += batch_cursor.$limit
           runBatch(batch_cursor, callback)
 
