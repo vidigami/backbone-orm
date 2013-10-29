@@ -6,13 +6,14 @@
 ###
 
 # ensure the client symbols are resolved
-require('./client_utils').loadDependencies([
-  {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
-  {symbol: 'Backbone', path: 'backbone'}
-  {symbol: 'moment', path: 'moment'}
-  {symbol: 'inflection', path: 'inflection'}
-  {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
-])
+if window?
+  require.shim([
+    {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
+    {symbol: 'Backbone', path: 'backbone'}
+    {symbol: 'moment', path: 'moment'}
+    {symbol: 'inflection', path: 'inflection'}
+    {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
+  ])
 
 module.exports =
   sync: require './memory/sync'

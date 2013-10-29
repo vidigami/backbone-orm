@@ -41,6 +41,7 @@ var globals = {};
       return globals.require(absolute, path);
     };
     _require.register = globals.require.register;
+    _require.shim = globals.require.shim;
     return _require;
   };
 
@@ -77,8 +78,57 @@ var globals = {};
     }
   };
 
+  var toString = Object.prototype.toString;
+  var isArray = function(obj) { return toString.call(obj) === '[object Array]'; }
+
+  // client shimming to add to local module system
+  var shim = function(info) {
+    if (typeof window === "undefined") return;
+    if (!isArray(info)) info = [info];
+
+    var _fn = function(item) {
+      var dep;
+
+      // already registered with local require
+      try { if (globals.require(item.path)) { return; } } catch (e) {}
+
+      // use global require
+      try { dep = typeof window.require === "function" ? window.require(item.path) : void 0; } catch (e) {}
+
+      // use symbol path on window
+      if (!dep && item.symbol) {
+        var components = item.symbol.split('.');
+        dep = window;
+        for (var _j = 0, _len1 = components.length; _j < _len1; _j++) { if (!(dep = dep[components[_j]])) break; }
+      }
+
+      // use path on global require (a symbol could be mixed into a module)
+      if (!dep && item.symbol_path && window.require) {
+        var components = item.symbol_path.split('.');
+        var path = components.shift();
+        try { dep = typeof window.require === "function" ? window.require(path) : void 0; } catch (e) {}
+
+        for (_k = 0, _len2 = components.length; _k < _len2; _k++) {
+          if (!(dep = dep != null ? dep[components[_k]] : void 0)) break;
+        }
+      }
+
+      // not found
+      if (!dep) {
+        if (item.optional) return;
+        throw new Error("Missing dependency: " + item.path);
+      }
+
+      // register with local require
+      globals.require.register(item.path, (function(exports, require, module) { return module.exports = dep; }));
+      if (item.alias) { globals.require.register(item.alias, (function(exports, require, module) { return module.exports = dep; })); }
+    };
+
+    for (var _i = 0, _len = info.length; _i < _len; _i++) { _fn(info[_i]); }
+  };
+
   globals.require = require;
-  globals.require.define = define;
   globals.require.register = define;
+  globals.require.shim = shim;
 }).call(this);
 var require = globals.require;

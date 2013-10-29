@@ -47,6 +47,7 @@ var globals = {};
       return globals.require(absolute, path);
     };
     _require.register = globals.require.register;
+    _require.shim = globals.require.shim;
     return _require;
   };
 
@@ -83,9 +84,58 @@ var globals = {};
     }
   };
 
+  var toString = Object.prototype.toString;
+  var isArray = function(obj) { return toString.call(obj) === '[object Array]'; }
+
+  // client shimming to add to local module system
+  var shim = function(info) {
+    if (typeof window === "undefined") return;
+    if (!isArray(info)) info = [info];
+
+    var _fn = function(item) {
+      var dep;
+
+      // already registered with local require
+      try { if (globals.require(item.path)) { return; } } catch (e) {}
+
+      // use global require
+      try { dep = typeof window.require === "function" ? window.require(item.path) : void 0; } catch (e) {}
+
+      // use symbol path on window
+      if (!dep && item.symbol) {
+        var components = item.symbol.split('.');
+        dep = window;
+        for (var _j = 0, _len1 = components.length; _j < _len1; _j++) { if (!(dep = dep[components[_j]])) break; }
+      }
+
+      // use path on global require (a symbol could be mixed into a module)
+      if (!dep && item.symbol_path && window.require) {
+        var components = item.symbol_path.split('.');
+        var path = components.shift();
+        try { dep = typeof window.require === "function" ? window.require(path) : void 0; } catch (e) {}
+
+        for (_k = 0, _len2 = components.length; _k < _len2; _k++) {
+          if (!(dep = dep != null ? dep[components[_k]] : void 0)) break;
+        }
+      }
+
+      // not found
+      if (!dep) {
+        if (item.optional) return;
+        throw new Error("Missing dependency: " + item.path);
+      }
+
+      // register with local require
+      globals.require.register(item.path, (function(exports, require, module) { return module.exports = dep; }));
+      if (item.alias) { globals.require.register(item.alias, (function(exports, require, module) { return module.exports = dep; })); }
+    };
+
+    for (var _i = 0, _len = info.length; _i < _len; _i++) { _fn(info[_i]); }
+  };
+
   globals.require = require;
-  globals.require.define = define;
   globals.require.register = define;
+  globals.require.shim = shim;
 }).call(this);
 var require = globals.require;
 
@@ -2172,91 +2222,6 @@ module.exports = function(model_type, wrapped_sync_fn) {
 
 });
 
-;require.register("backbone-orm/lib/client_utils", function(exports, require, module) {
-/*
-  backbone-orm.js 0.0.1
-  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js and Underscore.js.
-*/
-
-var ClientUtils;
-
-module.exports = ClientUtils = (function() {
-  function ClientUtils() {}
-
-  ClientUtils.loadDependency = function(item) {
-    var components, dep, err, key, path, _i, _j, _len, _len1, _ref;
-    if (typeof window === "undefined" || window === null) {
-      return;
-    }
-    try {
-      if (require(item.path)) {
-        return;
-      }
-    } catch (_error) {
-      err = _error;
-    }
-    try {
-      dep = typeof window.require === "function" ? window.require(item.path) : void 0;
-    } catch (_error) {
-      err = _error;
-    }
-    if (!dep && item.symbol) {
-      dep = window;
-      _ref = item.symbol.split('.');
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        key = _ref[_i];
-        if (!(dep = dep[key])) {
-          break;
-        }
-      }
-    }
-    if (!dep && item.symbol_path && window.require) {
-      components = item.symbol_path.split('.');
-      path = components.shift();
-      try {
-        dep = typeof window.require === "function" ? window.require(path) : void 0;
-      } catch (_error) {
-        err = _error;
-      }
-      for (_j = 0, _len1 = components.length; _j < _len1; _j++) {
-        key = components[_j];
-        if (!(dep = dep != null ? dep[key] : void 0)) {
-          break;
-        }
-      }
-    }
-    if (!dep) {
-      if (item.optional) {
-        return;
-      }
-      throw new Error("Missing dependency: " + item.path);
-    }
-    require.register(item.path, (function(exports, require, module) {
-      return module.exports = dep;
-    }));
-    if (item.alias) {
-      return require.register(item.alias, (function(exports, require, module) {
-        return module.exports = dep;
-      }));
-    }
-  };
-
-  ClientUtils.loadDependencies = function(info) {
-    var item, _i, _len;
-    for (_i = 0, _len = info.length; _i < _len; _i++) {
-      item = info[_i];
-      this.loadDependency(item);
-    }
-  };
-
-  return ClientUtils;
-
-})();
-
-});
-
 ;require.register("backbone-orm/lib/connection_pool", function(exports, require, module) {
 /*
   backbone-orm.js 0.0.1
@@ -3093,7 +3058,7 @@ module.exports = function(model_type) {
       query = {};
     }
     if (!ModelStream) {
-      throw new Error('Stream is a large dependency so you need to manually include "node-stream.js" in the browser.');
+      throw new Error('Stream is a large dependency so you need to manually include "stream.js" in the browser.');
     }
     return new ModelStream(model_type, query);
   };
@@ -3615,30 +3580,32 @@ module.exports = ModelStream = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-require('./client_utils').loadDependencies([
-  {
-    symbol: '_',
-    path: 'lodash',
-    alias: 'underscore',
-    optional: true
-  }, {
-    symbol: '_',
-    path: 'underscore'
-  }, {
-    symbol: 'Backbone',
-    path: 'backbone'
-  }, {
-    symbol: 'moment',
-    path: 'moment'
-  }, {
-    symbol: 'inflection',
-    path: 'inflection'
-  }, {
-    symbol: 'stream',
-    path: 'stream',
-    optional: true
-  }
-]);
+if (typeof window !== "undefined" && window !== null) {
+  require.shim([
+    {
+      symbol: '_',
+      path: 'lodash',
+      alias: 'underscore',
+      optional: true
+    }, {
+      symbol: '_',
+      path: 'underscore'
+    }, {
+      symbol: 'Backbone',
+      path: 'backbone'
+    }, {
+      symbol: 'moment',
+      path: 'moment'
+    }, {
+      symbol: 'inflection',
+      path: 'inflection'
+    }, {
+      symbol: 'stream',
+      path: 'stream',
+      optional: true
+    }
+  ]);
+}
 
 module.exports = {
   sync: require('./memory/sync'),

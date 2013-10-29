@@ -156,7 +156,7 @@ module.exports = (model_type) ->
     Utils.batch.apply(null, args)
 
   model_type.stream = (query={}) ->
-    throw new Error 'Stream is a large dependency so you need to manually include "node-stream.js" in the browser.' unless ModelStream
+    throw new Error 'Stream is a large dependency so you need to manually include "stream.js" in the browser.' unless ModelStream
     return new ModelStream(model_type, query)
 
   model_type.interval = (query, options, callback, fn) ->
