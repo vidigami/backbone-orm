@@ -3,8 +3,6 @@ _ = require 'underscore'
 moment = require 'moment'
 Queue = require '../lib/queue'
 
-Utils = require '../lib/utils'
-
 # Fabricator to generate test data.
 #
 module.exports = class Fabricator

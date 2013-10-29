@@ -11,7 +11,6 @@ Queue = require '../queue'
 
 MemoryStore = require './memory_store'
 MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy']
-Utils = require '../utils'
 
 # @private
 module.exports = class ModelCache

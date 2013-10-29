@@ -7,7 +7,6 @@ Queue = require '../../../lib/queue'
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
-Utils = require '../../../lib/utils'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
