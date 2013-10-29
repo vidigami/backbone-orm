@@ -1663,7 +1663,7 @@ module.exports = MemoryStore = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, Utils, _;
+var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, _;
 
 Backbone = require('backbone');
 
@@ -1674,8 +1674,6 @@ Queue = require('../queue');
 MemoryStore = require('./memory_store');
 
 MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy'];
-
-Utils = require('../utils');
 
 module.exports = ModelCache = (function() {
   function ModelCache() {
@@ -2185,7 +2183,7 @@ CacheSync = (function() {
       $limit: DEFAULT_LIMIT,
       parallelism: DEFAULT_PARALLELISM
     }, callback, function(model, callback) {
-      return model.destroy(bbCallback(callback));
+      return model.destroy(callback);
     });
   };
 
@@ -4734,7 +4732,7 @@ module.exports = Queue = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, Many, Queue, Utils, bbCallback, inflection, _,
+var Backbone, Many, Queue, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -4747,8 +4745,6 @@ inflection = require('inflection');
 Queue = require('../queue');
 
 Utils = require('../utils');
-
-bbCallback = Utils.bbCallback;
 
 module.exports = Many = (function(_super) {
   __extends(Many, _super);
@@ -5007,7 +5003,7 @@ module.exports = Many = (function(_super) {
             attributes[_this.foreign_key] = model.id;
             attributes[_this.reverse_relation.foreign_key] = related_id;
             join = new _this.join_table(attributes);
-            return join.save({}, bbCallback(callback));
+            return join.save(callback);
           };
           if (_this.reverse_relation.type === 'hasMany') {
             return add(callback);
@@ -5317,7 +5313,7 @@ module.exports = Many = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, One, Queue, Utils, bbCallback, inflection, _,
+var Backbone, One, Queue, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -5330,8 +5326,6 @@ inflection = require('inflection');
 Queue = require('../queue');
 
 Utils = require('../utils');
-
-bbCallback = Utils.bbCallback;
 
 module.exports = One = (function(_super) {
   __extends(One, _super);
@@ -5506,7 +5500,7 @@ module.exports = One = (function(_super) {
           return callback(new Error("Failed to fetch model with id: " + model.id));
         }
         model_json[_this.foreign_key] = related_id;
-        return model.save(model_json, bbCallback(callback));
+        return model.save(model_json, callback);
       });
     } else {
       return this.cursor(model, this.key).toJSON(function(err, current_related_json) {
@@ -5784,7 +5778,7 @@ module.exports = One = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, Queue, Relation, Utils, bbCallback, inflection, _;
+var Backbone, Queue, Relation, Utils, inflection, _;
 
 _ = require('underscore');
 
@@ -5795,8 +5789,6 @@ Queue = require('../queue');
 inflection = require('inflection');
 
 Utils = require('../utils');
-
-bbCallback = Utils.bbCallback;
 
 module.exports = Relation = (function() {
   function Relation() {}
@@ -5918,7 +5910,7 @@ module.exports = Relation = (function() {
               attributes[_this.foreign_key] = model.id;
               attributes[_this.reverse_relation.foreign_key] = related_id;
               join = new _this.join_table(attributes);
-              return join.save({}, bbCallback(callback));
+              return join.save(callback);
             });
           };
           for (_j = 0, _len1 = added_ids.length; _j < _len1; _j++) {
@@ -5928,13 +5920,13 @@ module.exports = Relation = (function() {
         } else {
           _fn2 = function(related_model) {
             return queue.defer(function(callback) {
-              return related_model.save({}, bbCallback(function(err, saved_model) {
+              return related_model.save(function(err, saved_model) {
                 var cache;
                 if (!err && (cache = _this.reverse_model_type.cache)) {
                   cache.set(saved_model.id, saved_model);
                 }
                 return callback(err);
-              }));
+              });
             });
           };
           for (_k = 0, _len2 = added_ids.length; _k < _len2; _k++) {
@@ -6442,7 +6434,7 @@ module.exports = Utils = (function() {
       related_models = value.models ? value.models : [value];
       _fn = function(related_model) {
         return queue.defer(function(callback) {
-          return related_model.save({}, Utils.bbCallback(callback));
+          return related_model.save(callback);
         });
       };
       for (_i = 0, _len = related_models.length; _i < _len; _i++) {
