@@ -2,13 +2,12 @@ _ = require 'underscore'
 Queue = require '../queue'
 Cursor = null
 
-BATCH_DEFAULT_LIMIT = 1000
+BATCH_DEFAULT_FETCH = 1000
 
 module.exports = (model_type, query, iterator, callback) ->
   Cursor = require '../cursor' unless Cursor # module dependencies
 
   options = query.$each or {}
-  threads = if options.hasOwnProperty('threads') then options.threads else 1
   method = if options.json then 'toJSON' else 'toModels'
 
   processed_count = 0
@@ -21,7 +20,7 @@ module.exports = (model_type, query, iterator, callback) ->
       return callback(null, processed_count) unless models.length
 
       # each operations on each
-      queue = new Queue(threads)
+      queue = new Queue(options.threads)
       for model in models
         do (model) -> queue.defer (callback) -> iterator(model, callback)
         processed_count++
@@ -34,7 +33,7 @@ module.exports = (model_type, query, iterator, callback) ->
         runBatch(each_cursor, callback)
 
   each_cursor = _.extend({
-    $limit: options.limit or BATCH_DEFAULT_LIMIT
+    $limit: options.fetch or BATCH_DEFAULT_FETCH
     $offset: parsed_query.cursor.$offset or 0
     $sort: parsed_query.cursor.$sort or 'id' # TODO: generalize sort for different types of sync
   }, parsed_query.find) # add find parameters

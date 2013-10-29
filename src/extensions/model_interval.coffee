@@ -7,7 +7,6 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 module.exports = (model_type, query, iterator, callback) ->
 
   options = query.$interval or {}
-  threads = if options.hasOwnProperty('threads') then options.threads else 1
   method = if options.json then 'toJSON' else 'toModels'
   throw new Error 'missing option: key' unless key = options.key
   throw new Error 'missing option: type' unless options.type
