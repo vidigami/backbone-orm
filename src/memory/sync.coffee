@@ -91,10 +91,12 @@ class MemorySync
   destroy: (query, callback) ->
     QueryCache.reset @model_type, (err) =>
       return callback(err) if err
-      @model_type.batch query, {$limit: DESTROY_BATCH_LIMIT, method: 'toJSON'}, callback, (model_json, callback) =>
-        Utils.patchRemoveByJSON @model_type, model_json, (err) =>
-          delete @store[model_json.id] unless err
-          callback(err)
+      @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
+        ((model_json, callback) =>
+          Utils.patchRemoveByJSON @model_type, model_json, (err) =>
+            delete @store[model_json.id] unless err
+            callback(err)
+        ), callback
 
 module.exports = (type) ->
   if Utils.isCollection(new type()) # collection

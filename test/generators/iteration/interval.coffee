@@ -26,7 +26,7 @@ module.exports = (options, callback) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Utils.interval (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "Model.interval (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()
@@ -47,39 +47,23 @@ module.exports = (options, callback) ->
 
       queue.await done
 
-    it 'callback for all models (util)', (done) ->
-      processed_count = 0
-
-      queue = new Queue(1)
-      queue.defer (callback) ->
-        Utils.batch Flat, callback, (model, callback) ->
-          assert.ok(!!model, 'model returned')
-          processed_count++
-          callback()
-
-      queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
-        done()
-
-    it 'callback for all models (model)', (done) ->
+    it 'callback for all models', (done) ->
       processed_count = 0
       interval_count = 0
 
       queue = new Queue(1)
 
       queue.defer (callback) ->
-        Flat.interval {
-          key: 'created_at'
-          range: {$gte: DATE_START}
-          type: 'milliseconds'
-          length: 2*DATE_STEP_MS
-        }, callback, (query, info, callback) ->
-          assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
-          interval_count++
-          Flat.batch query, {}, callback, (model, callback) ->
-            processed_count++
-            callback()
+        Flat.interval {$interval: {key: 'created_at', range: {$gte: DATE_START}, type: 'milliseconds', length: 2*DATE_STEP_MS}},
+          ((query, info, callback) ->
+            assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
+            interval_count++
+            Flat.each query,
+              ((model, callback) ->
+                processed_count++
+                callback()
+              ), callback
+          ), callback
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
@@ -94,20 +78,19 @@ module.exports = (options, callback) ->
       queue = new Queue(1)
 
       queue.defer (callback) ->
-        Flat.interval {
-          key: 'created_at'
-          type: 'milliseconds'
-          length: 2*DATE_STEP_MS
-        }, callback, (query, info, callback) ->
-          assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
-          interval_count++
-          Flat.batch query, {}, callback, (model, callback) ->
-            processed_count++
-            callback()
+        Flat.interval {$interval: {key: 'created_at', type: 'milliseconds', length: 2*DATE_STEP_MS}},
+          ((query, info, callback) ->
+            assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
+            interval_count++
+            Flat.each query,
+              ((model, callback) ->
+                processed_count++
+                callback()
+              ), callback
+          ), callback
 
       queue.await (err) ->
         assert.ok(!err, "No errors: #{err}")
         assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
-

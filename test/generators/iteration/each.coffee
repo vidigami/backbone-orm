@@ -45,29 +45,30 @@ module.exports = (options, callback) ->
     it 'callback for all models', (done) ->
       processed_count = 0
 
-      queue = new Queue(1)
-      queue.defer (callback) ->
-        Flat.each callback, (model, callback) ->
+      Flat.each ((model, callback) ->
           assert.ok(!!model, 'model returned')
           processed_count++
           callback()
-
-      queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
-        done()
+        ),
+        (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
+          done()
 
     it 'callback for queried models', (done) ->
-      processed_count = 0
-
-      queue = new Queue(1)
-      queue.defer (callback) ->
-        Flat.each callback, (model, callback) ->
-          assert.ok(!!model, 'model returned')
-          processed_count++
-          callback()
-
-      queue.await (err) ->
+      Flat.findOne (err, model) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
-        done()
+        assert.ok(!!model, 'model returned')
+
+        processed_count = 0
+
+        Flat.each {name: model.get('name')},
+          ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            processed_count++
+            callback()
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(1, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
+            done()

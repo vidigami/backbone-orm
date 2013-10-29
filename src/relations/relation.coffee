@@ -61,7 +61,7 @@ module.exports = class Relation
             query[@reverse_relation.join_key] = {$in: (related_json.id for related_json in changes.removed)}
             @join_table.destroy query, callback
         else
-          # TODO: optimize using batch update
+          # TODO: optimize using each update
           for related_json in changes.removed
             do (related_json) => queue.defer (callback) =>
               related_json[@reverse_relation.foreign_key] = null
@@ -70,7 +70,7 @@ module.exports = class Relation
       # create new
       if added_ids.length
         if @join_table
-          # TODO: optimize through batch create
+          # TODO: optimize through each create
           for related_id in added_ids
             do (related_id) => queue.defer (callback) =>
               attributes = {}

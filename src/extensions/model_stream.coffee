@@ -7,6 +7,6 @@ module.exports = class ModelStream extends stream.Readable
   _read: ->
     return if @ended
     done = (err) => @ended = true; @emit('error', err) if err; @push(null)
-    @model_type.batch @query, {}, done, (model, callback) => @push(model); callback()
+    @model_type.each @query, ((model, callback) => @push(model); callback()), done
 
 

@@ -12,6 +12,9 @@ Queue = require '../queue'
 
 Utils = require '../utils'
 ModelStream = require('./model_stream')
+modelEach = require('./model_each')
+modelInterval = require('./model_interval')
+
 require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
@@ -25,7 +28,7 @@ module.exports = (model_type) ->
   #   Create a cursor for iterating over models or JSON.
   #
   # @method .destroy(query, callback)
-  #   Destroy a batch of models by query.
+  #   Destroy a each of models by query.
   #
   # @method .exists(query, callback)
   #   Helper method to check if at least one model exists that matches the query (or with no query, if there is at least one model).
@@ -50,11 +53,11 @@ module.exports = (model_type) ->
   #   @param [Object] options
   #   @option reverse [String] Start searching backwards from the given date.
   #
-  # @method .batch(query, options, callback, fn)
-  #   Fetch a batch of models at a time and process them.
+  # @method .each(query, callback, fn)
+  #   Fetch a each of models at a time and process them.
   #
-  # @method .interval(query, options, callback, fn)
-  #   Process a batch of models in fixed-size time intervals. For example, if map-reducing in fixed intervals.
+  # @method .interval(query, callback, fn)
+  #   Process a each of models in fixed-size time intervals. For example, if map-reducing in fixed intervals.
   #
   # @method #modelName()
   #   Get a model name from a model instance.
@@ -149,21 +152,17 @@ module.exports = (model_type) ->
       return callback(null, model) if model
       functions[1] callback
 
-  model_type.batch = (query, options, callback, fn) ->
-    args = _.toArray(arguments)
-    args.unshift({}) while args.length < 4
-    args.unshift(model_type)
-    Utils.batch.apply(null, args)
+  model_type.each = (query, iterator, callback) ->
+    [query, iterator, callback] = [{}, query, iterator] if arguments.length is 2
+    modelEach(model_type, query, iterator, callback)
 
   model_type.stream = (query={}) ->
     throw new Error 'Stream is a large dependency so you need to manually include "stream.js" in the browser.' unless ModelStream
     return new ModelStream(model_type, query)
 
-  model_type.interval = (query, options, callback, fn) ->
-    args = _.toArray(arguments)
-    args.unshift({}) while args.length < 4
-    args.unshift(model_type)
-    Utils.interval.apply(null, args)
+  model_type.interval = (query, iterator, callback) ->
+    [query, iterator, callback] = [{}, query, iterator] if arguments.length is 2
+    modelInterval(model_type, query, iterator, callback)
 
   ###################################
   # Backbone ORM - Helpers

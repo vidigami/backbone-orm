@@ -87,7 +87,7 @@ module.exports = (options, callback) ->
           assert.equal(models.length, limit, 'found models')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can chain limit and offset', (done) ->
       ALBUM_NAME = 'Test2'
@@ -102,7 +102,7 @@ module.exports = (options, callback) ->
           assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can select fields', (done) ->
       ALBUM_NAME = 'Test3'
@@ -118,7 +118,7 @@ module.exports = (options, callback) ->
             assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -135,7 +135,7 @@ module.exports = (options, callback) ->
             assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can select the intersection of a whitelist and fields', (done) ->
       ALBUM_NAME = 'Test3'
@@ -154,7 +154,7 @@ module.exports = (options, callback) ->
             assert.equal(json['name'], ALBUM_NAME, 'gets the correct value')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can select the intersection of a whitelist and values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -173,7 +173,7 @@ module.exports = (options, callback) ->
             assert.equal(json[0], ALBUM_NAME, 'gets the correct value')
           done()
 
-      Flat.batch runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
+      Flat.each runTest, (model, callback) -> model.save {name: ALBUM_NAME}, callback
 
     it 'Cursor can perform an $in query', (done) ->
       Flat.findOne (err, test_model) ->
