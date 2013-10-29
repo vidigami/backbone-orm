@@ -23,6 +23,11 @@ module.exports =
   Queue: require './queue'
   DatabaseURL: require './database_url'
 
+  # re-expose node libraries
+  Url: require 'url'
+  QueryString: require 'querystring'
+  LRUCache: require 'lru-cache'
+
   Cursor: require './cursor'
   Schema: require './schema'
   ConnectionPool: require './connection_pool'
