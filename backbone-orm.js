@@ -46,7 +46,7 @@ var globals = {};
       var absolute = expand(dir, name);
       return globals.require(absolute, path);
     };
-    _require.register = require.register;
+    _require.register = globals.require.register;
     return _require;
   };
 
@@ -2904,7 +2904,14 @@ if (!collection_type.prototype._orm_original_fns) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, Queue, Utils, moment, _;
+var Backbone, ModelStream, Queue, Utils, e, moment, _;
+
+try {
+  ModelStream = require('../node/model_stream');
+} catch (_error) {
+  e = _error;
+  ModelStream = null;
+}
 
 _ = require('underscore');
 
@@ -3070,6 +3077,15 @@ module.exports = function(model_type) {
     }
     args.unshift(model_type);
     return Utils.batch.apply(null, args);
+  };
+  model_type.stream = function(query) {
+    if (query == null) {
+      query = {};
+    }
+    if (!ModelStream) {
+      throw new Error('Stream is currently only available server-side');
+    }
+    return new ModelStream(model_type, query);
   };
   model_type.interval = function(query, options, callback, fn) {
     var args;

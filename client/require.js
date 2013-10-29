@@ -40,7 +40,7 @@ var globals = {};
       var absolute = expand(dir, name);
       return globals.require(absolute, path);
     };
-    _require.register = require.register;
+    _require.register = globals.require.register;
     return _require;
   };
 

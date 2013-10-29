@@ -5,6 +5,7 @@ Queue = require '../../lib/queue'
 module.exports = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> require('./flat/sync')(options, callback)
+  queue.defer (callback) -> require('./flat/stream')(options, callback)
   queue.defer (callback) -> require('./flat/batch')(options, callback)
   queue.defer (callback) -> require('./flat/convenience')(options, callback)
   queue.defer (callback) -> require('./flat/cursor')(options, callback)

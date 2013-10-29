@@ -5,6 +5,9 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
+# model streaming only available on server
+try ModelStream = require('../node/model_stream') catch e then ModelStream = null
+
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
@@ -153,6 +156,10 @@ module.exports = (model_type) ->
     args.unshift({}) while args.length < 4
     args.unshift(model_type)
     Utils.batch.apply(null, args)
+
+  model_type.stream = (query={}) ->
+    throw new Error 'Stream is currently only available server-side' unless ModelStream
+    return new ModelStream(model_type, query)
 
   model_type.interval = (query, options, callback, fn) ->
     args = _.toArray(arguments)
