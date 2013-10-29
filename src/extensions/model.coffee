@@ -5,15 +5,13 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
-# model streaming only available on server
-try ModelStream = require('../node/model_stream') catch e then ModelStream = null
-
 _ = require 'underscore'
 Backbone = require 'backbone'
 moment = require 'moment'
 Queue = require '../queue'
 
 Utils = require '../utils'
+ModelStream = require('./model_stream')
 require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->

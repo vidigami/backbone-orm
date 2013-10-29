@@ -4,17 +4,17 @@ exports.config =
   sourceMaps: false
   paths:
     public: './_build'
-    watched: ['src', 'node']
+    watched: ['src', 'client/node-no-stream']
   modules:
     definition: false
     nameCleaner: (path) ->
       path = path.replace(/^src\//, 'backbone-orm/lib/')
-      path = path.replace(/^node\//, 'backbone-orm/node/')
+      path = path.replace(/^client\/node-no-stream\//, '')
   conventions:
     ignored: (path) -> return startsWith(path, 'src/node')
   files:
     javascripts:
       joinTo:
-        'backbone-orm.js': /^src|^node/
+        'backbone-orm.js': /^src|^client\/node-no-stream/
       order:
         before: []

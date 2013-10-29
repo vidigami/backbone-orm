@@ -89,7 +89,7 @@ var globals = {};
 }).call(this);
 var require = globals.require;
 
-require.register("backbone-orm/node/browserify/_shims", function(exports, require, module) {
+require.register("_shims", function(exports, require, module) {
 //
 // The shims in this file are not fully implemented shims for the ES5
 // features, but do work for the particular usecases there is in
@@ -306,7 +306,7 @@ if (typeof Object.getOwnPropertyDescriptor === 'function') {
 }
 });
 
-;require.register("backbone-orm/node/lru-cache", function(exports, require, module) {
+;require.register("lru-cache", function(exports, require, module) {
 ;(function () { // closure for web browsers
 
 if (typeof module === 'object' && module.exports) {
@@ -573,7 +573,7 @@ function Entry (key, value, mru, len, age) {
 
 });
 
-;require.register("backbone-orm/node/querystring", function(exports, require, module) {
+;require.register("querystring", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -598,8 +598,8 @@ function Entry (key, value, mru, len, age) {
 // Query String Utilities
 
 var QueryString = exports;
-var util = require('./util');
-var shims = require('./browserify/_shims');
+var util = require('util');
+var shims = require('_shims');
 
 // If obj.hasOwnProperty has been overridden, then calling
 // obj.hasOwnProperty(prop) will break.
@@ -719,7 +719,7 @@ return obj;
 };
 });
 
-;require.register("backbone-orm/node/url", function(exports, require, module) {
+;require.register("url", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -742,8 +742,8 @@ return obj;
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var punycode = { encode : function (s) { return s } };
-var util = require('./util');
-var shims = require('./browserify/_shims');
+var util = require('util');
+var shims = require('_shims');
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;
@@ -815,7 +815,7 @@ var protocolPattern = /^([a-z0-9.+-]+:)/i,
       'gopher:': true,
       'file:': true
     },
-    querystring = require('./querystring');
+    querystring = require('querystring');
 
 function urlParse(url, parseQueryString, slashesDenoteHost) {
   if (url && util.isObject(url) && url instanceof Url) return url;
@@ -1417,7 +1417,7 @@ Url.prototype.parseHost = function() {
 
 });
 
-;require.register("backbone-orm/node/util", function(exports, require, module) {
+;require.register("util", function(exports, require, module) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1439,7 +1439,7 @@ Url.prototype.parseHost = function() {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var shims = require('./browserify/_shims');
+var shims = require('_shims');
 
 // NOTE: These type checking functions intentionally don't use `instanceof`
 // because it is fragile and can be easily faked with `Object.create()`.
@@ -1529,7 +1529,7 @@ var LRU, MemoryStore, inflection, _,
 
 _ = require('underscore');
 
-LRU = require('../../node/lru-cache');
+LRU = require('lru-cache');
 
 inflection = require('inflection');
 
@@ -2722,7 +2722,7 @@ _ = require('underscore');
 
 inflection = require('inflection');
 
-URL = require('../node/url');
+URL = require('url');
 
 SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href'];
 
@@ -2904,14 +2904,7 @@ if (!collection_type.prototype._orm_original_fns) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, ModelStream, Queue, Utils, e, moment, _;
-
-try {
-  ModelStream = require('../node/model_stream');
-} catch (_error) {
-  e = _error;
-  ModelStream = null;
-}
+var Backbone, ModelStream, Queue, Utils, moment, _;
 
 _ = require('underscore');
 
@@ -2922,6 +2915,8 @@ moment = require('moment');
 Queue = require('../queue');
 
 Utils = require('../utils');
+
+ModelStream = require('./model_stream');
 
 require('./collection');
 
@@ -3544,6 +3539,59 @@ module.exports = function(model_type) {
     return _results;
   }
 };
+
+});
+
+;require.register("backbone-orm/lib/extensions/model_stream", function(exports, require, module) {
+var ModelStream, e, stream,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+try {
+  stream = require('stream');
+} catch (_error) {
+  e = _error;
+}
+
+if (!stream) {
+  module.exports = null;
+  return;
+}
+
+module.exports = ModelStream = (function(_super) {
+  __extends(ModelStream, _super);
+
+  function ModelStream(model_type, query) {
+    this.model_type = model_type;
+    this.query = query != null ? query : {};
+    ModelStream.__super__.constructor.call(this, {
+      objectMode: true
+    });
+    this.ended = false;
+  }
+
+  ModelStream.prototype._read = function() {
+    var done,
+      _this = this;
+    if (this.ended) {
+      return;
+    }
+    done = function(err) {
+      _this.ended = true;
+      if (err) {
+        _this.emit('error', err);
+      }
+      return _this.push(null);
+    };
+    return this.model_type.batch(this.query, {}, done, function(model, callback) {
+      _this.push(model);
+      return callback();
+    });
+  };
+
+  return ModelStream;
+
+})(stream.Readable);
 
 });
 
@@ -6188,7 +6236,7 @@ var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTER
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-URL = require('../node/url');
+URL = require('url');
 
 DatabaseURL = require('./database_url');
 

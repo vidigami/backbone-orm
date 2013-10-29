@@ -5,7 +5,7 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
-URL = require '../node/url'
+URL = require 'url'
 DatabaseURL = require './database_url'
 Backbone = require 'backbone'
 _ = require 'underscore'

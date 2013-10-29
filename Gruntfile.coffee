@@ -8,7 +8,7 @@ module.exports = (grunt) ->
     shell:
       library:
         options: {stdout: true, stderr: true}
-        command: 'brunch build -c client/config.coffee'
+        command: 'brunch build -c client/brunch_config.coffee'
       vendor:
         options: {stdout: true, stderr: true}
         command: 'browserify -r underscore -r backbone -r moment -r inflection > test/web/vendor-browserify.js'
