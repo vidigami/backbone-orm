@@ -11,7 +11,6 @@ Queue = require '../queue'
 inflection = require 'inflection'
 
 Utils = require '../utils'
-bbCallback = Utils.bbCallback
 
 module.exports = class Relation
   # hasJoinTable: -> return !!@join_table or (@reverse_relation and !!@reverse_relation.join_table)
@@ -79,7 +78,7 @@ module.exports = class Relation
               attributes[@reverse_relation.foreign_key] = related_id
               # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
               join = new @join_table(attributes)
-              join.save {}, bbCallback callback
+              join.save callback
 
         else
           # add new, if they have changed
@@ -88,7 +87,7 @@ module.exports = class Relation
             continue if not @reverse_relation._hasChanged(related_model) # related has not changed
 
             do (related_model) => queue.defer (callback) =>
-              related_model.save {}, bbCallback (err, saved_model) =>
+              related_model.save (err, saved_model) =>
                 cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
                 callback(err)
 

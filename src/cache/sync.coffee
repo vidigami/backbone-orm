@@ -66,7 +66,7 @@ class CacheSync
   destroy: (query, callback) ->
     # TODO: review for optimization
     @model_type.batch query, {$limit: DEFAULT_LIMIT, parallelism: DEFAULT_PARALLELISM}, callback, (model, callback) ->
-      model.destroy bbCallback callback
+      model.destroy callback
 
   ###################################
   # Backbone Cache Sync - Custom Extensions

@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 module.exports = (options, callback) ->
@@ -80,7 +79,7 @@ module.exports = (options, callback) ->
         reverses = MODELS.reverse.slice()
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, bbCallback callback
+            owner.save {flat: MODELS.flat.pop(), reverse: reverses.pop()}, callback
 
         save_queue.await callback
 
@@ -93,7 +92,7 @@ module.exports = (options, callback) ->
 #        assert.ok(test_model, 'found model')
 #
 #        fetched_owner = new Owner({id: test_model.id})
-#        fetched_owner.fetch bbCallback (err) ->
+#        fetched_owner.fetch (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          delete fetched_owner.attributes.reverse
 #

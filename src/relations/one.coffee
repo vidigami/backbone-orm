@@ -11,7 +11,6 @@ inflection = require 'inflection'
 Queue = require '../queue'
 
 Utils = require '../utils'
-bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class One extends require('./relation')
@@ -120,7 +119,7 @@ module.exports = class One extends require('./relation')
         return callback(err) if err
         return callback(new Error "Failed to fetch model with id: #{model.id}") unless model_json
         model_json[@foreign_key] = related_id
-        model.save model_json, bbCallback callback
+        model.save model_json, callback
 
     # not belongs to, update the related
     else

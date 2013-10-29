@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 module.exports = (options, callback) ->
@@ -91,7 +90,7 @@ module.exports = (options, callback) ->
               flat: MODELS.flat.pop()
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
             })
-            owner.save {}, bbCallback callback
+            owner.save callback
 
         save_queue.await callback
 

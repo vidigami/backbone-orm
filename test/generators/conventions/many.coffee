@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -69,7 +68,7 @@ module.exports = (options, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, callback
 
         save_queue.await callback
 

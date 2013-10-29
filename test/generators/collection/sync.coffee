@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -52,7 +51,7 @@ module.exports = (options, callback) ->
         sync: SYNC(Collection)
 
       collection = new Collection()
-      collection.fetch bbCallback (err, fetched_collection) ->
+      collection.fetch (err, fetched_collection) ->
         assert.ok(!err, "No errors: #{err}")
         assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
         assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
@@ -67,7 +66,7 @@ module.exports = (options, callback) ->
         return done(err) if err
 
         collection = new Collection()
-        collection.fetch bbCallback (err, fetched_collection) ->
+        collection.fetch (err, fetched_collection) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
           assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
@@ -90,7 +89,7 @@ module.exports = (options, callback) ->
         return done(err) if err
 
         collection = new Collection()
-        collection.fetch bbCallback (err, fetched_collection) ->
+        collection.fetch (err, fetched_collection) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(BASE_COUNT, collection.models.length, "Collection Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
           assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched Collection Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")

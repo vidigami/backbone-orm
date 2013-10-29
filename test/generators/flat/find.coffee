@@ -9,7 +9,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -139,7 +138,7 @@ module.exports = (options, callback) ->
       Flat.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: null}, bbCallback (err) ->
+        test_model.save {name: null}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: null}, (err, models) ->
@@ -154,7 +153,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: NAME}, bbCallback (err) ->
+        test_model.save {name: NAME}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: {$ne: NAME}}, (err, models) ->
@@ -181,7 +180,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: null}, bbCallback (err) ->
+        test_model.save {name: null}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: {$ne: NAME}}, (err, models) ->
@@ -223,7 +222,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {created_at: null}, bbCallback (err) ->
+        test_model.save {created_at: null}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {created_at: {$ne: END_DATE}}, (err, models) ->
@@ -270,7 +269,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: 'created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: NAME}, bbCallback (err) ->
+        test_model.save {name: NAME}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: NAME, created_at: {$lt: END_DATE}}, (err, models) ->
@@ -295,7 +294,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: 'created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: NAME}, bbCallback (err) ->
+        test_model.save {name: NAME}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: {$ne: NAME}, created_at: {$lt: END_DATE}}, (err, models) ->
@@ -337,7 +336,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: NAME}, bbCallback (err) ->
+        test_model.save {name: NAME}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: NAME, created_at: {$gt: START_DATE}}, (err, models) ->
@@ -361,7 +360,7 @@ module.exports = (options, callback) ->
       Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(!!test_model, 'test model found')
-        test_model.save {name: NAME}, bbCallback (err) ->
+        test_model.save {name: NAME}, (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           Flat.find {name: {$ne: NAME}, created_at: {$gt: START_DATE}}, (err, models) ->

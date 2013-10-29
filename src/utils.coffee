@@ -115,7 +115,7 @@ module.exports = class Utils
       related_models = if value.models then value.models else [value]
       for related_model in related_models
         continue if related_model.id # belongsTo require an id
-        do (related_model) => queue.defer (callback) => related_model.save {}, Utils.bbCallback callback
+        do (related_model) => queue.defer (callback) => related_model.save callback
 
     queue.await callback
 

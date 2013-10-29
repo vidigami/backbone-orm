@@ -9,7 +9,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -56,7 +55,7 @@ module.exports = (options, callback) ->
         bob = new Flat({name: 'Bob'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, bbCallback(callback)
+        queue.defer (callback) -> bob.save callback
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->
@@ -81,8 +80,8 @@ module.exports = (options, callback) ->
         fred = new Flat({name: 'Fred'})
 
         queue = new Queue(1)
-        queue.defer (callback) -> bob.save {}, bbCallback(callback)
-        queue.defer (callback) -> fred.save {}, bbCallback(callback)
+        queue.defer (callback) -> bob.save callback
+        queue.defer (callback) -> fred.save callback
 
         queue.defer (callback) ->
           Flat.count {name: 'Bob'}, (err, count) ->

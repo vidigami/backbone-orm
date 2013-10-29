@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 JSONUtils = require '../../../lib/json_utils'
 
 module.exports = (options, callback) ->
@@ -106,7 +105,7 @@ module.exports = (options, callback) ->
               reverse_as: reversed_reverse.pop()
               foreign_reverse: MODELS.foreign_reverse.pop()
             })
-            owner.save {}, bbCallback callback
+            owner.save callback
 
         save_queue.await callback
 
@@ -133,7 +132,7 @@ module.exports = (options, callback) ->
         flat_id = test_model.id
         new_model = new Owner({flat_id: flat_id})
 
-        new_model.save {}, bbCallback (err) ->
+        new_model.save (err) ->
           assert.ok(!err, "No errors: #{err}")
 
           new_model.get 'flat', (err, flat) ->
@@ -639,8 +638,8 @@ module.exports = (options, callback) ->
         assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
 
         queue = new Queue(1)
-        queue.defer (callback) -> new_owner.save {}, bbCallback callback
-        queue.defer (callback) -> owner.save {}, bbCallback callback
+        queue.defer (callback) -> new_owner.save callback
+        queue.defer (callback) -> owner.save callback
 
         # make sure nothing changed after save
         queue.defer (callback) ->
@@ -698,8 +697,8 @@ module.exports = (options, callback) ->
         assert.equal(related_id, new_owner.get(related_id_accessor), "Got related_id from copied related. Expected: #{related_id}. Actual: #{new_owner.get(related_id_accessor)}")
 
         queue = new Queue(1)
-        queue.defer (callback) -> new_owner.save {}, bbCallback callback
-        queue.defer (callback) -> owner.save {}, bbCallback callback
+        queue.defer (callback) -> new_owner.save callback
+        queue.defer (callback) -> owner.save callback
 
         # make sure nothing changed after save
         queue.defer (callback) ->
@@ -738,7 +737,7 @@ module.exports = (options, callback) ->
 
     #     reverse_id = test_model.id
     #     new_model = new Owner()
-    #     new_model.save {}, bbCallback (err) ->
+    #     new_model.save (err) ->
     #       assert.ok(!err, "No errors: #{err}")
     #       new_model.set({reverse_id: reverse_id})
     #       new_model.get 'reverse', (err, reverse) ->
@@ -847,7 +846,7 @@ module.exports = (options, callback) ->
         assert.ok(test_model, 'found model')
 
         fetched_owner = new Owner({id: test_model.id})
-        fetched_owner.fetch bbCallback (err) ->
+        fetched_owner.fetch (err) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
 
@@ -1050,8 +1049,8 @@ module.exports = (options, callback) ->
             callback()
 
           # save and recheck
-          queue.defer (callback) -> owner0.save {}, bbCallback callback
-          queue.defer (callback) -> owner1.save {}, bbCallback callback
+          queue.defer (callback) -> owner0.save callback
+          queue.defer (callback) -> owner1.save callback
           queue.defer (callback) ->
             ModelCache.reset(->) # TODO: make async # reset cache
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
@@ -1117,7 +1116,7 @@ module.exports = (options, callback) ->
         assert.equal(owner_with_virtual_flat.get('flat'), null, 'Virtual without flat was deserialized')
         done()
 
-        # owner.save {flat: null}, bbCallback (err) ->
+        # owner.save {flat: null}, (err) ->
         #   assert.ok(!err, "No errors: #{err}")
 
         #   ModelCache.reset(->) # TODO: make async # reset cache

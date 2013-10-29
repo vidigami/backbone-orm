@@ -6,7 +6,6 @@ Queue = require '../../../lib/queue'
 
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
@@ -85,7 +84,7 @@ module.exports = (options, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()], flat: MODELS.flat.pop()}, bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()], flat: MODELS.flat.pop()}, callback
 
         save_queue.await callback
 

@@ -11,7 +11,6 @@ inflection = require 'inflection'
 Queue = require '../queue'
 
 Utils = require '../utils'
-bbCallback = Utils.bbCallback
 
 # @private
 module.exports = class Many extends require('./relation')
@@ -148,7 +147,7 @@ module.exports = class Many extends require('./relation')
             attributes[@reverse_relation.foreign_key] = related_id
             # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
             join = new @join_table(attributes)
-            join.save {}, bbCallback callback
+            join.save callback
 
           # just create another entry
           return add(callback) if @reverse_relation.type is 'hasMany'

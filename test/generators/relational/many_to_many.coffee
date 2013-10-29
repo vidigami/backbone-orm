@@ -8,7 +8,6 @@ ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
 Fabricator = require '../../fabricator'
 Utils = require '../../../lib/utils'
-bbCallback = Utils.bbCallback
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''
@@ -73,7 +72,7 @@ module.exports = (options, callback) ->
 
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, bbCallback callback
+            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, callback
 
         save_queue.await callback
 
@@ -85,7 +84,7 @@ module.exports = (options, callback) ->
 #        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
 #
 #        new_model = new Owner()
-#        new_model.save {}, bbCallback (err) ->
+#        new_model.save (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          new_model.set({reverses: reverse_ids})
 #          new_model.get 'reverses', (err, reverses) ->
@@ -100,7 +99,7 @@ module.exports = (options, callback) ->
 #        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
 #
 #        new_model = new Owner()
-#        new_model.save {}, bbCallback (err) ->
+#        new_model.save (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          new_model.set({reverse_ids: reverse_ids})
 #          new_model.get 'reverses', (err, reverses) ->
@@ -115,7 +114,7 @@ module.exports = (options, callback) ->
 #        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
 #
 #        new_model = new Reverse()
-#        new_model.save {}, bbCallback (err) ->
+#        new_model.save (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          new_model.set({owners: owner_ids})
 #          new_model.get 'owners', (err, owners) ->
@@ -130,7 +129,7 @@ module.exports = (options, callback) ->
 #        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
 #
 #        new_model = new Reverse()
-#        new_model.save {}, bbCallback (err) ->
+#        new_model.save (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          new_model.set({owner_ids: owner_ids})
 #          new_model.get 'owners', (err, owners) ->
@@ -601,8 +600,8 @@ module.exports = (options, callback) ->
 #        assert.ok(!_.difference(related_ids, new_owner.get(related_id_accessor)).length, "Got related_id from copied related. Expected: #{related_ids}. Actual: #{new_owner.get(related_id_accessor)}")
 #
 #        queue = new Queue(1)
-#        queue.defer (callback) -> new_owner.save {}, bbCallback callback
-#        queue.defer (callback) -> owner.save {}, bbCallback callback
+#        queue.defer (callback) -> new_owner.save callback
+#        queue.defer (callback) -> owner.save callback
 #
 #        # make sure nothing changed after save
 #        queue.defer (callback) ->
@@ -705,7 +704,7 @@ module.exports = (options, callback) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          assert.ok(reverses, 'found model')
 #
-#          owner.destroy bbCallback (err, owner) ->
+#          owner.destroy (err, owner) ->
 #            assert.ok(!err, "No errors: #{err}")
 #
 #            Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
@@ -721,7 +720,7 @@ module.exports = (options, callback) ->
 #          assert.ok(!err, "No errors: #{err}")
 #          assert.ok(reverses, 'found model')
 #
-#          owner.destroy bbCallback (err, owner) ->
+#          owner.destroy (err, owner) ->
 #            assert.ok(!err, "No errors: #{err}")
 #
 #            Owner.relation('reverses').join_table.find {owner_id: owner.id}, (err, null_reverses) ->
@@ -806,8 +805,8 @@ module.exports = (options, callback) ->
 #            callback()
 #
 #          # save and recheck
-#          queue.defer (callback) -> owner0.save {}, bbCallback callback
-#          queue.defer (callback) -> owner1.save {}, bbCallback callback
+#          queue.defer (callback) -> owner0.save callback
+#          queue.defer (callback) -> owner1.save callback
 #          queue.defer (callback) ->
 #            Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -899,8 +898,8 @@ module.exports = (options, callback) ->
 #            callback()
 #
 #          # save and recheck
-#          queue.defer (callback) -> owner0.save {}, bbCallback callback
-#          queue.defer (callback) -> owner1.save {}, bbCallback callback
+#          queue.defer (callback) -> owner0.save callback
+#          queue.defer (callback) -> owner1.save callback
 #          queue.defer (callback) ->
 #            Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverses').toModels (err, owners) ->
 #              assert.ok(!err, "No errors: #{err}")
@@ -959,7 +958,7 @@ module.exports = (options, callback) ->
 #
 #        reverses = owner.get('reverses')
 #        owner.set({reverses: []})
-#        owner.save {reverses: reverses}, bbCallback (err) ->
+#        owner.save {reverses: reverses}, (err) ->
 #          assert.ok(!err, "No errors: #{err}")
 #
 #          Owner.cache.reset(owner.id) if Owner.cache
