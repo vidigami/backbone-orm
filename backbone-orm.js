@@ -3078,7 +3078,7 @@ module.exports = function(model_type) {
       query = {};
     }
     if (!ModelStream) {
-      throw new Error('Stream is currently only available server-side');
+      throw new Error('Stream is a large dependency so you need to manually include "node-stream.js" in the browser.');
     }
     return new ModelStream(model_type, query);
   };
@@ -3621,6 +3621,10 @@ require('./client_utils').loadDependencies([
   }, {
     symbol: 'inflection',
     path: 'inflection'
+  }, {
+    symbol: 'stream',
+    path: 'stream',
+    optional: true
   }
 ]);
 

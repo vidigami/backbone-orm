@@ -11,11 +11,12 @@
           'backbone': "../../node_modules/backbone/backbone",
           'moment': "../../node_modules/moment/moment",
           'inflection': "../../node_modules/inflection/lib/inflection",
+          'stream': "../../stream",
           'backbone-orm': "../../backbone-orm"
         }
     });
 
-    require(['underscore', 'backbone', 'backbone-orm'], function(_, Backbone, bborm) {
+    require(['underscore', 'backbone', 'stream', 'backbone-orm'], function(_, Backbone, stream, bborm) {
       var Backbone = window.Backbone;
       var Test = Backbone.Model.extend({
         urlRoot: '/api/tests',
@@ -23,8 +24,10 @@
       });
       Test.prototype.sync = bborm.sync(Test);
 
-      var test = new Test();
-      test.fetch({success: function(){}})
+      var test = new Test({name: 'Bob'});
+      test.save(function(err){
+        Test.stream().on('data', function(model) {console.log("Model: " + model.get('name'));});
+      });
     });
   </script>
 

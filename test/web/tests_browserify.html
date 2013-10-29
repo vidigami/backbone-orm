@@ -4,6 +4,7 @@
 <head>
   <title>Backbone-ORM</title>
   <script type="text/javascript" src="vendor-browserify.js"></script>
+  <script type="text/javascript" src="../../stream.js"></script>
   <script type="text/javascript" src="../../backbone-orm.js"></script>
   <script type="text/javascript">
     var Backbone = require('backbone');
@@ -13,7 +14,9 @@
     });
     Test.prototype.sync = Backbone.ORM.sync(Test);
 
-    var test = new Test();
-    test.fetch({success: function(){}})
+      var test = new Test({name: 'Bob'});
+      test.save(function(err){
+        Test.stream().on('data', function(model) {console.log("Model: " + model.get('name'));});
+      });
   </script>
 </head>

@@ -11,6 +11,7 @@ require('./client_utils').loadDependencies([
   {symbol: 'Backbone', path: 'backbone'}
   {symbol: 'moment', path: 'moment'}
   {symbol: 'inflection', path: 'inflection'}
+  {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
 ])
 
 module.exports =

@@ -7,6 +7,7 @@
   <script type="text/javascript" src="../../node_modules/backbone/backbone.js"></script>
   <script type="text/javascript" src="../../node_modules/moment/moment.js"></script>
   <script type="text/javascript" src="../../node_modules/inflection/lib/inflection.js"></script>
+  <script type="text/javascript" src="../../stream.js"></script>
   <script type="text/javascript" src="../../backbone-orm.js"></script>
   <script type="text/javascript">
     var Test = Backbone.Model.extend({
@@ -15,7 +16,9 @@
     });
     Test.prototype.sync = Backbone.ORM.sync(Test);
 
-    var test = new Test();
-    test.fetch({success: function(){}})
+    var test = new Test({name: 'Bob'});
+    test.save(function(err){
+      Test.stream().on('data', function(model) {console.log("Model: " + model.get('name'));});
+    });
   </script>
 </head>
