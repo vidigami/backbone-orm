@@ -2186,7 +2186,7 @@ module.exports = ClientUtils = (function() {
   function ClientUtils() {}
 
   ClientUtils.loadDependency = function(item) {
-    var dep, err, key, _i, _len, _ref;
+    var components, dep, err, key, path, _i, _j, _len, _len1, _ref;
     if (typeof window === "undefined" || window === null) {
       return;
     }
@@ -2202,12 +2202,27 @@ module.exports = ClientUtils = (function() {
     } catch (_error) {
       err = _error;
     }
-    if (!dep) {
+    if (!dep && item.symbol) {
       dep = window;
       _ref = item.symbol.split('.');
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         key = _ref[_i];
         if (!(dep = dep[key])) {
+          break;
+        }
+      }
+    }
+    if (!dep && item.symbol_path && window.require) {
+      components = item.symbol_path.split('.');
+      path = components.shift();
+      try {
+        dep = typeof window.require === "function" ? window.require(path) : void 0;
+      } catch (_error) {
+        err = _error;
+      }
+      for (_j = 0, _len1 = components.length; _j < _len1; _j++) {
+        key = components[_j];
+        if (!(dep = dep != null ? dep[key] : void 0)) {
           break;
         }
       }
