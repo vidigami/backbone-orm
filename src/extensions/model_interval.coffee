@@ -7,7 +7,6 @@ INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks'
 module.exports = (model_type, query, iterator, callback) ->
 
   options = query.$interval or {}
-  method = if options.json then 'toJSON' else 'toModels'
   throw new Error 'missing option: key' unless key = options.key
   throw new Error 'missing option: type' unless options.type
   throw new Error("type is not recognized: #{options.type}, #{_.contains(INTERVAL_TYPES, options.type)}") unless _.contains(INTERVAL_TYPES, options.type)

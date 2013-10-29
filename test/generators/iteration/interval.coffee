@@ -26,6 +26,10 @@ module.exports = (options, callback) ->
     @schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
+  class Counter extends require('stream').Writable
+    constructor: -> super {objectMode: true}; @count = 0
+    _write: (model, encoding, next) -> @count++; next()
+
   describe "Model.interval (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
@@ -87,6 +91,30 @@ module.exports = (options, callback) ->
                 processed_count++
                 callback()
               ), callback
+          ), callback
+
+      queue.await (err) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
+        assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
+        done()
+
+    it 'callback for all models (model and no range) using stream', (done) ->
+      processed_count = 0
+      interval_count = 0
+
+      queue = new Queue(1)
+
+      queue.defer (callback) ->
+        Flat.interval {$interval: {key: 'created_at', type: 'milliseconds', length: 2*DATE_STEP_MS}},
+          ((query, info, callback) ->
+            assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
+            interval_count++
+
+            Flat.stream(query)
+              .pipe(counter = new Counter())
+              .on('finish', -> processed_count += counter.count; callback())
+
           ), callback
 
       queue.await (err) ->
