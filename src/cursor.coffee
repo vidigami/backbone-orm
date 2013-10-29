@@ -42,7 +42,7 @@ module.exports = class Cursor
       try
         @validateQuery(query, null, model_type)
       catch e
-        throw new Error "#{e}, #{util.inspect(query)}"
+        throw new Error "Error: #{e}. Query: ", query
       parsed_query = {find: {}, cursor: {}}
       for key, value of query
         if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
@@ -90,8 +90,6 @@ module.exports = class Cursor
       callback(err, json)
 
   toModels: (callback) ->
-    console.trace "toModels: #{util.inspect(callback)}" unless _.isFunction(callback)
-
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
 
     # a cache candidate

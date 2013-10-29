@@ -5,6 +5,6 @@ Queue = require '../../lib/queue'
 module.exports = (options, callback) ->
   queue = new Queue(1)
   queue.defer (callback) -> require('./iteration/each')(options, callback)
-  queue.defer (callback) -> require('./iteration/interval')(options, callback)
-  queue.defer (callback) -> require('./iteration/stream')(options, callback)
+  # queue.defer (callback) -> require('./iteration/interval')(options, callback)
+  # queue.defer (callback) -> require('./iteration/stream')(options, callback)
   queue.await callback

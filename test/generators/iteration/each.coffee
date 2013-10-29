@@ -42,27 +42,43 @@ module.exports = (options, callback) ->
 
       queue.await done
 
-    it 'callback for all models', (done) ->
-      processed_count = 0
+    describe "Queries", ->
 
-      Flat.each ((model, callback) ->
-          assert.ok(!!model, 'model returned')
-          processed_count++
-          callback()
-        ),
-        (err) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
-          done()
-
-    it 'callback for queried models', (done) ->
-      Flat.findOne (err, model) ->
-        assert.ok(!err, "No errors: #{err}")
-        assert.ok(!!model, 'model returned')
-
+      it 'callback for all models', (done) ->
         processed_count = 0
 
-        Flat.each {name: model.get('name')},
+        Flat.each ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            processed_count++
+            callback()
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            done()
+
+      it 'callback for queried models', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(!!model, 'model returned')
+
+          processed_count = 0
+
+          Flat.each {name: model.get('name')},
+            ((model, callback) ->
+              assert.ok(!!model, 'model returned')
+              processed_count++
+              callback()
+            ),
+            (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(1, processed_count)
+              done()
+
+      it 'callback with limit and offset', (done) ->
+        processed_count = 0
+
+        Flat.each {$limit: 10, $offset: BASE_COUNT-3},
           ((model, callback) ->
             assert.ok(!!model, 'model returned')
             processed_count++
@@ -70,5 +86,99 @@ module.exports = (options, callback) ->
           ),
           (err) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.equal(1, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
+            assert.equal(3, processed_count)
+            done()
+
+      it 'callback for queried models with limit and offset', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(!!model, 'model returned')
+
+          processed_count = 0
+
+          Flat.each {name: model.get('name'), $limit: 10, $offset: 0},
+            ((model, callback) ->
+              assert.ok(!!model, 'model returned')
+              processed_count++
+              callback()
+            ),
+            (err) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(1, processed_count)
+              done()
+
+    describe "JSON or Models", ->
+
+      it 'Default is models', (done) ->
+        processed_count = 0
+
+        Flat.each ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            assert.ok(model instanceof Backbone.Model, 'is a model')
+            processed_count++
+            callback()
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            done()
+
+      it 'Non-json is models', (done) ->
+        processed_count = 0
+
+        Flat.each {$each: {json: false}}, ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            assert.ok(model instanceof Backbone.Model, 'is a model')
+            processed_count++
+            callback()
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            done()
+
+      it 'Can request json', (done) ->
+        processed_count = 0
+
+        Flat.each {$each: {json: true}}, ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            assert.ok(not (model instanceof Backbone.Model), 'is not a model')
+            assert.ok(model.name, 'has a name')
+            processed_count++
+            callback()
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            done()
+
+    describe "Threads", ->
+      it 'Default is Infinite threads', (done) ->
+        processed_count = 0
+        results = []
+
+        Flat.each ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            processed_count++
+            _.delay (-> results.push(processed_count); callback()), 10
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            assert.deepEqual(results, _.map([1..BASE_COUNT], -> BASE_COUNT))
+            done()
+
+      it 'Can process one at a time', (done) ->
+        processed_count = 0
+        results = []
+
+        Flat.each {$each: {threads: 1}}, ((model, callback) ->
+            assert.ok(!!model, 'model returned')
+            processed_count++
+            _.delay (-> results.push(processed_count); callback()), 10
+          ),
+          (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            assert.deepEqual(results, [1..BASE_COUNT])
             done()

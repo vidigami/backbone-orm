@@ -12,9 +12,13 @@ module.exports = (model_type, query, iterator, callback) ->
 
   processed_count = 0
   parsed_query = Cursor.parseQuery(_.omit(query, '$each'))
+  _.defaults(parsed_query.cursor, {$offset: 0, $sort: 'id'})
 
-  runBatch = (each_cursor, callback) ->
-    cursor = model_type.cursor(each_cursor)
+  model_limit = parsed_query.cursor.$limit or Infinity
+  parsed_query.cursor.$limit = options.fetch or BATCH_DEFAULT_FETCH
+
+  runBatch = (callback) ->
+    cursor = model_type.cursor(parsed_query)
     cursor[method].call cursor, (err, models) ->
       return callback(new Error("Failed to get models. Error: #{err}")) if err or !models
       return callback(null, processed_count) unless models.length
@@ -22,19 +26,14 @@ module.exports = (model_type, query, iterator, callback) ->
       # each operations on each
       queue = new Queue(options.threads)
       for model in models
+        break if (++processed_count >= model_limit)
         do (model) -> queue.defer (callback) -> iterator(model, callback)
-        processed_count++
-        break if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
+
       queue.await (err) ->
         return callback(err) if err
-        return callback(null, processed_count) if parsed_query.cursor.$limit and (processed_count >= parsed_query.cursor.$limit)
-        return callback(null, processed_count) if models.length < each_cursor.$limit
-        each_cursor.$offset += each_cursor.$limit
-        runBatch(each_cursor, callback)
+        return callback(null, processed_count) if (processed_count >= model_limit)
+        return callback(null, processed_count) if models.length < parsed_query.cursor.$limit # we fetched less than the total
+        parsed_query.cursor.$offset += parsed_query.cursor.$limit
+        runBatch(callback)
 
-  each_cursor = _.extend({
-    $limit: options.fetch or BATCH_DEFAULT_FETCH
-    $offset: parsed_query.cursor.$offset or 0
-    $sort: parsed_query.cursor.$sort or 'id' # TODO: generalize sort for different types of sync
-  }, parsed_query.find) # add find parameters
-  runBatch(each_cursor, callback)
+  runBatch(callback)
