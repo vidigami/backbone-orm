@@ -34,7 +34,7 @@ module.exports = (model_type, query, iterator, callback) ->
         runBatch(each_cursor, callback)
 
   each_cursor = _.extend({
-    $limit: options.$limit or BATCH_DEFAULT_LIMIT
+    $limit: options.limit or BATCH_DEFAULT_LIMIT
     $offset: parsed_query.cursor.$offset or 0
     $sort: parsed_query.cursor.$sort or 'id' # TODO: generalize sort for different types of sync
   }, parsed_query.find) # add find parameters
