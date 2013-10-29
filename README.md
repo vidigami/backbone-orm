@@ -3,6 +3,11 @@ Introduction
 
 A collection of Classes and Utilities for interfacing with Backbone.js in Node.js.
 
+TODO
+=======
+
+Mention streams being optional on client
+
 Install
 =======
 

@@ -18,7 +18,9 @@
 
     var test = new Test({name: 'Bob'});
     test.save(function(err){
-      Test.stream().on('data', function(model) {console.log("Model: " + model.get('name'));});
+      Test.stream()
+        .on('data', function(model){ console.log("Model: " + model.get('name')); })
+        .on('error', function(err){ console.log("An error is NOT expected: " + err); });
     });
   </script>
 </head>
