@@ -86,7 +86,7 @@ var globals = {};
     if (typeof window === "undefined") return;
     if (!isArray(info)) info = [info];
 
-    var _fn = function(item) {
+    var iterator = function(item) {
       var dep;
 
       // already registered with local require
@@ -99,7 +99,7 @@ var globals = {};
       if (!dep && item.symbol) {
         var components = item.symbol.split('.');
         dep = window;
-        for (var _j = 0, _len1 = components.length; _j < _len1; _j++) { if (!(dep = dep[components[_j]])) break; }
+        for (var i = 0, length = components.length; i < length; i++) { if (!(dep = dep[components[i]])) break; }
       }
 
       // use path on global require (a symbol could be mixed into a module)
@@ -108,9 +108,7 @@ var globals = {};
         var path = components.shift();
         try { dep = typeof window.require === "function" ? window.require(path) : void 0; } catch (e) {}
 
-        for (_k = 0, _len2 = components.length; _k < _len2; _k++) {
-          if (!(dep = dep != null ? dep[components[_k]] : void 0)) break;
-        }
+        for (var i = 0, length = components.length; i < length; i++) { if (!(dep = dep != null ? dep[components[i]] : void 0)) break; }
       }
 
       // not found
@@ -124,7 +122,7 @@ var globals = {};
       if (item.alias) { globals.require.register(item.alias, (function(exports, require, module) { return module.exports = dep; })); }
     };
 
-    for (var _i = 0, _len = info.length; _i < _len; _i++) { _fn(info[_i]); }
+    for (var i = 0, length = info.length; i < length; i++) { iterator(info[i]); }
   };
 
   globals.require = require;
