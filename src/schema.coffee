@@ -7,10 +7,23 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
+inflection = require 'inflection'
 One = require './relations/one'
 Many = require './relations/many'
-inflection = require 'inflection'
 DatabaseURL = require './database_url'
+
+RELATION_VARIANTS =
+  'hasOne': 'hasOne'
+  'has_one': 'hasOne'
+  'HasOne': 'hasOne'
+
+  'belongsTo': 'belongsTo'
+  'belongs_to': 'belongsTo'
+  'BelongsTo': 'belongsTo'
+
+  'hasMany': 'hasMany'
+  'has_many': 'hasMany'
+  'HasMany': 'hasMany'
 
 # @private
 module.exports = class Schema
@@ -95,17 +108,16 @@ module.exports = class Schema
     options = @_fieldInfoToOptions(if _.isFunction(info) then info() else info)
     return @fields[key] = options unless options.type
 
-    type = inflection.camelize(inflection.underscore(options.type), true) # ensure HasOne, hasOne, and has_one resolve to hasOne
-    switch type
-      when 'hasOne', 'belongsTo', 'hasMany'
-        options.type = type
-        relation = @relations[key] = if type is 'hasMany' then new Many(@model_type, key, options) else new One(@model_type, key, options)
-        @virtual_accessors[relation.virtual_id_accessor] = relation if relation.virtual_id_accessor
-        @virtual_accessors[relation.foreign_key] = relation if type is 'belongsTo'
-        return relation
-      else
-        throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
-        return @fields[key] = options
+    # unrecognized
+    unless type = RELATION_VARIANTS[options.type]
+      throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
+      return @fields[key] = options
+
+    options.type = type
+    relation = @relations[key] = if type is 'hasMany' then new Many(@model_type, key, options) else new One(@model_type, key, options)
+    @virtual_accessors[relation.virtual_id_accessor] = relation if relation.virtual_id_accessor
+    @virtual_accessors[relation.foreign_key] = relation if type is 'belongsTo'
+    return relation
 
   _fieldInfoToOptions: (options) ->
     # convert to an object
