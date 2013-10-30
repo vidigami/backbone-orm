@@ -1,0 +1,46 @@
+{
+  "name": "backbone-orm",
+  "version": "0.5.0",
+  "description": "A polystore ORM for Node.js and the browser",
+  "main": "./lib/index.js",
+  "license": "MIT",
+  "author": "Kevin Malakoff (https://github.com/kmalakoff)",
+  "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
+  "repository": {"type": "git", "url": "https://bitbucket.org/vidigami/backbone-orm.git"},
+  "keywords": ["backbone", "orm", "backbone-orm"],
+  "engines": {"node": "*"},
+  "scripts": {
+    "test": "npm run build; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script --reporter spec",
+    "docs": "codo -o docs src/.",
+    "build": "coffee -o lib -c src",
+    "watch": "coffee -o lib -w src",
+    "clean": "rm -rf lib/*",
+    "prepublish": "npm run build",
+    "postpublish": "npm run clean",
+    "postinstall": "npm run build"
+  },
+  "devDependencies": {
+    "coffee-script": "*",
+    "codo": "1.7.x",
+    "mocha": "*",
+    "powerset": "0.0.x",
+    "store-redis": "0.1.x",
+    "brunch": "*",
+    "javascript-brunch": "*",
+    "coffee-script-brunch": "*",
+    "browserify": "~2.35.0",
+    "grunt": "0.4.x",
+    "grunt-cli": "0.1.x",
+    "grunt-shell": "~0.5.0",
+    "grunt-wrap": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-uglify": "~0.2.4"
+  },
+  "dependencies": {
+    "underscore": "1.5.x",
+    "backbone": "1.1.x",
+    "moment": "2.0.x",
+    "inflection": "1.2.x",
+    "lru-cache": "2.3.x"
+  }
+}
