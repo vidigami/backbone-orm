@@ -5,7 +5,7 @@ module.exports =
 
   license: """
     /*
-      backbone-orm.js 0.0.1
+      backbone-orm.js 0.5.0
       Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
       License: MIT (http://www.opensource.org/licenses/mit-license.php)
       Dependencies: Backbone.js and Underscore.js.
