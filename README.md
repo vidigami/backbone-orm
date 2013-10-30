@@ -1,38 +1,23 @@
-Introduction
+[![Build Status](https://secure.travis-ci.org/vidigami/backbone-orm.png)](http://travis-ci.org/vidigami/backbone-orm)
+
+![logo](https://github.com/vidigami/backbone-orm/raw/master/media/logo.png)
+
+A polystore ORM for Node.js and the browser.
+
+Please [checkout the website](http://vidigami.github.io/backbone-orm/) for examples, documentation, and community!
+
+
+For Contributors
 ============
 
-A collection of Classes and Utilities for interfacing with Backbone.js in Node.js.
+To build the library for Node.js:
 
-TODO
-=======
+  $ npm run build
 
-Mention streams being optional on client
+To build the library for the browser:
 
-Install
-=======
+  $ grunt
 
-Install all npm modules:
-
-  $ cd backbone-orm
-
-  $ npm install
-
-Test
-====
-
-Run the unit tests one time:
+Please run tests before submitting a pull request.
 
   $ npm test
-
-
-Documentation
-====
-
-Generate docs
-
-  $ npm run-script docs
-
-
-Relationships (TODO)
-
-[see docs](https://docs.google.com/a/vidigami.com/spreadsheet/ccc?key=0Am5arO2G3v9cdDMybUJvSEFpclRsMkFwUGNkSC04VWc#gid=0)
