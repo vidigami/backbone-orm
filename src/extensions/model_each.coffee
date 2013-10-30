@@ -17,7 +17,7 @@ module.exports = (model_type, query, iterator, callback) ->
   model_limit = parsed_query.cursor.$limit or Infinity
   parsed_query.cursor.$limit = options.fetch or BATCH_DEFAULT_FETCH
 
-  runBatch = (callback) ->
+  runBatch = ->
     cursor = model_type.cursor(parsed_query)
     cursor[method].call cursor, (err, models) ->
       return callback(new Error("Failed to get models. Error: #{err}")) if err or !models
@@ -34,6 +34,5 @@ module.exports = (model_type, query, iterator, callback) ->
         return callback(null, processed_count) if (processed_count >= model_limit)
         return callback(null, processed_count) if models.length < parsed_query.cursor.$limit # we fetched less than the total
         parsed_query.cursor.$offset += parsed_query.cursor.$limit
-        runBatch(callback)
-
-  runBatch(callback)
+        runBatch()
+  runBatch()
