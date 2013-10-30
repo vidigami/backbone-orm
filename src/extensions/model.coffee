@@ -53,10 +53,13 @@ module.exports = (model_type) ->
   #   @param [Object] options
   #   @option reverse [String] Start searching backwards from the given date.
   #
-  # @method .each(query, callback, fn)
-  #   Fetch a each of models at a time and process them.
+  # @method .each(query, iterator, callback)
+  #   Fetch a batch of models at a time and process them.
   #
-  # @method .interval(query, callback, fn)
+  # @method .stream(query)
+  #   Fetch a batch of models at a time and process them.
+  #
+  # @method .interval(query, iterator, callback)
   #   Process a each of models in fixed-size time intervals. For example, if map-reducing in fixed intervals.
   #
   # @method #modelName()
