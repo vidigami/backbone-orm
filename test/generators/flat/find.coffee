@@ -15,7 +15,7 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
+  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()

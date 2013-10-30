@@ -16,7 +16,7 @@ module.exports = (options, callback) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure(if options.cache then {max: 100} else null).hardReset() # configure model cache
+  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 

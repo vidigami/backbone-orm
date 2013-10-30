@@ -31,8 +31,6 @@ module.exports = class ModelCache
   configure: (options={}) ->
     @enabled = options.enabled
     @reset(->)
-    (@options = {modelTypes: {}}; return @) unless options # clear all options
-
     for key, value of options
       if _.isObject(value)
         @options[key] or= {}
@@ -54,7 +52,7 @@ module.exports = class ModelCache
     queue.await callback
 
   hardReset: ->
-    @configure()
+    @reset(->)
     delete @caches[key] for key, value of @caches
     return @
 

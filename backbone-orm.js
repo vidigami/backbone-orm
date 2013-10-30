@@ -1692,12 +1692,6 @@ module.exports = ModelCache = (function() {
     }
     this.enabled = options.enabled;
     this.reset(function() {});
-    if (!options) {
-      this.options = {
-        modelTypes: {}
-      };
-      return this;
-    }
     for (key in options) {
       value = options[key];
       if (_.isObject(value)) {
@@ -1741,7 +1735,7 @@ module.exports = ModelCache = (function() {
 
   ModelCache.prototype.hardReset = function() {
     var key, value, _ref;
-    this.configure();
+    this.reset(function() {});
     _ref = this.caches;
     for (key in _ref) {
       value = _ref[key];
