@@ -26,7 +26,7 @@ module.exports = (model_type, query, iterator, callback) ->
       # each operations on each
       queue = new Queue(options.threads)
       for model in models
-        break if (++processed_count >= model_limit)
+        break if (processed_count++ >= model_limit)
         do (model) -> queue.defer (callback) -> iterator(model, callback)
 
       queue.await (err) ->
