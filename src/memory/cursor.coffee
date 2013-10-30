@@ -11,6 +11,7 @@ inflection = require 'inflection'
 Queue = require '../queue'
 
 Utils = require '../utils'
+JSONUtils = require '../json_utils'
 Cursor = require '../cursor'
 
 IS_MATCH_FNS =
@@ -66,7 +67,7 @@ module.exports = class MemoryCursor extends Cursor
         if keys.length or ins_size
           if @_cursor.$ids
             for id, model_json of @store
-              json.push(Utils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
@@ -81,7 +82,7 @@ module.exports = class MemoryCursor extends Cursor
                   return callback(err) if err
                   return callback() unless is_match
                   if not find_keys.length or (exists and (keys.length isnt find_keys.length)) # exists only needs one result
-                    json.push(Utils.deepClone(model_json))
+                    json.push(JSONUtils.deepClone(model_json))
                     return callback()
 
                   # check next key
@@ -98,9 +99,9 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(Utils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
           else
-            json = (Utils.deepClone(model_json) for id, model_json of @store)
+            json = (JSONUtils.deepClone(model_json) for id, model_json of @store)
           callback()
 
       if not exists

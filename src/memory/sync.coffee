@@ -12,6 +12,7 @@ Queue = require '../queue'
 MemoryCursor = require './cursor'
 Schema = require '../schema'
 Utils = require '../utils'
+JSONUtils = require '../json_utils'
 
 ModelCache = require('../cache/singletons').ModelCache
 QueryCache = require('../cache/singletons').QueryCache
@@ -46,10 +47,10 @@ class MemorySync
   # @private
   read: (model, options) ->
     if model.models
-      options.success(Utils.deepClone(model_json) for id, model_json of @store)
+      options.success(JSONUtils.deepClone(model_json) for id, model_json of @store)
     else
       return options.error(new Error("Model not found with id: #{model.id}")) if _.isUndefined(@store[model.id])
-      options.success(Utils.deepClone(@store[model.id]))
+      options.success(JSONUtils.deepClone(@store[model.id]))
 
   # @private
   create: (model, options) ->
@@ -57,14 +58,14 @@ class MemorySync
       return options.error?(err) if err
       model.set(id: Utils.guid())
       model_json = @store[model.id] = model.toJSON()
-      options.success(Utils.deepClone(model_json))
+      options.success(JSONUtils.deepClone(model_json))
 
   # @private
   update: (model, options) ->
     QueryCache.reset @model_type, (err) =>
       return options.error?(err) if err
       @store[model.id] = model_json = model.toJSON()
-      options.success(Utils.deepClone(model_json))
+      options.success(JSONUtils.deepClone(model_json))
 
   # @private
   delete: (model, options) ->

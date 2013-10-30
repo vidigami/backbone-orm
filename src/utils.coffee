@@ -12,6 +12,7 @@ _ = require 'underscore'
 inflection = require 'inflection'
 moment = require 'moment'
 Queue = require './queue'
+JSONUtils = require './json_utils'
 modelExtensions = null
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
@@ -38,17 +39,6 @@ module.exports = class Utils
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
       return callback(new Error("Failed to migrate schemas: #{failed_schemas.join(', ')}")) if failed_schemas.length
       callback()
-
-  @deepClone: (obj) ->
-    return obj if not obj or (typeof obj isnt 'object')
-    return String::slice.call(obj) if _.isString(obj)
-    return new Date(obj.valueOf()) if _.isDate(obj)
-    return (Utils.deepClone(item) for item in obj) if _.isArray(obj)
-    if _.isObject(obj) and obj.constructor is {}.constructor # simple object
-      result = {}
-      result[key] = Utils.deepClone(value) for key, value of obj
-      return result
-    return obj
 
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 

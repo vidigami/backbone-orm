@@ -4248,7 +4248,7 @@ module.exports = JSONUtils = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, MemoryCursor, Queue, Utils, inflection, moment, _, _ref,
+var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, inflection, moment, _, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -4262,6 +4262,8 @@ inflection = require('inflection');
 Queue = require('../queue');
 
 Utils = require('../utils');
+
+JSONUtils = require('../json_utils');
 
 Cursor = require('../cursor');
 
@@ -4349,7 +4351,7 @@ module.exports = MemoryCursor = (function(_super) {
             for (id in _ref1) {
               model_json = _ref1[id];
               if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
-                json.push(Utils.deepClone(model_json));
+                json.push(JSONUtils.deepClone(model_json));
               }
             }
             return callback();
@@ -4368,7 +4370,7 @@ module.exports = MemoryCursor = (function(_super) {
                     return callback();
                   }
                   if (!find_keys.length || (exists && (keys.length !== find_keys.length))) {
-                    json.push(Utils.deepClone(model_json));
+                    json.push(JSONUtils.deepClone(model_json));
                     return callback();
                   }
                   return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
@@ -4404,7 +4406,7 @@ module.exports = MemoryCursor = (function(_super) {
             for (id in _ref3) {
               model_json = _ref3[id];
               if (_.contains(_this._cursor.$ids, model_json.id)) {
-                json.push(Utils.deepClone(model_json));
+                json.push(JSONUtils.deepClone(model_json));
               }
             }
           } else {
@@ -4414,7 +4416,7 @@ module.exports = MemoryCursor = (function(_super) {
               _results = [];
               for (id in _ref4) {
                 model_json = _ref4[id];
-                _results.push(Utils.deepClone(model_json));
+                _results.push(JSONUtils.deepClone(model_json));
               }
               return _results;
             }).call(_this);
@@ -4690,7 +4692,7 @@ module.exports = MemoryCursor = (function(_super) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, DESTROY_BATCH_LIMIT, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, _;
+var Backbone, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, STORES, Schema, Utils, _;
 
 _ = require('underscore');
 
@@ -4703,6 +4705,8 @@ MemoryCursor = require('./cursor');
 Schema = require('../schema');
 
 Utils = require('../utils');
+
+JSONUtils = require('../json_utils');
 
 ModelCache = require('../cache/singletons').ModelCache;
 
@@ -4738,7 +4742,7 @@ MemorySync = (function() {
         _results = [];
         for (id in _ref) {
           model_json = _ref[id];
-          _results.push(Utils.deepClone(model_json));
+          _results.push(JSONUtils.deepClone(model_json));
         }
         return _results;
       }).call(this));
@@ -4746,7 +4750,7 @@ MemorySync = (function() {
       if (_.isUndefined(this.store[model.id])) {
         return options.error(new Error("Model not found with id: " + model.id));
       }
-      return options.success(Utils.deepClone(this.store[model.id]));
+      return options.success(JSONUtils.deepClone(this.store[model.id]));
     }
   };
 
@@ -4761,7 +4765,7 @@ MemorySync = (function() {
         id: Utils.guid()
       });
       model_json = _this.store[model.id] = model.toJSON();
-      return options.success(Utils.deepClone(model_json));
+      return options.success(JSONUtils.deepClone(model_json));
     });
   };
 
@@ -4773,7 +4777,7 @@ MemorySync = (function() {
         return typeof options.error === "function" ? options.error(err) : void 0;
       }
       _this.store[model.id] = model_json = model.toJSON();
-      return options.success(Utils.deepClone(model_json));
+      return options.success(JSONUtils.deepClone(model_json));
     });
   };
 
@@ -6439,7 +6443,7 @@ module.exports = Schema = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, DatabaseURL, Queue, S4, URL, Utils, inflection, modelExtensions, moment, _,
+var Backbone, DatabaseURL, JSONUtils, Queue, S4, URL, Utils, inflection, modelExtensions, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6456,6 +6460,8 @@ inflection = require('inflection');
 moment = require('moment');
 
 Queue = require('./queue');
+
+JSONUtils = require('./json_utils');
 
 modelExtensions = null;
 
@@ -6501,39 +6507,6 @@ module.exports = Utils = (function() {
       }
       return callback();
     });
-  };
-
-  Utils.deepClone = function(obj) {
-    var item, key, result, value;
-    if (!obj || (typeof obj !== 'object')) {
-      return obj;
-    }
-    if (_.isString(obj)) {
-      return String.prototype.slice.call(obj);
-    }
-    if (_.isDate(obj)) {
-      return new Date(obj.valueOf());
-    }
-    if (_.isArray(obj)) {
-      return (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = obj.length; _i < _len; _i++) {
-          item = obj[_i];
-          _results.push(Utils.deepClone(item));
-        }
-        return _results;
-      })();
-    }
-    if (_.isObject(obj) && obj.constructor === {}.constructor) {
-      result = {};
-      for (key in obj) {
-        value = obj[key];
-        result[key] = Utils.deepClone(value);
-      }
-      return result;
-    }
-    return obj;
   };
 
   Utils.guid = function() {
