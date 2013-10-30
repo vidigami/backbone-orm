@@ -65,7 +65,7 @@ class CacheSync
 
   destroy: (query, callback) ->
     # TODO: review for optimization
-    @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, threads: DESTROY_THREADS}}, query), ((model_json, callback) => model.destroy callback), callback
+    @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, threads: DESTROY_THREADS}}, query), ((model, callback) => model.destroy callback), callback
 
   ###################################
   # Backbone Cache Sync - Custom Extensions
