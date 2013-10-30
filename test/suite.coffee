@@ -5,7 +5,7 @@ ModelTypeID = require('../lib/cache/singletons').ModelTypeID
 ModelTypeID.strict = false
 
 option_sets = require('./option_sets')
-option_sets = option_sets.slice(0, 5)
+# option_sets = option_sets.slice(0, 5)
 
 queue = new Queue(1)
 for options in option_sets
