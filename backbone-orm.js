@@ -3537,7 +3537,7 @@ module.exports = function(model_type, query, iterator, callback) {
   });
   model_limit = parsed_query.cursor.$limit || Infinity;
   parsed_query.cursor.$limit = options.fetch || BATCH_DEFAULT_FETCH;
-  runBatch = function(callback) {
+  runBatch = function() {
     var cursor;
     cursor = model_type.cursor(parsed_query);
     return cursor[method].call(cursor, function(err, models) {
@@ -3572,11 +3572,11 @@ module.exports = function(model_type, query, iterator, callback) {
           return callback(null, processed_count);
         }
         parsed_query.cursor.$offset += parsed_query.cursor.$limit;
-        return runBatch(callback);
+        return runBatch();
       });
     });
   };
-  return runBatch(callback);
+  return runBatch();
 };
 
 });
@@ -6183,7 +6183,7 @@ module.exports = Relation = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, DatabaseURL, Many, One, Schema, inflection, _,
+var Backbone, DatabaseURL, Many, One, RELATION_VARIANTS, Schema, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6191,13 +6191,25 @@ _ = require('underscore');
 
 Backbone = require('backbone');
 
+inflection = require('inflection');
+
 One = require('./relations/one');
 
 Many = require('./relations/many');
 
-inflection = require('inflection');
-
 DatabaseURL = require('./database_url');
+
+RELATION_VARIANTS = {
+  'hasOne': 'hasOne',
+  'has_one': 'hasOne',
+  'HasOne': 'hasOne',
+  'belongsTo': 'belongsTo',
+  'belongs_to': 'belongsTo',
+  'BelongsTo': 'belongsTo',
+  'hasMany': 'hasMany',
+  'has_many': 'hasMany',
+  'HasMany': 'hasMany'
+};
 
 module.exports = Schema = (function() {
   function Schema(model_type) {
@@ -6367,26 +6379,21 @@ module.exports = Schema = (function() {
     if (!options.type) {
       return this.fields[key] = options;
     }
-    type = inflection.camelize(inflection.underscore(options.type), true);
-    switch (type) {
-      case 'hasOne':
-      case 'belongsTo':
-      case 'hasMany':
-        options.type = type;
-        relation = this.relations[key] = type === 'hasMany' ? new Many(this.model_type, key, options) : new One(this.model_type, key, options);
-        if (relation.virtual_id_accessor) {
-          this.virtual_accessors[relation.virtual_id_accessor] = relation;
-        }
-        if (type === 'belongsTo') {
-          this.virtual_accessors[relation.foreign_key] = relation;
-        }
-        return relation;
-      default:
-        if (!_.isString(options.type)) {
-          throw new Error("Unexpected type name is not a string: " + (util.inspect(options)));
-        }
-        return this.fields[key] = options;
+    if (!(type = RELATION_VARIANTS[options.type])) {
+      if (!_.isString(options.type)) {
+        throw new Error("Unexpected type name is not a string: " + (util.inspect(options)));
+      }
+      return this.fields[key] = options;
     }
+    options.type = type;
+    relation = this.relations[key] = type === 'hasMany' ? new Many(this.model_type, key, options) : new One(this.model_type, key, options);
+    if (relation.virtual_id_accessor) {
+      this.virtual_accessors[relation.virtual_id_accessor] = relation;
+    }
+    if (type === 'belongsTo') {
+      this.virtual_accessors[relation.foreign_key] = relation;
+    }
+    return relation;
   };
 
   Schema.prototype._fieldInfoToOptions = function(options) {
