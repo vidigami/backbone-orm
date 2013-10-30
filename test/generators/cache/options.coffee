@@ -3,7 +3,6 @@ assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require '../../../lib/queue'
-moment = require 'moment'
 
 ModelCache = require('../../../lib/cache/singletons').ModelCache
 QueryCache = require('../../../lib/cache/singletons').QueryCache
