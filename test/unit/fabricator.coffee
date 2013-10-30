@@ -8,6 +8,7 @@ Fabricator = require '../fabricator'
 module.exports = (options, callback) ->
 
   describe 'Fabricator', ->
+    after (done) -> callback(); done()
 
     describe 'value', ->
 

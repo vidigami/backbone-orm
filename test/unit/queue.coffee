@@ -6,6 +6,7 @@ _ = require 'underscore'
 module.exports = (options, callback) ->
 
   describe 'Queue', ->
+    after (done) -> callback(); done()
 
     it 'infinite parallelism', (done) ->
       queue = new Queue()

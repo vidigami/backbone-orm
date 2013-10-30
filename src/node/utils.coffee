@@ -10,17 +10,16 @@ path = require 'path'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require '../queue'
-Utils = require './utils'
+Utils = require '../utils'
 
 # @private
 module.exports = class NodeUtils
 
   @findModels = (directory, options, callback) ->
-
     model_types = []
+
     findModelsInDirectory = (directory, options, callback) ->
       fs.readdir directory, (err, files) ->
-
         return callback(err) if err
         return callback(null, model_types) unless files
 
@@ -40,6 +39,7 @@ module.exports = class NodeUtils
                 model_path = path.join(directory, file)
                 model_type = require(model_path)
                 return callback() unless (model_type and _.isFunction(model_type) and Utils.isModel(new model_type()) and model_type.resetSchema)
+
                 model_type.path = model_path if options.append_path
                 model_types.push(model_type)
                 callback()
@@ -58,13 +58,11 @@ module.exports = class NodeUtils
     [options, callback] = [{}, options] if arguments.length is 2
 
     @findModels directory, options, (err, model_types) ->
+      return callback(err) if err
 
       queue = new Queue(1)
-
       for model_type in model_types
-        do (model_type) -> queue.defer (callback) ->
-          model_type.resetSchema options, callback
-
+        do (model_type) -> queue.defer (callback) -> model_type.resetSchema options, callback
       queue.await (err) ->
         console.log "resetSchemasByDirectory: failed to reset schemas: #{err}" if err
         callback(err)

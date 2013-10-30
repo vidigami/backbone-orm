@@ -6,6 +6,7 @@ _ = require 'underscore'
 module.exports = (options, callback) ->
 
   describe 'DatabaseURL', ->
+    after (done) -> callback(); done()
 
     it 'parses url (unparsed query)', (done) ->
       url = new DatabaseURL('protocol://user:password@host:80/database/model_names?query1=true&query2="bob"')

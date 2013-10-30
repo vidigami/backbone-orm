@@ -2070,7 +2070,7 @@ try {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var CacheCursor, CacheSync, DEFAULT_LIMIT, DEFAULT_PARALLELISM, Schema, Utils, bbCallback, _;
+var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
 
 _ = require('underscore');
 
@@ -2082,9 +2082,9 @@ Utils = require('../utils');
 
 bbCallback = Utils.bbCallback;
 
-DEFAULT_LIMIT = 1000;
+DESTROY_BATCH_LIMIT = 1000;
 
-DEFAULT_PARALLELISM = 100;
+DESTROY_THREADS = 100;
 
 CacheSync = (function() {
   function CacheSync(model_type, wrapped_sync_fn) {
@@ -2179,12 +2179,15 @@ CacheSync = (function() {
   };
 
   CacheSync.prototype.destroy = function(query, callback) {
-    return this.model_type.batch(query, {
-      $limit: DEFAULT_LIMIT,
-      parallelism: DEFAULT_PARALLELISM
-    }, callback, function(model, callback) {
+    var _this = this;
+    return this.model_type.each(_.extend({
+      $each: {
+        limit: DESTROY_BATCH_LIMIT,
+        threads: DESTROY_THREADS
+      }
+    }, query), (function(model, callback) {
       return model.destroy(callback);
-    });
+    }), callback);
   };
 
   CacheSync.prototype.connect = function(url) {
@@ -2328,7 +2331,7 @@ module.exports = Cursor = (function() {
         Cursor.validateQuery(query, null, model_type);
       } catch (_error) {
         e = _error;
-        throw new Error("" + e + ", " + (util.inspect(query)));
+        throw new Error("Error: " + e + ". Query: ", query);
       }
       parsed_query = {
         find: {},
@@ -2406,30 +2409,8 @@ module.exports = Cursor = (function() {
     return this.execWithCursorQuery('$one', 'toModels', callback);
   };
 
-  Cursor.prototype.hasCursorQuery = function(key) {
-    return this._cursor[key] || (this._cursor[key] === '');
-  };
-
-  Cursor.prototype.execWithCursorQuery = function(key, method, callback) {
-    var value,
-      _this = this;
-    value = this._cursor[key];
-    this._cursor[key] = true;
-    return this[method](function(err, json) {
-      if (_.isUndefined(value)) {
-        delete _this._cursor[key];
-      } else {
-        _this._cursor[key] = value;
-      }
-      return callback(err, json);
-    });
-  };
-
   Cursor.prototype.toModels = function(callback) {
     var _this = this;
-    if (!_.isFunction(callback)) {
-      console.trace("toModels: " + (util.inspect(callback)));
-    }
     if (this._cursor.$values) {
       return callback(new Error("Cannot call toModels on cursor with values for model " + this.model_type.model_name + ". Values: " + (util.inspect(this._cursor.$values))));
     }
@@ -2506,6 +2487,25 @@ module.exports = Cursor = (function() {
 
   Cursor.prototype.queryToJSON = function(callback) {
     throw new Error('toJSON must be implemented by a concrete cursor for a Backbone Sync type');
+  };
+
+  Cursor.prototype.hasCursorQuery = function(key) {
+    return this._cursor[key] || (this._cursor[key] === '');
+  };
+
+  Cursor.prototype.execWithCursorQuery = function(key, method, callback) {
+    var value,
+      _this = this;
+    value = this._cursor[key];
+    this._cursor[key] = true;
+    return this[method](function(err, json) {
+      if (_.isUndefined(value)) {
+        delete _this._cursor[key];
+      } else {
+        _this._cursor[key] = value;
+      }
+      return callback(err, json);
+    });
   };
 
   Cursor.prototype.relatedModelTypesInQuery = function() {
@@ -2882,7 +2882,7 @@ if (!collection_type.prototype._orm_original_fns) {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var Backbone, ModelStream, Queue, Utils, moment, _;
+var Backbone, ModelStream, Queue, Utils, modelEach, modelInterval, moment, _;
 
 _ = require('underscore');
 
@@ -2895,6 +2895,10 @@ Queue = require('../queue');
 Utils = require('../utils');
 
 ModelStream = require('./model_stream');
+
+modelEach = require('./model_each');
+
+modelInterval = require('./model_interval');
 
 require('./collection');
 
@@ -3042,14 +3046,12 @@ module.exports = function(model_type) {
       return functions[1](callback);
     });
   };
-  model_type.batch = function(query, options, callback, fn) {
-    var args;
-    args = _.toArray(arguments);
-    while (args.length < 4) {
-      args.unshift({});
+  model_type.each = function(query, iterator, callback) {
+    var _ref;
+    if (arguments.length === 2) {
+      _ref = [{}, query, iterator], query = _ref[0], iterator = _ref[1], callback = _ref[2];
     }
-    args.unshift(model_type);
-    return Utils.batch.apply(null, args);
+    return modelEach(model_type, query, iterator, callback);
   };
   model_type.stream = function(query) {
     if (query == null) {
@@ -3060,14 +3062,12 @@ module.exports = function(model_type) {
     }
     return new ModelStream(model_type, query);
   };
-  model_type.interval = function(query, options, callback, fn) {
-    var args;
-    args = _.toArray(arguments);
-    while (args.length < 4) {
-      args.unshift({});
+  model_type.interval = function(query, iterator, callback) {
+    var _ref;
+    if (arguments.length === 2) {
+      _ref = [{}, query, iterator], query = _ref[0], iterator = _ref[1], callback = _ref[2];
     }
-    args.unshift(model_type);
-    return Utils.interval.apply(null, args);
+    return modelInterval(model_type, query, iterator, callback);
   };
   model_type.prototype.modelName = function() {
     return model_type.model_name;
@@ -3517,6 +3517,233 @@ module.exports = function(model_type) {
 
 });
 
+;require.register("backbone-orm/lib/extensions/model_each", function(exports, require, module) {
+var BATCH_DEFAULT_FETCH, Cursor, Queue, _;
+
+_ = require('underscore');
+
+Queue = require('../queue');
+
+Cursor = null;
+
+BATCH_DEFAULT_FETCH = 1000;
+
+module.exports = function(model_type, query, iterator, callback) {
+  var method, model_limit, options, parsed_query, processed_count, runBatch;
+  if (!Cursor) {
+    Cursor = require('../cursor');
+  }
+  options = query.$each || {};
+  method = options.json ? 'toJSON' : 'toModels';
+  processed_count = 0;
+  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
+  _.defaults(parsed_query.cursor, {
+    $offset: 0,
+    $sort: 'id'
+  });
+  model_limit = parsed_query.cursor.$limit || Infinity;
+  parsed_query.cursor.$limit = options.fetch || BATCH_DEFAULT_FETCH;
+  runBatch = function(callback) {
+    var cursor;
+    cursor = model_type.cursor(parsed_query);
+    return cursor[method].call(cursor, function(err, models) {
+      var model, queue, _fn, _i, _len;
+      if (err || !models) {
+        return callback(new Error("Failed to get models. Error: " + err));
+      }
+      if (!models.length) {
+        return callback(null, processed_count);
+      }
+      queue = new Queue(options.threads);
+      _fn = function(model) {
+        return queue.defer(function(callback) {
+          return iterator(model, callback);
+        });
+      };
+      for (_i = 0, _len = models.length; _i < _len; _i++) {
+        model = models[_i];
+        if (processed_count++ >= model_limit) {
+          break;
+        }
+        _fn(model);
+      }
+      return queue.await(function(err) {
+        if (err) {
+          return callback(err);
+        }
+        if (processed_count >= model_limit) {
+          return callback(null, processed_count);
+        }
+        if (models.length < parsed_query.cursor.$limit) {
+          return callback(null, processed_count);
+        }
+        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
+        return runBatch(callback);
+      });
+    });
+  };
+  return runBatch(callback);
+};
+
+});
+
+;require.register("backbone-orm/lib/extensions/model_interval", function(exports, require, module) {
+var INTERVAL_TYPES, Queue, moment, _;
+
+_ = require('underscore');
+
+moment = require('moment');
+
+Queue = require('../queue');
+
+INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
+
+module.exports = function(model_type, query, iterator, callback) {
+  var iteration_info, key, no_models, options, queue, range;
+  options = query.$interval || {};
+  if (!(key = options.key)) {
+    throw new Error('missing option: key');
+  }
+  if (!options.type) {
+    throw new Error('missing option: type');
+  }
+  if (!_.contains(INTERVAL_TYPES, options.type)) {
+    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
+  }
+  iteration_info = _.clone(options);
+  if (!iteration_info.range) {
+    iteration_info.range = {};
+  }
+  range = iteration_info.range;
+  no_models = false;
+  queue = new Queue(1);
+  queue.defer(function(callback) {
+    var start;
+    if (!(start = range.$gte || range.$gt)) {
+      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
+        if (err) {
+          return callback(err);
+        }
+        if (!models.length) {
+          no_models = true;
+          return callback();
+        }
+        range.start = iteration_info.first = models[0].get(key);
+        return callback();
+      });
+    } else {
+      range.start = start;
+      return model_type.findOneNearestDate(start, {
+        key: key,
+        reverse: true
+      }, query, function(err, model) {
+        if (err) {
+          return callback(err);
+        }
+        if (!model) {
+          no_models = true;
+          return callback();
+        }
+        iteration_info.first = model.get(key);
+        return callback();
+      });
+    }
+  });
+  queue.defer(function(callback) {
+    var end;
+    if (no_models) {
+      return callback();
+    }
+    if (!(end = range.$lte || range.$lt)) {
+      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
+        if (err) {
+          return callback(err);
+        }
+        if (!models.length) {
+          no_models = true;
+          return callback();
+        }
+        range.end = iteration_info.last = models[0].get(key);
+        return callback();
+      });
+    } else {
+      range.end = end;
+      return model_type.findOneNearestDate(end, {
+        key: key
+      }, query, function(err, model) {
+        if (err) {
+          return callback(err);
+        }
+        if (!model) {
+          no_models = true;
+          return callback();
+        }
+        iteration_info.last = model.get(key);
+        return callback();
+      });
+    }
+  });
+  return queue.await(function(err) {
+    var length_ms, processed_count, runInterval, start_ms;
+    if (err) {
+      return callback(err);
+    }
+    if (no_models) {
+      return callback();
+    }
+    start_ms = range.start.getTime();
+    length_ms = moment.duration((_.isUndefined(options.length) ? 1 : options.length), options.type).asMilliseconds();
+    if (!length_ms) {
+      throw Error("length_ms is invalid: " + length_ms + " for range: " + (util.inspect(range)));
+    }
+    query = _.omit(query, '$interval');
+    query.$sort = [key];
+    processed_count = 0;
+    iteration_info.index = 0;
+    runInterval = function(current) {
+      if (current.isAfter(range.end)) {
+        return callback();
+      }
+      query[key] = {
+        $gte: current.toDate(),
+        $lte: iteration_info.last
+      };
+      return model_type.findOne(query, function(err, model) {
+        var next;
+        if (err) {
+          return callback(err);
+        }
+        if (!model) {
+          return callback();
+        }
+        next = model.get(key);
+        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
+        current = moment.utc(range.start).add({
+          milliseconds: iteration_info.index * length_ms
+        });
+        iteration_info.start = current.toDate();
+        next = current.clone().add({
+          milliseconds: length_ms
+        });
+        iteration_info.end = next.toDate();
+        query[key] = {
+          $gte: current.toDate(),
+          $lt: next.toDate()
+        };
+        return iterator(query, iteration_info, function(err) {
+          if (err) {
+            return callback(err);
+          }
+          return runInterval(next);
+        });
+      });
+    };
+    return runInterval(moment(range.start));
+  });
+};
+
+});
+
 ;require.register("backbone-orm/lib/extensions/model_stream", function(exports, require, module) {
 var ModelStream, e, stream,
   __hasProp = {}.hasOwnProperty,
@@ -3542,15 +3769,15 @@ module.exports = ModelStream = (function(_super) {
     ModelStream.__super__.constructor.call(this, {
       objectMode: true
     });
-    this.ended = false;
   }
 
   ModelStream.prototype._read = function() {
     var done,
       _this = this;
-    if (this.ended) {
+    if (this.ended || this.started) {
       return;
     }
+    this.started = true;
     done = function(err) {
       _this.ended = true;
       if (err) {
@@ -3558,10 +3785,10 @@ module.exports = ModelStream = (function(_super) {
       }
       return _this.push(null);
     };
-    return this.model_type.batch(this.query, {}, done, function(model, callback) {
+    return this.model_type.each(this.query, (function(model, callback) {
       _this.push(model);
       return callback();
-    });
+    }), done);
   };
 
   return ModelStream;
@@ -4595,17 +4822,19 @@ MemorySync = (function() {
       if (err) {
         return callback(err);
       }
-      return _this.model_type.batch(query, {
-        $limit: DESTROY_BATCH_LIMIT,
-        method: 'toJSON'
-      }, callback, function(model_json, callback) {
+      return _this.model_type.each(_.extend({
+        $each: {
+          limit: DESTROY_BATCH_LIMIT,
+          json: true
+        }
+      }, query), (function(model_json, callback) {
         return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
           if (!err) {
             delete _this.store[model_json.id];
           }
           return callback(err);
         });
-      });
+      }), callback);
     });
   };
 
@@ -4765,7 +4994,7 @@ module.exports = Many = (function(_super) {
       this.foreign_key = inflection.foreign_key(this.as || this.model_type.model_name);
     }
     if (!this.collection_type) {
-      this.collection_type = Collection = (function(_super1) {
+      Collection = (function(_super1) {
         __extends(Collection, _super1);
 
         function Collection() {
@@ -4778,6 +5007,7 @@ module.exports = Many = (function(_super) {
         return Collection;
 
       })(Backbone.Collection);
+      this.collection_type = Collection;
     }
   }
 
@@ -6210,7 +6440,7 @@ module.exports = Schema = (function() {
   Dependencies: Backbone.js and Underscore.js.
 */
 
-var BATCH_DEFAULT_LIMIT, BATCH_DEFAULT_PARALLELISM, Backbone, DatabaseURL, INTERVAL_TYPES, Queue, S4, URL, Utils, inflection, modelExtensions, moment, _,
+var Backbone, DatabaseURL, Queue, S4, URL, Utils, inflection, modelExtensions, moment, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6234,44 +6464,44 @@ S4 = function() {
   return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 };
 
-BATCH_DEFAULT_LIMIT = 1500;
-
-BATCH_DEFAULT_PARALLELISM = 1;
-
-INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
-
 module.exports = Utils = (function() {
   function Utils() {}
 
-  Utils.bbCallback = function(callback) {
-    return {
-      success: (function(model, resp, options) {
-        return callback(null, model, resp, options);
-      }),
-      error: (function(model, resp, options) {
-        return callback(resp || new Error('Backbone call failed'), model, resp, options);
-      })
+  Utils.resetSchemas = function(model_types, options, callback) {
+    var failed_schemas, model_type, queue, _fn, _i, _j, _len, _len1, _ref;
+    if (arguments.length === 2) {
+      _ref = [{}, options], options = _ref[0], callback = _ref[1];
+    }
+    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
+      model_type = model_types[_i];
+      model_type.schema();
+    }
+    failed_schemas = [];
+    queue = new Queue(1);
+    _fn = function(model_type) {
+      return queue.defer(function(callback) {
+        return model_type.resetSchema(options, function(err) {
+          if (err) {
+            failed_schemas.push(model_type.model_name);
+            console.log("Error when dropping schema for " + model_type.model_name + ". " + err);
+          }
+          return callback();
+        });
+      });
     };
-  };
-
-  Utils.wrapOptions = function(options, callback) {
-    if (options == null) {
-      options = {};
+    for (_j = 0, _len1 = model_types.length; _j < _len1; _j++) {
+      model_type = model_types[_j];
+      _fn(model_type);
     }
-    if (_.isFunction(options)) {
-      options = Utils.bbCallback(options);
-    }
-    return _.defaults(Utils.bbCallback(function(err, model, resp, modified_options) {
-      return callback(err, model, resp, options);
-    }), options);
-  };
-
-  Utils.isModel = function(obj) {
-    return obj && obj.attributes && ((obj instanceof Backbone.Model) || (obj.parse && obj.fetch));
-  };
-
-  Utils.isCollection = function(obj) {
-    return obj && obj.models && ((obj instanceof Backbone.Collection) || (obj.reset && obj.fetch));
+    return queue.await(function(err) {
+      if (options.verbose) {
+        console.log("" + (model_types.length - failed_schemas.length) + " schemas dropped.");
+      }
+      if (failed_schemas.length) {
+        return callback(new Error("Failed to migrate schemas: " + (failed_schemas.join(', '))));
+      }
+      return callback();
+    });
   };
 
   Utils.deepClone = function(obj) {
@@ -6309,6 +6539,37 @@ module.exports = Utils = (function() {
 
   Utils.guid = function() {
     return S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4();
+  };
+
+  Utils.bbCallback = function(callback) {
+    return {
+      success: (function(model, resp, options) {
+        return callback(null, model, resp, options);
+      }),
+      error: (function(model, resp, options) {
+        return callback(resp || new Error('Backbone call failed'), model, resp, options);
+      })
+    };
+  };
+
+  Utils.wrapOptions = function(options, callback) {
+    if (options == null) {
+      options = {};
+    }
+    if (_.isFunction(options)) {
+      options = Utils.bbCallback(options);
+    }
+    return _.defaults(Utils.bbCallback(function(err, model, resp, modified_options) {
+      return callback(err, model, resp, options);
+    }), options);
+  };
+
+  Utils.isModel = function(obj) {
+    return obj && obj.attributes && ((obj instanceof Backbone.Model) || (obj.parse && obj.fetch));
+  };
+
+  Utils.isCollection = function(obj) {
+    return obj && obj.models && ((obj instanceof Backbone.Collection) || (obj.reset && obj.fetch));
   };
 
   Utils.get = function(model, key, default_value) {
@@ -6614,253 +6875,6 @@ module.exports = Utils = (function() {
         return -1;
       }
     }
-  };
-
-  Utils.resetSchemas = function(model_types, options, callback) {
-    var failed_schemas, model_type, queue, _fn, _i, _j, _len, _len1, _ref;
-    if (arguments.length === 2) {
-      _ref = [{}, options], options = _ref[0], callback = _ref[1];
-    }
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      model_type.schema();
-    }
-    failed_schemas = [];
-    queue = new Queue(1);
-    _fn = function(model_type) {
-      return queue.defer(function(callback) {
-        return model_type.resetSchema(options, function(err) {
-          if (err) {
-            failed_schemas.push(model_type.model_name);
-            console.log("Error when dropping schema for " + model_type.model_name + ". " + err);
-          }
-          return callback();
-        });
-      });
-    };
-    for (_j = 0, _len1 = model_types.length; _j < _len1; _j++) {
-      model_type = model_types[_j];
-      _fn(model_type);
-    }
-    return queue.await(function(err) {
-      if (options.verbose) {
-        console.log("" + (model_types.length - failed_schemas.length) + " schemas dropped.");
-      }
-      if (failed_schemas.length) {
-        return callback(new Error("Failed to migrate schemas: " + (failed_schemas.join(', '))));
-      }
-      return callback();
-    });
-  };
-
-  Utils.batch = function(model_type, query, options, callback, fn) {
-    var Cursor, batch_cursor, method, parallelism, parsed_query, processed_count, runBatch, _ref, _ref1;
-    Cursor = require('./cursor');
-    if (arguments.length === 3) {
-      _ref = [{}, {}, query, options], query = _ref[0], options = _ref[1], callback = _ref[2], fn = _ref[3];
-    }
-    if (arguments.length === 4) {
-      _ref1 = [{}, query, options, callback], query = _ref1[0], options = _ref1[1], callback = _ref1[2], fn = _ref1[3];
-    }
-    processed_count = 0;
-    parsed_query = Cursor.parseQuery(query);
-    parallelism = options.hasOwnProperty('parallelism') ? options.parallelism : BATCH_DEFAULT_PARALLELISM;
-    method = options.method || 'toModels';
-    runBatch = function(batch_cursor, callback) {
-      var cursor;
-      cursor = model_type.cursor(batch_cursor);
-      return cursor[method].call(cursor, function(err, models) {
-        var model, queue, _fn, _i, _len;
-        if (err || !models) {
-          return callback(new Error("Failed to get models. Error: " + err));
-        }
-        if (!models.length) {
-          return callback(null, processed_count);
-        }
-        queue = new Queue(parallelism);
-        _fn = function(model) {
-          return queue.defer(function(callback) {
-            return fn(model, callback);
-          });
-        };
-        for (_i = 0, _len = models.length; _i < _len; _i++) {
-          model = models[_i];
-          _fn(model);
-          processed_count++;
-          if (parsed_query.cursor.$limit && (processed_count >= parsed_query.cursor.$limit)) {
-            break;
-          }
-        }
-        return queue.await(function(err) {
-          if (err) {
-            return callback(err);
-          }
-          if (parsed_query.cursor.$limit && (processed_count >= parsed_query.cursor.$limit)) {
-            return callback(null, processed_count);
-          }
-          if (models.length < batch_cursor.$limit) {
-            return callback(null, processed_count);
-          }
-          batch_cursor.$offset += batch_cursor.$limit;
-          return runBatch(batch_cursor, callback);
-        });
-      });
-    };
-    batch_cursor = _.extend({
-      $limit: options.$limit || BATCH_DEFAULT_LIMIT,
-      $offset: parsed_query.cursor.$offset || 0,
-      $sort: parsed_query.cursor.$sort || 'id'
-    }, parsed_query.find);
-    return runBatch(batch_cursor, callback);
-  };
-
-  Utils.interval = function(model_type, query, options, callback, fn) {
-    var iteration_info, key, no_models, queue, range, _ref, _ref1;
-    if (arguments.length === 3) {
-      _ref = [{}, {}, query, options], query = _ref[0], options = _ref[1], callback = _ref[2], fn = _ref[3];
-    }
-    if (arguments.length === 4) {
-      _ref1 = [{}, query, options, callback], query = _ref1[0], options = _ref1[1], callback = _ref1[2], fn = _ref1[3];
-    }
-    if (!(key = options.key)) {
-      throw new Error('missing option: key');
-    }
-    if (!options.type) {
-      throw new Error('missing option: type');
-    }
-    if (!_.contains(INTERVAL_TYPES, options.type)) {
-      throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
-    }
-    iteration_info = _.clone(options);
-    if (!iteration_info.range) {
-      iteration_info.range = {};
-    }
-    range = iteration_info.range;
-    no_models = false;
-    queue = new Queue(1);
-    queue.defer(function(callback) {
-      var start;
-      if (!(start = range.$gte || range.$gt)) {
-        return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
-          if (err) {
-            return callback(err);
-          }
-          if (!models.length) {
-            no_models = true;
-            return callback();
-          }
-          range.start = iteration_info.first = models[0].get(key);
-          return callback();
-        });
-      } else {
-        range.start = start;
-        return model_type.findOneNearestDate(start, {
-          key: key,
-          reverse: true
-        }, query, function(err, model) {
-          if (err) {
-            return callback(err);
-          }
-          if (!model) {
-            no_models = true;
-            return callback();
-          }
-          iteration_info.first = model.get(key);
-          return callback();
-        });
-      }
-    });
-    queue.defer(function(callback) {
-      var end;
-      if (no_models) {
-        return callback();
-      }
-      if (!(end = range.$lte || range.$lt)) {
-        return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
-          if (err) {
-            return callback(err);
-          }
-          if (!models.length) {
-            no_models = true;
-            return callback();
-          }
-          range.end = iteration_info.last = models[0].get(key);
-          return callback();
-        });
-      } else {
-        range.end = end;
-        return model_type.findOneNearestDate(end, {
-          key: key
-        }, query, function(err, model) {
-          if (err) {
-            return callback(err);
-          }
-          if (!model) {
-            no_models = true;
-            return callback();
-          }
-          iteration_info.last = model.get(key);
-          return callback();
-        });
-      }
-    });
-    return queue.await(function(err) {
-      var length_ms, processed_count, runInterval, start_ms;
-      if (err) {
-        return callback(err);
-      }
-      if (no_models) {
-        return callback();
-      }
-      start_ms = range.start.getTime();
-      length_ms = moment.duration((_.isUndefined(options.length) ? 1 : options.length), options.type).asMilliseconds();
-      if (!length_ms) {
-        throw Error("length_ms is invalid: " + length_ms + " for range: " + (util.inspect(range)));
-      }
-      query = _.clone(query);
-      query.$sort = [key];
-      processed_count = 0;
-      iteration_info.index = 0;
-      runInterval = function(current) {
-        if (current.isAfter(range.end)) {
-          return callback();
-        }
-        query[key] = {
-          $gte: current.toDate(),
-          $lte: iteration_info.last
-        };
-        return model_type.findOne(query, function(err, model) {
-          var next;
-          if (err) {
-            return callback(err);
-          }
-          if (!model) {
-            return callback();
-          }
-          next = model.get(key);
-          iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
-          current = moment.utc(range.start).add({
-            milliseconds: iteration_info.index * length_ms
-          });
-          iteration_info.start = current.toDate();
-          next = current.clone().add({
-            milliseconds: length_ms
-          });
-          iteration_info.end = next.toDate();
-          query[key] = {
-            $gte: current.toDate(),
-            $lt: next.toDate()
-          };
-          return fn(query, iteration_info, function(err) {
-            if (err) {
-              return callback(err);
-            }
-            return runInterval(next);
-          });
-        });
-      };
-      return runInterval(moment(range.start));
-    });
   };
 
   return Utils;
