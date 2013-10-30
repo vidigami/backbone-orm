@@ -12,6 +12,7 @@ Backbone = require 'backbone'
 Queue = require '../queue'
 Utils = require './utils'
 
+# @private
 module.exports = class NodeUtils
 
   @findModels = (directory, options, callback) ->

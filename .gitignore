@@ -3,4 +3,4 @@ node_modules/
 _build/
 .DS_Store
 *.map
-_docs/
+docs/

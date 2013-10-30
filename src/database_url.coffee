@@ -13,7 +13,7 @@ SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'se
 
 module.exports = class DatabaseURL
 
-  # follow the convention of node url
+  # Create an instance. Arguments follow the convention of node url
   constructor: (url, parse_query_string, slashes_denote_host) ->
     url_parts = URL.parse(url, parse_query_string, slashes_denote_host)
 

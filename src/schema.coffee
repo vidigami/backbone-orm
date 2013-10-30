@@ -66,12 +66,14 @@ module.exports = class Schema
     name = inflection.pluralize(inflection.classify(url))
 
     try
+      # @private
       class JoinTable extends Backbone.Model
         @model_name: name
         urlRoot: "#{(new DatabaseURL(_.result(relation.model_type.prototype, 'url'))).format({exclude_table: true})}/#{url}"
         @schema: schema
         sync: relation.model_type.createSync(JoinTable)
     catch
+      # @private
       class JoinTable extends Backbone.Model
         @model_name: name
         urlRoot: "/#{url}"

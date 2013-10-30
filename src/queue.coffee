@@ -18,8 +18,10 @@ module.exports = class Queue
     @await_callback = callback
     @_callAwaiting() unless (@tasks.length + @running_count)
 
+  # @private
   _doneTask: (err) => @running_count--; @error or= err; @_runTasks()
 
+  # @private
   _runTasks: ->
     return @_callAwaiting() if @error or not (@tasks.length + @running_count)
 
@@ -28,6 +30,7 @@ module.exports = class Queue
       current = @tasks.shift(); @running_count++
       current(@_doneTask)
 
+  # @private
   _callAwaiting: ->
     return if @await_called or not @await_callback
     @await_called = true; @await_callback(@error)

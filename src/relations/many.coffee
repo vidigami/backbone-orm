@@ -20,8 +20,10 @@ module.exports = class Many extends require('./relation')
     @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     unless @collection_type
-      @collection_type = class Collection extends Backbone.Collection
+      # @private
+      class Collection extends Backbone.Collection
         model: @reverse_model_type
+      @collection_type = Collection
 
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)

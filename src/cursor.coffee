@@ -76,19 +76,10 @@ module.exports = class Cursor
 
   ##############################################
   # Execution of the Query
-  ##############################################
+
   count: (callback) -> @execWithCursorQuery('$count', 'toJSON', callback)
   exists: (callback) -> @execWithCursorQuery('$exists', 'toJSON', callback)
   toModel: (callback) -> @execWithCursorQuery('$one', 'toModels', callback)
-
-  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
-  execWithCursorQuery: (key, method, callback) ->
-    value = @_cursor[key]
-    @_cursor[key] = true
-    @[method] (err, json) =>
-      if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
-      callback(err, json)
-
   toModels: (callback) ->
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
 
@@ -148,7 +139,8 @@ module.exports = class Cursor
         else
           callback(null, json)
 
-  # @abstract Provided by a concrete cursor for a Backbone Sync type
+  # @private
+  # Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->
     throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
 
@@ -156,6 +148,18 @@ module.exports = class Cursor
   # Helpers
   ##############################################
 
+  # @private
+  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
+
+  # @private
+  execWithCursorQuery: (key, method, callback) ->
+    value = @_cursor[key]
+    @_cursor[key] = true
+    @[method] (err, json) =>
+      if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
+      callback(err, json)
+
+  # @private
   relatedModelTypesInQuery: =>
     related_fields = []
     related_model_types = []
@@ -181,6 +185,7 @@ module.exports = class Cursor
 #    console.log (m.name for m in related_model_types)
     return related_model_types
 
+  # @private
   selectResults: (json) ->
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
@@ -200,6 +205,7 @@ module.exports = class Cursor
 
     return if @_cursor.$one then (json[0] or null) else json
 
+  # @private
   selectFromModels: (models, callback) ->
     if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
@@ -210,6 +216,7 @@ module.exports = class Cursor
 
     return models
 
+  # @private
   prepareIncludes: (json, callback) ->
     return callback(null, json) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
     schema = @model_type.schema()

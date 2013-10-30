@@ -782,10 +782,10 @@ module.exports = (options, callback) ->
 #          queue = new Queue(1)
 #          queue.defer checkReverseFn(reverses0, owner0)
 #          queue.defer checkReverseFn(reverses1, owner1)
-#          assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
-#          assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
-#          assert.equal(1, reverses1[0].get('owners').models.length, "Reverse1_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
-#          assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+#          assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models.length)}")
+#          assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models.length)}")
+#          assert.equal(1, reverses1[0].get('owners').models.length, "Reverse1_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[0].get('owners').models.length)}")
+#          assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models.length)}")
 #
 #          queue.defer (callback) ->
 #            owner0.set({reverses: new_reverses0})
@@ -798,10 +798,10 @@ module.exports = (options, callback) ->
 #            assert.equal(2, owner0.get('reverses').models.length, "Owner0 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
 #            assert.equal(2, owner1.get('reverses').models.length, "Owner1 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
 #
-#            assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
+#            assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models.length)}")
 #            assert.equal(0, reverses0[1].get('owners').models.length, "Reverse0_1 has no owners.\nExpected: #{0}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
 #            assert.equal(2, reverses1[0].get('owners').models.length, "Reverse1_0 has 2 owners.\nExpected: #{2}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
-#            assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+#            assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models.length)}")
 #            callback()
 #
 #          # save and recheck
@@ -873,10 +873,10 @@ module.exports = (options, callback) ->
 #          queue = new Queue(1)
 #          queue.defer checkReverseFn(reverses0, owner0)
 #          queue.defer checkReverseFn(reverses1, owner1)
-#          assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
-#          assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
-#          assert.equal(1, reverses1[0].get('owners').models.length, "Reverse1_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
-#          assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+#          assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models.length)}")
+#          assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models.length)}")
+#          assert.equal(1, reverses1[0].get('owners').models.length, "Reverse1_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[0].get('owners').models.length)}")
+#          assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models.length)}")
 #
 #          queue.defer (callback) ->
 #            reverses = owner0.get('reverses')
@@ -891,10 +891,10 @@ module.exports = (options, callback) ->
 #            assert.equal(3, owner0.get('reverses').models.length, "Owner0 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner0.get('reverses').models.length)}")
 #            assert.equal(2, owner1.get('reverses').models.length, "Owner1 has 2 reverses.\nExpected: #{2}.\nActual: #{util.inspect(owner1.get('reverses').models.length)}")
 #
-#            assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models)}")
-#            assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models)}")
+#            assert.equal(1, reverses0[0].get('owners').models.length, "Reverse0_0 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[0].get('owners').models.length)}")
+#            assert.equal(1, reverses0[1].get('owners').models.length, "Reverse0_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses0[1].get('owners').models.length)}")
 #            assert.equal(2, reverses1[0].get('owners').models.length, "Reverse1_0 has 2 owners.\nExpected: #{2}.\nActual: #{util.inspect(reverses1[0].get('owners').models)}")
-#            assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models)}")
+#            assert.equal(1, reverses1[1].get('owners').models.length, "Reverse1_1 has 1 owner.\nExpected: #{1}.\nActual: #{util.inspect(reverses1[1].get('owners').models.length)}")
 #            callback()
 #
 #          # save and recheck

@@ -43,6 +43,7 @@ module.exports = class MemoryStore
     callback?()
     return @
 
+  # @private
   _normalizeKey: (key) ->
     key = inflection.underscore(key)
     return key.toLowerCase() if key.indexOf('_') < 0
