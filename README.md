@@ -2,9 +2,119 @@
 
 ![logo](https://github.com/vidigami/backbone-orm/raw/master/media/logo.png)
 
-A polystore ORM for Node.js and the browser.
+BackboneORM and all of its variants were designed to provide a consistent and flexible across Node.js and the browser.
 
-Please [checkout the website](http://vidigami.github.io/backbone-orm/) for examples, documentation, and community!
+It was inspired by other great software and provides:
+
+* Node.js-style callbacks and streams for a familiar asynchronous programming style
+* MongoDB-like query language to easily slice-and-dice your data
+* REST controller for browser search bar queires like CouchDB
+
+Other great things:
+
+* it provides a JSON-rendering DSL
+* it solves the dreaded Node.js circular dependencies problem for related models
+* it is compatible with [Knockback.js](http://kmalakoff.github.io/knockback/)
+* it parses IS6801 dates automatically
+* BackboneMongo provides a CouchDB-like '_rev' versioning solution
+* BackboneREST provides authorization middleware hooks and emits REST events
+
+
+#### Examples (CoffeeScript)
+
+```
+# Find the Project with id = 123
+Project.findOne {id: 123}, (err, project) ->
+
+# Find the first Project named 'my kickass project'
+Project.findOne {name: 'my kickass project'}, (err, project) ->
+
+# Find all items with is_active = true
+Project.find {is_active: true}, (err, projects) ->
+
+# Find the items with an id of 1, 2 or 3
+Project.find {id: {$in: [1, 2, 3]}}, (err, projects) ->
+
+# A shortcut for `$in` when we're working with ids
+Project.find {$ids: [1, 2, 3]}, (err, projects) ->
+
+# Select named properties from each model
+Project.find {$select: ['created_at', 'name']}, (err, array_of_json) ->
+
+# Select values in the specified order
+Project.find {$values: ['created_at', 'status']}, (err, array_of_arrays) ->
+
+# Iterate through all items with is_active = true in batches of 200
+Project.each {is_active: true, $each: {fetch: 200}},
+  ((project, callback) -> console.log "project: #{project.get('name')}"; callback()),
+  (err) -> console.log 'Done'
+
+# Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', -> console.log 'Done')
+
+# Collect the status of tasks over days
+stats = []
+Task.interval {$interval: {key: 'created_at', type: 'days', length: 1}},
+  ((query, info, callback) ->
+    histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', -> stats.push(histogram.summary()); callback())
+  ),
+  (err) -> console.log 'Done'
+```
+
+#### Examples (JavaScript)
+
+```
+// Find the Project with id = 123
+Project.findOne({id: 123}, function(err, project) { /* ... */ });
+
+// Find the first Project named 'my kickass project'
+Project.findOne({name: 'my kickass project'}, function(err, project) { /* ... */ });
+
+// Find all items with is_active = true
+Project.find({is_active: true}, function(err, projects) { /* ... */ });
+
+// Find the items with an id of 1, 2 or 3
+Project.find({id: {$in: [1, 2, 3]}}, function(err, projects) { /* ... */ });
+
+// A shortcut for `$in` when we're working with ids
+Project.find({$ids: [1, 2, 3]}, function(err, projects) { /* ... */ });
+
+// Select named properties from each model
+Project.find({$select: ['created_at', 'name']}, function(err, array_of_json) {});
+
+// Select values in the specified order
+Project.find({$values: ['created_at', 'status']}, function(err, array_of_arrays) {});
+
+// Iterate through all items with is_active = true in batches of 200
+Project.each({is_active: true, $each: {fetch: 200}},
+  function(project, callback) {console.log('project: ' + project.get('name')); callback()},
+  function(err) {return console.log('Done');}
+);
+
+// Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', function() {return console.log('Done');});
+
+var stats = [];
+Task.interval({$interval: {key: 'created_at', type: 'days', length: 1}},
+  function(query, info, callback) {
+    var histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', function() {stats.push(histogram.summary()); return callback();});
+  },
+  function(err) { return console.log('Done'); }
+);
+```
+
+
+Please [checkout the website](http://vidigami.github.io/backbone-orm/) for installation instructions, examples, documentation, and community!
 
 
 ### For Contributors
