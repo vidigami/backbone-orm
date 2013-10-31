@@ -115,12 +115,108 @@
         </p>
       </nav>
       <div id='filecontents'>
-        <p><a href="http://travis-ci.org/vidigami/backbone-orm"><img src="https://secure.travis-ci.org/vidigami/backbone-orm.png" alt="Build Status"></a></p><p><img src="https://github.com/vidigami/backbone-orm/raw/master/media/logo.png" alt="logo"></p><p>A polystore ORM for Node.js and the browser.</p><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for examples, documentation, and community!</p><h3>For Contributors</h3><p>To build the library for Node.js:</p><p>  $ npm run build</p><p>To build the library for the browser:</p><p>  $ grunt</p><p>Please run tests before submitting a pull request.</p><p>  $ npm test</p>
+        <p><a href="http://travis-ci.org/vidigami/backbone-orm"><img src="https://secure.travis-ci.org/vidigami/backbone-orm.png" alt="Build Status"></a></p><p><img src="https://github.com/vidigami/backbone-orm/raw/master/media/logo.png" alt="logo"></p><p>BackboneORM and all of its variants were designed to provide a consistent and flexible across Node.js and the browser.</p><p>It was inspired by other great software and provides:</p><ul>
+<li>Node.js-style callbacks and streams for a familiar asynchronous programming style</li>
+<li>MongoDB-like query language to easily slice-and-dice your data</li>
+<li>REST controller for browser search bar queires like CouchDB</li>
+</ul><p>Other great things:</p><ul>
+<li>it provides a JSON-rendering DSL</li>
+<li>it solves the dreaded Node.js circular dependencies problem for related models</li>
+<li>it is compatible with <a href="http://kmalakoff.github.io/knockback/">Knockback.js</a></li>
+<li>it parses IS6801 dates automatically</li>
+<li>BackboneMongo provides a CouchDB-like &#39;_rev&#39; versioning solution</li>
+<li>BackboneREST provides authorization middleware hooks and emits REST events</li>
+</ul>
+<h4>Examples (CoffeeScript)</h4>
+<pre><code># Find the Project with id = 123
+Project.findOne {id: 123}, (err, project) -&gt;
+
+# Find the first Project named &#39;my kickass project&#39;
+Project.findOne {name: &#39;my kickass project&#39;}, (err, project) -&gt;
+
+# Find all items with is_active = true
+Project.find {is_active: true}, (err, projects) -&gt;
+
+# Find the items with an id of 1, 2 or 3
+Project.find {id: {$in: [1, 2, 3]}}, (err, projects) -&gt;
+
+# A shortcut for `$in` when we&#39;re working with ids
+Project.find {$ids: [1, 2, 3]}, (err, projects) -&gt;
+
+# Select named properties from each model
+Project.find {$select: [&#39;created_at&#39;, &#39;name&#39;]}, (err, array_of_json) -&gt;
+
+# Select values in the specified order
+Project.find {$values: [&#39;created_at&#39;, &#39;status&#39;]}, (err, array_of_arrays) -&gt;
+
+# Iterate through all items with is_active = true in batches of 200
+Project.each {is_active: true, $each: {fetch: 200}},
+  ((project, callback) -&gt; console.log &quot;project: #{project.get(&#39;name&#39;)}&quot;; callback()),
+  (err) -&gt; console.log &#39;Done&#39;
+
+# Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on(&#39;finish&#39;, -&gt; console.log &#39;Done&#39;)
+
+# Collect the status of tasks over days
+stats = []
+Task.interval {$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, length: 1}},
+  ((query, info, callback) -&gt;
+    histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: [&#39;created_at&#39;, &#39;status&#39;]}))
+      .pipe(histogram)
+      .on(&#39;finish&#39;, -&gt; stats.push(histogram.summary()); callback())
+  ),
+  (err) -&gt; console.log &#39;Done&#39;</code></pre>
+<h4>Examples (JavaScript)</h4>
+<pre><code>// Find the Project with id = 123
+Project.findOne({id: 123}, function(err, project) { /* ... */ });
+
+// Find the first Project named &#39;my kickass project&#39;
+Project.findOne({name: &#39;my kickass project&#39;}, function(err, project) { /* ... */ });
+
+// Find all items with is_active = true
+Project.find({is_active: true}, function(err, projects) { /* ... */ });
+
+// Find the items with an id of 1, 2 or 3
+Project.find({id: {$in: [1, 2, 3]}}, function(err, projects) { /* ... */ });
+
+// A shortcut for `$in` when we&#39;re working with ids
+Project.find({$ids: [1, 2, 3]}, function(err, projects) { /* ... */ });
+
+// Select named properties from each model
+Project.find({$select: [&#39;created_at&#39;, &#39;name&#39;]}, function(err, array_of_json) {});
+
+// Select values in the specified order
+Project.find({$values: [&#39;created_at&#39;, &#39;status&#39;]}, function(err, array_of_arrays) {});
+
+// Iterate through all items with is_active = true in batches of 200
+Project.each({is_active: true, $each: {fetch: 200}},
+  function(project, callback) {console.log(&#39;project: &#39; + project.get(&#39;name&#39;)); callback()},
+  function(err) {return console.log(&#39;Done&#39;);}
+);
+
+// Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on(&#39;finish&#39;, function() {return console.log(&#39;Done&#39;);});
+
+var stats = [];
+Task.interval({$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, length: 1}},
+  function(query, info, callback) {
+    var histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: [&#39;created_at&#39;, &#39;status&#39;]}))
+      .pipe(histogram)
+      .on(&#39;finish&#39;, function() {stats.push(histogram.summary()); return callback();});
+  },
+  function(err) { return console.log(&#39;Done&#39;); }
+);</code></pre><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for installation instructions, examples, documentation, and community!</p><h3>For Contributors</h3><p>To build the library for Node.js:</p><p>  $ npm run build</p><p>To build the library for the browser:</p><p>  $ grunt</p><p>Please run tests before submitting a pull request.</p><p>  $ npm test</p>
       </div>
     </div>
     <div id='footer'>
   Generated on
-  Thu Oct 31 2013 16:14:22 GMT-0700 (PDT)
+  Thu Oct 31 2013 16:35:51 GMT-0700 (PDT)
   by
   <a href='https://github.com/netzpirat/codo' title='CoffeeScript API documentation generator'>Codo</a>
   v1.7.2
