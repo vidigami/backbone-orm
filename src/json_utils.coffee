@@ -60,7 +60,7 @@ module.exports = class JSONUtils
   #   query = JSONUtils.toQuery(json)
   #
   @toQuery: (values, depth=0) ->
-    return null if _.isNull(values)
+    return 'null' if _.isNull(values)
     return JSON.stringify(values) if _.isArray(values)
     return values.toJSON() if _.isDate(values) or values.toJSON
     if _.isObject(values)

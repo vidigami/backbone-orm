@@ -3925,7 +3925,7 @@ module.exports = JSONUtils = (function() {
       depth = 0;
     }
     if (_.isNull(values)) {
-      return null;
+      return 'null';
     }
     if (_.isArray(values)) {
       return JSON.stringify(values);
