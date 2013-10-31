@@ -1,0 +1,47 @@
+
+<div class="row">
+  <div class="col-lg-5 col-md-5"><h3>Callbacks</h3>
+
+<p>Use Node or Backbone style callbacks as you please (even on the client).</p>
+
+<p><code>save</code>, <code>destroy</code> and <code>fetch</code> work just like you expect from plain Backbone.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row example coffeescript">
+      <pre><code class="language-coffeescript"># Node style
+project.save (err, project) ->
+  return console.log 'Oh no an error' if err
+  console.log "We're saved!"
+
+# Backbone style
+project.save {
+  success: (project) ->
+    console.log "We're saved!"
+  error: (project, err) ->
+    console.log 'Oh no an error'
+}
+</code></pre>
+    </div>
+    <div class="row example javascript">
+      <pre><code class="language-javascript">// Node style
+project.save(function(err, project) {
+  if (err) {
+    return console.log('Oh no an error');
+  }
+  return console.log("We're saved!");
+});
+
+// Backbone style
+project.save({
+  success: function(project) {
+    return console.log("We're saved!");
+  },
+  error: function(project, err) {
+    return console.log('Oh no an error');
+  }
+});
+</code></pre>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+
+<div class="row">
+  <div class="col-lg-5 col-md-5"><h3>Relation options</h3>
+
+<p>Sometimes we&#39;ll want to treat certain relations differently, the following options are available:</p>
+
+<ul><li><code>manual_fetch</code>: By default BackbonORM will load related models whenever they are accessed. To turn off this behavior
+and manually retrieve related models, pass <code>manual_fetch: true</code> as an option to the relation.</li><li><code>virtual</code>: By default, BackbonORM will ensure that changes to relations in memory are persisted to the respective store.
+This may result in <code>hasOne</code>, <code>hasMany</code> and <code>manyToMany</code> relations being loaded in order to update their foreign keys.
+To turn off this behavior and manually manage model relations, pass <code>virtual: true</code> as an option to the relation.
+This is particularly useful when you wish to use models that do not have a store representation (e.g. they may be on
+the client).</li><li><code>embed</code>: By default, relations are given their own storage representation (collection/table/endpoint). To indicate that
+a model should only be saved as embedded json in a parent model pass <code>embed: true</code> as an option to the relation.</li></ul>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row example coffeescript">
+      <pre><code class="language-coffeescript">MongoSync = require('backbone-mongo').Sync
+
+# manual_fetch: Tasks will not be loaded when accessing a projects tasks property
+class Project extends Backbone.Model
+  urlRoot: "mongodb://localhost:27017/projects"
+  schema:
+    tasks: -> ['hasMany', Task, manual_fetch: true]
+  sync: MongoSync(Project)
+
+# virtual: Tasks will not have their foreign keys updated automatically if a project is deleted
+#          or it has its tasks changed while some are not loaded to memory
+class Project extends Backbone.Model
+  urlRoot: "mongodb://localhost:27017/projects"
+  schema:
+    tasks: -> ['hasMany', Task, virtual: true]
+  sync: MongoSync(Project)
+
+# embed: Tasks will be saved as an embedded document in each project
+class Project extends Backbone.Model
+  urlRoot: "mongodb://localhost:27017/projects"
+  schema:
+    tasks: -> ['hasMany', Task, embed: true]
+  sync: MongoSync(Project)
+</code></pre>
+    </div>
+    <div class="row example javascript">
+      <pre><code class="language-javascript">var MongoSync = require('backbone-mongo').Sync;
+
+// manual_fetch: Tasks will not be loaded when accessing a projects tasks property
+var Project = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/projects',
+  schema: {
+    tasks: function() { return ['hasMany', Task, {manual_fetch: true}]; }
+  }
+});
+Project.prototype.sync = MongoSync(Project);
+
+// virtual: Tasks will not have their foreign keys updated automatically if a project is deleted
+//          or it has its tasks changed while some are not loaded to memory
+var Project = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/projects',
+  schema: {
+    tasks: function() { return ['hasMany', Task, {virtual: true}]; }
+  }
+});
+
+// embed: Tasks will be saved as an embedded document in each project
+var Project = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/projects',
+  schema: {
+    tasks: function() { return ['hasMany', Task, {embed: true}]; }
+  }
+});
+</code></pre>
+    </div>
+  </div>
+</div>

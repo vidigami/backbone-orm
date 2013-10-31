@@ -1,0 +1,29 @@
+
+<div class="row">
+  <div class="col-lg-5 col-md-5"><h3>BackboneRest and BackboneHTTP</h3>
+
+<p>BackboneRest provides a RESTful controller for JSON APIs from Node.js.</p>
+
+<p>BackboneHTTP provides an interface for consuming JSON APIs through HTTP.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row example coffeescript">
+      <pre><code class="language-coffeescript">class Task extends Backbone.Model
+  url: '/tasks'
+  sync: require('backbone-sql').sync(Task)
+
+new RestController(app, {model_type: Task, route: '/tasks'})
+</code></pre>
+    </div>
+    <div class="row example javascript">
+      <pre><code class="language-javascript">var Task = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/tasks'
+});
+Task.prototype.sync = require('backbone-mongo').sync(Task);
+
+new RestController(app, {model_type: Task, route: '/tasks'});
+</code></pre>
+    </div>
+  </div>
+</div>
