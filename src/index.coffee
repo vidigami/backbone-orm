@@ -37,3 +37,6 @@ module.exports =
   Schema: require './schema'
   ConnectionPool: require './connection_pool'
   CacheSingletons: require './cache/singletons'
+
+# re-expose modules
+try module.exports.modules.stream = require('stream') catch e
