@@ -18,7 +18,7 @@ module.exports = (options, callback) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
   describe "Backbone Sync (cache: #{options.cache}, query_cache: #{options.query_cache})", ->

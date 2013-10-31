@@ -28,7 +28,7 @@ RELATION_VARIANTS =
 # @private
 module.exports = class Schema
   constructor: (@model_type) ->
-    @raw = _.clone(_.result(@model_type, 'schema') or {})
+    @raw = _.clone(_.result(new @model_type(), 'schema') or {})
     @fields ={}; @relations ={}; @virtual_accessors = {}
 
   initialize: ->
@@ -81,16 +81,16 @@ module.exports = class Schema
     try
       # @private
       class JoinTable extends Backbone.Model
-        @model_name: name
+        model_name: name
         urlRoot: "#{(new DatabaseURL(_.result(relation.model_type.prototype, 'url'))).format({exclude_table: true})}/#{url}"
-        @schema: schema
+        schema: schema
         sync: relation.model_type.createSync(JoinTable)
     catch
       # @private
       class JoinTable extends Backbone.Model
-        @model_name: name
+        model_name: name
         urlRoot: "/#{url}"
-        @schema: schema
+        schema: schema
         sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable

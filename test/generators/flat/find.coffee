@@ -23,7 +23,7 @@ module.exports = (options, callback) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: _.defaults({
+    schema: _.defaults({
       boolean: 'Boolean'
     }, BASE_SCHEMA)
     sync: SYNC(Flat)

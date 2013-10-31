@@ -20,19 +20,19 @@ module.exports = (options, callback) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: BASE_SCHEMA
+    schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
-    @schema: _.defaults({
+    schema: _.defaults({
       owner: -> ['belongs_to', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
-    @schema: _.defaults({
+    schema: _.defaults({
       flat: -> ['BelongsTo', Flat, embed: options.embed]
       reverse: -> ['has_one', Reverse]
     }, BASE_SCHEMA)

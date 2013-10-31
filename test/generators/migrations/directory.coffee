@@ -28,13 +28,13 @@ module.exports = (options, callback) ->
 
   # pre-configure
   Reverse::urlRoot = "#{DATABASE_URL}/reverses"
-  Reverse.schema = _.defaults({
+  Reverse::schema = _.defaults({
     owners: -> ['hasMany', Owner]
   }, BASE_SCHEMA)
   Reverse::sync = SYNC(Reverse)
 
   Owner::urlRoot = "#{DATABASE_URL}/owners"
-  Owner.schema = _.defaults({
+  Owner::schema = _.defaults({
     reverses: -> ['hasMany', Reverse]
   }, BASE_SCHEMA)
   Owner::sync = SYNC(Owner)

@@ -4,6 +4,6 @@ Queue = require '../../lib/queue'
 # beforeEach should return the models_json for the current run
 module.exports = (options, callback) ->
   queue = new Queue(1)
-  queue.defer (callback) -> require('./cache/options')(options, callback)
+  # queue.defer (callback) -> require('./cache/options')(options, callback)
   queue.defer (callback) -> require('./cache/query')(options, callback)
   queue.await callback

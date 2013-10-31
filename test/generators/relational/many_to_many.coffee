@@ -21,14 +21,14 @@ module.exports = (options, callback) ->
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
-    @schema: _.defaults({
+    schema: _.defaults({
       owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
-    @schema: _.defaults({
+    schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
     sync: SYNC(Owner)

@@ -194,8 +194,8 @@ module.exports = class JSONUtils
             model[args.method].apply(model, fn_args)
 
           else
-            console.trace "Unknown DSL action: #{key}: #{util.inspect(args)}"
-            return callback(new Error "Unknown DSL action: #{key}: #{util.inspect(args)}")
+            console.trace "Unknown DSL action: #{key}: ", args
+            return callback(new Error "Unknown DSL action: #{key}: ", args)
 
     queue.await (err) -> callback(err, if err then undefined else result)
 

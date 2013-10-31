@@ -15,7 +15,7 @@
     "build": "coffee -o lib -c src",
     "watch": "coffee -o lib -w src",
     "clean": "rm -rf lib/*",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build; grunt"
   },
   "devDependencies": {
     "coffee-script": "*",

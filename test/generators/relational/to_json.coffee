@@ -20,7 +20,7 @@ module.exports = (options, callback) ->
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
-    @schema: _.defaults({
+    schema: _.defaults({
       owner: -> ['hasOne', Owner]
     }, BASE_SCHEMA)
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
@@ -28,14 +28,14 @@ module.exports = (options, callback) ->
 
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
-    @schema: _.defaults({
+    schema: _.defaults({
       owner: -> ['belongsTo', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/owners"
-    @schema: _.defaults({
+    schema: _.defaults({
       flat: -> ['belongsTo', Flat]
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)

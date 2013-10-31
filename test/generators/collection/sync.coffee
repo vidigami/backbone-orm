@@ -18,7 +18,7 @@ module.exports = (options, callback) ->
 
   class Model extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/models"
-    @schema: BASE_SCHEMA
+    schema: BASE_SCHEMA
     sync: SYNC(Model)
 
   describe "Backbone.Collection (cache: #{options.cache}, query_cache: #{options.query_cache})", ->

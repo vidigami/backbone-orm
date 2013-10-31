@@ -24,7 +24,7 @@ STORES = {}
 #
 # @example How to configure using a model name
 #   class Thing extends Backbone.Model
-#     @model_name: 'Thing'
+#     model_name: 'Thing'
 #     sync: require('backbone-orm').sync(Thing)
 #
 # @example How to configure using a url
