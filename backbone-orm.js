@@ -4090,8 +4090,8 @@ module.exports = JSONUtils = (function() {
             });
             return model[args.method].apply(model, fn_args);
           } else {
-            console.trace("Unknown DSL action: " + key + ": " + (util.inspect(args)));
-            return callback(new Error("Unknown DSL action: " + key + ": " + (util.inspect(args))));
+            console.trace("Unknown DSL action: " + key + ": ", args);
+            return callback(new Error("Unknown DSL action: " + key + ": ", args));
           }
         }
       });
@@ -6216,7 +6216,7 @@ RELATION_VARIANTS = {
 module.exports = Schema = (function() {
   function Schema(model_type) {
     this.model_type = model_type;
-    this.raw = _.clone(_.result(this.model_type, 'schema') || {});
+    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
     this.fields = {};
     this.relations = {};
     this.virtual_accessors = {};
@@ -6325,13 +6325,13 @@ module.exports = Schema = (function() {
           return _ref;
         }
 
-        JoinTable.model_name = name;
+        JoinTable.prototype.model_name = name;
 
         JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(relation.model_type.prototype, 'url'))).format({
           exclude_table: true
         })) + "/" + url;
 
-        JoinTable.schema = schema;
+        JoinTable.prototype.schema = schema;
 
         JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
 
@@ -6347,11 +6347,11 @@ module.exports = Schema = (function() {
           return _ref1;
         }
 
-        JoinTable.model_name = name;
+        JoinTable.prototype.model_name = name;
 
         JoinTable.prototype.urlRoot = "/" + url;
 
-        JoinTable.schema = schema;
+        JoinTable.prototype.schema = schema;
 
         JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
 
