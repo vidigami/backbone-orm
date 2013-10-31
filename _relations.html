@@ -1,5 +1,5 @@
 
-<div class="row">
+<div class="row block">
   <div class="col-lg-5 col-md-5"><h3>Relations</h3>
 
 <p>Backbone-ORM allows you to create relations to use with any backend</p>
@@ -21,13 +21,13 @@ If it is already loaded it will also be returned directly.</p>
       <pre><code class="language-coffeescript">MongoSync = require('backbone-mongo').sync
 
 class Project extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/projects"
+  urlRoot: 'mongodb://localhost:27017/projects'
   schema:
     tasks: -> ['hasMany', Task]
   sync: MongoSync(Project)
 
 class Task extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/tasks"
+  urlRoot: 'mongodb://localhost:27017/tasks'
   schema:
     project: -> ['belongsTo', Project]
   sync: MongoSync(Task)

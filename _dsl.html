@@ -1,0 +1,35 @@
+
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h3>JSON DSL</h3>
+
+<p>BackboneORM provides a DSL for rendering JSON. It is consistent with BackboneORM&#39;s query syntax and BackboneREST&#39;s url-based query language.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row block example coffeescript">
+      <pre><code class="language-coffeescript">new RestController(app, {
+  model_type: Task
+  route: '/tasks'
+  templates:
+    show: {$select: ['id', 'name']}
+    show_with_stuff: {$select: ['id', 'name', 'stuff']}
+  default_template: 'show'
+})
+</code></pre>
+    </div>
+    <div class="row block example javascript">
+      <pre><code class="language-javascript">var RestController = require('backbone-rest');
+
+new RestController(app, {
+  model_type: Task,
+  route: '/tasks',
+  templates: {
+    show: { $select: ['id', 'name'] },
+    show_with_stuff: { $select: ['id', 'name', 'stuff']}
+  },
+  default_template: 'show'
+});
+</code></pre>
+    </div>
+  </div>
+</div>

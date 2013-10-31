@@ -41,7 +41,7 @@
         <p class="hidden-sm hidden-xs"><img src="./images/backbone-orm-logo-large.png"></p>
         <p class="hidden-lg hidden-md"><img src="./images/backbone_orm-logo-small.png"></p>
         <p class="subtitle">A polystore ORM for Node.js and the browser</p>
-        <div class="row">
+        <div class="row block">
           <div class="col-lg-6 col-md-6">
             <h2>Install</h2>
             <pre><code>npm install backbone-orm</code></pre>
@@ -54,11 +54,22 @@
     </div>
   </div>
   <div class="container main">
-    <div class="row">
-      <div class="col-lg-5 col-md-5"><h3>Introduction</h3>
+    <div class="row block">
+      <div class="col-lg-12 col-md-12">
+        <h3>Introduction</h3>
+      </div>
+      <div class="col-lg-6 col-md-6"><p>BackboneORM and all of its variants were designed to provide a consistent and flexible across Node.js and the browser.</p>
+
+<p>It was inspired by other great software and provides:</p>
+
+<ul><li>Node.js-style callbacks and streams for a familiar asynchronous programming style</li><li>MongoDB-like query language to easily slice-and-dice your data</li><li>REST controller for browser search bar queires like CouchDB</li></ul>
+      </div>
+      <div class="col-lg-6 col-md-6"><p>Other great things:</p>
+
+<ul><li>it provides a JSON-rendering DSL</li><li>it solves the dreaded Node.js circular dependencies problem for related models</li><li>it is compatible with <a href="http://kmalakoff.github.io/knockback/">Knockback.js</a></li><li>it parses IS6801 dates automatically</li><li>BackboneMongo provides a CouchDB-like &#39;_rev&#39; versioning solution</li><li>BackboneREST provides authorization middleware hooks and emits REST events</li></ul>
       </div>
     </div>
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Getting Started</h3>
 
 <p>BackboneORM lets you use basic backbone models. To make them all ORM-y, we override the Backbone <code>sync</code> property
@@ -70,27 +81,21 @@ models, so we don&#39;t need to specify an <code>urlRoot</code>. Usually we will
       <div class="col-lg-7 col-md-7">
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
-          <pre><code class="language-coffeescript"># in the browser: MemorySync = Backbone.ORM.sync
-MemorySync = require('backbone-orm').sync
-
-class Project extends Backbone.Model
+          <pre><code class="language-coffeescript">class Project extends Backbone.Model
   urlRoot: '/projects'
-  sync: MemorySync(Project)
+  sync: require('backbone-orm').sync(Project)
 </code></pre>
         </div>
         <div class="row example javascript">
-          <pre><code class="language-javascript">// in the browser: var MemorySync = Backbone.ORM.sync;
-var MemorySync = require('backbone-orm').sync;
-
-var Project = Backbone.Model.extend({
-  urlRoot: ''
+          <pre><code class="language-javascript">var Project = Backbone.Model.extend({
+  urlRoot: '/projects'
 });
-Project.prototype.sync = MemorySync(Project);
+Project.prototype.sync = require('backbone-orm').sync(Project);
 </code></pre>
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Persisting models</h3>
 
 <p>Now, in-memory models are all well and good, but that&#39;s not what we&#39;re here for. To persist our models we need to provide
@@ -105,19 +110,18 @@ a bit more information, namely filling in the <code>urlRoot</code> property.</p>
         <div class="row example coffeescript">
           <pre><code class="language-coffeescript">class Project extends Backbone.Model
   urlRoot: 'mongodb://localhost:27017/projects'
-  sync: MongoSync(Project)
+  sync: require('backbone-mongo').sync(Project)
 </code></pre>
         </div>
         <div class="row example javascript">
           <pre><code class="language-javascript">var Project = Backbone.Model.extend({
   urlRoot: 'mongodb://localhost:27017/projects'
 });
-Project.prototype.sync = MongoSync(Project);
-</code></pre>
+Project.prototype.sync = require('backbone-mongo').sync(Project);</code></pre>
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Callbacks</h3>
 
 <p>Use Node or Backbone style callbacks as you please (even on the client).</p>
@@ -163,7 +167,7 @@ project.save({
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Relations</h3>
 
 <p>Backbone-ORM allows you to create relations to use with any backend</p>
@@ -185,13 +189,13 @@ If it is already loaded it will also be returned directly.</p>
           <pre><code class="language-coffeescript">MongoSync = require('backbone-mongo').sync
 
 class Project extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/projects"
+  urlRoot: 'mongodb://localhost:27017/projects'
   schema:
     tasks: -> ['hasMany', Task]
   sync: MongoSync(Project)
 
 class Task extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/tasks"
+  urlRoot: 'mongodb://localhost:27017/tasks'
   schema:
     project: -> ['belongsTo', Project]
   sync: MongoSync(Task)
@@ -242,7 +246,7 @@ Project.findOne({name: 'My project', $include: 'tasks'}, function(err, project) 
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Relation options</h3>
 
 <p>Sometimes we&#39;ll want to treat certain relations differently, the following options are available:</p>
@@ -262,7 +266,7 @@ a model should only be saved as embedded json in a parent model pass <code>embed
 
 # manual_fetch: Tasks will not be loaded when accessing a projects tasks property
 class Project extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/projects"
+  urlRoot: 'mongodb://localhost:27017/projects'
   schema:
     tasks: -> ['hasMany', Task, manual_fetch: true]
   sync: MongoSync(Project)
@@ -270,14 +274,14 @@ class Project extends Backbone.Model
 # virtual: Tasks will not have their foreign keys updated automatically if a project is deleted
 #          or it has its tasks changed while some are not loaded to memory
 class Project extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/projects"
+  urlRoot: 'mongodb://localhost:27017/projects'
   schema:
     tasks: -> ['hasMany', Task, virtual: true]
   sync: MongoSync(Project)
 
 # embed: Tasks will be saved as an embedded document in each project
 class Project extends Backbone.Model
-  urlRoot: "mongodb://localhost:27017/projects"
+  urlRoot: 'mongodb://localhost:27017/projects'
   schema:
     tasks: -> ['hasMany', Task, embed: true]
   sync: MongoSync(Project)
@@ -315,8 +319,10 @@ var Project = Backbone.Model.extend({
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-lg-5 col-md-5"><h3>Unified query syntax</h3>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>MongoDB, SQL, and HTTP</h3>
+
+<p>Irregardless of the BackboneORM variant and whether you are in the browser or on the server, you can query your models using an identical syntax.</p>
       </div>
       <div class="col-lg-7 col-md-7">
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
@@ -335,6 +341,12 @@ Project.find {id: {$in: [1, 2, 3]}}, (err, projects) ->
 
 # A shortcut for `$in` when we're working with ids
 Project.find {$ids: [1, 2, 3]}, (err, projects) ->
+
+# Select named properties from each model
+Project.find {$select: ['created_at', 'name']}, (err, array_of_json) ->
+
+# Select values in the specified order
+Project.find {$values: ['created_at', 'status']}, (err, array_of_arrays) ->
 </code></pre>
         </div>
         <div class="row example javascript">
@@ -352,23 +364,110 @@ Project.find({id: {$in: [1, 2, 3]}}, function(err, projects) { /* ... */ });
 
 // A shortcut for `$in` when we're working with ids
 Project.find({$ids: [1, 2, 3]}, function(err, projects) { /* ... */ });
+
+// Select named properties from each model
+Project.find({$select: ['created_at', 'name']}, function(err, array_of_json) {});
+
+// Select values in the specified order
+Project.find({$values: ['created_at', 'status']}, function(err, array_of_arrays) {});
 </code></pre>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-lg-5 col-md-5"><h3>BackboneRest and BackboneHTTP</h3>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>Iteration</h3>
 
-<p>BackboneRest provides a RESTful controller for JSON APIs from Node.js.</p>
-
-<p>BackboneHTTP provides an interface for consuming JSON APIs through HTTP.</p>
+<p>Using <code>each</code>, <code>stream</code>, and <code>interval</code>, you can iterate over your models in a way that suits the problem you are trying to solve.</p>
       </div>
       <div class="col-lg-7 col-md-7">
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
+          <pre><code class="language-coffeescript"># Iterate through all items with is_active = true in batches of 200
+Project.each {is_active: true, $each: {fetch: 200}},
+  ((project, callback) -> console.log "project: #{project.get('name')}"; callback()),
+  (err) -> console.log 'Done'
+
+# Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', -> console.log 'Done')
+
+# Collect the status of tasks over days
+stats = []
+Task.interval {$interval: {key: 'created_at', type: 'days', length: 1}},
+  ((query, info, callback) ->
+    histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', -> stats.push(histogram.summary()); callback())
+  ),
+  (err) -> console.log 'Done'
+</code></pre>
+        </div>
+        <div class="row example javascript">
+          <pre><code class="language-javascript">// Iterate through all items with is_active = true in batches of 200
+Project.each({is_active: true, $each: {fetch: 200}},
+  function(project, callback) {console.log('project: ' + project.get('name')); callback()},
+  function(err) {return console.log('Done');}
+);
+
+// Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', function() {return console.log('Done');});
+
+var stats = [];
+Task.interval({$interval: {key: 'created_at', type: 'days', length: 1}},
+  function(query, info, callback) {
+    var histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', function() {stats.push(histogram.summary()); return callback();});
+  },
+  function(err) { return console.log('Done'); }
+);
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>BackboneHTTP and BackboneRest</h3>
+
+<p>BackboneHTTP provides an interface for consuming JSON APIs through HTTP. BackboneRest provides a RESTful controller for JSON APIs from Node.js. Together, they rock!</p>
+
+<p>With this simple example setup, you can iterate through Tasks on the server or in the browser and can even make ad-hoc queries from the Brower&#39;s address bar:</p>
+
+<p>Assuming you Node.js app in on port 5000, you can request tasks by name:</p>
+
+<p><code>
+localhost:5000/tasks?name=&#39;Bob&#39;
+</code></p>
+
+<p>or even ask for the first 100 names of names of tasks:</p>
+
+<p><code>
+localhost:5000/tasks?$sort=&#39;name&#39;&amp;$values=&#39;name&#39;&amp;$limit=100
+</code></p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div><span>In the browser:</span>
+        <div class="row example coffeescript">
           <pre><code class="language-coffeescript">class Task extends Backbone.Model
-  url: '/tasks'
-  sync: require('backbone-sql').sync(Task)
+  urlRoot: '/tasks'
+  sync: require('backbone-http').sync(Task)
+</code></pre>
+        </div>
+        <div class="row example javascript">
+          <pre><code class="language-javascript">var Task = Backbone.Model.extend({
+  urlRoot: '/tasks'
+});
+Task.prototype.sync = require('backbone-http').sync(Task);
+</code></pre>
+        </div><span>On the server:</span>
+        <div class="row example coffeescript">
+          <pre><code class="language-coffeescript">class Task extends Backbone.Model
+  urlRoot: 'mongodb://localhost:27017/tasks'
+  sync: require('backbone-mongo').sync(Task)
 
 new RestController(app, {model_type: Task, route: '/tasks'})
 </code></pre>
@@ -380,6 +479,57 @@ new RestController(app, {model_type: Task, route: '/tasks'})
 Task.prototype.sync = require('backbone-mongo').sync(Task);
 
 new RestController(app, {model_type: Task, route: '/tasks'});
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>JSON Rendering DSL</h3>
+
+<p>BackboneORM provides an asynchronous JSON rendering DSL that is consistent with the unified query language.</p>
+
+<p>When using BackboneREST and BackboneHTTP, you can select the template by passing the $template parameter to your query.</p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row example coffeescript">
+          <pre><code class="language-coffeescript">module.exports =
+  # select properties
+  task:             {$select: ['id', 'name']}
+
+  # relationship select properties
+  project:          {$select: ['id', 'name']}
+
+  # relationship render function
+  project_custom:   (model, options, callback) ->
+    _.pick(model.attributes, 'id', 'name'); callback()
+
+  # relationship inferred with query
+  commits:          {query: {active: false}}
+
+  # relationship with opertation
+  total_commits:    {key: 'commits', query: {$count: true}}
+</code></pre>
+        </div>
+        <div class="row example javascript">
+          <pre><code class="language-javascript">module.exports = {
+  // select properties
+  task: {$select: ['id', 'name']},
+
+  // relationship select properties
+  project: {$select: ['id', 'name']},
+
+  // relationship render function
+  project_custom: function(model, options, callback) {
+    _.pick(model.attributes, 'id', 'name'); return callback();
+  },
+
+  // relationship inferred with query
+  commits: {query: {active: false}},
+
+  // relationship with opertation
+  total_commits: {key: 'commits', query: {$count: true}}
+};
 </code></pre>
         </div>
       </div>

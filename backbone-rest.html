@@ -41,7 +41,7 @@
         <p class="hidden-sm hidden-xs"><img src="./images/backbone-rest-logo-large.png"></p>
         <p class="hidden-lg hidden-md"><img src="./images/backbone-rest-logo-small.png"></p>
         <p class="subtitle">A RESTful controller for BackboneORM</p>
-        <div class="row">
+        <div class="row block">
           <div class="col-lg-12 col-md-12">
             <h2>Install</h2>
             <pre><code>npm install backbone-rest</code></pre>
@@ -51,8 +51,99 @@
     </div>
   </div>
   <div class="container main">
-    <div class="row">
+    <div class="row block">
       <div class="col-lg-5 col-md-5"><h3>Introduction</h3>
+
+<p>By using BackboneREST on the server and BackboneORM&#39;s JSON rendering DSL, you can save time in defining JSON APIs.</p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row block example coffeescript">
+          <pre><code class="language-coffeescript">Backbone = require 'backbone'
+RestController = require 'backbone-rest'
+
+class Task extends Backbone.Model
+  urlRoot: 'mongodb://localhost:27017/tasks'
+  sync: require('backbone-mongo').sync(Task)
+
+new RestController(app, {model_type: Task, route: '/tasks'})
+</code></pre>
+        </div>
+        <div class="row block example javascript">
+          <pre><code class="language-javascript">var Backbone = require('backbone');
+var RestController = require('backbone-rest');
+
+var Task = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/tasks'
+});
+Task.prototype.sync = require('backbone-mongo').sync(Task);
+
+new RestController(app, {model_type: Task, route: '/tasks'});
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>JSON DSL</h3>
+
+<p>BackboneORM provides a DSL for rendering JSON. It is consistent with BackboneORM&#39;s query syntax and BackboneREST&#39;s url-based query language.</p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row block example coffeescript">
+          <pre><code class="language-coffeescript">new RestController(app, {
+  model_type: Task
+  route: '/tasks'
+  templates:
+    show: {$select: ['id', 'name']}
+    show_with_stuff: {$select: ['id', 'name', 'stuff']}
+  default_template: 'show'
+})
+</code></pre>
+        </div>
+        <div class="row block example javascript">
+          <pre><code class="language-javascript">var RestController = require('backbone-rest');
+
+new RestController(app, {
+  model_type: Task,
+  route: '/tasks',
+  templates: {
+    show: { $select: ['id', 'name'] },
+    show_with_stuff: { $select: ['id', 'name', 'stuff']}
+  },
+  default_template: 'show'
+});
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>Security</h3>
+
+<p>You are able to use Express middleware to secure you application.</p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row block example coffeescript">
+          <pre><code class="language-coffeescript">ensureLoggedIn = require 'connect-ensure-login'
+
+new RestController(app, {
+  auth: ensureLoggedIn('/login')
+  model_type: Task
+  route: '/tasks'
+})
+</code></pre>
+        </div>
+        <div class="row block example javascript">
+          <pre><code class="language-javascript">var ensureLoggedIn = require('connect-ensure-login');
+
+new RestController(app, {
+  auth: ensureLoggedIn('/login'),
+  model_type: Task,
+  route: '/tasks'
+});
+</code></pre>
+        </div>
       </div>
     </div>
   </div>

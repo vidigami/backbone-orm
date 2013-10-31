@@ -1,0 +1,57 @@
+
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h3>Iteration</h3>
+
+<p>Using <code>each</code>, <code>stream</code>, and <code>interval</code>, you can iterate over your models in a way that suits the problem you are trying to solve.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row example coffeescript">
+      <pre><code class="language-coffeescript"># Iterate through all items with is_active = true in batches of 200
+Project.each {is_active: true, $each: {fetch: 200}},
+  ((project, callback) -> console.log "project: #{project.get('name')}"; callback()),
+  (err) -> console.log 'Done'
+
+# Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', -> console.log 'Done')
+
+# Collect the status of tasks over days
+stats = []
+Task.interval {$interval: {key: 'created_at', type: 'days', length: 1}},
+  ((query, info, callback) ->
+    histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', -> stats.push(histogram.summary()); callback())
+  ),
+  (err) -> console.log 'Done'
+</code></pre>
+    </div>
+    <div class="row example javascript">
+      <pre><code class="language-javascript">// Iterate through all items with is_active = true in batches of 200
+Project.each({is_active: true, $each: {fetch: 200}},
+  function(project, callback) {console.log('project: ' + project.get('name')); callback()},
+  function(err) {return console.log('Done');}
+);
+
+// Stream all items with is_active = true in batches of 200
+Project.stream({is_active: true, $each: {fetch: 200}})
+  .pipe(new ModelStringifier())
+  .on('finish', function() {return console.log('Done');});
+
+var stats = [];
+Task.interval({$interval: {key: 'created_at', type: 'days', length: 1}},
+  function(query, info, callback) {
+    var histogram = new Histogram()
+    Task.stream(_.extend(query, {$select: ['created_at', 'status']}))
+      .pipe(histogram)
+      .on('finish', function() {stats.push(histogram.summary()); return callback();});
+  },
+  function(err) { return console.log('Done'); }
+);
+</code></pre>
+    </div>
+  </div>
+</div>

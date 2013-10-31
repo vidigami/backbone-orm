@@ -1,0 +1,46 @@
+
+<div class="row block">
+  <div class="col-lg-12 col-md-12"><h3>Getting Started</h3>
+
+<p>When loading BackboneHTTP in the browser, you can use global script tags, AMD, or a broswerified bundle. Also, you should set up a <a href="./backbone-rest.html">BackboneREST</a> controller in you Node.js server to provide a JSON API for BackboneHTTP to consume.</p>
+
+<p><strong>Note:</strong> depending on the way BackboneORM is loaded, you may need to access it differently. See below examples for details.</p>
+  </div>
+</div>
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h4>Load Using Global Script Tags</h4>
+
+<p>BackboneHTTP can be used in the browser by using script tags.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <pre><code class="language-html">&lt;script type=&quot;text/javascript&quot; src=&quot;underscore.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;backbone.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;moment.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;inflection.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;backbone-orm.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;superagent.js&quot;&gt;&lt;/script&gt;<br/>&lt;script type=&quot;text/javascript&quot; src=&quot;backbone-http.js&quot;&gt;&lt;/script&gt;<br/><br/>&lt;script type=&quot;text/javascript&quot;&gt;<br/>  var Test = Backbone.Model.extend({<br/>    urlRoot: '/api/tests',<br/>    model_name: 'Test'<br/>  });<br/>  Test.prototype.sync = Backbone.HTTP.sync(Test);<br/><br/>  var test = new Test({name: 'Bob'});<br/>  test.save(function(err){});<br/>&lt;/script&gt;</code></pre>
+  </div>
+</div>
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h4>Load Using AMD</h4>
+
+<p>BackboneORM supports the AMD module loading pattern.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <pre><code class="language-html">&lt;script type=&quot;text/javascript&quot; src=&quot;require.js&quot;&gt;&lt;/script&gt;<br/><br/>&lt;script type=&quot;text/javascript&quot;&gt;<br/>  require.config({<br/>    paths: {<br/>      'underscore': &quot;underscore&quot;, 'backbone': &quot;backbone&quot;,<br/>      'moment': &quot;moment&quot;, 'inflection': &quot;inflection&quot;,<br/>      'backbone-orm': &quot;backbone-orm&quot;,<br/>      'superagent': &quot;superagent&quot;,<br/>      'backbone-http': &quot;backbone-http&quot;<br/>    }<br/>  });<br/><br/>  require(['underscore', 'backbone', 'backbone-orm', 'superagent', 'backbone-http'], function(_, Backbone, bborm, superagent, bbhttp) {<br/>    var Backbone = bbhttp.modules.backbone;<br/><br/>    var Test = Backbone.Model.extend({<br/>      urlRoot: '/api/tests',<br/>      model_name: 'Test'<br/>    });<br/>    Test.prototype.sync = bbhttp.sync(Test);<br/><br/>    var test = new Test({name: 'Bob'});<br/>    test.save(function(err){});<br/>  });<br/>&lt;/script&gt;</code></pre>
+  </div>
+</div>
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h4>Load Using Browserify</h4>
+
+<p>You can browserify BackboneHTTP and include the full package into the browser:</p>
+
+<p><code>
+npm install backbone-http
+</code></p>
+
+<p><code>
+browserify -r backbone-http &gt; backbone-http-bundle.js
+</code></p>
+
+<p>Because browserify by default will pull in the stream interface, you can use the stream interface on the client.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <pre><code class="language-html">  &lt;script type=&quot;text/javascript&quot; src=&quot;backbone-http-bundle.js&quot;&gt;&lt;/script&gt;<br/><br/>  &lt;script type=&quot;text/javascript&quot;&gt;<br/>    var bbhttp = require('backbone-http');<br/>    var Backbone = bbhttp.modules.backbone;<br/><br/>    var Test = Backbone.Model.extend({<br/>      urlRoot: '/api/tests',<br/>      model_name: 'Test'<br/>    });<br/>    Test.prototype.sync = bbhttp.sync(Test);<br/><br/>    var test = new Test({name: 'Bob'});<br/>    test.save(function(err){<br/>      Test.stream()<br/>        .on('data', function(model){ console.log(&quot;Model: &quot; + model.get('name')); })<br/>        .on('error', function(err){ console.log(&quot;An error is expected: &quot; + err); });<br/>    });<br/>  &lt;/script&gt;<br/></code></pre>
+  </div>
+</div>

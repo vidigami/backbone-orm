@@ -1,0 +1,30 @@
+
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h3>Security</h3>
+
+<p>You are able to use Express middleware to secure you application.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row block example coffeescript">
+      <pre><code class="language-coffeescript">ensureLoggedIn = require 'connect-ensure-login'
+
+new RestController(app, {
+  auth: ensureLoggedIn('/login')
+  model_type: Task
+  route: '/tasks'
+})
+</code></pre>
+    </div>
+    <div class="row block example javascript">
+      <pre><code class="language-javascript">var ensureLoggedIn = require('connect-ensure-login');
+
+new RestController(app, {
+  auth: ensureLoggedIn('/login'),
+  model_type: Task,
+  route: '/tasks'
+});
+</code></pre>
+    </div>
+  </div>
+</div>

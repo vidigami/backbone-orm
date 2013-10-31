@@ -1,5 +1,5 @@
 
-<div class="row">
+<div class="row block">
   <div class="col-lg-5 col-md-5"><h3>Getting Started</h3>
 
 <p>BackboneORM lets you use basic backbone models. To make them all ORM-y, we override the Backbone <code>sync</code> property
@@ -11,22 +11,16 @@ models, so we don&#39;t need to specify an <code>urlRoot</code>. Usually we will
   <div class="col-lg-7 col-md-7">
     <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
     <div class="row example coffeescript">
-      <pre><code class="language-coffeescript"># in the browser: MemorySync = Backbone.ORM.sync
-MemorySync = require('backbone-orm').sync
-
-class Project extends Backbone.Model
+      <pre><code class="language-coffeescript">class Project extends Backbone.Model
   urlRoot: '/projects'
-  sync: MemorySync(Project)
+  sync: require('backbone-orm').sync(Project)
 </code></pre>
     </div>
     <div class="row example javascript">
-      <pre><code class="language-javascript">// in the browser: var MemorySync = Backbone.ORM.sync;
-var MemorySync = require('backbone-orm').sync;
-
-var Project = Backbone.Model.extend({
-  urlRoot: ''
+      <pre><code class="language-javascript">var Project = Backbone.Model.extend({
+  urlRoot: '/projects'
 });
-Project.prototype.sync = MemorySync(Project);
+Project.prototype.sync = require('backbone-orm').sync(Project);
 </code></pre>
     </div>
   </div>

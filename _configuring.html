@@ -1,0 +1,41 @@
+
+<div class="row block">
+  <div class="col-lg-5 col-md-5"><h3>Configuring</h3>
+
+<p>You can globally configure BackboneMongo&#39;s connections using connection_options and can configure a specific collection using url query parameters.</p>
+  </div>
+  <div class="col-lg-7 col-md-7">
+    <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+    <div class="row example coffeescript">
+      <pre><code class="language-coffeescript"># configure replicaset globally
+_.extend(require('backbone-mongo').connection_options, {
+  retryMiliSeconds: 1000
+  numberOfRetries: 2*60
+  autoReconnect: true
+  readPreference: require('mongodb').ReadPreference.NEAREST
+})
+
+# set journalling for a specific model
+class Task extends Backbone.Model
+  urlRoot: 'mongodb://localhost:27017/tasks?journal=true'
+  sync: require('backbone-mongo').sync(Task)
+</code></pre>
+    </div>
+    <div class="row example javascript">
+      <pre><code class="language-javascript">// configure replicaset globally
+_.extend(require('backbone-mongo').connection_options, {
+  retryMiliSeconds: 1000,
+  numberOfRetries: 2 * 60,
+  autoReconnect: true,
+  readPreference: require('mongodb').ReadPreference.NEAREST
+});
+
+// set journalling for a specific model
+var Task = Backbone.Model.extend({
+  urlRoot: 'mongodb://localhost:27017/tasks?journal=true',
+});
+Task.prototype.sync = require('backbone-mongo').sync(Task);
+</code></pre>
+    </div>
+  </div>
+</div>
