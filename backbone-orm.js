@@ -3797,6 +3797,8 @@ module.exports = ModelStream = (function(_super) {
   Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
 */
 
+var e;
+
 if ((typeof window !== "undefined" && window !== null) && require.shim) {
   require.shim([
     {
@@ -3831,19 +3833,25 @@ module.exports = {
   Queue: require('./queue'),
   DatabaseURL: require('./database_url'),
   modules: {
+    url: require('url'),
+    querystring: require('querystring'),
+    'lru-cache': require('lru-cache'),
     underscore: require('underscore'),
     backbone: require('backbone'),
     moment: require('moment'),
-    inflection: require('inflection'),
-    url: require('url'),
-    querystring: require('querystring'),
-    'lru-cache': require('lru-cache')
+    inflection: require('inflection')
   },
   Cursor: require('./cursor'),
   Schema: require('./schema'),
   ConnectionPool: require('./connection_pool'),
   CacheSingletons: require('./cache/singletons')
 };
+
+try {
+  module.exports.modules.stream = require('stream');
+} catch (_error) {
+  e = _error;
+}
 
 });
 
