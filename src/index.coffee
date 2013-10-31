@@ -25,13 +25,13 @@ module.exports =
 
   # re-expose modules
   modules:
+    url: require 'url'
+    querystring: require 'querystring'
+    'lru-cache': require 'lru-cache'
     underscore: require 'underscore'
     backbone: require 'backbone'
     moment: require 'moment'
     inflection: require 'inflection'
-    url: require 'url'
-    querystring: require 'querystring'
-    'lru-cache': require 'lru-cache'
 
   Cursor: require './cursor'
   Schema: require './schema'
