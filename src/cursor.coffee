@@ -178,9 +178,9 @@ module.exports = class Cursor
 
     related_fields = related_fields.concat(@_cursor.$include) if @_cursor?.$include
     for relation_key in related_fields
-      relation = @model_type.relation(relation_key)
-      related_model_types.push(relation.reverse_model_type)
-      related_model_types.push(relation.join_table) if relation.join_table
+      if relation = @model_type.relation(relation_key)
+        related_model_types.push(relation.reverse_model_type)
+        related_model_types.push(relation.join_table) if relation.join_table
 
 #    console.log (m.name for m in related_model_types)
     return related_model_types
