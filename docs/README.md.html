@@ -164,11 +164,11 @@ Project.find {$select: [&#39;created_at&#39;, &#39;name&#39;]}, (err, array_of_j
 Project.find {$values: [&#39;created_at&#39;, &#39;status&#39;]}, (err, array_of_arrays) -&gt;
 
 # Find active items in pages using cursor syntax (Models or JSON)
-Project.cusror({is_active: true}).limit(10).offset(20).toModels (err, projects) -&gt;
-Project.cusror({is_active: true}).limit(10).offset(20).toJSON (err, projects_json) -&gt;
+Project.cursor({is_active: true}).limit(10).offset(20).toModels (err, projects) -&gt;
+Project.cursor({is_active: true}).limit(10).offset(20).toJSON (err, projects_json) -&gt;
 
 # Find completed tasks in a project
-project.cusror(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels (err, tasks) -&gt;
+project.cursor(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels (err, tasks) -&gt;
 
 # Iterate through all items with is_active = true in batches of 200
 Project.each {is_active: true, $each: {fetch: 200}},
@@ -216,11 +216,11 @@ Project.find({$select: [&#39;created_at&#39;, &#39;name&#39;]}, function(err, ar
 Project.find({$values: [&#39;created_at&#39;, &#39;status&#39;]}, function(err, array_of_arrays) {});
 
 // Find active items in pages using cursor syntax (Models or JSON)
-Project.cusror({is_active: true}).limit(10).offset(20).toModels function(err, projects) {});
-Project.cusror({is_active: true}).limit(10).offset(20).toJSON function(err, projects_json) {});
+Project.cursor({is_active: true}).limit(10).offset(20).toModels function(err, projects) {});
+Project.cursor({is_active: true}).limit(10).offset(20).toJSON function(err, projects_json) {});
 
 // Find completed tasks in a project sorted by name
-project.cusror(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels function(err, tasks) {});
+project.cursor(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels function(err, tasks) {});
 
 // Iterate through all items with is_active = true in batches of 200
 Project.each({is_active: true, $each: {fetch: 200}},
