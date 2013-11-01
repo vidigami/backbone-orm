@@ -6586,8 +6586,8 @@ module.exports = Utils = (function() {
 
   Utils.findOrGenerateModelName = function(model_type) {
     var model_name, url;
-    if (model_type.model_name) {
-      return model_type.model_name;
+    if (model_type.prototype.model_name) {
+      return model_type.prototype.model_name;
     }
     if (url = _.result(model_type.prototype, 'url')) {
       if (model_name = (new DatabaseURL(url)).modelName()) {
