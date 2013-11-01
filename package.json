@@ -11,7 +11,7 @@
   "engines": {"node": "*"},
   "scripts": {
     "test": "npm run build; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script --reporter spec --timeout 10000",
-    "docs": "codo -o docs src/.",
+    "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "coffee -o lib -c src",
     "watch": "coffee -o lib -w src",
     "clean": "rm -rf lib/*",
