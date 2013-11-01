@@ -143,11 +143,21 @@ Project.find {id: {$in: [1, 2, 3]}}, (err, projects) -&gt;
 # A shortcut for `$in` when we&#39;re working with ids
 Project.find {$ids: [1, 2, 3]}, (err, projects) -&gt;
 
+# Find active items in pages
+Project.find {is_active: true, $limit: 10, $offset: 20}, (err, projects) -&gt;
+
 # Select named properties from each model
 Project.find {$select: [&#39;created_at&#39;, &#39;name&#39;]}, (err, array_of_json) -&gt;
 
 # Select values in the specified order
 Project.find {$values: [&#39;created_at&#39;, &#39;status&#39;]}, (err, array_of_arrays) -&gt;
+
+# Find active items in pages using cursor syntax (Models or JSON)
+Project.cusror({is_active: true}).limit(10).offset(20).toModels (err, projects) -&gt;
+Project.cusror({is_active: true}).limit(10).offset(20).toJSON (err, projects_json) -&gt;
+
+# Find completed tasks in a project
+project.cusror(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels (err, tasks) -&gt;
 
 # Iterate through all items with is_active = true in batches of 200
 Project.each {is_active: true, $each: {fetch: 200}},
@@ -171,25 +181,35 @@ Task.interval {$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, leng
   (err) -&gt; console.log &#39;Done&#39;</code></pre>
 <h4>Examples (JavaScript)</h4>
 <pre><code>// Find the Project with id = 123
-Project.findOne({id: 123}, function(err, project) { /* ... */ });
+Project.findOne({id: 123}, function(err, project) {});
 
 // Find the first Project named &#39;my kickass project&#39;
-Project.findOne({name: &#39;my kickass project&#39;}, function(err, project) { /* ... */ });
+Project.findOne({name: &#39;my kickass project&#39;}, function(err, project) {});
 
 // Find all items with is_active = true
-Project.find({is_active: true}, function(err, projects) { /* ... */ });
+Project.find({is_active: true}, function(err, projects) {});
 
 // Find the items with an id of 1, 2 or 3
-Project.find({id: {$in: [1, 2, 3]}}, function(err, projects) { /* ... */ });
+Project.find({id: {$in: [1, 2, 3]}}, function(err, projects) {});
 
 // A shortcut for `$in` when we&#39;re working with ids
-Project.find({$ids: [1, 2, 3]}, function(err, projects) { /* ... */ });
+Project.find({$ids: [1, 2, 3]}, function(err, projects) {});
+
+// Find all items with is_active = true
+Project.find({is_active: true, $limit: 10, $offset: 20}, function(err, projects) {});
 
 // Select named properties from each model
 Project.find({$select: [&#39;created_at&#39;, &#39;name&#39;]}, function(err, array_of_json) {});
 
 // Select values in the specified order
 Project.find({$values: [&#39;created_at&#39;, &#39;status&#39;]}, function(err, array_of_arrays) {});
+
+// Find active items in pages using cursor syntax (Models or JSON)
+Project.cusror({is_active: true}).limit(10).offset(20).toModels function(err, projects) {});
+Project.cusror({is_active: true}).limit(10).offset(20).toJSON function(err, projects_json) {});
+
+// Find completed tasks in a project sorted by name
+project.cusror(&#39;tasks&#39;, {status: &#39;completed&#39;}).sort(&#39;name&#39;).toModels function(err, tasks) {});
 
 // Iterate through all items with is_active = true in batches of 200
 Project.each({is_active: true, $each: {fetch: 200}},
@@ -216,7 +236,7 @@ Task.interval({$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, leng
     </div>
     <div id='footer'>
   Generated on
-  Thu Oct 31 2013 16:35:51 GMT-0700 (PDT)
+  Fri Nov 01 2013 02:22:57 GMT-0700 (PDT)
   by
   <a href='https://github.com/netzpirat/codo' title='CoffeeScript API documentation generator'>Codo</a>
   v1.7.2
