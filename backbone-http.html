@@ -38,7 +38,7 @@
         <p class="hidden-sm hidden-xs"><img src="./images/backbone-http-logo-large.png"></p>
         <p class="hidden-lg hidden-md"><img src="./images/backbone-http-logo-small.png"></p>
         <p class="subtitle">An HTTP interface for BackboneORM</p>
-        <div class="row">
+        <div class="row block">
           <div class="col-lg-6 col-md-6">
             <h2>Install</h2>
             <pre><code>npm install backbone-http</code></pre>
@@ -59,8 +59,8 @@
 <p>This allows for a iteration of remote collections from the browser using BackboneORM&#39;s unified query syntax and iteration methods.</p>
       </div>
       <div class="col-lg-7 col-md-7">
-        <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
-        <div class="row block example coffeescript">
+        <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row example coffeescript">
           <pre><code class="language-coffeescript">class Project extends Backbone.Model
   urlRoot: '/projects'
   sync: require('backbone-http').sync(Project)
@@ -79,7 +79,7 @@ Project.stream({is_active: true, $each: {fetch: 200}})
   .on('finish', -> console.log 'Done')
 </code></pre>
         </div>
-        <div class="row block example javascript">
+        <div class="row example javascript">
           <pre><code class="language-javascript">var Project = Backbone.Model.extend({
   urlRoot: '/projects'
 });
