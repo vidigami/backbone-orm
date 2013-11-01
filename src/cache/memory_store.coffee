@@ -20,7 +20,6 @@ module.exports = class MemoryStore
     @cache = new LRU(normalized_options)
 
   set: (key, value, callback) =>
-#    console.log 'set, ', key, value
     return callback?(null, value) or @ if value._orm_never_cache # skip cache
     @cache.set(key, value)
     callback?(null, value)
@@ -28,12 +27,10 @@ module.exports = class MemoryStore
 
   get: (key, callback) =>
     value = @cache.get(key)
-#    console.log 'get, ', key, value
     callback?(null, value)
     return value
 
   destroy: (key, callback) =>
-#    console.log 'destroy, ', key
     @cache.del(key)
     callback?()
     return @
@@ -48,3 +45,6 @@ module.exports = class MemoryStore
     key = inflection.underscore(key)
     return key.toLowerCase() if key.indexOf('_') < 0
     return inflection.camelize(key)
+
+  forEach: (callback) => @cache.forEach(callback)
+
