@@ -75,6 +75,27 @@ module.exports = (options, callback) ->
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
+    it 'callback for all models - intervalC (CoffeeScript friendly)', (done) ->
+      processed_count = 0
+      interval_count = 0
+
+      queue = new Queue(1)
+
+      queue.defer (callback) ->
+        Flat.intervalC {$interval: {key: 'created_at', range: {$gte: DATE_START}, type: 'milliseconds', length: 2*DATE_STEP_MS}}, callback, (query, info, callback) ->
+          assert.equal(interval_count, info.index, "Has correct index. Expected: #{interval_count}. Actual: #{info.index}")
+
+          interval_count++
+          Flat.eachC query, callback, (model, callback) ->
+            processed_count++
+            callback()
+
+      queue.await (err) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
+        assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
+        done()
+
     it 'callback for all models (model and no range)', (done) ->
       processed_count = 0
       interval_count = 0

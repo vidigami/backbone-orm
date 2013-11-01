@@ -57,6 +57,19 @@ module.exports = (options, callback) ->
             assert.equal(BASE_COUNT, processed_count)
             done()
 
+      it 'callback for all models - eachC (CoffeeScript friendly)', (done) ->
+        processed_count = 0
+
+        summary = (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(BASE_COUNT, processed_count)
+            done()
+
+        Flat.eachC summary, (model, callback) ->
+          assert.ok(!!model, 'model returned')
+          processed_count++
+          callback()
+
       it 'callback for queried models', (done) ->
         Flat.findOne (err, model) ->
           assert.ok(!err, "No errors: #{err}")
@@ -74,6 +87,23 @@ module.exports = (options, callback) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(1, processed_count)
               done()
+
+      it 'callback for queried models - eachC (CoffeeScript friendly)', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(!!model, 'model returned')
+
+          processed_count = 0
+
+          summary = (err) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(1, processed_count)
+            done()
+
+          Flat.eachC {name: model.get('name')}, summary, (model, callback) ->
+            assert.ok(!!model, 'model returned')
+            processed_count++
+            callback()
 
       it 'callback with limit and offset', (done) ->
         processed_count = 0
