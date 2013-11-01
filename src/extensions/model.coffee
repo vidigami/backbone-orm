@@ -159,13 +159,16 @@ module.exports = (model_type) ->
     [query, iterator, callback] = [{}, query, iterator] if arguments.length is 2
     modelEach(model_type, query, iterator, callback)
 
+  model_type.eachC = (query, callback, iterator) ->
+    [query, callback, iterator] = [{}, query, callback] if arguments.length is 2
+    modelEach(model_type, query, iterator, callback)
+
   model_type.stream = (query={}) ->
     throw new Error 'Stream is a large dependency so you need to manually include "stream.js" in the browser.' unless ModelStream
     return new ModelStream(model_type, query)
 
-  model_type.interval = (query, iterator, callback) ->
-    [query, iterator, callback] = [{}, query, iterator] if arguments.length is 2
-    modelInterval(model_type, query, iterator, callback)
+  model_type.interval = (query, iterator, callback) -> modelInterval(model_type, query, iterator, callback)
+  model_type.intervalC = (query, callback, iterator) -> modelInterval(model_type, query, iterator, callback)
 
   ###################################
   # Backbone ORM - Helpers

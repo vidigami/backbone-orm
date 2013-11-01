@@ -182,7 +182,6 @@ module.exports = class Cursor
         related_model_types.push(relation.reverse_model_type)
         related_model_types.push(relation.join_table) if relation.join_table
 
-#    console.log (m.name for m in related_model_types)
     return related_model_types
 
   # @private

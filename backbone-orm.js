@@ -2451,14 +2451,19 @@ module.exports = Cursor = (function() {
       _this = this;
     parsed_query = _.extend({}, _.pick(this._cursor, CURSOR_KEYS), this._find);
     return QueryCache.get(this.model_type, parsed_query, function(err, cached_result) {
-      var model_types;
+      var e, model_types;
       if (err) {
         return callback(err);
       }
       if (!_.isUndefined(cached_result)) {
         return callback(null, cached_result);
       }
-      model_types = _this.relatedModelTypesInQuery();
+      try {
+        model_types = _this.relatedModelTypesInQuery();
+      } catch (_error) {
+        e = _error;
+        return callback(e, null);
+      }
       return _this.queryToJSON(function(err, json) {
         if (err) {
           return callback(err);
@@ -2520,10 +2525,13 @@ module.exports = Cursor = (function() {
     }
     for (_i = 0, _len = related_fields.length; _i < _len; _i++) {
       relation_key = related_fields[_i];
-      relation = this.model_type.relation(relation_key);
-      related_model_types.push(relation.reverse_model_type);
-      if (relation.join_table) {
-        related_model_types.push(relation.join_table);
+      if (relation = this.model_type.relation(relation_key)) {
+        related_model_types.push(relation.reverse_model_type);
+        if (relation.join_table) {
+          related_model_types.push(relation.join_table);
+        }
+      } else {
+        throw new Error("" + relation_key + " is not a relation of " + this.model_type.name + ", query: " + (JSON.stringify(this._find)) + " " + (JSON.stringify(this._cursor)));
       }
     }
     return related_model_types;
@@ -3045,6 +3053,13 @@ module.exports = function(model_type) {
     }
     return modelEach(model_type, query, iterator, callback);
   };
+  model_type.eachC = function(query, callback, iterator) {
+    var _ref;
+    if (arguments.length === 2) {
+      _ref = [{}, query, callback], query = _ref[0], callback = _ref[1], iterator = _ref[2];
+    }
+    return modelEach(model_type, query, iterator, callback);
+  };
   model_type.stream = function(query) {
     if (query == null) {
       query = {};
@@ -3055,10 +3070,9 @@ module.exports = function(model_type) {
     return new ModelStream(model_type, query);
   };
   model_type.interval = function(query, iterator, callback) {
-    var _ref;
-    if (arguments.length === 2) {
-      _ref = [{}, query, iterator], query = _ref[0], iterator = _ref[1], callback = _ref[2];
-    }
+    return modelInterval(model_type, query, iterator, callback);
+  };
+  model_type.intervalC = function(query, callback, iterator) {
     return modelInterval(model_type, query, iterator, callback);
   };
   model_type.prototype.modelName = function() {
@@ -6586,8 +6600,8 @@ module.exports = Utils = (function() {
 
   Utils.findOrGenerateModelName = function(model_type) {
     var model_name, url;
-    if (model_type.model_name) {
-      return model_type.model_name;
+    if (model_type.prototype.model_name) {
+      return model_type.prototype.model_name;
     }
     if (url = _.result(model_type.prototype, 'url')) {
       if (model_name = (new DatabaseURL(url)).modelName()) {

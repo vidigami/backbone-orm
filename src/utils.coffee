@@ -85,7 +85,7 @@ module.exports = class Utils
 
   # @private
   @findOrGenerateModelName: (model_type) ->
-    return model_type.model_name if model_type.model_name
+    return model_type::model_name if model_type::model_name
     if url = _.result(model_type.prototype, 'url')
       return model_name if model_name = (new DatabaseURL(url)).modelName()
     return model_type.name if model_type.name
