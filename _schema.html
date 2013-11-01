@@ -54,17 +54,8 @@ var Project = Backbon.Model.extend({
   // Schema defines the fields for the model's table
   schema: {
     created_at: 'DateTime',
-    type: [
-      'Integer', {
-        nullable: false
-      }
-    ],
-    name: [
-      'String', {
-        unique: true,
-        indexed: true
-      }
-    ]
+    type: ['Integer', {nullable: false}],
+    name: ['String', {unique: true, indexed: true}]
   }
 });
 
