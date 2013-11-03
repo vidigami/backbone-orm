@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>BackboneORM</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="icon" type="image/png" href="./images/favicon-48x48.png">
+  <link rel="stylesheet" href="./css/vendor.css">
+  <link rel="stylesheet" href="./css/site.css">
+  <script src="./js/vendor.js"></script>
+  <script src="./js/site.js"></script>
+</head>
+<body>
+  <div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header"><a href="https://www.vidigami.com" class="pull-left lizard"><img src="./images/vidigami-lizard.png"/></a><a href="./index.html" class="navbar-brand">backbone-orm</a>
+        <button type="button" data-toggle="collapse" data-target="#navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+      </div>
+      <div id="navbar-collapse" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li class="active"><a href="./index.html">ORM</a></li>
+          <li class="divider"></li>
+          <li><a href="./backbone-http.html">HTTP</a></li>
+          <li><a href="./backbone-rest.html">REST</a></li>
+          <li class="divider"></li>
+          <li><a href="./backbone-mongo.html">MongoDB</a></li>
+          <li><a href="./backbone-sql.html">SQL</a></li>
+          <li class="divider"></li>
+          <li><a href="./docs/index.html">Docs</a></li>
+          <li><a href="https://github.com/vidigami/backbone-orm">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="jumbo">
+    <div class="container">
+      <div class="jumbotron">
+        <h1>Whip up a RESTful API</h1>
+        <p>in about the time it takes to make a nice cup of coffee</p>
+      </div>
+    </div>
+  </div>
+  <div class="container main">
+    <div class="row block">
+      <div class="col-lg-12 col-md-12"><h3>What is BackboneORM?</h3>
+
+<p>First up, I&#39;d like to give a decent answer to this question.</p>
+
+<p>BackboneORM is a bit more than just persistence for Backbone models - it was designed to make it super easy to get a
+RESTful API up and running in Node and start consuming it from the client.</p>
+
+<p>The various components each have a role to play here:</p>
+
+<ul><li>BackboneORM is the core project. It manages relationships and does most of the fun, internal things.</li><li>BackboneMongo and BackboneSQL take care of persisting your models to (wait for it...) MongoDB and SQL stores.</li><li>BackboneREST lets you quickly generate RESTful web services from your models.</li><li>BackboneHTTP is a <em>client side</em> library for accessing these services. It shares the syntax of BackboneMongo and
+BackboneSQL, but will hit up your REST endpoints rather than a database directly.</li></ul>
+
+<p>So! Without further ado, let&#39;s make an app.</p>
+      </div>
+    </div>
+    <div class="row block">
+      <div class="col-lg-12 col-md-12"><h3>First step: Install Express and BackboneORM</h3>
+
+<p>We&#39;re going to create a simple Node app with BackboneORM and Express to store and retrieve some data from a MongoDB.</p>
+
+<p>Lets start out with a simple directory structure. Make a new one for the app (we&#39;re calling it <code>app</code> here) and add a
+<code>client</code> and a <code>server</code> directory to it, so it looks like so:</p>
+
+<pre><code>* - app
+*  - client
+*  - server</code></pre>
+
+<p>Next up we need to install Express and BackboneORM. Make sure your&#39;re in the <code>app</code> directory jsut created and run the
+following:</p>
+
+<pre><code>npm install express --save
+npm install backbone-mongo --save
+npm install backbone-rest --save</code></pre>
+
+<p>Note that we don&#39;t need to install BackboneORM directly, as it&#39;s a dependency of the others. We use the <code>--save</code> option
+to tell npm to write our dependencies to package.json so we don&#39;t need to add them manually.</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-36443094-3', 'vidigami.github.io');
+    ga('send', 'pageview');
+  </script>
+</body>

@@ -150,18 +150,35 @@ browserify -r backbone-http &gt; backbone-http-bundle.js
     <div class="row">
       <div class="col-lg-5 col-md-5"><h3>Selecting JSON Templates</h3>
 
-<p>You can use the <code>$template</code> option in your calls to request specific templates from BackboneREST.</p>
+<p>You can use the <code>$template</code> option in your calls to request JSON rendered by specific templates by BackboneREST.</p>
+
+<p>For example, you can request a relationship to be embedded in the response to avoid a second call for related models. If you need all the attributes in a relationship, you could alternatively use <code>include</code>.</p>
       </div>
       <div class="col-lg-7 col-md-7">
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
-          <pre><code class="language-coffeescript">Project.find {$template: 'project_with_tasks'}, (err, projects_with_tasks) ->
+          <pre><code class="language-coffeescript"># Models fetched with custom rendering including relationships
+Project.find {$template: 'project_with_tasks'}, (err, custom_projects_with_tasks) ->
+
+# Models including all relationship models
+Project.find {$include: 'tasks'}, (err, projects_with_tasks) ->
+
+# Models rendered including relationships as JSON
+Project.cursor().include('tasks').toJSON (err, projects_with_tasks_json) ->
 </code></pre>
         </div>
         <div class="row example javascript">
-          <pre><code class="language-javascript">Project.find({$template: 'project_with_tasks'},
-  function(err, projects_with_tasks) {}
-);
+          <pre><code class="language-javascript">// Models fetched with custom rendering including relationships
+Project.find({$template: 'project_with_tasks'}, function(err, custom_projects_with_tasks) {
+});
+
+// Models including all relationship models
+Project.find({$include: 'tasks'}, function(err, projects_with_tasks) {
+});
+
+// Models rendered including relationships as JSON
+Project.cursor().include('tasks').toJSON(function(err, projects_with_tasks_json) {
+});
 </code></pre>
         </div>
       </div>

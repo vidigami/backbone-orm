@@ -42,6 +42,11 @@ Project.findOne {name: 'My project'}, (err, project) ->
 Project.findOne {name: 'My project', $include: 'tasks'}, (err, project) ->
   # Tasks are already loaded, we can just use them
   tasks = project.get('tasks')
+
+# Find a project and its tasks using cursor with include
+Project.cursor({name: 'My project'}).include('tasks').toModel (err, project) ->
+  # Tasks are already loaded, we can just use them
+  tasks = project.get('tasks')
 </code></pre>
     </div>
     <div class="row example javascript">
@@ -71,6 +76,12 @@ Project.findOne({name: 'My project'}, function(err, project) {
 
 // Find a project and its tasks with `$include`
 Project.findOne({name: 'My project', $include: 'tasks'}, function(err, project) {
+  // Tasks are already loaded, we can just use them
+  var tasks = project.get('tasks');
+});
+
+// Find a project and its tasks using cursor with include
+Project.cursor({name: 'My project'}).include('tasks').toModel function(err, project) {
   // Tasks are already loaded, we can just use them
   var tasks = project.get('tasks');
 });

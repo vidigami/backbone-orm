@@ -1,0 +1,24 @@
+
+<div class="row block">
+  <div class="col-lg-12 col-md-12"><h3>First step: Install Express and BackboneORM</h3>
+
+<p>We&#39;re going to create a simple Node app with BackboneORM and Express to store and retrieve some data from a MongoDB.</p>
+
+<p>Lets start out with a simple directory structure. Make a new one for the app (we&#39;re calling it <code>app</code> here) and add a
+<code>client</code> and a <code>server</code> directory to it, so it looks like so:</p>
+
+<pre><code>* - app
+*  - client
+*  - server</code></pre>
+
+<p>Next up we need to install Express and BackboneORM. Make sure your&#39;re in the <code>app</code> directory jsut created and run the
+following:</p>
+
+<pre><code>npm install express --save
+npm install backbone-mongo --save
+npm install backbone-rest --save</code></pre>
+
+<p>Note that we don&#39;t need to install BackboneORM directly, as it&#39;s a dependency of the others. We use the <code>--save</code> option
+to tell npm to write our dependencies to package.json so we don&#39;t need to add them manually.</p>
+  </div>
+</div>
