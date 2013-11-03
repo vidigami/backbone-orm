@@ -22,7 +22,7 @@ Other great things:
 
 #### Examples (CoffeeScript)
 
-```
+```coffeescript
 # Find the Project with id = 123
 Project.findOne {id: 123}, (err, project) ->
 
@@ -78,7 +78,7 @@ Task.interval {$interval: {key: 'created_at', type: 'days', length: 1}},
 
 #### Examples (JavaScript)
 
-```
+```javascript
 // Find the Project with id = 123
 Project.findOne({id: 123}, function(err, project) {});
 
@@ -141,12 +141,18 @@ Please [checkout the website](http://vidigami.github.io/backbone-orm/) for insta
 
 To build the library for Node.js:
 
-  $ npm run build
+```
+$ npm run 
+```
 
 To build the library for the browser:
 
-  $ grunt
+```
+$ grunt
+```
 
 Please run tests before submitting a pull request.
 
-  $ npm test
+```
+$ npm test
+```
