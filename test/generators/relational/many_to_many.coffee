@@ -967,7 +967,7 @@ module.exports = (options, callback) ->
             assert.equal(0, owner.get('reverses').length, "Virtual flat is not saved. Expected: #{0}. Actual: #{owner.get('reverses').length}")
             done()
 
-    it 'ignores duplicates in a manyToMany relation', (done) ->
+    it 'ignores duplicates via patchAdd in a manyToMany relation by model', (done) ->
 
       Owner.cursor({$one: true}).include('reverses').toModels (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
@@ -980,3 +980,21 @@ module.exports = (options, callback) ->
 
           assert.equal(2, owner.get('reverses').length, "Reverse not added again to relation. Expected: #{2}. Actual: #{owner.get('reverses').length}")
           done()
+
+    it 'ignores duplicates via patchAdd in a manyToMany relation by id', (done) ->
+
+      Owner.cursor({$one: true}).toModels (err, owner) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(owner, 'Found model')
+
+        Reverse.findOne {owner_id: owner.id}, (err, reverse) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          owner.patchAdd 'reverses', reverse.id, (err) ->
+
+            assert.ok(!err, "No errors: #{err}")
+
+            owner.get 'reverses', (err, reverses) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.equal(2, reverses.length, "Reverse not added again to relation. Expected: #{2}. Actual: #{reverses.length}")
+              done()
