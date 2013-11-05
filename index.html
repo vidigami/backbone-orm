@@ -522,41 +522,41 @@ new RestController(app, {model_type: Task, route: '/tasks'});
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
           <pre><code class="language-coffeescript">module.exports =
-  # select properties
-  task:             {$select: ['id', 'name']}
+  # select id and name from the task
+  {$select: ['id', 'name']}
 
-  # relationship select properties
-  project:          {$select: ['id', 'name']}
-
-  # relationship render function
-  project_custom:   (model, options, callback) ->
+  # use a render function
+  task_custom:   (model, options, callback) ->
     callback(null, _.pick(model.attributes, 'id', 'name'))
+
+  # select properties from relationship
+  project:          {$select: ['id', 'name']}
 
   # relationship inferred with query
   commits:          {query: {active: false}}
 
-  # relationship with opertation
+  # relationship with operation
   total_commits:    {key: 'commits', query: {$count: true}}
 </code></pre>
         </div>
         <div class="row example javascript">
           <pre><code class="language-javascript">module.exports = {
-  // select properties
-  task: {$select: ['id', 'name']},
+  // select id and name from the task
+  {$select: ['id', 'name']}
 
-  // relationship select properties
-  project: {$select: ['id', 'name']},
+  // use a render function
+  task_custom:   function(model, options, callback) {
+    callback(null, _.pick(model.attributes, 'id', 'name'))
+  }
 
-  // relationship render function
-  project_custom: function(model, options, callback) {
-    callback(null, _.pick(model.attributes, 'id', 'name'));
-  },
+  // select properties from relationship
+  project:          {$select: ['id', 'name']},
 
   // relationship inferred with query
-  commits: {query: {active: false}},
+  commits:          {query: {active: false}},
 
-  // relationship with opertation
-  total_commits: {key: 'commits', query: {$count: true}}
+  // relationship with operation
+  total_commits:    {key: 'commits', query: {$count: true}}
 };
 </code></pre>
         </div>
