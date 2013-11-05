@@ -2,27 +2,27 @@
 
 ![logo](https://github.com/vidigami/backbone-orm/raw/master/media/logo.png)
 
-BackboneORM and all of its variants were designed to provide a consistent and flexible across Node.js and the browser.
+BackboneORM was designed to provide a consistent, polystore ORM across Node.js and the browser.
 
 It was inspired by other great software and provides:
 
 * Node.js-style callbacks and streams for a familiar asynchronous programming style
 * MongoDB-like query language to easily slice-and-dice your data
-* REST controller for browser search bar queries like CouchDB
+* a REST controller enabling browser search bar queries and an optional paging format like CouchDB
 
 Other great things:
 
 * it provides a JSON-rendering DSL
 * it solves the dreaded Node.js circular dependencies problem for related models
 * it is compatible with [Knockback.js](http://kmalakoff.github.io/knockback/)
-* it parses IS6801 dates automatically
+* it parses ISO8601 dates automatically
 * BackboneMongo provides a CouchDB-like '_rev' versioning solution
 * BackboneREST provides authorization middleware hooks and emits REST events
 
 
 #### Examples (CoffeeScript)
 
-```
+```coffeescript
 # Find the Project with id = 123
 Project.findOne {id: 123}, (err, project) ->
 
@@ -78,7 +78,7 @@ Task.interval {$interval: {key: 'created_at', type: 'days', length: 1}},
 
 #### Examples (JavaScript)
 
-```
+```javascript
 // Find the Project with id = 123
 Project.findOne({id: 123}, function(err, project) {});
 
@@ -141,12 +141,18 @@ Please [checkout the website](http://vidigami.github.io/backbone-orm/) for insta
 
 To build the library for Node.js:
 
-  $ npm run build
+```
+$ npm run
+```
 
 To build the library for the browser:
 
-  $ grunt
+```
+$ grunt
+```
 
 Please run tests before submitting a pull request.
 
-  $ npm test
+```
+$ npm test
+```
