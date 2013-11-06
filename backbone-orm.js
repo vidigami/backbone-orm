@@ -1587,6 +1587,7 @@ module.exports = MemoryStore = (function() {
     if (options == null) {
       options = {};
     }
+    this.forEach = __bind(this.forEach, this);
     this.reset = __bind(this.reset, this);
     this.destroy = __bind(this.destroy, this);
     this.get = __bind(this.get, this);
@@ -1645,6 +1646,10 @@ module.exports = MemoryStore = (function() {
       return key.toLowerCase();
     }
     return inflection.camelize(key);
+  };
+
+  MemoryStore.prototype.forEach = function(callback) {
+    return this.cache.forEach(callback);
   };
 
   return MemoryStore;
@@ -2451,19 +2456,14 @@ module.exports = Cursor = (function() {
       _this = this;
     parsed_query = _.extend({}, _.pick(this._cursor, CURSOR_KEYS), this._find);
     return QueryCache.get(this.model_type, parsed_query, function(err, cached_result) {
-      var e, model_types;
+      var model_types;
       if (err) {
         return callback(err);
       }
       if (!_.isUndefined(cached_result)) {
         return callback(null, cached_result);
       }
-      try {
-        model_types = _this.relatedModelTypesInQuery();
-      } catch (_error) {
-        e = _error;
-        return callback(e, null);
-      }
+      model_types = _this.relatedModelTypesInQuery();
       return _this.queryToJSON(function(err, json) {
         if (err) {
           return callback(err);
@@ -2530,8 +2530,6 @@ module.exports = Cursor = (function() {
         if (relation.join_table) {
           related_model_types.push(relation.join_table);
         }
-      } else {
-        throw new Error("" + relation_key + " is not a relation of " + this.model_type.name + ", query: " + (JSON.stringify(this._find)) + " " + (JSON.stringify(this._cursor)));
       }
     }
     return related_model_types;
@@ -6537,6 +6535,16 @@ module.exports = Utils = (function() {
 
   Utils.guid = function() {
     return S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4();
+  };
+
+  Utils.inspect = function(obj) {
+    var err;
+    try {
+      return JSON.stringify(obj);
+    } catch (_error) {
+      err = _error;
+      return "inspect: " + err;
+    }
   };
 
   Utils.bbCallback = function(callback) {

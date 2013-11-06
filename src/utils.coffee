@@ -41,6 +41,8 @@ module.exports = class Utils
 
   @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
+  @inspect = (obj) -> try return JSON.stringify(obj) catch err then return "inspect: #{err}"
+
   # @private
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
 
