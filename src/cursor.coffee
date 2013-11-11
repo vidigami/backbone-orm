@@ -81,7 +81,7 @@ module.exports = class Cursor
   exists: (callback) -> @execWithCursorQuery('$exists', 'toJSON', callback)
   toModel: (callback) -> @execWithCursorQuery('$one', 'toModels', callback)
   toModels: (callback) ->
-    return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{util.inspect(@_cursor.$values)}") if @_cursor.$values
+    return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{Utils.inspect(@_cursor.$values)}") if @_cursor.$values
 
     # a cache candidate
     # if not (@_cursor.$offset or @_cursor.$limit or @_cursor.$include) and cache = @model_type.cache
