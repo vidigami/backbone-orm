@@ -2409,7 +2409,7 @@ module.exports = Cursor = (function() {
   Cursor.prototype.toModels = function(callback) {
     var _this = this;
     if (this._cursor.$values) {
-      return callback(new Error("Cannot call toModels on cursor with values for model " + this.model_type.model_name + ". Values: " + (util.inspect(this._cursor.$values))));
+      return callback(new Error("Cannot call toModels on cursor with values for model " + this.model_type.model_name + ". Values: " + (Utils.inspect(this._cursor.$values))));
     }
     return this.toJSON(function(err, json) {
       if (err) {
@@ -3759,7 +3759,7 @@ try {
   e = _error;
 }
 
-if (!stream) {
+if (!(stream != null ? stream.Readable : void 0)) {
   module.exports = null;
   return;
 }
