@@ -1,6 +1,6 @@
 # stream is large so it is optional on the browser
 try stream = require('stream') catch e
-(module.exports = null; return) unless stream
+(module.exports = null; return) unless stream?.Readable
 
 # @private
 module.exports = class ModelStream extends stream.Readable
