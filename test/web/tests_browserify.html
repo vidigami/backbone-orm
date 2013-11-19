@@ -8,11 +8,12 @@
   <script type="text/javascript" src="../../backbone-orm.js"></script>
   <script type="text/javascript">
     var Backbone = require('backbone');
+    var BackboneORM = require('backbone-orm');
     var Test = Backbone.Model.extend({
       urlRoot: '/api/tests',
       model_name: 'Test'
     });
-    Test.prototype.sync = Backbone.ORM.sync(Test);
+    Test.prototype.sync = BackboneORM.sync(Test);
 
       var test = new Test({name: 'Bob'});
       test.save(function(err){

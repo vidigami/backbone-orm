@@ -102,15 +102,6 @@ var globals = {};
         for (var i = 0, length = components.length; i < length; i++) { if (!(dep = dep[components[i]])) break; }
       }
 
-      // use path on global require (a symbol could be mixed into a module)
-      if (!dep && item.symbol_path && window.require) {
-        var components = item.symbol_path.split('.');
-        var path = components.shift();
-        try { dep = typeof window.require === "function" ? window.require(path) : void 0; } catch (e) {}
-
-        for (var i = 0, length = components.length; i < length; i++) { if (!(dep = dep != null ? dep[components[i]] : void 0)) break; }
-      }
-
       // not found
       if (!dep) {
         if (item.optional) return;

@@ -16,13 +16,13 @@
         }
     });
 
-    require(['underscore', 'backbone', 'stream', 'backbone-orm'], function(_, Backbone, stream, bborm) {
+    require(['underscore', 'backbone', 'stream', 'backbone-orm'], function(_, Backbone, stream, BackboneORM) {
       var Backbone = window.Backbone;
       var Test = Backbone.Model.extend({
         urlRoot: '/api/tests',
         model_name: 'Test'
       });
-      Test.prototype.sync = bborm.sync(Test);
+      Test.prototype.sync = BackboneORM.sync(Test);
 
       var test = new Test({name: 'Bob'});
       test.save(function(err){
