@@ -1,5 +1,11 @@
 {
   "name": "browserify-test",
+  "scripts": {
+    "build": "browserify -r backbone-http -r backbone > browserify-bundle.js"
+  },
+  "devDependencies": {
+    "browserify": "*"
+  },
   "dependencies": {
     "underscore": "1.5.x",
     "backbone": "1.1.x",
