@@ -30,8 +30,8 @@ module.exports = (grunt) ->
         options: {wrapper: [LIBRARY_WRAPPERS.license, '']}
 
     uglify:
-      library: {expand: true, cwd: '_build/', src: ['*.js'], dest: '_build/', ext: '-min.js'}
-      vendor: {expand: true, cwd: 'client/', src: ['backbone-orm-vendor.js'], dest: 'client/', ext: '-min.js'}
+      library: {expand: true, cwd: '_build/', src: ['*.js'], dest: '_build/', ext: '.min.js'}
+      vendor: {expand: true, cwd: 'client/', src: ['backbone-orm-vendor.js'], dest: 'client/', ext: '.min.js'}
 
     clean:
       build: ['_build']
