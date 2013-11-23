@@ -2983,7 +2983,7 @@ module.exports = function(model_type) {
         return callback(null, model);
       }
       model = new model_type(data);
-      return model.save({}, function(err) {
+      return model.save(function(err) {
         var cache;
         if (err) {
           return callback(err);
@@ -3354,7 +3354,10 @@ module.exports = function(model_type) {
             options = Utils.wrapOptions(options, callback);
         }
       } else {
-        if (key === null || _.isObject(key)) {
+        if (arguments.length === 0) {
+          attributes = {};
+          options = {};
+        } else if (key === null || _.isObject(key)) {
           attributes = key;
           options = value;
         } else {

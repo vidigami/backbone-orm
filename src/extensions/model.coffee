@@ -124,7 +124,7 @@ module.exports = (model_type) ->
       return callback(err) if err
       return callback(null, model) if model
       model = new model_type(data)
-      model.save {}, (err) ->
+      model.save (err) ->
         return callback(err) if err
         cache.set(model.id, model) if cache = model_type.cache
         callback(null, model)
@@ -349,7 +349,9 @@ module.exports = (model_type) ->
           when 3 then attributes = key; options = Utils.wrapOptions(value, callback)
           when 4 then (attributes = {})[key] = value; options = Utils.wrapOptions(options, callback)
       else
-        if key is null or _.isObject(key)
+        if arguments.length is 0
+          attributes = {}; options = {}
+        else if key is null or _.isObject(key)
           attributes = key; options = value
         else
           (attributes = {})[key] = value;
