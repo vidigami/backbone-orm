@@ -16,7 +16,7 @@ module.exports = class Queue
   await: (callback) ->
     throw new Error "Awaiting callback was added twice: #{callback}" if @await_callback
     @await_callback = callback
-    @_callAwaiting() unless (@tasks.length + @running_count)
+    @_callAwaiting() if @error or not (@tasks.length + @running_count)
 
   # @private
   _doneTask: (err) => @running_count--; @error or= err; @_runTasks()

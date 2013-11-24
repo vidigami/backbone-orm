@@ -67,7 +67,7 @@ module.exports = class MemoryCursor extends Cursor
         if keys.length or ins_size
           if @_cursor.$ids
             for id, model_json of @store
-              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
@@ -99,7 +99,7 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, id)
           else
             json = (JSONUtils.deepClone(model_json) for id, model_json of @store)
           callback()
@@ -246,6 +246,7 @@ module.exports = class MemoryCursor extends Cursor
     next = (err, models_json) =>
       return callback(err) if err
       key = key_components.shift()
+      key = model_type::idAttribute if key is 'id' # allow for id key override
 
       # done conditions
       unless key_components.length

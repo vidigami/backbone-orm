@@ -164,7 +164,8 @@ module.exports = class Utils
     else if Utils.dataId(data) isnt data
       model = new model_type(model_type::parse(data))
     else
-      model = new model_type({id: data})
+      (attributes = {})[model_type::idAttribute] = data
+      model = new model_type(attributes)
       model.setLoaded(false)
 
     return model

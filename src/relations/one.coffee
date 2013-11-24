@@ -17,7 +17,7 @@ module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @virtual_id_accessor or= "#{@key}_id"
-    @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
+    @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
@@ -125,7 +125,7 @@ module.exports = class One extends require('./relation')
     else
       @cursor(model, @key).toJSON (err, current_related_json) =>
         return callback(err) if err
-        return callback() if current_related_json and (related_id is current_related_json.id) # already set
+        return callback() if current_related_json and (related_id is current_related_json[@reverse_model_type::idAttribute]) # already set
 
         queue = new Queue(1)
 
@@ -203,7 +203,7 @@ module.exports = class One extends require('./relation')
       @cursor(model, @key).toJSON (err, related_json) =>
         return callback(err) if err
         return callback() unless related_json
-        return callback() unless _.contains(related_ids, related_json.id)
+        return callback() unless _.contains(related_ids, related_json[@reverse_model_type::idAttribute])
 
         related_json[@reverse_relation.foreign_key] = null
         Utils.modelJSONSave(related_json, @reverse_model_type, callback)
@@ -269,7 +269,10 @@ module.exports = class One extends require('./relation')
     model.on("change:#{@key}", events.change) # bind
 
     # already set, set up initial value
-    setBacklink(related_model) if related_model = model.get(@key)
+    if related_model = model.get(@key)
+      setBacklink(related_model)
+    else
+      model.attributes[@key] = null
 
     return model
 

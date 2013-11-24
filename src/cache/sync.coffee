@@ -31,7 +31,8 @@ class CacheSync
   create: (model, options) ->
     @wrapped_sync_fn 'create', model, bbCallback (err, json) =>
       return options.error(err) if err
-      model.set({id: json.id})
+      (attributes = {})[@model_type::idAttribute] = json[@model_type::idAttribute]
+      model.set(attributes)
       if cache_model = @model_type.cache.get(model.id)
         Utils.updateModel(cache_model, model) if cache_model isnt model
       else

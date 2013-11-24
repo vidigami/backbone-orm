@@ -132,3 +132,15 @@ module.exports = (options, callback) ->
       catch err
         assert.ok(err, "Has error: #{err}")
         assert.ok(err.toString().indexOf('Error: Awaiting callback was added twice') is 0, 'Expected message')
+
+    it 'calls await if an error occurs before it is added', (done) ->
+      queue = new Queue(1)
+
+      results = []
+      queue.defer (callback) -> results.push('1.0'); callback(new Error('error'))
+      queue.defer (callback) -> results.push('2.0'); callback()
+      queue.defer (callback) -> results.push('3.0'); callback()
+      queue.await (err) ->
+        assert.ok(err, "Has error: #{err}")
+        assert.deepEqual(results, ['1.0'])
+        done()

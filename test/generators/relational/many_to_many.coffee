@@ -165,7 +165,7 @@ module.exports = (options, callback) ->
             if unload
               ModelCache.reset(->) # TODO: make async # reset cache
               owner = new Owner({id: owner.id})
-            console.log 'PATCHing'
+            # console.log 'PATCHing'
   #          require('../../../lib/cache/query_cache').reset()
             owner.patchAdd 'reverses', shared_reverse_id, (err) ->
               assert.ok(!err, "No errors: #{err}")

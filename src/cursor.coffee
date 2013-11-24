@@ -222,13 +222,14 @@ module.exports = class Cursor
     shared_related_models = {}
 
     findOrNew = (related_json, reverse_model_type) =>
-      unless shared_related_models[related_json.id]
+      related_id = related_json[reverse_model_type::idAttribute]
+      unless shared_related_models[related_id]
         if reverse_model_type.cache
-          unless shared_related_models[related_json.id] = reverse_model_type.cache.get(related_json.id)
-            reverse_model_type.cache.set(related_json.id, shared_related_models[related_json.id] = new reverse_model_type(related_json))
+          unless shared_related_models[related_id] = reverse_model_type.cache.get(related_id)
+            reverse_model_type.cache.set(related_id, shared_related_models[related_id] = new reverse_model_type(related_json))
         else
-          shared_related_models[related_json.id] = new reverse_model_type(related_json)
-      return shared_related_models[related_json.id]
+          shared_related_models[related_id] = new reverse_model_type(related_json)
+      return shared_related_models[related_id]
 
     for include in @_cursor.$include
       relation = schema.relation(include)

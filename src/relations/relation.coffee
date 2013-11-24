@@ -59,7 +59,7 @@ module.exports = class Relation
         if @join_table
           queue.defer (callback) =>
             query = {}
-            query[@reverse_relation.join_key] = {$in: (related_json.id for related_json in changes.removed)}
+            query[@reverse_relation.join_key] = {$in: (related_json[@reverse_model_type::idAttribute] for related_json in changes.removed)}
             @join_table.destroy query, callback
         else
           # TODO: optimize using each update

@@ -17,7 +17,7 @@ module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @virtual_id_accessor or= "#{inflection.singularize(@key)}_ids"
-    @join_key = inflection.foreign_key(@model_type.model_name) unless @join_key
+    @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     unless @collection_type
       # @private
@@ -50,10 +50,11 @@ module.exports = class Many extends require('./relation')
     throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{util.inspect(value)}" unless _.isArray(value)
 
     Utils.orSet(model, 'rel_dirty', {})[@key] = true
-    model.setLoaded(@key, true)
+    model.setLoaded(@key, _.all(value, (item) -> Utils.dataId(item) isnt item))
 
     # set the collection with found or created models
     models = ((if related_model = collection.get(Utils.dataId(item)) then Utils.updateModel(related_model, item) else Utils.updateOrNew(item, @reverse_model_type)) for item in value)
+    model.setLoaded(@key, _.all(models, (model) -> model.isLoaded()))
     previous_models = _.clone(collection.models)
     collection.reset(models)
 
@@ -78,13 +79,13 @@ module.exports = class Many extends require('./relation')
 
         # process the found models
         for model_json in json
-          if related_model = collection.get(model_json.id)
+          if related_model = collection.get(model_json[@reverse_model_type::idAttribute])
             related_model.set(model_json)
           else
             collection.add(related_model = Utils.updateOrNew(model_json, @reverse_model_type))
 
         # update cache
-        (cache.set(model.id, related_model) for related_model in collection.models) if cache = @reverse_model_type.cache
+        (cache.set(related_model.id, related_model) for related_model in collection.models) if cache = @reverse_model_type.cache
 
         result = returnValue()
         callback(null, if result.models then result.models else result)
@@ -255,7 +256,7 @@ module.exports = class Many extends require('./relation')
 
   cursor: (model, key, query) ->
     json = if Utils.isModel(model) then model.attributes else model
-    (query = _.clone(query or {}))[if @join_table then @join_key else @reverse_relation.foreign_key] = json.id
+    (query = _.clone(query or {}))[if @join_table then @join_key else @reverse_relation.foreign_key] = json[@model_type::idAttribute]
     (query.$values or= []).push('id') if key is @virtual_id_accessor
     return @reverse_model_type.cursor(query)
 

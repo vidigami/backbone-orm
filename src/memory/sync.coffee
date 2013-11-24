@@ -56,7 +56,8 @@ class MemorySync
   create: (model, options) ->
     QueryCache.reset @model_type, (err) =>
       return options.error?(err) if err
-      model.set(id: Utils.guid())
+      (attributes = {})[@model_type::idAttribute] = Utils.guid()
+      model.set(attributes)
       model_json = @store[model.id] = model.toJSON()
       options.success(JSONUtils.deepClone(model_json))
 
@@ -95,7 +96,7 @@ class MemorySync
       @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
         ((model_json, callback) =>
           Utils.patchRemoveByJSON @model_type, model_json, (err) =>
-            delete @store[model_json.id] unless err
+            delete @store[model_json[@model_type::idAttribute]] unless err
             callback(err)
         ), callback
 

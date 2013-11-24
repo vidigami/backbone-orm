@@ -123,11 +123,7 @@ module.exports = (model_type) ->
     model_type::sync('cursor', query).toModels (err, model) ->
       return callback(err) if err
       return callback(null, model) if model
-      model = new model_type(data)
-      model.save (err) ->
-        return callback(err) if err
-        cache.set(model.id, model) if cache = model_type.cache
-        callback(null, model)
+      (new model_type(data)).save callback
 
   model_type.findOneNearestDate = (date, options, query, callback) ->
     throw new Error "Missing options key" unless key = options.key
@@ -206,6 +202,25 @@ module.exports = (model_type) ->
   # Backbone ORM - Model Lifecyle
   ###################################
 
+  model_type::fetchRelated = (relations, callback) ->
+    [relations, callback] = [null, relations] if arguments.length is 1
+
+    queue = new Queue(1)
+    queue.defer (callback) =>
+      return callback() if @isLoaded()
+      @fetch(callback)
+    queue.defer (callback) =>
+      keys = _.keys(Utils.orSet(@, 'needs_load', {}))
+      relations = [relations] if relations and not _.isArray(relations)
+      keys = _.intersection(keys, relations) if _.isArray(relations)
+
+      relations_queue = new Queue()
+      for key in keys
+        do (key) => relations_queue.defer (callback) => @get(key, callback)
+      relations_queue.await callback
+
+    queue.await callback
+
   model_type::patchAdd = (key, relateds, callback) ->
     return callback(new Error("patchAdd: relation '#{key}' unrecognized")) unless relation = @relation(key)
     return callback(new Error("patchAdd: missing relateds for '#{key}'")) unless relateds
@@ -252,7 +267,7 @@ module.exports = (model_type) ->
     return clone
 
   overrides =
-    initialize: ->
+    initialize: (attributes) ->
       if model_type.schema and (schema = model_type.schema())
         relation.initializeModel(@) for key, relation of schema.relations
 
@@ -260,6 +275,9 @@ module.exports = (model_type) ->
         needs_load = Utils.orSet(@, 'needs_load', {})
         delete needs_load[key] for key, value of needs_load when !value
         Utils.set(@, 'is_initialized', true)
+
+        # TODO: add to the cache -> would need to check that all relationships are loaded and set self as loaded?
+        # model_type.cache.set(@id, @) if model_type.cache and @id and attributes and _.size(attributes) > 1 # assume it is loaded
 
       return model_type::_orm_original_fns.initialize.apply(@, arguments)
 
@@ -269,11 +287,13 @@ module.exports = (model_type) ->
         switch arguments.length
           when 1 then options = Utils.wrapOptions({}, callback)
           when 2 then options = Utils.wrapOptions(options, callback)
+      else
+        options or= {}
 
       return model_type::_orm_original_fns.fetch.call(@, Utils.wrapOptions(options, (err, model, resp, options) =>
         return options.error?(@, resp, options) if err
         @setLoaded(true)
-        options.success?(model, resp, options)
+        options.success?(@, resp, options)
       ))
 
     unset: (key) ->
@@ -359,7 +379,9 @@ module.exports = (model_type) ->
       return options.error?(@, new Error "An unloaded model is trying to be saved: #{model_type.model_name}") unless @isLoaded()
 
       @_orm or= {}
-      return options.error?(@, new Error "Model is in a save loop: #{model_type.model_name}") if @_orm.save > 0
+      if @_orm.save > 0
+        return options.success?(@, {}, options) if @id # has an id so should be safe for relationships
+        return options.error?(@, new Error "Model is in a save loop: #{model_type.model_name}")
       @_orm.save or= 0; @_orm.save++
 
       # set the attributes
@@ -382,6 +404,7 @@ module.exports = (model_type) ->
 
           queue.await (err) =>
             return options.error?(@, Error "Failed to save relations. #{err}", options) if err
+            cache.set(@id, @) if cache = model_type.cache # update the cache
             options.success?(@, resp, options)
         ))
 
@@ -405,7 +428,7 @@ module.exports = (model_type) ->
 
         @patchRemove (err) =>
           return options.error?(@, new Error "Failed to destroy relations. #{err}", options) if err
-          options.success?(model, resp, options)
+          options.success?(@, resp, options)
       ))
 
     clone: (options) ->
