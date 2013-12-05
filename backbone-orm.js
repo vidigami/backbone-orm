@@ -3622,13 +3622,15 @@ module.exports = function(model_type, query, iterator, callback) {
 });
 
 ;require.register("backbone-orm/lib/extensions/model_interval", function(exports, require, module) {
-var INTERVAL_TYPES, Queue, moment, _;
+var INTERVAL_TYPES, Queue, Utils, moment, _;
 
 _ = require('underscore');
 
 moment = require('moment');
 
 Queue = require('../queue');
+
+Utils = require('../utils');
 
 INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
 
@@ -3728,7 +3730,7 @@ module.exports = function(model_type, query, iterator, callback) {
     start_ms = range.start.getTime();
     length_ms = moment.duration((_.isUndefined(options.length) ? 1 : options.length), options.type).asMilliseconds();
     if (!length_ms) {
-      throw Error("length_ms is invalid: " + length_ms + " for range: " + (util.inspect(range)));
+      throw Error("length_ms is invalid: " + length_ms + " for range: " + (Utils.inspect(range)));
     }
     query = _.omit(query, '$interval');
     query.$sort = [key];
@@ -4608,7 +4610,7 @@ module.exports = MemoryCursor = (function(_super) {
           return queue.defer(function(callback) {
             var related_query;
             if (reverse_relation.embed) {
-              throw Error("Embedded find is not yet supported. @_find: " + (util.inspect(_this._find)));
+              throw Error("Embedded find is not yet supported. @_find: " + (Utils.inspect(_this._find)));
               (related_query = {}).id = value;
               return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
                 if (err) {
@@ -5104,7 +5106,7 @@ module.exports = Many = (function(_super) {
       value = [];
     }
     if (!_.isArray(value)) {
-      throw new Error("HasMany.set: Unexpected type to set " + key + ". Expecting array: " + (util.inspect(value)));
+      throw new Error("HasMany.set: Unexpected type to set " + key + ". Expecting array: " + (Utils.inspect(value)));
     }
     Utils.orSet(model, 'rel_dirty', {})[this.key] = true;
     model.setLoaded(this.key, _.all(value, function(item) {
@@ -6075,9 +6077,9 @@ _ = require('underscore');
 
 Backbone = require('backbone');
 
-Queue = require('../queue');
-
 inflection = require('inflection');
+
+Queue = require('../queue');
 
 Utils = require('../utils');
 
@@ -6250,7 +6252,7 @@ module.exports = Relation = (function() {
   Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
 */
 
-var Backbone, DatabaseURL, Many, One, RELATION_VARIANTS, Schema, inflection, _,
+var Backbone, DatabaseURL, Many, One, RELATION_VARIANTS, Schema, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6265,6 +6267,8 @@ One = require('./relations/one');
 Many = require('./relations/many');
 
 DatabaseURL = require('./database_url');
+
+Utils = require('./utils');
 
 RELATION_VARIANTS = {
   'hasOne': 'hasOne',
@@ -6448,7 +6452,7 @@ module.exports = Schema = (function() {
     }
     if (!(type = RELATION_VARIANTS[options.type])) {
       if (!_.isString(options.type)) {
-        throw new Error("Unexpected type name is not a string: " + (util.inspect(options)));
+        throw new Error("Unexpected type name is not a string: " + (Utils.inspect(options)));
       }
       return this.fields[key] = options;
     }
@@ -6486,7 +6490,7 @@ module.exports = Schema = (function() {
       options = options.slice(1);
     }
     if (options.length > 1) {
-      throw new Error("Unexpected field options array: " + (util.inspect(options)));
+      throw new Error("Unexpected field options array: " + (Utils.inspect(options)));
     }
     if (options.length === 1) {
       _.extend(result, options[0]);

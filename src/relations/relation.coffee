@@ -7,9 +7,9 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../queue'
 inflection = require 'inflection'
 
+Queue = require '../queue'
 Utils = require '../utils'
 
 # @private
@@ -77,7 +77,7 @@ module.exports = class Relation
               attributes = {}
               attributes[@foreign_key] = model.id
               attributes[@reverse_relation.foreign_key] = related_id
-              # console.log "Creating join for: #{@model_type.model_name} join: #{util.inspect(attributes)}"
+              # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.inspect(attributes)}"
               join = new @join_table(attributes)
               join.save callback
 

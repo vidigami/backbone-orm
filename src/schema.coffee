@@ -8,9 +8,11 @@
 _ = require 'underscore'
 Backbone = require 'backbone'
 inflection = require 'inflection'
+
 One = require './relations/one'
 Many = require './relations/many'
 DatabaseURL = require './database_url'
+Utils = require './utils'
 
 RELATION_VARIANTS =
   'hasOne': 'hasOne'
@@ -110,7 +112,7 @@ module.exports = class Schema
 
     # unrecognized
     unless type = RELATION_VARIANTS[options.type]
-      throw new Error "Unexpected type name is not a string: #{util.inspect(options)}" unless _.isString(options.type)
+      throw new Error "Unexpected type name is not a string: #{Utils.inspect(options)}" unless _.isString(options.type)
       return @fields[key] = options
 
     options.type = type
@@ -137,7 +139,7 @@ module.exports = class Schema
       options = options.slice(1)
 
     # too many options
-    throw new Error "Unexpected field options array: #{util.inspect(options)}" if options.length > 1
+    throw new Error "Unexpected field options array: #{Utils.inspect(options)}" if options.length > 1
 
     # options object
     _.extend(result, options[0]) if options.length is 1
