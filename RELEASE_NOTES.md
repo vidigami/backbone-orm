@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.4
+* Bug fix: references to util Node.js module
+
 ### 0.5.3
 * Bug fix: set ids for relationship incorrectly reported the relationship as loaded
 * Bug fix: was not handling idAttribute
