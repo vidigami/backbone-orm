@@ -1,0 +1,29 @@
+{
+  "name": "backbone-orm",
+  "main": "backbone-orm.js",
+  "version": "0.5.4",
+  "homepage": "https://github.com/vidigami/backbone-orm",
+  "authors": [
+    "Kevin Malakoff <kmalakoff@gmail.com>"
+  ],
+  "description": "A polystore ORM for Node.js and the browser",
+  "keywords": [
+    "backbone",
+    "orm",
+    "backbone-orm"
+  ],
+  "dependencies": {
+    "underscore": ">=1.2.0",
+    "backbone": ">=1.0.0",
+    "moment": ">=1.0.0",
+    "inflection": ">=1.0.0"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

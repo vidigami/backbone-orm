@@ -36,10 +36,10 @@
     "grunt-zip": "*"
   },
   "dependencies": {
-    "underscore": "1.5.x",
-    "backbone": "1.1.x",
-    "moment": "2.4.x",
-    "inflection": "1.2.x",
-    "lru-cache": "2.3.x"
+    "underscore": ">=1.2.0",
+    "backbone": ">=1.0.0",
+    "moment": ">=1.0.0",
+    "inflection": ">=1.0.0",
+    "lru-cache": ">=2.0.0"
   }
 }
