@@ -15,7 +15,7 @@
     "build": "grunt build",
     "watch": "grunt watch:compile",
     "clean": "rm -rf lib/*",
-    "prepublish": "grunt build default"
+    "prepublish": "grunt build default --force"
   },
   "devDependencies": {
     "coffee-script": "*",
