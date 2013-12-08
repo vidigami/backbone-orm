@@ -1,0 +1,44 @@
+<!-- *forked* from tests_amd.html -->
+<!DOCTYPE HTML>
+<html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+  <title>Backbone-ORM-uRequire-AMD</title>
+  <script type="text/javascript" src="require.js"></script>
+  <script type="text/javascript">
+    require.config({
+
+        baseUrl:"../../_build_urequire/lib",
+
+        paths: {
+          'underscore': "../../node_modules/underscore/underscore",
+          'backbone': "../../node_modules/backbone/backbone",
+          'moment': "../../node_modules/moment/moment",
+          'inflection': "../../node_modules/inflection/lib/inflection",
+          'stream': "../../stream",
+          'backbone-orm': "index"
+        },
+
+        shim: {
+          backbone: { deps: ['underscore'], exports: "Backbone"},
+          underscore: { deps: [], exports: "_"}
+        }
+    });
+
+    require(['underscore', 'backbone', 'stream', 'backbone-orm'], function(_, Backbone, stream, BackboneORM) {
+      //var Backbone = window.Backbone; // Better to load as AMD dep instead of `window`
+      var Test = Backbone.Model.extend({
+        urlRoot: '/api/tests',
+        model_name: 'Test'
+      });
+      Test.prototype.sync = BackboneORM.sync(Test);
+
+      var test = new Test({name: 'Bob'});
+      test.save(function(err){
+        Test.stream()
+          .on('data', function(model){console.log("Model: " + model.get('name'));})
+          .on('error', function(err){ console.log("An error is NOT expected: " + err); });
+      });
+    });
+  </script>
+</head>

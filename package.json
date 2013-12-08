@@ -1,6 +1,6 @@
 {
   "name": "backbone-orm",
-  "version": "0.5.4",
+  "version": "0.5.4u",
   "description": "A polystore ORM for Node.js and the browser",
   "main": "./lib/index.js",
   "license": "MIT",
@@ -12,10 +12,10 @@
   "scripts": {
     "test": "npm run build; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script --reporter spec --timeout 10000",
     "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
-    "build": "coffee -o lib -c src",
-    "watch": "coffee -o lib -w src",
+    "build": "grunt build",
+    "watch": "grunt watch:compile",
     "clean": "rm -rf lib/*",
-    "prepublish": "npm run build; grunt"
+    "prepublish": "grunt build default"
   },
   "devDependencies": {
     "coffee-script": "*",
@@ -33,7 +33,12 @@
     "grunt-wrap": "*",
     "grunt-contrib-clean": "*",
     "grunt-contrib-uglify": "*",
-    "grunt-zip": "*"
+    "grunt-zip": "*",
+
+    "urequire": "0.6.9",
+    "grunt-urequire": "0.6.x",
+    "grunt-contrib-watch": "*",
+    "grunt-mocha": "*"
   },
   "dependencies": {
     "underscore": ">=1.2.0",
