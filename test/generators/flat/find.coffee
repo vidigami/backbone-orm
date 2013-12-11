@@ -400,3 +400,52 @@ module.exports = (options, callback) ->
       catch e
         assert.ok(e, "Error thrown")
         done()
+
+    it 'Handles a find $in query on id', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        $in = [999, test_model.id]
+
+        Flat.find {id: {$in: $in}}, (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(models.length, 'finds one model')
+          for model in models
+            assert.equal(test_model.get('name'), model.get('name'), "Names match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+          done()
+
+    it 'Handles a find $nin query', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        $nin = ['random_string', 'some_9']
+
+        Flat.find {name: {$nin: $nin}}, (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(models.length, BASE_COUNT, 'finds all models')
+          $nin.push(test_model.get('name'))
+
+          Flat.find {name: {$nin: $nin}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, BASE_COUNT-1, 'Finds other models')
+            for model in models
+              assert.notEqual(test_model.get('name'), model.get('name'), "Names don't match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+            done()
+
+    it 'Handles a find $nin query on id', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+        $nin = [999, 9999]
+
+        Flat.find {id: {$nin: $nin}}, (err, models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(models.length, BASE_COUNT, 'finds all models')
+
+          $nin.push(test_model.id)
+          Flat.find {id: {$nin: $nin}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, BASE_COUNT-1, 'Finds other models')
+            for model in models
+              assert.notEqual(test_model.get('name'), model.get('name'), "Names don't match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+            done()
