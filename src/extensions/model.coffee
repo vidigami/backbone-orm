@@ -14,6 +14,7 @@ Utils = require '../utils'
 ModelStream = require('./model_stream')
 modelEach = require('./model_each')
 modelInterval = require('./model_interval')
+DatabaseURL = require('../database_url')
 
 require './collection' # ensure collection extensions are loaded
 
@@ -92,7 +93,6 @@ module.exports = (model_type) ->
     model_type::sync('destroy', query, callback)
 
   model_type.db = -> model_type::sync('db')
-  model_type.sync = -> model_type::sync('sync')
 
   ###################################
   # Backbone ORM - Convenience Functions
