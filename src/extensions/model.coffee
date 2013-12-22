@@ -14,6 +14,7 @@ Utils = require '../utils'
 ModelStream = require('./model_stream')
 modelEach = require('./model_each')
 modelInterval = require('./model_interval')
+DatabaseURL = require('../database_url')
 
 require './collection' # ensure collection extensions are loaded
 

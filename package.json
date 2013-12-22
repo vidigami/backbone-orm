@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "Kevin Malakoff (https://github.com/kmalakoff)",
   "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
-  "repository": {"type": "git", "url": "https://bitbucket.org/vidigami/backbone-orm.git"},
+  "repository": {"type": "git", "url": "https://github.com/vidigami/backbone-orm.git"},
   "keywords": ["backbone", "orm", "backbone-orm"],
   "engines": {"node": "*"},
   "scripts": {

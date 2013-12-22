@@ -57,14 +57,15 @@ module.exports = class MemoryCursor extends Cursor
       queue = new Queue(1)
 
       queue.defer (callback) =>
-        ins = {}
-        (delete find_query[key]; ins[key] = value.$in) for key, value of find_query when value?.$in
-        ins_size = _.size(ins)
-
+        [ins, nins] = [{}, {}]
+        for key, value of find_query
+          (delete find_query[key]; ins[key] = value.$in) if value?.$in
+          (delete find_query[key]; nins[key] = value.$nin) if value?.$nin
+        [ins_size, nins_size] = [_.size(ins), _.size(nins)]
         # NOTE: we clone the data out of the store since the caller could modify it
 
         # use find
-        if keys.length or ins_size
+        if keys.length or ins_size or nins_size
           if @_cursor.$ids
             for id, model_json of @store
               json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, id) and _.isEqual(_.pick(model_json, keys), find_query)
@@ -94,6 +95,8 @@ module.exports = class MemoryCursor extends Cursor
               return callback(err) if err
               if ins_size
                 json = _.filter json, (model_json) => return true for key, values of ins when model_json[key] in values
+              if nins_size
+                json = _.filter json, (model_json) => return true for key, values of nins when model_json[key] not in values
               callback()
 
         else
