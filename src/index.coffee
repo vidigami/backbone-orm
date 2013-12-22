@@ -16,6 +16,7 @@ if window? and require.shim
   ])
 
 module.exports =
+  VERSION: VERSION # injected by uRequire
   sync: require './memory/sync'
 
   Utils: require './utils'

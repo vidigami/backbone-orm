@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.4
+  backbone-orm.js 0.5.4u
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
@@ -16,7 +16,9 @@ modelExtensions = null
 
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
-module.exports = class Utils
+#module.exports = # use `exports` object to return module @ end - breaks circular dependency problem with AMD
+
+class Utils
   ##############################################
   # Schema
 
@@ -246,3 +248,5 @@ module.exports = class Utils
       return if JSON.stringify(model[field]) < JSON.stringify(other_model[field]) then 1 else -1
     else
       return if JSON.stringify(model[field]) > JSON.stringify(other_model[field]) then 1 else -1
+
+_.extend exports, Utils

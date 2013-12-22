@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>specs: backbone-orm: 'UMDplain', loader: 'AMD/RequireJS' }</title>
+  </head>
+
+  <body>
+    <h1>backbone-orm/spec - urequire template: 'UMD', loader: 'AMD/RequireJS' }</h1>
+
+    <link rel="stylesheet" href="../../../bower_components/mocha/mocha.css"/>
+    <div id="mocha"></div>
+  </body>
+
+  <!-- grunt-mocha / phantomjs requires mocha as plain <script> ? -->
+  <script src="../../../bower_components/mocha/mocha.js"></script>
+
+  <script src="../../../bower_components/requirejs/require.js"></script>
+
+  <script type="text/javascript">
+    window.process = {argv: []};// node shim
+
+    require.config({
+
+      baseUrl: "../", //cause this file is in `web/`
+
+      paths: {
+        mocha: "../../bower_components/mocha/mocha",
+        chai: "../../bower_components/chai/chai",
+        'underscore': "../../bower_components/underscore/underscore",
+        'backbone': "../../bower_components/backbone/backbone",
+        'moment': "../../bower_components/moment/moment",
+        'inflection': "../../bower_components/inflection/lib/inflection",
+        'stream': "../../stream"
+        // 'backbone-orm': "index" // we should test regressions against this only
+      },
+
+      shim: {
+        backbone: { deps: ['underscore'], exports: "Backbone"},
+        underscore: { deps: [], exports: "_"},
+        inflection: { deps: [], exports: "inflection"}
+      }
+    });
+
+    mocha.setup('bdd');
+    require(["suiteWeb"], function(){
+      mocha.run().globals(['_', 'backbone-orm']);
+    });
+
+  </script>
+</html>

@@ -1,5 +1,4 @@
 Mocha = require 'mocha'
-path = require 'path'
 fs = require 'fs'
 
 mocha = new Mocha(

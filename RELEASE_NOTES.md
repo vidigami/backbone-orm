@@ -1,4 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
+### 0.5.4u
+
+urequire edition
+
 
 ### 0.5.4
 * Bug fix: references to util Node.js module

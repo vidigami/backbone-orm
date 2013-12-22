@@ -1,0 +1,30 @@
+<!-- *forked* from tests_global.html -->
+<!DOCTYPE HTML>
+<html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+  <title>Backbone-ORM-uRequire-combined</title>
+  <script type="text/javascript" src="../../node_modules/underscore/underscore.js"></script>
+  <script type="text/javascript" src="../../node_modules/backbone/backbone.js"></script>
+  <script type="text/javascript" src="../../node_modules/moment/moment.js"></script>
+  <script type="text/javascript" src="../../node_modules/inflection/lib/inflection.js"></script>
+  <script type="text/javascript" src="../../stream.js"></script>
+  <script type="text/javascript" src="../../_build_urequire/backbone-orm-combined.js"></script>
+  <!--<script type="text/javascript" src="../../_build_urequire/backbone-orm-combined.min.js"></script>-->
+
+  <script type="text/javascript">
+    var Test = Backbone.Model.extend({
+      urlRoot: '/api/tests',
+      model_name: 'Test'
+    });
+    Test.prototype.sync = BackboneORM.sync(Test);
+
+    var test = new Test({name: 'Bob'});
+    test.save(function(err){
+      Test.stream()
+        .on('data', function(model){ console.log("Model: " + model.get('name')); })
+        .on('error', function(err){ console.log("An error is NOT expected: " + err); });
+    });
+  </script>
+
+</head>
