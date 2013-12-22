@@ -47,10 +47,7 @@ module.exports = (grunt) ->
           filepath
         src: ['backbone-orm*.js', 'stream*.js']
 
-    clean:
-      build: ["_build"]
-      lib: ['lib']
-      urequire: ['_build_urequire']
+    clean: lib: ['lib']
 
     watch:
       webUMD: files: ["src/**/*"], tasks: ['urequire:webUMD']
@@ -87,11 +84,12 @@ module.exports = (grunt) ->
         template:
           name: 'UMDplain'
           banner: LIBRARY_WRAPPERS.license
+        clean: true
         #verbose: true
-        #debugLevel: 100
+        #debugLevel: 0
 
       webUMD: # uses the utils.js, url.js etc that shadow node's modules, so itc can be used on the web (and node).
-        dstPath: "_build_urequire/lib" # 'lib' so it works with specsWeb, until partial dep path can be replaced by urequire :-)
+        dstPath: "_build_urequire/UMD" # 'lib' so it works with specsWeb, until partial dep path can be replaced by urequire :-)
 
       webCombined:
         dstPath: "_build_urequire/backbone-orm-combined"
@@ -121,7 +119,7 @@ module.exports = (grunt) ->
         optimize: true # uglify2 defaults
 
       # a quick compile i.e `coffee -o lib -c src` + VERSION injection on index.js
-      # without module translation, just coffee with uRequire features
+      # without module translation, just coffee with uRequire
       compile:
         filez: ['**/*.coffee']  # accept only `.coffee`, i.e exclude .js shims
         dstPath: 'lib'
@@ -151,6 +149,7 @@ module.exports = (grunt) ->
         dstPath: '_build_urequire/test'
         dependencies:
           node: [ '!', (d)-> d in [ 'stream', 'assert', 'util', 'querystring' ] ] # 'stream' optionaly available as local
+          replace: '../UMD': '../lib|' # >= 0.6.10beta1
 
   ### shortcuts generation ###
   splitTasks = (tasks)-> if !_.isString tasks then tasks else (_.filter tasks.split(/\s/), (v)-> v)
@@ -162,15 +161,15 @@ module.exports = (grunt) ->
     vendor:     ['shell:vendor']
 
     build:      "urequire:compile"             #  allows inject of VERSION
-    webAll:     "webUMD webCombined webMin"   # `urequire:xxx` shortcuted above
+    webAll:     "webUMD webCombined webMin"    # `urequire:xxx` shortcuted above
 
     # specs
-    libSpecs:   "clean:lib build mochaCmd"
-    libUMDSpecs:"clean:lib libUMD mochaCmd"
-    libUMDSpecsUnshadowed:"clean:lib libUMDnode mochaCmd"
-    webSpecs:   "clean:urequire webUMD specsWeb mocha"
+    libSpecs:        "build mochaCmd"
+    libUMDSpecs:     "libUMD mochaCmd"
+    libUMDnodeSpecs: "libUMDnode mochaCmd"
+    webSpecs:        "webUMD specsWeb mocha"
 
-    allSpecs:   "libSpecs libUMDSpecs libUMDSpecsUnshadowed webSpecs"
+    allSpecs:        "libUMDSpecs libUMDnodeSpecs webSpecs libSpecs"
   }
 
   grunt.loadNpmTasks task for task in [

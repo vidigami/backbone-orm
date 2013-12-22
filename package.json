@@ -35,7 +35,7 @@
     "grunt-contrib-uglify": "*",
     "grunt-zip": "*",
 
-    "urequire": "0.6.9",
+    "urequire": "0.6.10",
     "grunt-urequire": "0.6.x",
     "grunt-contrib-watch": "*",
     "grunt-mocha": "*"
