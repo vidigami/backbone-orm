@@ -1,5 +1,9 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.5
+* Added $nin support
+* Allow for manual model_type_id
+
 ### 0.5.4
 * Bug fix: references to util Node.js module
 
