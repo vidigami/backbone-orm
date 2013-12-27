@@ -47,7 +47,7 @@ module.exports = (grunt) ->
           filepath
         src: ['backbone-orm*.js', 'stream*.js']
 
-    clean: lib: ['lib']
+    clean: build: ['lib']
 
     watch:
       webUMD: files: ["src/**/*"], tasks: ['urequire:webUMD']
