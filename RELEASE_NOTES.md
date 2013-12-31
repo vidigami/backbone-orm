@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.6
+* Removed default each limit. Must now be explicitly passed.
+
 ### 0.5.5
 * Added $nin support
 * Allow for manual model_type_id

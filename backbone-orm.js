@@ -3554,15 +3554,13 @@ module.exports = function(model_type) {
 });
 
 ;require.register("backbone-orm/lib/extensions/model_each", function(exports, require, module) {
-var BATCH_DEFAULT_FETCH, Cursor, Queue, _;
+var Cursor, Queue, _;
 
 _ = require('underscore');
 
 Queue = require('../queue');
 
 Cursor = null;
-
-BATCH_DEFAULT_FETCH = 1000;
 
 module.exports = function(model_type, query, iterator, callback) {
   var method, model_limit, options, parsed_query, processed_count, runBatch;
@@ -3578,7 +3576,9 @@ module.exports = function(model_type, query, iterator, callback) {
     $sort: 'id'
   });
   model_limit = parsed_query.cursor.$limit || Infinity;
-  parsed_query.cursor.$limit = options.fetch || BATCH_DEFAULT_FETCH;
+  if (options.fetch) {
+    parsed_query.cursor.$limit = options.fetch;
+  }
   runBatch = function() {
     var cursor;
     cursor = model_type.cursor(parsed_query);
@@ -3607,10 +3607,7 @@ module.exports = function(model_type, query, iterator, callback) {
         if (err) {
           return callback(err);
         }
-        if (processed_count >= model_limit) {
-          return callback(null, processed_count);
-        }
-        if (models.length < parsed_query.cursor.$limit) {
+        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
           return callback(null, processed_count);
         }
         parsed_query.cursor.$offset += parsed_query.cursor.$limit;

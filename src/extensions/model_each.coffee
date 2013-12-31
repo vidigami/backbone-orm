@@ -2,8 +2,6 @@ _ = require 'underscore'
 Queue = require '../queue'
 Cursor = null
 
-BATCH_DEFAULT_FETCH = 1000
-
 module.exports = (model_type, query, iterator, callback) ->
   Cursor = require '../cursor' unless Cursor # module dependencies
 
@@ -15,7 +13,7 @@ module.exports = (model_type, query, iterator, callback) ->
   _.defaults(parsed_query.cursor, {$offset: 0, $sort: 'id'})
 
   model_limit = parsed_query.cursor.$limit or Infinity
-  parsed_query.cursor.$limit = options.fetch or BATCH_DEFAULT_FETCH
+  parsed_query.cursor.$limit = options.fetch if options.fetch
 
   runBatch = ->
     cursor = model_type.cursor(parsed_query)
@@ -31,8 +29,7 @@ module.exports = (model_type, query, iterator, callback) ->
 
       queue.await (err) ->
         return callback(err) if err
-        return callback(null, processed_count) if (processed_count >= model_limit)
-        return callback(null, processed_count) if models.length < parsed_query.cursor.$limit # we fetched less than the total
+        return callback(null, processed_count) if (processed_count >= model_limit) or (models.length < parsed_query.cursor.$limit) or not parsed_query.cursor.$limit
         parsed_query.cursor.$offset += parsed_query.cursor.$limit
         runBatch()
   runBatch()
