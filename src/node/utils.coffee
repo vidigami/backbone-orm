@@ -45,7 +45,7 @@ module.exports = class NodeUtils
                 callback()
 
               catch err
-                console.log "resetSchemasByDirectory: skipping: #{err}" if options.verbose
+                console.log "findModels: skipping: #{err}" if options.verbose
                 callback()
 
         queue.await (err) ->
