@@ -119,7 +119,7 @@ module.exports = class Cursor
         if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
           models = (Utils.updateOrNew(item, @model_type) for item in json)
         else
-          models = (model = new @model_type(@model_type::parse(item)); model.setPartial(true); model for item in json)
+          models = ((model = new @model_type(@model_type::parse(item)); model.setPartial(true); model) for item in json)
         return callback(null, if @_cursor.$one then models[0] else models)
 
   toJSON: (callback) ->

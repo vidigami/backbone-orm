@@ -2424,17 +2424,15 @@ module.exports = Cursor = (function() {
             return _results;
           }).call(_this);
         } else {
-          models = ((function() {
+          models = (function() {
             var _i, _len, _results;
-            model = new this.model_type(this.model_type.prototype.parse(item));
-            model.setPartial(true);
             _results = [];
             for (_i = 0, _len = json.length; _i < _len; _i++) {
               item = json[_i];
-              _results.push(model);
+              _results.push((model = new this.model_type(this.model_type.prototype.parse(item)), model.setPartial(true), model));
             }
             return _results;
-          }).call(_this));
+          }).call(_this);
         }
         return callback(null, _this._cursor.$one ? models[0] : models);
       });

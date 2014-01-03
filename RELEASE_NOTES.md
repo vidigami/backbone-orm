@@ -2,6 +2,7 @@ Please refer to the following release notes when upgrading your version of Backb
 
 ### 0.5.6
 * Removed default each limit. Must now be explicitly passed.
+* Bug fix: $select with toModels.
 
 ### 0.5.5
 * Added $nin support
