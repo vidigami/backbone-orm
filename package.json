@@ -12,10 +12,9 @@
   "scripts": {
     "test": "npm run build; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script --reporter spec --timeout 10000",
     "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
-    "build": "coffee -o lib -c src",
-    "watch": "coffee -o lib -w src",
-    "clean": "rm -rf lib/*",
-    "prepublish": "npm run build; grunt"
+    "build": "gulp build --require coffee-script",
+    "watch": "gulp watch --require coffee-script",
+    "clean": "rm -rf lib/*"
   },
   "devDependencies": {
     "coffee-script": "*",
@@ -23,17 +22,17 @@
     "mocha": "*",
     "powerset": "*",
     "store-redis": "0.1.x",
-    "brunch": "*",
-    "javascript-brunch": "*",
-    "coffee-script-brunch": "*",
-    "browserify": "*",
-    "grunt": "*",
-    "grunt-cli": "*",
-    "grunt-shell": "*",
-    "grunt-wrap": "*",
-    "grunt-contrib-clean": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-zip": "*"
+    "gulp": "*",
+    "gulp-util": "*",
+    "gulp-coffee": "*",
+    "gulp-concat": "*",
+    "gulp-uglify": "*",
+    "gulp-rename": "*",
+    "gulp-zip": "*",
+    "gulp-browserify": "*",
+    "gulp-license": "*",
+    "streamee": "*",
+    "event-stream": "*"
   },
   "dependencies": {
     "underscore": ">=1.2.0",
