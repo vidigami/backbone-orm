@@ -14,6 +14,7 @@
     "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "gulp build --require coffee-script",
     "watch": "gulp watch --require coffee-script",
+    "release": "gulp release --require coffee-script",
     "clean": "rm -rf lib/*"
   },
   "devDependencies": {
@@ -26,11 +27,12 @@
     "gulp-util": "*",
     "gulp-coffee": "*",
     "gulp-concat": "*",
+    "gulp-license": "*",
     "gulp-uglify": "*",
     "gulp-rename": "*",
     "gulp-zip": "*",
     "gulp-browserify": "*",
-    "gulp-license": "*",
+    "gulp-wrap-define": "*",
     "streamee": "*",
     "event-stream": "*"
   },
