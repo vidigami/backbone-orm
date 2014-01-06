@@ -13,16 +13,16 @@ zip = require 'gulp-zip'
 LIBRARY_WRAPPERS = require './client/config_library_wrap'
 
 gulp.task 'build', ->
-  gulp.src('./src/**/*.coffee').pipe(coffee({bare: true}).on('error', gutil.log))
-    .pipe(gulp.dest('./lib/'))
+  gulp.src('src/**/*.coffee').pipe(coffee({bare: true}).on('error', gutil.log))
+    .pipe(gulp.dest('lib/'))
 
 gulp.task 'watch', ['build'], ->
   gulp.watch './src/**/*.coffee', -> gulp.run 'build'
 
 gulp.task 'build_client', ->
   es.merge(
-    gulp.src('./src/**/*.coffee').pipe(coffee({bare: true}).on('error', gutil.log))
-    gulp.src('./client/node-dependencies/**/*.js')
+    gulp.src(['src/**/*.coffee', '!src/node/*.coffee']).pipe(coffee({bare: true}).on('error', gutil.log))
+    gulp.src('client/node-dependencies/**/*.js')
   )
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
     .pipe(define({define: 'require.register'}))
@@ -37,10 +37,10 @@ gulp.task 'minify_client', ['build_client'], ->
     .pipe(gulp.dest('./'))
 
 gulp.task 'zip', ['minify_client'], ->
-  gulp.src(['./*.js'])
+  gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))
-    .pipe(gulp.dest('./client/'))
+    .pipe(gulp.dest('client/'))
 
 gulp.task 'release', ->
   gulp.run 'build', 'zip'
