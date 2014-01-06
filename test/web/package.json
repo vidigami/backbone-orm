@@ -13,6 +13,6 @@
     "moment": "2.4.x",
     "inflection": "1.2.x",
     "lru-cache": "2.3.x",
-    "backbone-orm": "git+https://github.com/vidigami/backbone-orm.git"
+    "backbone-orm": "git+https://github.com/vidigami/backbone-orm.git#gulp"
   }
 }
