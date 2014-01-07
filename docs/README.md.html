@@ -189,7 +189,8 @@ Task.interval {$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, leng
       .pipe(histogram)
       .on(&#39;finish&#39;, -&gt; stats.push(histogram.summary()); callback())
   ),
-  (err) -&gt; console.log &#39;Done&#39;</code></pre>
+  (err) -&gt; console.log &#39;Done&#39;
+</code></pre>
 <h4 id="examples-javascript-">Examples (JavaScript)</h4>
 <pre><code class="lang-javascript">// Find the Project with id = 123
 Project.findOne({id: 123}, function(err, project) {});
@@ -242,13 +243,16 @@ Task.interval({$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, leng
       .on(&#39;finish&#39;, function() {stats.push(histogram.summary()); return callback();});
   },
   function(err) { return console.log(&#39;Done&#39;); }
-);</code></pre><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for installation instructions, examples, documentation, and community!</p><h3 id="for-contributors">For Contributors</h3><p>To build the library for Node.js:</p><pre><code>$ npm run</code></pre><p>To build the library for the browser:</p><pre><code>$ grunt</code></pre><p>Please run tests before submitting a pull request.</p><pre><code>$ npm test</code></pre>
-
+);
+</code></pre><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for installation instructions, examples, documentation, and community!</p><h3 id="for-contributors">For Contributors</h3><p>To build the library for Node.js:</p><pre><code>$ npm run build
+</code></pre><p>To build the library for the browser:</p><pre><code>$ npm run release
+</code></pre><p>Please run tests before submitting a pull request.</p><pre><code>$ npm test
+</code></pre>
       </div>
     </div>
     <div id='footer'>
   Generated on
-  Sat Dec 07 2013 18:15:23 GMT-0800 (PST)
+  Mon Jan 06 2014 17:04:40 GMT-0800 (PST)
   by
   <a href='https://github.com/netzpirat/codo' title='CoffeeScript API documentation generator'>Codo</a>
   v1.7.2
