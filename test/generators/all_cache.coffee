@@ -5,5 +5,5 @@ Queue = require '../../lib/queue'
 module.exports = (options, callback) ->
   queue = new Queue(1)
   # queue.defer (callback) -> require('./cache/options')(options, callback)
-  queue.defer (callback) -> require('./cache/query')(options, callback)
+  # queue.defer (callback) -> require('./cache/query')(options, callback)
   queue.await callback
