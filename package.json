@@ -15,7 +15,8 @@
     "build": "gulp build --require coffee-script",
     "watch": "gulp watch --require coffee-script",
     "release": "gulp release --require coffee-script",
-    "clean": "rm -rf lib/*"
+    "clean": "rm -rf lib/*",
+    "prepublish": "gulp release --require coffee-script"
   },
   "devDependencies": {
     "coffee-script": "*",
