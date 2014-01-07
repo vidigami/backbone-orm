@@ -142,13 +142,13 @@ Please [checkout the website](http://vidigami.github.io/backbone-orm/) for insta
 To build the library for Node.js:
 
 ```
-$ npm run
+$ npm run build
 ```
 
 To build the library for the browser:
 
 ```
-$ grunt
+$ npm run release
 ```
 
 Please run tests before submitting a pull request.
