@@ -3,6 +3,8 @@ es = require 'event-stream'
 
 gulp = require 'gulp'
 gutil = require 'gulp-util'
+coffee = require 'gulp-coffee'
+compile = require 'gulp-compile-js'
 modules = require 'gulp-module-system'
 rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
@@ -23,7 +25,8 @@ gulp.task 'build_client', ->
     gulp.src(['client/node-dependencies/**/*.js'])
   )
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
-    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', compile: {coffee: {bare: true}}, umd: {symbol: 'BackboneORM'}}))
+    .pipe(compile({coffee: {bare: true}}))
+    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment', 'inflection'], bottom: true}}))
     .pipe(gulp.dest('./'))
 
 gulp.task 'minify_client', ['build_client'], ->

@@ -29,6 +29,8 @@
     "gulp-uglify": "*",
     "gulp-rename": "*",
     "gulp-zip": "*",
+    "gulp-coffee": "*",
+    "gulp-compile-js": "*",
     "gulp-module-system": "*",
     "event-stream": "*"
   },

@@ -16,7 +16,7 @@
         }
     });
 
-    require(['underscore', 'backbone', 'stream', 'backbone-orm'], function(_, Backbone, stream, BackboneORM) {
+    require(['underscore', 'backbone', 'moment', 'inflection', 'stream', 'backbone-orm'], function(_, Backbone, moment, inflection, stream, BackboneORM) {
       var Backbone = window.Backbone;
       var Test = Backbone.Model.extend({
         urlRoot: '/api/tests',
