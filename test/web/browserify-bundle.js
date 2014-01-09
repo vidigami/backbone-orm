@@ -2277,9 +2277,7 @@ module.exports = ModelStream = (function(_super) {
 
 })(stream.Readable);
 
-},{"stream":46}],"backbone-orm":[function(require,module,exports){
-module.exports=require('Atkl4x');
-},{}],"Atkl4x":[function(require,module,exports){
+},{"stream":46}],"Atkl4x":[function(require,module,exports){
 /*
   backbone-orm.js 0.5.6
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
@@ -2343,7 +2341,9 @@ try {
   e = _error;
 }
 
-},{"./cache/singletons":5,"./connection_pool":7,"./cursor":8,"./database_url":9,"./json_utils":17,"./memory/sync":19,"./queue":21,"./schema":25,"./utils":26,"backbone":"M0BcZC","inflection":54,"lru-cache":55,"moment":56,"querystring":44,"stream":46,"underscore":57,"url":53}],17:[function(require,module,exports){
+},{"./cache/singletons":5,"./connection_pool":7,"./cursor":8,"./database_url":9,"./json_utils":17,"./memory/sync":19,"./queue":21,"./schema":25,"./utils":26,"backbone":"M0BcZC","inflection":54,"lru-cache":55,"moment":56,"querystring":44,"stream":46,"underscore":57,"url":53}],"backbone-orm":[function(require,module,exports){
+module.exports=require('Atkl4x');
+},{}],17:[function(require,module,exports){
 /*
   backbone-orm.js 0.5.6
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
@@ -5437,9 +5437,7 @@ module.exports = Utils = (function() {
 
 })();
 
-},{"./database_url":9,"./extensions/model":11,"./json_utils":17,"./queue":21,"backbone":"M0BcZC","inflection":54,"underscore":57,"url":53}],"backbone":[function(require,module,exports){
-module.exports=require('M0BcZC');
-},{}],"M0BcZC":[function(require,module,exports){
+},{"./database_url":9,"./extensions/model":11,"./json_utils":17,"./queue":21,"backbone":"M0BcZC","inflection":54,"underscore":57,"url":53}],"M0BcZC":[function(require,module,exports){
 //     Backbone.js 1.1.0
 
 //     (c) 2010-2011 Jeremy Ashkenas, DocumentCloud Inc.
@@ -7022,7 +7020,9 @@ module.exports=require('M0BcZC');
 
 }).call(this);
 
-},{"underscore":57}],29:[function(require,module,exports){
+},{"underscore":57}],"backbone":[function(require,module,exports){
+module.exports=require('M0BcZC');
+},{}],29:[function(require,module,exports){
 var Buffer = require('buffer').Buffer;
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
@@ -8002,10 +8002,11 @@ function Buffer (subject, encoding, noZero) {
     // Fallback: Return this instance of Buffer
     buf = this
     buf.length = length
+    buf._isBuffer = true
   }
 
   var i
-  if (Buffer.isBuffer(subject)) {
+  if (typeof Uint8Array === 'function' && subject instanceof Uint8Array) {
     // Speed optimization -- use set if we're copying from a Uint8Array
     buf.set(subject)
   } else if (isArrayish(subject)) {
@@ -8046,7 +8047,7 @@ Buffer.isEncoding = function (encoding) {
 }
 
 Buffer.isBuffer = function (b) {
-  return b && b._isBuffer
+  return (b != null && b._isBuffer) || false
 }
 
 Buffer.byteLength = function (str, encoding) {
@@ -8845,14 +8846,18 @@ function toHex (n) {
 
 function utf8ToBytes (str) {
   var byteArray = []
-  for (var i = 0; i < str.length; i++)
-    if (str.charCodeAt(i) <= 0x7F)
+  for (var i = 0; i < str.length; i++) {
+    var b = str.charCodeAt(i)
+    if (b <= 0x7F)
       byteArray.push(str.charCodeAt(i))
     else {
-      var h = encodeURIComponent(str.charAt(i)).substr(1).split('%')
+      var start = i
+      if (b >= 0xD800 && b <= 0xDFFF) i++
+      var h = encodeURIComponent(str.slice(start, i+1)).substr(1).split('%')
       for (var j = 0; j < h.length; j++)
         byteArray.push(parseInt(h[j], 16))
     }
+  }
   return byteArray
 }
 
@@ -8936,25 +8941,25 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 	function decode (elt) {
 		var code = elt.charCodeAt(0)
-		if(code === PLUS)
+		if (code === PLUS)
 			return 62 // '+'
-		if(code === SLASH)
+		if (code === SLASH)
 			return 63 // '/'
-		if(code < NUMBER)
+		if (code < NUMBER)
 			return -1 //no match
-		if(code < NUMBER + 10)
+		if (code < NUMBER + 10)
 			return code - NUMBER + 26 + 26
-		if(code < UPPER + 26)
+		if (code < UPPER + 26)
 			return code - UPPER
-		if(code < LOWER + 26)
+		if (code < LOWER + 26)
 			return code - LOWER + 26
 	}
 
-	function b64ToByteArray(b64) {
-		var i, j, l, tmp, placeHolders, arr;
+	function b64ToByteArray (b64) {
+		var i, j, l, tmp, placeHolders, arr
 
 		if (b64.length % 4 > 0) {
-			throw 'Invalid string. Length must be a multiple of 4';
+			throw new Error('Invalid string. Length must be a multiple of 4')
 		}
 
 		// the number of equal signs (place holders)
@@ -8966,13 +8971,10 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
 
 		// base64 is 4/3 + up to two characters of the original data
-		arr = new Arr(b64.length * 3 / 4 - placeHolders);
+		arr = new Arr(b64.length * 3 / 4 - placeHolders)
 
 		// if there are placeholders, only get up to the last complete 4 chars
-
-
-
-		l = placeHolders > 0 ? b64.length - 4 : b64.length;
+		l = placeHolders > 0 ? b64.length - 4 : b64.length
 
 		var L = 0
 
@@ -8981,68 +8983,67 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		}
 
 		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3));
-			push((tmp & 0xFF0000) >> 16);
-			push((tmp & 0xFF00) >> 8);
-			push(tmp & 0xFF);
+			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+			push((tmp & 0xFF0000) >> 16)
+			push((tmp & 0xFF00) >> 8)
+			push(tmp & 0xFF)
 		}
 
 		if (placeHolders === 2) {
-			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4);
-			push(tmp & 0xFF);
+			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+			push(tmp & 0xFF)
 		} else if (placeHolders === 1) {
-			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2);
-			push((tmp >> 8) & 0xFF);
-			push(tmp & 0xFF);
+			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+			push((tmp >> 8) & 0xFF)
+			push(tmp & 0xFF)
 		}
 
-		return arr;
+		return arr
 	}
 
-	function uint8ToBase64(uint8) {
+	function uint8ToBase64 (uint8) {
 		var i,
 			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
 			output = "",
-			temp, length;
+			temp, length
 
 		function encode (num) {
 			return lookup.charAt(num)
 		}
 
 		function tripletToBase64 (num) {
-			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F);
-		};
+			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+		}
 
 		// go through the array every three bytes, we'll deal with trailing stuff later
 		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
-			output += tripletToBase64(temp);
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+			output += tripletToBase64(temp)
 		}
 
 		// pad the end with zeros, but make sure to not forget the extra bytes
 		switch (extraBytes) {
 			case 1:
-				temp = uint8[uint8.length - 1];
-				output += encode(temp >> 2);
-				output += encode((temp << 4) & 0x3F);
-				output += '==';
-				break;
+				temp = uint8[uint8.length - 1]
+				output += encode(temp >> 2)
+				output += encode((temp << 4) & 0x3F)
+				output += '=='
+				break
 			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
-				output += encode(temp >> 10);
-				output += encode((temp >> 4) & 0x3F);
-				output += encode((temp << 2) & 0x3F);
-				output += '=';
-				break;
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+				output += encode(temp >> 10)
+				output += encode((temp >> 4) & 0x3F)
+				output += encode((temp << 2) & 0x3F)
+				output += '='
+				break
 		}
 
-		return output;
+		return output
 	}
 
-	module.exports.toByteArray = b64ToByteArray;
-	module.exports.fromByteArray = uint8ToBase64;
-}());
-
+	module.exports.toByteArray = b64ToByteArray
+	module.exports.fromByteArray = uint8ToBase64
+}())
 
 },{}],40:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
