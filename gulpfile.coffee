@@ -3,9 +3,7 @@ es = require 'event-stream'
 
 gulp = require 'gulp'
 gutil = require 'gulp-util'
-coffee = require 'gulp-coffee'
-define = require 'gulp-wrap-define'
-concat = require 'gulp-concat'
+modules = require 'gulp-module-system'
 rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
 zip = require 'gulp-zip'
@@ -21,13 +19,11 @@ gulp.task 'watch', ['build'], ->
 
 gulp.task 'build_client', ->
   es.merge(
-    gulp.src(['src/**/*.coffee', '!src/node/*.coffee']).pipe(coffee({bare: true}).on('error', gutil.log))
-    gulp.src('client/node-dependencies/**/*.js')
+    gulp.src(['src/**/*.coffee', '!src/node/*.coffee'])
+    gulp.src(['client/node-dependencies/**/*.js'])
   )
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
-    .pipe(define({define: 'require.register'}))
-    .pipe(concat('backbone-orm.js'))
-    .pipe(es.map (file, callback) -> file.contents = new Buffer("#{LIBRARY_WRAPPERS.license}\n#{LIBRARY_WRAPPERS.start}\n#{String(file.contents)}\n#{LIBRARY_WRAPPERS.end}"); callback(null, file))
+    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', compile: {coffee: {bare: true}}, umd: {symbol: 'BackboneORM'}}))
     .pipe(gulp.dest('./'))
 
 gulp.task 'minify_client', ['build_client'], ->

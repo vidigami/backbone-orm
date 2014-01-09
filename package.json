@@ -26,12 +26,10 @@
     "store-redis": "0.1.x",
     "gulp": "*",
     "gulp-util": "*",
-    "gulp-coffee": "*",
-    "gulp-concat": "*",
     "gulp-uglify": "*",
     "gulp-rename": "*",
     "gulp-zip": "*",
-    "gulp-wrap-define": "*",
+    "gulp-module-system": "*",
     "event-stream": "*"
   },
   "dependencies": {
