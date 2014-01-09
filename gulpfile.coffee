@@ -20,13 +20,10 @@ gulp.task 'watch', ['build'], ->
   gulp.watch './src/**/*.coffee', -> gulp.run 'build'
 
 gulp.task 'build_client', ->
-  es.merge(
-    gulp.src(['src/**/*.coffee', '!src/node/*.coffee'])
-    gulp.src(['client/node-dependencies/**/*.js'])
-  )
+  gulp.src(['src/**/*.coffee', '!src/node/*.coffee', 'client/node-dependencies/**/*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
     .pipe(compile({coffee: {bare: true}}))
-    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment', 'inflection'], bottom: true}}))
+    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment', 'inflection']}}))
     .pipe(gulp.dest('./'))
 
 gulp.task 'minify_client', ['build_client'], ->
