@@ -186,7 +186,7 @@ module.exports = class Cursor
 
   # @private
   selectResults: (json) ->
-    json = [json[0]] if @_cursor.$one
+    json = json.slice(0, 1) if @_cursor.$one
 
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
@@ -204,6 +204,7 @@ module.exports = class Cursor
     else if @_cursor.$white_list
       json = (_.pick(item, @_cursor.$white_list) for item in json)
 
+    return json if @hasCursorQuery('$page') # paging expects an array
     return if @_cursor.$one then (json[0] or null) else json
 
   # @private

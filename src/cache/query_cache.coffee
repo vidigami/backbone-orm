@@ -14,13 +14,16 @@ MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
 
+CacheSingletons = require('../index').CacheSingletons
+
 module.exports = class QueryCache
   constructor: ->
     @enabled = false
 
   configure: (options={}) =>
-    @enabled = options.enabled
-    @verbose = options.verbose
+    @enabled = !!options.enabled
+    @verbose = !!options.verbose
+    CacheSingletons.ModelTypeID?.configure({enabled: @enabled, verbose: @verbose}) # only for query cache
     @hits = @misses = @clears = 0
     @store = options.store or new MemoryStore()
     return @

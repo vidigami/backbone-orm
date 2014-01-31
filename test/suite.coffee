@@ -1,9 +1,6 @@
 _ = require 'underscore'
 Queue = require '../lib/queue'
 
-ModelTypeID = require('../lib/cache/singletons').ModelTypeID
-ModelTypeID.strict = false
-
 option_sets = require('./option_sets')
 # option_sets = option_sets.slice(0, 1)
 

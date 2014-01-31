@@ -107,3 +107,13 @@ module.exports = (options, callback) ->
           assert.equal(data.rows.length, 1, 'has the correct row.length')
           assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
           done()
+
+    it 'Ensure paging of one always returns an array of one', (done) ->
+      LIMIT = 3; OFFSET = 1
+      Flat.cursor({$page: '', $one: true}).limit(LIMIT).offset(OFFSET).toJSON (err, data) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(data.rows, 'models received')
+        assert.equal(data.total_rows, BASE_COUNT, 'has the correct total_rows')
+        assert.equal(OFFSET, data.offset, 'has the correct offset')
+        assert.equal(1, data.rows.length, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
+        done()

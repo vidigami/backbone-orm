@@ -119,7 +119,7 @@ module.exports = class MemoryCursor extends Cursor
             json = if number then json.slice(@_cursor.$offset, @_cursor.$offset+number) else []
 
           if @_cursor.$one
-            json = if json.length then [json[0]] else []
+            json = json.slice(0, 1)
 
           else if @_cursor.$limit
             json = json.splice(0, Math.min(json.length, @_cursor.$limit))
@@ -131,17 +131,17 @@ module.exports = class MemoryCursor extends Cursor
         return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
 
-        json = @selectResults(json)
         if @hasCursorQuery('$page')
           count_cursor = new MemoryCursor(@_find, _.extend(_.pick(@, ['model_type', 'store'])))
           count_cursor.count (err, count) =>
+            return callback(err) if err
             callback(null, {
               offset: @_cursor.$offset or 0
               total_rows: count
-              rows: json
+              rows: @selectResults(json)
             })
         else
-          callback(null, json)
+          callback(null, @selectResults(json))
 
       return # terminating
 
