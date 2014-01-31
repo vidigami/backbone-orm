@@ -186,6 +186,8 @@ module.exports = class Cursor
 
   # @private
   selectResults: (json) ->
+    json = [json[0]] if @_cursor.$one
+
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
       $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values

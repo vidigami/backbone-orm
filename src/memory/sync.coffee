@@ -18,7 +18,6 @@ ModelCache = require('../cache/singletons').ModelCache
 QueryCache = require('../cache/singletons').QueryCache
 
 DESTROY_BATCH_LIMIT = 1000
-STORES = {}
 
 # Backbone Sync for in-memory models.
 #
@@ -37,7 +36,7 @@ class MemorySync
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @schema = new Schema(@model_type)
-    @store = @model_type.store = STORES[@model_type.model_name] or= {}
+    @store = @model_type.store or= {}
 
   # @private
   initialize: ->

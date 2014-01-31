@@ -10,7 +10,7 @@
   "keywords": ["backbone", "orm", "backbone-orm"],
   "engines": {"node": "*"},
   "scripts": {
-    "test": "gulp build --require coffee-script; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script --reporter spec --timeout 10000",
+    "test": "gulp build --require coffee-script; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script/register --reporter spec --timeout 10000",
     "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "gulp build --require coffee-script",
     "watch": "gulp watch --require coffee-script",
