@@ -14,8 +14,6 @@ MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
 
-CacheSingletons = require('../index').CacheSingletons
-
 module.exports = class QueryCache
   constructor: ->
     @enabled = false
@@ -23,9 +21,12 @@ module.exports = class QueryCache
   configure: (options={}) =>
     @enabled = !!options.enabled
     @verbose = !!options.verbose
-    CacheSingletons.ModelTypeID?.configure({enabled: @enabled, verbose: @verbose}) # only for query cache
     @hits = @misses = @clears = 0
     @store = options.store or new MemoryStore()
+
+    # sync model cache
+    CacheSingletons = require('../index').CacheSingletons
+    CacheSingletons.ModelTypeID?.configure({enabled: @enabled, verbose: @verbose}) # only for query cache
     return @
 
   cacheKey: (model_type, query) -> "#{model_type.model_id}_#{JSON.stringify(query)}"
