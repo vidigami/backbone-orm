@@ -1685,6 +1685,8 @@ module.exports = Utils = (function() {
 
         ORMModel.prototype.url = modelURL;
 
+        ORMModel.prototype.schema = type.prototype.schema;
+
         ORMModel.prototype.sync = sync(ORMModel);
 
         return ORMModel;
@@ -1693,6 +1695,7 @@ module.exports = Utils = (function() {
       return type.prototype.model = ORMModel;
     } else if (model_type.prototype.sync === Backbone.Model.prototype.sync) {
       model_type.prototype.url = modelURL;
+      model_type.prototype.schema = type.prototype.schema;
       model_type.prototype.sync = sync(model_type);
     }
     return model_type;
