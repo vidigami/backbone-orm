@@ -18,6 +18,7 @@ module.exports = (options, callback) ->
     model_type = collection_type::model
 
     queue = new Queue(1)
+    queue.defer (callback) -> if options.before then options.before([model_type], callback) else callback()
     queue.defer (callback) -> model_type.resetSchema(callback)
     queue.defer (callback) -> Fabricator.create(model_type, BASE_COUNT, {
       name: Fabricator.uniqueId('model_')

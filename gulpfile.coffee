@@ -38,5 +38,4 @@ gulp.task 'zip', ['minify_client'], ->
     .pipe(zip('backbone-orm.zip'))
     .pipe(gulp.dest('client/'))
 
-gulp.task 'release', ->
-  gulp.run 'build', 'zip'
+gulp.task 'release', ['build', 'zip'], ->

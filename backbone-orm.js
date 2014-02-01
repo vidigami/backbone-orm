@@ -2172,7 +2172,7 @@ require.register('cache/query_cache', function(exports, require, module) {
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
  */
-var CLONE_DEPTH, CacheSingletons, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
+var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 _ = require('underscore');
@@ -2186,8 +2186,6 @@ JSONUtils = require('../json_utils');
 MemoryStore = require('./memory_store');
 
 CLONE_DEPTH = 2;
-
-CacheSingletons = require('../index').CacheSingletons;
 
 module.exports = QueryCache = (function() {
   function QueryCache() {
@@ -2206,20 +2204,21 @@ module.exports = QueryCache = (function() {
   }
 
   QueryCache.prototype.configure = function(options) {
-    var _ref;
+    var CacheSingletons, _ref;
     if (options == null) {
       options = {};
     }
     this.enabled = !!options.enabled;
     this.verbose = !!options.verbose;
+    this.hits = this.misses = this.clears = 0;
+    this.store = options.store || new MemoryStore();
+    CacheSingletons = require('../index').CacheSingletons;
     if ((_ref = CacheSingletons.ModelTypeID) != null) {
       _ref.configure({
         enabled: this.enabled,
         verbose: this.verbose
       });
     }
-    this.hits = this.misses = this.clears = 0;
-    this.store = options.store || new MemoryStore();
     return this;
   };
 
