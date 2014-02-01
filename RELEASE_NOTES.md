@@ -3,6 +3,7 @@ Please refer to the following release notes when upgrading your version of Backb
 ### 0.5.7
 * Bug fix: $page with $one wasn't returning an array.
 * Disabled ModelIds cache by default and synced to QueryCache enabling
+* Added schema to collection so it can be passed to a model
 
 ### 0.5.6
 * Removed default each limit. Must now be explicitly passed.

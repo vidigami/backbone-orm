@@ -108,10 +108,12 @@ module.exports = class Utils
       # @private
       class ORMModel extends Backbone.Model
         url: modelURL
+        schema: type::schema
         sync: sync(ORMModel)
       return type::model = ORMModel
     else if model_type::sync is Backbone.Model::sync # override built-in backbone sync
       model_type::url = modelURL
+      model_type::schema = type::schema # TODO: handle the case where the schema is already configured
       model_type::sync = sync(model_type)
     return model_type
 

@@ -54,6 +54,7 @@ module.exports = (options, callback) ->
     it 'fetch models using pre-configured model', (done) ->
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
+        schema: BASE_SCHEMA
         model: Model
         sync: SYNC(Collection)
       runTest Collection, done
@@ -61,6 +62,7 @@ module.exports = (options, callback) ->
     it 'fetch models using default model', (done) ->
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
+        schema: BASE_SCHEMA
         sync: SYNC(Collection)
 
       runTest Collection, done
@@ -71,6 +73,7 @@ module.exports = (options, callback) ->
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
         model: SomeModel
+        schema: BASE_SCHEMA
         sync: SYNC(Collection)
 
       runTest Collection, done
@@ -79,6 +82,7 @@ module.exports = (options, callback) ->
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
         model: Model
+        schema: BASE_SCHEMA
         sync: SYNC(Collection)
 
       runTest Collection, done
