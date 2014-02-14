@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.9
+* Compatability fix for Backbone 1.1.1
+
 ### 0.5.8
 * Lock Backbone.js to 1.1.0 until new release compatibility issues fixed
 
