@@ -8,6 +8,7 @@
     "brfs": "*"
   },
   "dependencies": {
+    "jquery": "*",
     "underscore": "1.5.x",
     "backbone": ">=1.0.0",
     "moment": "2.x.x",
