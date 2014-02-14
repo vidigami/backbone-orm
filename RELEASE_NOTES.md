@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.8
+* Lock Backbone.js to 1.1.0 until new release compatibility issues fixed
+
 ### 0.5.7
 * Bug fix: $page with $one wasn't returning an array.
 * Disabled ModelIds cache by default and synced to QueryCache enabling

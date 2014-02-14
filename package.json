@@ -1,6 +1,6 @@
 {
   "name": "backbone-orm",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "A polystore ORM for Node.js and the browser",
   "main": "./lib/index.js",
   "license": "MIT",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "underscore": ">=1.2.0",
-    "backbone": ">=1.0.0",
+    "backbone": "1.1.0",
     "moment": ">=1.0.0",
     "inflection": ">=1.0.0",
     "lru-cache": ">=2.0.0"
