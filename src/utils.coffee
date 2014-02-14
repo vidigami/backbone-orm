@@ -88,7 +88,7 @@ module.exports = class Utils
   # @private
   @findOrGenerateModelName: (model_type) ->
     return model_type::model_name if model_type::model_name
-    if url = _.result(model_type::prototype, 'url')
+    if url = _.result(new model_type, 'url')
       return model_name if model_name = (new DatabaseURL(url)).modelName()
     return model_type.name if model_type.name
     throw "Could not find or generate model name for #{model_type}"
@@ -204,7 +204,7 @@ module.exports = class Utils
     model = new Backbone.Model(model_json)
     model._orm_never_cache = true
     model.urlRoot = =>
-      try url = _.result(model_type::prototype, 'url') catch e
+      try url = _.result(new model_type, 'url') catch e
       return url
     model_type::sync 'update', model, Utils.bbCallback callback
 

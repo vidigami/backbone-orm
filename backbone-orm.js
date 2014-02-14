@@ -78,7 +78,7 @@
     }
   };
 
-  var toString = Object.prototype.toString;
+  var toString = Object::prototype.toString;
   var isArray = function(obj) { return toString.call(obj) === '[object Array]'; }
 
   // client shimming to add to local module system
@@ -1395,7 +1395,7 @@ module.exports = Schema = (function() {
 
         JoinTable.prototype.model_name = name;
 
-        JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(relation.model_type.prototype.prototype, 'url'))).format({
+        JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
           exclude_table: true
         })) + "/" + url;
 
@@ -1651,7 +1651,7 @@ module.exports = Utils = (function() {
     if (model_type.prototype.model_name) {
       return model_type.prototype.model_name;
     }
-    if (url = _.result(model_type.prototype.prototype, 'url')) {
+    if (url = _.result(new model_type, 'url')) {
       if (model_name = (new DatabaseURL(url)).modelName()) {
         return model_name;
       }
@@ -1839,7 +1839,7 @@ module.exports = Utils = (function() {
       return function() {
         var e, url;
         try {
-          url = _.result(model_type.prototype.prototype, 'url');
+          url = _.result(new model_type, 'url');
         } catch (_error) {
           e = _error;
         }
