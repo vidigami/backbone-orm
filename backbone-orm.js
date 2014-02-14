@@ -78,7 +78,7 @@
     }
   };
 
-  var toString = Object::prototype.toString;
+  var toString = Object.prototype.toString;
   var isArray = function(obj) { return toString.call(obj) === '[object Array]'; }
 
   // client shimming to add to local module system
