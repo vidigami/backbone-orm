@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.10
+* npm re-publish
+
 ### 0.5.9
 * Compatability fix for Backbone 1.1.1
 
