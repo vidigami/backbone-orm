@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.11
+* publish on component. Removed client dependency on inflection by burning into library.
+
 ### 0.5.10
 * npm re-publish
 
