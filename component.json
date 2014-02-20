@@ -1,0 +1,19 @@
+{
+  "name": "backbone-orm",
+  "repo": "vidigami/backbone-orm",
+  "description": "A polystore ORM for Node.js and the browser",
+  "version": "0.5.10",
+  "author": "Kevin Malakoff (https://github.com/kmalakoff)",
+  "keywords": ["backbone", "orm", "backbone-orm"],
+  "dependencies": {
+    "jashkenas/backbone": "*"
+  , "moment/moment": "*"
+  , "dreamerslab/node.inflection": "*"
+  // lru-cache still missing
+  },
+  "license": "MIT",
+  "main": "   index.js",
+  "scripts": [
+
+  ]
+}
