@@ -4,16 +4,20 @@
   "description": "A polystore ORM for Node.js and the browser",
   "version": "0.5.10",
   "author": "Kevin Malakoff (https://github.com/kmalakoff)",
+  "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
   "keywords": ["backbone", "orm", "backbone-orm"],
   "dependencies": {
-    "jashkenas/backbone": "*"
-  , "moment/moment": "*"
-  , "dreamerslab/node.inflection": "*"
-  // lru-cache still missing
+    "jashkenas/underscore": "*",
+    "jashkenas/backbone": "*",
+    "moment/moment": "*",
+    "dreamerslab/node.inflection": "*"
   },
   "license": "MIT",
-  "main": "   index.js",
+  "main": "backbone-orm.js",
   "scripts": [
-
+    "backbone-orm.js",
+    "backbone-orm.min.js",
+    "stream.js",
+    "stream.min.js"
   ]
 }
