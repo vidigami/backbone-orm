@@ -9,8 +9,7 @@
   "dependencies": {
     "jashkenas/underscore": "*",
     "jashkenas/backbone": "*",
-    "moment/moment": "*",
-    "dreamerslab/node.inflection": "*"
+    "moment/moment": "*"
   },
   "license": "MIT",
   "main": "backbone-orm.js",

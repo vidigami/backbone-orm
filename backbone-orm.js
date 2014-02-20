@@ -127,7 +127,7 @@ require.register('connection_pool', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var MemoryStore;
 
@@ -146,7 +146,7 @@ require.register('cursor', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var CURSOR_KEYS, Cursor, QueryCache, Utils, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -597,7 +597,7 @@ require.register('database_url', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var DatabaseURL, SUPPORTED_KEYS, URL, inflection, _;
 
@@ -718,7 +718,7 @@ require.register('index', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var e;
 
@@ -738,9 +738,6 @@ if ((typeof window !== "undefined" && window !== null) && require.shim) {
     }, {
       symbol: 'moment',
       path: 'moment'
-    }, {
-      symbol: 'inflection',
-      path: 'inflection'
     }, {
       symbol: 'stream',
       path: 'stream',
@@ -783,7 +780,7 @@ require.register('json_utils', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var JSONUtils, Queue, moment, _;
 
@@ -1179,7 +1176,7 @@ require.register('queue', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Queue,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -1250,7 +1247,7 @@ require.register('schema', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, DatabaseURL, Many, One, RELATION_VARIANTS, Schema, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
@@ -1507,7 +1504,7 @@ require.register('utils', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, DatabaseURL, JSONUtils, Queue, S4, URL, Utils, inflection, modelExtensions, _,
   __hasProp = {}.hasOwnProperty,
@@ -1937,7 +1934,7 @@ require.register('cache/cursor', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var CacheCursor, _,
   __hasProp = {}.hasOwnProperty,
@@ -1967,7 +1964,7 @@ require.register('cache/memory_store', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var LRU, MemoryStore, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -2060,7 +2057,7 @@ require.register('cache/model_cache', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, _;
 
@@ -2173,7 +2170,7 @@ require.register('cache/query_cache', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -2450,7 +2447,7 @@ require.register('cache/singletons', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var e;
 
@@ -2472,7 +2469,7 @@ require.register('cache/sync', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
 
@@ -2636,7 +2633,7 @@ require.register('extensions/collection', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, Utils, collection_type, fn, key, overrides, _;
 
@@ -2702,7 +2699,7 @@ require.register('extensions/model', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, DatabaseURL, ModelStream, Queue, Utils, modelEach, modelInterval, moment, _;
 
@@ -3679,7 +3676,7 @@ require.register('memory/cursor', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Cursor, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, inflection, moment, _,
   __hasProp = {}.hasOwnProperty,
@@ -4149,7 +4146,7 @@ require.register('memory/sync', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, Schema, Utils, _;
 
@@ -4343,7 +4340,7 @@ require.register('relations/many', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, Many, Queue, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
@@ -4942,7 +4939,7 @@ require.register('relations/one', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, One, Queue, Utils, inflection, _,
   __hasProp = {}.hasOwnProperty,
@@ -5422,7 +5419,7 @@ require.register('relations/relation', function(exports, require, module) {
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
 var Backbone, Queue, Relation, Utils, inflection, _;
 
@@ -7640,7 +7637,7 @@ return Object.prototype.toString.call(o);
 });
 
   if (typeof define == 'function' && define.amd) {
-    define(["require","underscore","backbone","moment","inflection"], function(){ return require('index'); });
+    define(["require","underscore","backbone","moment"], function(){ return require('index'); });
   }
   else if (typeof exports == 'object') {
     module.exports = require('index');

@@ -11,13 +11,12 @@
           'underscore': "../../node_modules/underscore/underscore",
           'backbone': "../../node_modules/backbone/backbone",
           'moment': "../../node_modules/moment/moment",
-          'inflection': "../../node_modules/inflection/lib/inflection",
           'stream': "../../stream",
           'backbone-orm': "../../backbone-orm"
         }
     });
 
-    require(['underscore', 'backbone', 'moment', 'inflection', 'stream', 'backbone-orm'], function(_, Backbone, moment, inflection, stream, BackboneORM) {
+    require(['underscore', 'backbone', 'moment', 'stream', 'backbone-orm'], function(_, Backbone, moment, stream, BackboneORM) {
       var Backbone = window.Backbone;
       var Test = Backbone.Model.extend({
         urlRoot: '/api/tests',

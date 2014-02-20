@@ -2,7 +2,7 @@
   backbone-orm.js 0.5.10
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Dependencies: Backbone.js, Underscore.js, Moment.js, and Inflection.js.
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 # ensure the client symbols are resolved
@@ -11,7 +11,7 @@ if window? and require.shim
     {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
     {symbol: 'Backbone', path: 'backbone'}
     {symbol: 'moment', path: 'moment'}
-    {symbol: 'inflection', path: 'inflection'}
+    # {symbol: 'inflection', path: 'inflection'} # burned in
     {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
   ])
 
