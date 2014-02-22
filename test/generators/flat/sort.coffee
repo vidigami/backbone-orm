@@ -63,3 +63,12 @@ module.exports = (options, callback) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()
+
+    it 'should sort by id', (done) ->
+      Flat.cursor().sort('id').toModels (err, models) ->
+        assert.ok(!err, "No errors: #{err}")
+
+        ids = (model.id for model in models)
+        sorted_ids = _.clone(ids).sort()
+        assert.deepEqual(ids, sorted_ids, "Models were returned in sorted order")
+        done()
