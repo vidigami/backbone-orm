@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.12
+* Added unset functionality for multiple unset: https://github.com/vidigami/backbone-mongo/issues/7
+
 ### 0.5.11
 * publish on component. Removed client dependency on inflection by burning into library.
 

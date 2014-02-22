@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.11
+  backbone-orm.js 0.5.12
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -199,6 +199,14 @@ module.exports = (model_type) ->
   model_type::setPartial = (is_partial) ->
     if is_partial then Utils.set(@, 'partial', true) else Utils.unset(@, 'partial')
 
+  model_type::addUnset = (key) ->
+    unsets = Utils.orSet(@, 'unsets', [])
+    unsets.push(key) if unsets.indexOf(key) < 0
+
+  model_type::removeUnset = (key) ->
+    return unless unsets = Utils.get(@, 'unsets', null)
+    unsets.splice(index, 1) if (index = unsets.indexOf(key)) >= 0
+
   ###################################
   # Backbone ORM - Model Lifecyle
   ###################################
@@ -298,6 +306,7 @@ module.exports = (model_type) ->
       ))
 
     unset: (key) ->
+      @addUnset(key)
       id = @id
       model_type::_orm_original_fns.unset.apply(@, arguments)
       model_type.cache.destroy(id) if key is 'id' and model_type.cache and id and (model_type.cache.get(id) is @) # clear us from the cache
@@ -393,7 +402,7 @@ module.exports = (model_type) ->
         return options.error?(@, err) if err
 
         return model_type::_orm_original_fns.save.call(@, attributes, Utils.wrapOptions(options, (err, model, resp, options) =>
-          --@_orm.save
+          Utils.unset(@, 'unsets'); --@_orm.save
           return options.error?(@, resp, options) if err
           queue = new Queue(1)
 

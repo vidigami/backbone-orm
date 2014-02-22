@@ -2,7 +2,7 @@
   "name": "backbone-orm",
   "repo": "vidigami/backbone-orm",
   "description": "A polystore ORM for Node.js and the browser",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "author": "Kevin Malakoff (https://github.com/kmalakoff)",
   "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
   "keywords": ["backbone", "orm", "backbone-orm"],
