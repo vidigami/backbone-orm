@@ -240,6 +240,20 @@ module.exports = (options, callback) ->
                 assert.ok(_.isNull(models[0].get('created_at')), 'created_at null attribute')
                 done()
 
+    it 'Handles $ne with null and another value', (done) ->
+      Flat.findOne {$sort: '-created_at'}, (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(!!test_model, 'test model found')
+        test_model.save {created_at: null}, (err) ->
+          assert.ok(!err, "No errors: #{err}")
+
+          Flat.find {created_at: {$ne: null, $gte: START_DATE}}, (err, models) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(models.length, BASE_COUNT-1, 'all models but found null found')
+            for model in models
+              assert.ok(!_.isNull(model.get('created_at')), 'created_at null attribute')
+            done()
+
     it 'Handles $lt and $lte boundary conditions', (done) ->
       Flat.find {created_at: {$lt: START_DATE}}, (err, models) ->
         assert.ok(!err, "No errors: #{err}")
@@ -285,7 +299,6 @@ module.exports = (options, callback) ->
               for model in models
                 assert.ok(model.get('name') is NAME, 'matching name attribute')
               done()
-
 
     it 'Handles $lt and $lte with find not equal', (done) ->
       NAME = 'Bob'
