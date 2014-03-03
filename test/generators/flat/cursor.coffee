@@ -38,6 +38,7 @@ module.exports = (options, callback) ->
 
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
+        json_data: {foo: {bar: 'baz'}, fizz: 'buzz'}
         created_at: Fabricator.date
         updated_at: Fabricator.date
         boolean: true
@@ -120,6 +121,23 @@ module.exports = (options, callback) ->
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
+    it 'Cursor can select fields from json', (done) ->
+      ALBUM_NAME = 'Test3'
+      FIELD_NAMES = ['json_data.foo.bar']
+
+      runTest = (err) ->
+        assert.ok(!err, "No errors: #{err}")
+
+        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+          for json in models_json
+            assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
+            assert.equal(_.size(json.json_data), 1, 'gets only the requested value')
+          done()
+
+      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
       FIELD_NAMES = ['id', 'name']
@@ -132,7 +150,23 @@ module.exports = (options, callback) ->
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
             assert.ok(_.isArray(json), 'cursor data values is an array')
-            assert.equal(json.length, FIELD_NAMES.length, 'gets only the requested values')
+            assert.equal(json.length, FIELD_NAMES.length, 'gets the requested value, and only the requested value')
+          done()
+
+      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+
+    it 'Cursor can select values from json', (done) ->
+      ALBUM_NAME = 'Test3'
+      FIELD_NAMES = ['json_data.foo.bar']
+
+      runTest = (err) ->
+        assert.ok(!err, "No errors: #{err}")
+
+        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+          for json in models_json
+            assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
           done()
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
