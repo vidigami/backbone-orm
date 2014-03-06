@@ -1,5 +1,8 @@
 (function() {
-  var globals = {};
+  
+var globals = {requires: []};
+if (window.require) globals.requires.push(window.require);
+if (typeof require !== "undefined" && require !== null) globals.requires.push(require);
 
 /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
 (function() {
@@ -92,8 +95,8 @@
       // already registered with local require
       try { if (globals.require(item.path)) { return; } } catch (e) {}
 
-      // use global require
-      try { dep = typeof window.require === "function" ? window.require(item.path) : void 0; } catch (e) {}
+      // use external require
+      try { for (var ext_i = 0, ext_length = globals.requires.length; ext_i < ext_length; ext_i++) {if (dep = globals.requires[ext_i](item.path)) break;}} catch (e) {}
 
       // use symbol path on window
       if (!dep && item.symbol) {
