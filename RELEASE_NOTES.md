@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.13
+* Fix for Component: https://github.com/vidigami/backbone-orm/issues/18
+
 ### 0.5.12
 * Added unset functionality for multiple unset: https://github.com/vidigami/backbone-mongo/issues/7
 

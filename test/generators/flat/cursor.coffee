@@ -121,22 +121,22 @@ module.exports = (options, callback) ->
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
-    it 'Cursor can select fields from json', (done) ->
-      ALBUM_NAME = 'Test3'
-      FIELD_NAMES = ['json_data.foo.bar']
+    # it 'Cursor can select fields from json', (done) ->
+    #   ALBUM_NAME = 'Test3'
+    #   FIELD_NAMES = ['json_data.foo.bar']
 
-      runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+    #   runTest = (err) ->
+    #     assert.ok(!err, "No errors: #{err}")
 
-        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
-          for json in models_json
-            assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
-            assert.equal(_.size(json.json_data), 1, 'gets only the requested value')
-          done()
+    #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+    #       assert.ok(!err, "No errors: #{err}")
+    #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+    #       for json in models_json
+    #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
+    #         assert.equal(_.size(json.json_data), 1, 'gets only the requested value')
+    #       done()
 
-      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+    #   Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -155,21 +155,21 @@ module.exports = (options, callback) ->
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
-    it 'Cursor can select values from json', (done) ->
-      ALBUM_NAME = 'Test3'
-      FIELD_NAMES = ['json_data.foo.bar']
+    # it 'Cursor can select values from json', (done) ->
+    #   ALBUM_NAME = 'Test3'
+    #   FIELD_NAMES = ['json_data.foo.bar']
 
-      runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+    #   runTest = (err) ->
+    #     assert.ok(!err, "No errors: #{err}")
 
-        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, "No errors: #{err}")
-          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
-          for json in models_json
-            assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
-          done()
+    #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+    #       assert.ok(!err, "No errors: #{err}")
+    #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+    #       for json in models_json
+    #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
+    #       done()
 
-      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+    #   Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
     it 'Cursor can select the intersection of a whitelist and fields', (done) ->
       ALBUM_NAME = 'Test3'
