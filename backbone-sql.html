@@ -85,9 +85,7 @@ The first letter of the type name is optionally capitalized, while the remainder
       <div class="col-lg-7 col-md-7">
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
-          <pre><code class="language-coffeescript">SQLSync = require('backbone-sql').sync
-
-class Project extends Backbone.Model
+          <pre><code class="language-coffeescript">class Project extends Backbone.Model
 
   # Database connection and table name are specified with the urlRoot
   urlRoot: 'postgres://username:password@localhost:27017/projects'
@@ -99,13 +97,11 @@ class Project extends Backbone.Model
     name: ['String', unique: true, indexed: true]
 
   # Kick it off by setting the model's sync to an SQLSync
-  sync: SQLSync(Project)
+  sync: require('backbone-sql').sync(Project)
 </code></pre>
         </div>
         <div class="row example javascript">
-          <pre><code class="language-javascript">var SQLSync = require('backbone-sql').sync;
-
-var Project = Backbon.Model.extend({
+          <pre><code class="language-javascript">var Project = Backbon.Model.extend({
 
   // Database connection and table name are specified with the urlRoot
   urlRoot: 'postgres://username:password@localhost:27017/projects',
@@ -119,7 +115,7 @@ var Project = Backbon.Model.extend({
 });
 
 // Kick it off by setting the model's sync to an SQLSync
-Project.prototype.sync = SQLSync(Project);
+Project.prototype.sync = require('backbone-sql').sync(Project);
 </code></pre>
         </div>
       </div>
