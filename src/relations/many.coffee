@@ -21,8 +21,9 @@ module.exports = class Many extends require('./relation')
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     unless @collection_type
       # @private
+      reverse_model_type = @reverse_model_type
       class Collection extends Backbone.Collection
-        model: @reverse_model_type
+        model: reverse_model_type
       @collection_type = Collection
 
   initialize: ->
