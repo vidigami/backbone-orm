@@ -779,7 +779,7 @@ module.exports = (options, callback) ->
         owner_id = owner.id
         relateds = owner.get(related_key).models
         related_ids = (related.id for related in relateds)
-        assert.ok(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
+        assert.equal(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
         assert.ok(!_.difference(related_ids, owner.get(related_id_accessor)).length, "Got related_id from previous related. Expected: #{related_ids}. Actual: #{owner.get(related_id_accessor)}")
 
         (attributes = {})[related_key] = relateds
@@ -1280,7 +1280,7 @@ module.exports = (options, callback) ->
         relateds = owner.get(related_key).models
         related_ids = (related.id for related in relateds)
         console.log relateds
-        assert.ok(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
+        assert.equal(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
         assert.ok(!_.difference(related_ids, owner.get(related_id_accessor)).length, "Got related_id from previous related. Expected: #{related_ids}. Actual: #{owner.get(related_id_accessor)}")
 
         (attributes = {})[related_key] = relateds
