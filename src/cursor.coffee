@@ -10,7 +10,7 @@ _ = require 'underscore'
 QueryCache = require('./cache/singletons').QueryCache
 Utils = require './utils'
 
-CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids']
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or']
 
 module.exports = class Cursor
   # @private
