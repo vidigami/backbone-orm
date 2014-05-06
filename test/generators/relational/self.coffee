@@ -28,7 +28,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
-  describe "hasMany (cache: #{true}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
+  describe "self model relations (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([SelfReference], done)
     after (done) -> callback(); done()
@@ -98,7 +98,6 @@ module.exports = (options, callback) ->
         owner_id = owner.id
         relateds = owner.get(related_key).models
         related_ids = (related.id for related in relateds)
-        console.log relateds
         assert.equal(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
         assert.ok(!_.difference(related_ids, owner.get(related_id_accessor)).length, "Got related_id from previous related. Expected: #{related_ids}. Actual: #{owner.get(related_id_accessor)}")
 
