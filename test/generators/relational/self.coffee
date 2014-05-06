@@ -30,7 +30,7 @@ module.exports = (options, callback) ->
 
   describe "hasMany (cache: #{true}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
+    before (done) -> return done() unless options.before; options.before([SelfReference], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
       MODELS = {}
