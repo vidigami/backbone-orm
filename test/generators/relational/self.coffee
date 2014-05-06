@@ -20,36 +20,6 @@ module.exports = (options, callback) ->
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
-
-  class Reverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner]
-      another_owner: -> ['belongsTo', Owner, as: 'more_reverses']
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class ForeignReverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/foreign_reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
-    }, BASE_SCHEMA)
-    sync: SYNC(ForeignReverse)
-
-  class Owner extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/owners"
-    schema: _.defaults({
-      flats: -> ['hasMany', Flat]
-      reverses: -> ['hasMany', Reverse]
-      more_reverses: -> ['hasMany', Reverse, as: 'another_owner']
-      foreign_reverses: -> ['hasMany', ForeignReverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
   class SelfReference extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/self_references"
     schema: _.defaults({
@@ -58,13 +28,11 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
-  describe "hasMany (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
+  describe "hasMany (cache: #{true}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
-      relation = Owner.relation('reverses')
-      delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
@@ -74,7 +42,7 @@ module.exports = (options, callback) ->
       queue.defer (callback) -> QueryCache.configure({enabled: !!options.query_cache, verbose: false}).reset(callback) # configure query cache
 
       # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
+      queue.defer (callback) -> Utils.resetSchemas [SelfReference], callback
 
       # create all
       queue.defer (callback) ->
@@ -83,6 +51,7 @@ module.exports = (options, callback) ->
         create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_')
           created_at: Fabricator.date
+          is_base: true
         }, (err, models) -> MODELS.self_references = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_target_')
@@ -102,18 +71,18 @@ module.exports = (options, callback) ->
         for self_reference in MODELS.self_references
           do (self_reference) ->
             save_queue.defer (callback) ->
+              self_reference_inverse = MODELS.self_reference_inverses.pop()
+              self_reference_inverse.set({
+                owner: self_reference
+              })
+              self_reference_inverse.save callback
+            save_queue.defer (callback) ->
               self_references = self_reference.get('self_references') or []
               self_references.push MODELS.self_reference_targets.pop()
               self_reference.set({
                 self_references: self_references
               })
               self_reference.save callback
-            save_queue.defer (callback) ->
-              self_reference_inverse = MODELS.self_reference_inverses.pop()
-              self_reference_inverse.set({
-                owner: self_reference
-              })
-              self_reference_inverse.save callback
 
         save_queue.await callback
 
@@ -123,7 +92,7 @@ module.exports = (options, callback) ->
       related_key = 'self_references'
       related_id_accessor = 'self_reference_ids'
 
-      SelfReference.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+      SelfReference.cursor({$one: true, is_base: true}).include(related_key).toModels (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner_id = owner.id
