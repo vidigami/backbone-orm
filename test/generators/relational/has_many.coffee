@@ -55,6 +55,7 @@ module.exports = (options, callback) ->
     schema: _.defaults({
       owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
       self_references: -> ['hasMany', SelfReference, as: 'owner']
+      is_base: 'Boolean'
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
@@ -103,6 +104,7 @@ module.exports = (options, callback) ->
         create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_')
           created_at: Fabricator.date
+          is_base: true
         }, (err, models) -> MODELS.self_references = models; callback(err))
         create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_target_')
@@ -132,18 +134,18 @@ module.exports = (options, callback) ->
         for self_reference in MODELS.self_references
           do (self_reference) ->
             save_queue.defer (callback) ->
+              self_reference_inverse = MODELS.self_reference_inverses.pop()
+              self_reference_inverse.set({
+                owner: self_reference
+              })
+              self_reference_inverse.save callback
+            save_queue.defer (callback) ->
               self_references = self_reference.get('self_references') or []
               self_references.push MODELS.self_reference_targets.pop()
               self_reference.set({
                 self_references: self_references
               })
               self_reference.save callback
-            save_queue.defer (callback) ->
-              self_reference_inverse = MODELS.self_reference_inverses.pop()
-              self_reference_inverse.set({
-                owner: self_reference
-              })
-              self_reference_inverse.save callback
 
         save_queue.await callback
 
@@ -1273,7 +1275,7 @@ module.exports = (options, callback) ->
       related_key = 'self_references'
       related_id_accessor = 'self_reference_ids'
 
-      SelfReference.cursor({$one: true}).include(related_key).toModels (err, owner) ->
+      SelfReference.cursor({$one: true, is_base: true}).include(related_key).toModels (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner_id = owner.id
