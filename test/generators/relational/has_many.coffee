@@ -50,6 +50,15 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
+  class SelfReference extends Backbone.Model
+    urlRoot: "#{DATABASE_URL}/self_references"
+    schema: _.defaults({
+      owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
+      self_references: -> ['hasMany', SelfReference, as: 'owner']
+      is_base: 'Boolean'
+    }, BASE_SCHEMA)
+    sync: SYNC(SelfReference)
+
   describe "hasMany (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
@@ -743,7 +752,7 @@ module.exports = (options, callback) ->
         owner_id = owner.id
         relateds = owner.get(related_key).models
         related_ids = (related.id for related in relateds)
-        assert.ok(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
+        assert.equal(2, relateds.length, "Loaded relateds. Expected: #{2}. Actual: #{relateds.length}")
         assert.ok(!_.difference(related_ids, owner.get(related_id_accessor)).length, "Got related_id from previous related. Expected: #{related_ids}. Actual: #{owner.get(related_id_accessor)}")
 
         (attributes = {})[related_key] = relateds

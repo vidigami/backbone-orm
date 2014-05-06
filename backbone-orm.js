@@ -1,8 +1,13 @@
-(function() {
-  
-var globals = {requires: []};
-if (window.require) globals.requires.push(window.require);
-if (typeof require !== "undefined" && require !== null) globals.requires.push(require);
+(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define(["require","underscore","backbone","moment"], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory(require,exports,module);
+  } else {
+    root['BackboneORM'] = factory();
+  }
+}(this, function(require,exports,module) {
+  var globals = {};
 
 /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
 (function() {
@@ -95,8 +100,8 @@ if (typeof require !== "undefined" && require !== null) globals.requires.push(re
       // already registered with local require
       try { if (globals.require(item.path)) { return; } } catch (e) {}
 
-      // use external require
-      try { for (var ext_i = 0, ext_length = globals.requires.length; ext_i < ext_length; ext_i++) {if (dep = globals.requires[ext_i](item.path)) break;}} catch (e) {}
+      // use global require
+      try { dep = typeof window.require === "function" ? window.require(item.path) : void 0; } catch (e) {}
 
       // use symbol path on window
       if (!dep && item.symbol) {
@@ -160,7 +165,7 @@ QueryCache = require('./cache/singletons').QueryCache;
 
 Utils = require('./utils');
 
-CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids'];
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or'];
 
 module.exports = Cursor = (function() {
   function Cursor(query, options) {
@@ -4381,7 +4386,7 @@ module.exports = Many = (function(_super) {
   __extends(Many, _super);
 
   function Many(model_type, key, options) {
-    var Collection, value;
+    var Collection, reverse_model_type, value;
     this.model_type = model_type;
     this.key = key;
     for (key in options) {
@@ -4396,6 +4401,7 @@ module.exports = Many = (function(_super) {
       this.foreign_key = inflection.foreign_key(this.as || this.model_type.model_name);
     }
     if (!this.collection_type) {
+      reverse_model_type = this.reverse_model_type;
       Collection = (function(_super1) {
         __extends(Collection, _super1);
 
@@ -4403,7 +4409,7 @@ module.exports = Many = (function(_super) {
           return Collection.__super__.constructor.apply(this, arguments);
         }
 
-        Collection.prototype.model = Collection.reverse_model_type;
+        Collection.prototype.model = reverse_model_type;
 
         return Collection;
 
@@ -7657,13 +7663,5 @@ return Object.prototype.toString.call(o);
 
 });
 
-  if (typeof define == 'function' && define.amd) {
-    define(["require","underscore","backbone","moment"], function(){ return require('index'); });
-  }
-  else if (typeof exports == 'object') {
-    module.exports = require('index');
-  } else {
-    this['BackboneORM'] = require('index');
-  }
-
-}).call(this);
+  return require('index');
+}));
