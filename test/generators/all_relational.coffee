@@ -9,4 +9,5 @@ module.exports = (options, callback) ->
   queue.defer (callback) -> require('./relational/has_one')(options, callback)
   queue.defer (callback) -> require('./relational/many_to_many')(options, callback)
   queue.defer (callback) -> require('./relational/to_json')(options, callback)
+  queue.defer (callback) -> require('./relational/join_table')(options, callback)
   queue.await callback
