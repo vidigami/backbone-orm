@@ -1,6 +1,6 @@
 {
   "name": "backbone-orm",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "description": "A polystore ORM for Node.js and the browser",
   "main": "./lib/index.js",
   "license": "MIT",
