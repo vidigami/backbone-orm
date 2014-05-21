@@ -32,7 +32,7 @@ module.exports = (options, callback) ->
   second_ids = []
   describe 'Join Table Functionality', ->
 
-    before (done) -> return done() unless options.before; options.before([IndexedModel, ManualIdModel], done)
+    before (done) -> return done() unless options.before; options.before([FirstModel, SecondModel], done)
     after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
