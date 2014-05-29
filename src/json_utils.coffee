@@ -190,7 +190,7 @@ module.exports = class JSONUtils
             # is_great: {method: 'isGreatFor', args: [options.user]}
           else if _.isString(args.method)
             fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
-            fn_args.push((err, json) -> result[key] = json; callback())
+            fn_args.push((err, json) -> result[key] = json; callback(err))
             model[args.method].apply(model, fn_args)
 
           else
