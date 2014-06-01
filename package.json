@@ -11,7 +11,7 @@
   "engines": {"node": "*"},
   "scripts": {
     "test": "gulp build --require coffee-script/register; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script/register --reporter spec --timeout 10000",
-    "docs": "codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
+    "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "gulp build --require coffee-script/register",
     "watch": "gulp watch --require coffee-script/register",
     "release": "gulp release --require coffee-script/register",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "coffee-script": "*",
-    "codo": "1.7.x",
+    "codo": "2.x",
     "mocha": "*",
     "powerset": "*",
     "store-redis": "0.1.x",

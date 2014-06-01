@@ -15,7 +15,7 @@ bbCallback = Utils.bbCallback
 DESTROY_BATCH_LIMIT = 1000
 DESTROY_THREADS = 100
 
-# @private
+# @nodoc
 class CacheSync
   constructor: (@model_type, @wrapped_sync_fn) ->
 

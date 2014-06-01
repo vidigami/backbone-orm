@@ -39,44 +39,46 @@ module.exports = class Utils
       return callback(new Error("Failed to migrate schemas: #{failed_schemas.join(', ')}")) if failed_schemas.length
       callback()
 
-  @guid = -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
+  # @nodoc
+  @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
-  @inspect = (obj) -> try return JSON.stringify(obj) catch err then return "inspect: #{err}"
+  # @nodoc
+  @inspect: (obj) -> try return JSON.stringify(obj) catch err then return "inspect: #{err}"
 
-  # @private
+  # @nodoc
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
 
-  # @private
+  # @nodoc
   @wrapOptions: (options={}, callback) ->
     options = Utils.bbCallback(options) if _.isFunction(options) # node style callback
     return _.defaults(Utils.bbCallback((err, model, resp, modified_options) -> callback(err, model, resp, options)), options)
 
   # use signatures as a check in case multiple versions of Backbone have been included
 
-  # @private
+  # @nodoc
   @isModel: (obj) -> return obj and obj.attributes and ((obj instanceof Backbone.Model) or (obj.parse and obj.fetch))
 
-  # @private
+  # @nodoc
   @isCollection: (obj) -> return obj and obj.models and ((obj instanceof Backbone.Collection) or (obj.reset and obj.fetch))
 
-  # @private
+  # @nodoc
   @get: (model, key, default_value) ->
     model._orm or= {}
     return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
 
-  # @private
+  # @nodoc
   @set: (model, key, value) ->
     model._orm or= {}
     model._orm[key] = value
     return model._orm[key]
 
-  # @private
+  # @nodoc
   @orSet: (model, key, value) ->
     model._orm or= {}
     model._orm[key] = value unless model._orm.hasOwnProperty(key)
     return model._orm[key]
 
-  # @private
+  # @nodoc
   @unset: (model, key) ->
     model._orm or= {}
     delete model._orm[key]
@@ -85,7 +87,7 @@ module.exports = class Utils
   # ModelType
   ##############################
 
-  # @private
+  # @nodoc
   @findOrGenerateModelName: (model_type) ->
     return model_type::model_name if model_type::model_name
     if url = _.result(new model_type, 'url')
@@ -93,7 +95,7 @@ module.exports = class Utils
     return model_type.name if model_type.name
     throw "Could not find or generate model name for #{model_type}"
 
-  # @private
+  # @nodoc
   @configureCollectionModelType: (type, sync) ->
     modelURL = ->
       url = _.result(@collection or type::, 'url')
@@ -105,7 +107,7 @@ module.exports = class Utils
 
     model_type = type::model
     if not model_type or (model_type is Backbone.Model)
-      # @private
+      # @nodoc
       class ORMModel extends Backbone.Model
         url: modelURL
         schema: type::schema
@@ -117,12 +119,12 @@ module.exports = class Utils
       model_type::sync = sync(model_type)
     return model_type
 
-  # @private
+  # @nodoc
   @configureModelType: (type) ->
     modelExtensions = require('./extensions/model') unless modelExtensions # break dependency cycle
     modelExtensions(type)
 
-  # @private
+  # @nodoc
   @patchRemoveByJSON: (model_type, model_json, callback) ->
     return callback() unless schema = model_type.schema()
     queue = new Queue(1)
@@ -130,7 +132,7 @@ module.exports = class Utils
       do (relation) -> queue.defer (callback) -> relation.patchRemove(model_json, callback)
     queue.await callback
 
-  # @private
+  # @nodoc
   @presaveBelongsToRelationships: (model, callback) ->
     return callback() if not model.schema
     queue = new Queue(1)
@@ -149,15 +151,15 @@ module.exports = class Utils
   # Data to Model Helpers
   ##############################
 
-  # @private
+  # @nodoc
   @dataId: (data) -> return if _.isObject(data) then data.id else data
 
-  # @private
+  # @nodoc
   @dataIsSameModel: (data1, data2) ->
     return Utils.dataId(data1) is Utils.dataId(data2) if Utils.dataId(data1) or Utils.dataId(data2)
     return _.isEqual(data1, data2)
 
-  # @private
+  # @nodoc
   @dataToModel: (data, model_type) ->
     return null unless data
     return (Utils.dataToModel(item, model_type) for item in data) if _.isArray(data)
@@ -172,7 +174,7 @@ module.exports = class Utils
 
     return model
 
-  # @private
+  # @nodoc
   @updateModel: (model, data) ->
     return model if not data or (model is data) or data._orm_needs_load
     data = data.toJSON() if Utils.isModel(data)
@@ -190,7 +192,7 @@ module.exports = class Utils
       #     model.unset(key)
     return model
 
-  # @private
+  # @nodoc
   @updateOrNew: (data, model_type) ->
     if (cache = model_type.cache) and (id = Utils.dataId(data))
       Utils.updateModel(model, data) if model = cache.get(id)
@@ -199,7 +201,7 @@ module.exports = class Utils
       cache.set(model.id, model) if model and cache
     return model
 
-  # @private
+  # @nodoc
   @modelJSONSave: (model_json, model_type, callback) ->
     model = new Backbone.Model(model_json)
     model._orm_never_cache = true
@@ -211,7 +213,7 @@ module.exports = class Utils
   ##############################
   # Sorting
   ##############################
-  # @private
+  # @nodoc
   @isSorted: (models, fields) ->
     fields = _.uniq(fields)
     for model in models
@@ -219,7 +221,7 @@ module.exports = class Utils
       last_model = model
     return true
 
-  # @private
+  # @nodoc
   @fieldCompare: (model, other_model, fields) ->
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo
@@ -234,7 +236,7 @@ module.exports = class Utils
     else
       return if model.get(field) > other_model.get(field) then 1 else -1
 
-  # @private
+  # @nodoc
   @jsonFieldCompare: (model, other_model, fields) ->
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo

@@ -7,7 +7,7 @@
 _ = require 'underscore'
 crypto = require 'crypto'
 
-# @private
+# @nodoc
 module.exports = class ModelTypeID
 
   constructor: ->

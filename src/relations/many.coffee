@@ -12,7 +12,7 @@ inflection = require 'inflection'
 Queue = require '../queue'
 Utils = require '../utils'
 
-# @private
+# @nodoc
 module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
@@ -20,8 +20,9 @@ module.exports = class Many extends require('./relation')
     @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
     unless @collection_type
-      # @private
       reverse_model_type = @reverse_model_type
+
+      # @nodoc
       class Collection extends Backbone.Collection
         model: reverse_model_type
       @collection_type = Collection

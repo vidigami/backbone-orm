@@ -42,7 +42,7 @@ IS_MATCH_FNS =
       return (mv > tv) or _.isEqual(mv, tv)
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
-# @private
+# @nodoc
 module.exports = class MemoryCursor extends Cursor
   queryToJSON: (callback) ->
     return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
@@ -239,9 +239,7 @@ module.exports = class MemoryCursor extends Cursor
 
     load_queue.await callback
 
-  ##########################################
-  # Internal
-  ##########################################
+  # @nodoc
   _valueIsMatch: (find_query, key_path, model_json, callback) ->
     key_components = key_path.split('.')
     model_type = @model_type

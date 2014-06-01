@@ -2,7 +2,7 @@
 try stream = require('stream') catch e
 (module.exports = null; return) unless stream?.Readable
 
-# @private
+# @nodoc
 module.exports = class ModelStream extends stream.Readable
   constructor: (@model_type, @query={}) -> super {objectMode: true}
   _read: ->

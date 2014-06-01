@@ -12,7 +12,6 @@ Queue = require '../queue'
 MemoryStore = require './memory_store'
 MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy']
 
-# @private
 module.exports = class ModelCache
   constructor: ->
     @enabled = false
@@ -56,6 +55,7 @@ module.exports = class ModelCache
     delete @caches[key] for key, value of @caches
     return @
 
+  # @nodoc
   getOrCreateCache: (model_name) ->
     return null unless @enabled
     throw new Error "Missing model name for cache" unless model_name

@@ -12,7 +12,7 @@ Queue = require '../queue'
 
 Utils = require '../utils'
 
-# @private
+# @nodoc
 module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options

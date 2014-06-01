@@ -14,6 +14,7 @@ MemoryStore = require './memory_store'
 
 CLONE_DEPTH = 2
 
+# @nodoc
 module.exports = class QueryCache
   constructor: ->
     @enabled = false

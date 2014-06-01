@@ -32,18 +32,18 @@ DESTROY_BATCH_LIMIT = 1000
 #     sync: require('backbone-orm').sync(Thing)
 #
 class MemorySync
-  # @private
+  # @nodoc
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @schema = new Schema(@model_type)
     @store = @model_type.store or= {}
 
-  # @private
+  # @nodoc
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @schema.initialize()
 
-  # @private
+  # @nodoc
   read: (model, options) ->
     if model.models
       options.success(JSONUtils.deepClone(model_json) for id, model_json of @store)
@@ -51,7 +51,7 @@ class MemorySync
       return options.error(new Error("Model not found with id: #{model.id}")) if _.isUndefined(@store[model.id])
       options.success(JSONUtils.deepClone(@store[model.id]))
 
-  # @private
+  # @nodoc
   create: (model, options) ->
     QueryCache.reset @model_type, (err) =>
       return options.error?(err) if err
@@ -60,14 +60,14 @@ class MemorySync
       model_json = @store[model.id] = model.toJSON()
       options.success(JSONUtils.deepClone(model_json))
 
-  # @private
+  # @nodoc
   update: (model, options) ->
     QueryCache.reset @model_type, (err) =>
       return options.error?(err) if err
       @store[model.id] = model_json = model.toJSON()
       options.success(JSONUtils.deepClone(model_json))
 
-  # @private
+  # @nodoc
   delete: (model, options) ->
     QueryCache.reset @model_type, (err) =>
       return options.error?(err) if err
@@ -79,16 +79,16 @@ class MemorySync
   # Backbone ORM - Class Extensions
   ###################################
 
-  # @private
+  # @nodoc
   resetSchema: (options, callback) ->
     QueryCache.reset @model_type, (err) =>
       return callback(err) if err
       @destroy({}, callback)
 
-  # @private
+  # @nodoc
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
-  # @private
+  # @nodoc
   destroy: (query, callback) ->
     QueryCache.reset @model_type, (err) =>
       return callback(err) if err

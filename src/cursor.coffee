@@ -13,7 +13,7 @@ Utils = require './utils'
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or']
 
 module.exports = class Cursor
-  # @private
+  # @nodoc
   constructor: (query, options) ->
     @[key] = value for key, value of options
     parsed_query = Cursor.parseQuery(query, @model_type)
@@ -22,7 +22,7 @@ module.exports = class Cursor
     # ensure arrays
     @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
-  # @private
+  # @nodoc
   @validateQuery = (query, memo, model_type) =>
     for key, value of query
       continue unless _.isUndefined(value) or _.isObject(value)
@@ -30,7 +30,7 @@ module.exports = class Cursor
       throw new Error "Unexpected undefined for query key '#{full_key}' on #{model_type?.model_name}" if _.isUndefined(value)
       @validateQuery(value, full_key, model_type) if _.isObject(value)
 
-  # @private
+  # @nodoc
   @parseQuery: (query, model_type) =>
     if not query
       return {find: {}, cursor: {}}
@@ -72,6 +72,7 @@ module.exports = class Cursor
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
     return @
 
+  # @nodoc
   ids: -> @_cursor.$values = ['id']; return @
 
   ##############################################
@@ -139,7 +140,7 @@ module.exports = class Cursor
         else
           callback(null, json)
 
-  # @private
+  # @nodoc
   # Provided by a concrete cursor for a Backbone Sync type
   queryToJSON: (callback) ->
     throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
@@ -148,10 +149,10 @@ module.exports = class Cursor
   # Helpers
   ##############################################
 
-  # @private
+  # @nodoc
   hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
 
-  # @private
+  # @nodoc
   execWithCursorQuery: (key, method, callback) ->
     value = @_cursor[key]
     @_cursor[key] = true
@@ -159,7 +160,7 @@ module.exports = class Cursor
       if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
       callback(err, json)
 
-  # @private
+  # @nodoc
   relatedModelTypesInQuery: =>
     related_fields = []
     related_model_types = []
@@ -184,7 +185,7 @@ module.exports = class Cursor
 
     return related_model_types
 
-  # @private
+  # @nodoc
   selectResults: (json) ->
     json = json.slice(0, 1) if @_cursor.$one
 
@@ -207,7 +208,7 @@ module.exports = class Cursor
     return json if @hasCursorQuery('$page') # paging expects an array
     return if @_cursor.$one then (json[0] or null) else json
 
-  # @private
+  # @nodoc
   selectFromModels: (models, callback) ->
     if @_cursor.$select
       $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
@@ -218,7 +219,7 @@ module.exports = class Cursor
 
     return models
 
-  # @private
+  # @nodoc
   prepareIncludes: (json, callback) ->
     return callback(null, json) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
     schema = @model_type.schema()
