@@ -3,12 +3,12 @@
   <head>
   <meta charset='UTF-8'>
   <title>CoffeeScript API Documentation</title>
-  <link rel='stylesheet' href='assets/codo.css' type='text/css'>
-  <script src='assets/codo.js'></script>
-  <script src='assets/search_data.js'></script>
+  <script src='javascript/application.js'></script>
+  <script src='javascript/search.js'></script>
+  <link rel='stylesheet' href='stylesheets/application.css' type='text/css'>
   <script>
     var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-36443094-3']);
+    _gaq.push(['_setAccount', 'undefined']);
     _gaq.push(['_trackPageview']);
   
     (function() {
@@ -22,10 +22,18 @@
     <div class='list' id='content'>
       <h1 class='full_list_header'>Method List</h1>
       <nav>
-  <a target='_self' href='class_list.html'>Classes</a>
-  <a target='_self' href='file_list.html'>Files</a>
-  <a target='_self' href='method_list.html'>Methods</a>
-  <a target='_self' href='extra_list.html'>Extras</a>
+  <a target='_self' href='class_list.html'>
+    Classes
+  </a>
+  <a target='_self' href='file_list.html'>
+    Files
+  </a>
+  <a target='_self' href='method_list.html'>
+    Methods
+  </a>
+  <a target='_self' href='extra_list.html'>
+    Extras
+  </a>
 </nav>
       <div id='search'>
         Search:
@@ -33,15 +41,23 @@
       </div>
       <ul>
         <li>
-          <a href='files/src/utils.coffee.html#S4-file' target='main' title='S4'>
-            .S4
+          <a href='file/src/utils.coffee.html#S4-' target='main' title='S4'>
+            ~S4
           </a>
           <small>
             (src&#47;utils.coffee)
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#all-class' target='main' title='all'>
+          <a href='class/MemoryStore.html#_normalizeKey-dynamic' target='main' title='_normalizeKey'>
+            #_normalizeKey
+          </a>
+          <small>
+            (MemoryStore)
+          </small>
+        </li>
+        <li>
+          <a href='class/BackboneModelExtensions.html#all-static' target='main' title='all'>
             .all
           </a>
           <small>
@@ -49,7 +65,23 @@
           </small>
         </li>
         <li>
-          <a href='classes/Queue.html#await-instance' target='main' title='await'>
+          <a href='class/Schema.html#allColumns-dynamic' target='main' title='allColumns'>
+            #allColumns
+          </a>
+          <small>
+            (Schema)
+          </small>
+        </li>
+        <li>
+          <a href='class/Schema.html#allRelations-dynamic' target='main' title='allRelations'>
+            #allRelations
+          </a>
+          <small>
+            (Schema)
+          </small>
+        </li>
+        <li>
+          <a href='class/Queue.html#await-dynamic' target='main' title='await'>
             #await
           </a>
           <small>
@@ -57,55 +89,55 @@
           </small>
         </li>
         <li>
-          <a href='classes/QueryCache.html#cacheKey-instance' target='main' title='cacheKey'>
-            #cacheKey
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#cacheKeyMeta-instance' target='main' title='cacheKeyMeta'>
-            #cacheKeyMeta
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#clearMetaForModelTypes-instance' target='main' title='clearMetaForModelTypes'>
-            #clearMetaForModelTypes
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#clearModelTypes-instance' target='main' title='clearModelTypes'>
-            #clearModelTypes
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#configure-instance' target='main' title='configure'>
+          <a href='class/ModelCache.html#configure-dynamic' target='main' title='configure'>
             #configure
           </a>
           <small>
-            (QueryCache)
+            (ModelCache)
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#count-instance' target='main' title='count'>
-            #count
+          <a href='class/ModelCache.html#configureSync-dynamic' target='main' title='configureSync'>
+            #configureSync
           </a>
           <small>
-            (Cursor)
+            (ModelCache)
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#count-class' target='main' title='count'>
+          <a href='class/MemoryStore.html#constructor-dynamic' target='main' title='constructor'>
+            #constructor
+          </a>
+          <small>
+            (MemoryStore)
+          </small>
+        </li>
+        <li>
+          <a href='class/DatabaseURL.html#constructor-dynamic' target='main' title='constructor'>
+            #constructor
+          </a>
+          <small>
+            (DatabaseURL)
+          </small>
+        </li>
+        <li>
+          <a href='class/ModelCache.html#constructor-dynamic' target='main' title='constructor'>
+            #constructor
+          </a>
+          <small>
+            (ModelCache)
+          </small>
+        </li>
+        <li>
+          <a href='class/Queue.html#constructor-dynamic' target='main' title='constructor'>
+            #constructor
+          </a>
+          <small>
+            (Queue)
+          </small>
+        </li>
+        <li>
+          <a href='class/BackboneModelExtensions.html#count-static' target='main' title='count'>
             .count
           </a>
           <small>
@@ -113,15 +145,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#cursor-class' target='main' title='cursor'>
-            .cursor
+          <a href='class/Cursor.html#count-dynamic' target='main' title='count'>
+            #count
           </a>
           <small>
-            (BackboneModelExtensions)
+            (Cursor)
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#cursor-instance' target='main' title='cursor'>
+          <a href='class/BackboneModelExtensions.html#cursor-dynamic' target='main' title='cursor'>
             #cursor
           </a>
           <small>
@@ -129,7 +161,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#deepClone-class' target='main' title='deepClone'>
+          <a href='class/BackboneModelExtensions.html#cursor-static' target='main' title='cursor'>
+            .cursor
+          </a>
+          <small>
+            (BackboneModelExtensions)
+          </small>
+        </li>
+        <li>
+          <a href='class/JSONUtils.html#deepClone-static' target='main' title='deepClone'>
             .deepClone
           </a>
           <small>
@@ -137,7 +177,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Queue.html#defer-instance' target='main' title='defer'>
+          <a href='class/Queue.html#defer-dynamic' target='main' title='defer'>
             #defer
           </a>
           <small>
@@ -145,7 +185,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/MemoryStore.html#destroy-instance' target='main' title='destroy'>
+          <a href='class/MemoryStore.html#destroy-dynamic' target='main' title='destroy'>
             #destroy
           </a>
           <small>
@@ -153,7 +193,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#destroy-class' target='main' title='destroy'>
+          <a href='class/BackboneModelExtensions.html#destroy-static' target='main' title='destroy'>
             .destroy
           </a>
           <small>
@@ -161,7 +201,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#each-class' target='main' title='each'>
+          <a href='class/BackboneModelExtensions.html#each-static' target='main' title='each'>
             .each
           </a>
           <small>
@@ -169,7 +209,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#exists-instance' target='main' title='exists'>
+          <a href='class/Cursor.html#exists-dynamic' target='main' title='exists'>
             #exists
           </a>
           <small>
@@ -177,7 +217,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#exists-class' target='main' title='exists'>
+          <a href='class/BackboneModelExtensions.html#exists-static' target='main' title='exists'>
             .exists
           </a>
           <small>
@@ -185,7 +225,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#find-class' target='main' title='find'>
+          <a href='class/BackboneModelExtensions.html#find-static' target='main' title='find'>
             .find
           </a>
           <small>
@@ -193,7 +233,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#findOne-class' target='main' title='findOne'>
+          <a href='class/NodeUtils.html#findModels-static' target='main' title='findModels'>
+            .findModels
+          </a>
+          <small>
+            (NodeUtils)
+          </small>
+        </li>
+        <li>
+          <a href='class/BackboneModelExtensions.html#findOne-static' target='main' title='findOne'>
             .findOne
           </a>
           <small>
@@ -201,7 +249,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#findOneNearestDate-class' target='main' title='findOneNearestDate'>
+          <a href='class/BackboneModelExtensions.html#findOneNearestDate-static' target='main' title='findOneNearestDate'>
             .findOneNearestDate
           </a>
           <small>
@@ -209,7 +257,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#findOrCreate-class' target='main' title='findOrCreate'>
+          <a href='class/BackboneModelExtensions.html#findOrCreate-static' target='main' title='findOrCreate'>
             .findOrCreate
           </a>
           <small>
@@ -217,7 +265,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/MemoryStore.html#forEach-instance' target='main' title='forEach'>
+          <a href='class/MemoryStore.html#forEach-dynamic' target='main' title='forEach'>
             #forEach
           </a>
           <small>
@@ -225,7 +273,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/DatabaseURL.html#format-instance' target='main' title='format'>
+          <a href='class/DatabaseURL.html#format-dynamic' target='main' title='format'>
             #format
           </a>
           <small>
@@ -233,7 +281,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/MemoryStore.html#get-instance' target='main' title='get'>
+          <a href='class/MemoryStore.html#get-dynamic' target='main' title='get'>
             #get
           </a>
           <small>
@@ -241,63 +289,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/QueryCache.html#get-instance' target='main' title='get'>
-            #get
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#getKey-instance' target='main' title='getKey'>
-            #getKey
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#getKeysForModelTypes-instance' target='main' title='getKeysForModelTypes'>
-            #getKeysForModelTypes
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#getMeta-instance' target='main' title='getMeta'>
-            #getMeta
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/Utils.html#guid-class' target='main' title='guid'>
-            .guid
-          </a>
-          <small>
-            (Utils)
-          </small>
-        </li>
-        <li>
-          <a href='classes/QueryCache.html#hardReset-instance' target='main' title='hardReset'>
+          <a href='class/ModelCache.html#hardReset-dynamic' target='main' title='hardReset'>
             #hardReset
           </a>
           <small>
-            (QueryCache)
+            (ModelCache)
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#ids-instance' target='main' title='ids'>
-            #ids
-          </a>
-          <small>
-            (Cursor)
-          </small>
-        </li>
-        <li>
-          <a href='classes/Cursor.html#include-instance' target='main' title='include'>
+          <a href='class/Cursor.html#include-dynamic' target='main' title='include'>
             #include
           </a>
           <small>
@@ -305,15 +305,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Utils.html#inspect-class' target='main' title='inspect'>
-            .inspect
-          </a>
-          <small>
-            (Utils)
-          </small>
-        </li>
-        <li>
-          <a href='classes/BackboneModelExtensions.html#interval-class' target='main' title='interval'>
+          <a href='class/BackboneModelExtensions.html#interval-static' target='main' title='interval'>
             .interval
           </a>
           <small>
@@ -321,7 +313,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#limit-instance' target='main' title='limit'>
+          <a href='class/Schema.html#joinTableURL-static' target='main' title='joinTableURL'>
+            .joinTableURL
+          </a>
+          <small>
+            (Schema)
+          </small>
+        </li>
+        <li>
+          <a href='class/Cursor.html#limit-dynamic' target='main' title='limit'>
             #limit
           </a>
           <small>
@@ -329,7 +329,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/DatabaseURL.html#modelName-instance' target='main' title='modelName'>
+          <a href='class/DatabaseURL.html#modelName-dynamic' target='main' title='modelName'>
             #modelName
           </a>
           <small>
@@ -337,7 +337,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#modelName-instance' target='main' title='modelName'>
+          <a href='class/BackboneModelExtensions.html#modelName-dynamic' target='main' title='modelName'>
             #modelName
           </a>
           <small>
@@ -345,47 +345,7 @@
           </small>
         </li>
         <li>
-          <a href='files/src/cache/sync.coffee.html#module.exports-file' target='main' title='module.exports'>
-            .module.exports
-          </a>
-          <small>
-            (src&#47;cache&#47;sync.coffee)
-          </small>
-        </li>
-        <li>
-          <a href='files/src/extensions/model.coffee.html#module.exports-file' target='main' title='module.exports'>
-            .module.exports
-          </a>
-          <small>
-            (src&#47;extensions&#47;model.coffee)
-          </small>
-        </li>
-        <li>
-          <a href='files/src/extensions/model_each.coffee.html#module.exports-file' target='main' title='module.exports'>
-            .module.exports
-          </a>
-          <small>
-            (src&#47;extensions&#47;model_each.coffee)
-          </small>
-        </li>
-        <li>
-          <a href='files/src/extensions/model_interval.coffee.html#module.exports-file' target='main' title='module.exports'>
-            .module.exports
-          </a>
-          <small>
-            (src&#47;extensions&#47;model_interval.coffee)
-          </small>
-        </li>
-        <li>
-          <a href='files/src/memory/sync.coffee.html#module.exports-file' target='main' title='module.exports'>
-            .module.exports
-          </a>
-          <small>
-            (src&#47;memory&#47;sync.coffee)
-          </small>
-        </li>
-        <li>
-          <a href='classes/Cursor.html#offset-instance' target='main' title='offset'>
+          <a href='class/Cursor.html#offset-dynamic' target='main' title='offset'>
             #offset
           </a>
           <small>
@@ -393,7 +353,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#parse-class' target='main' title='parse'>
+          <a href='class/JSONUtils.html#parse-static' target='main' title='parse'>
             .parse
           </a>
           <small>
@@ -401,7 +361,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/DatabaseURL.html#parseAuth-instance' target='main' title='parseAuth'>
+          <a href='class/DatabaseURL.html#parseAuth-dynamic' target='main' title='parseAuth'>
             #parseAuth
           </a>
           <small>
@@ -409,7 +369,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#parseParams-class' target='main' title='parseParams'>
+          <a href='class/JSONUtils.html#parseParams-static' target='main' title='parseParams'>
             .parseParams
           </a>
           <small>
@@ -417,7 +377,39 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#renderRelated-class' target='main' title='renderRelated'>
+          <a href='class/Schema.html#relation-dynamic' target='main' title='relation'>
+            #relation
+          </a>
+          <small>
+            (Schema)
+          </small>
+        </li>
+        <li>
+          <a href='class/JSONUtils.html#renderDSL-static' target='main' title='renderDSL'>
+            .renderDSL
+          </a>
+          <small>
+            (JSONUtils)
+          </small>
+        </li>
+        <li>
+          <a href='class/JSONUtils.html#renderKey-static' target='main' title='renderKey'>
+            .renderKey
+          </a>
+          <small>
+            (JSONUtils)
+          </small>
+        </li>
+        <li>
+          <a href='class/JSONUtils.html#renderKeys-static' target='main' title='renderKeys'>
+            .renderKeys
+          </a>
+          <small>
+            (JSONUtils)
+          </small>
+        </li>
+        <li>
+          <a href='class/JSONUtils.html#renderRelated-static' target='main' title='renderRelated'>
             .renderRelated
           </a>
           <small>
@@ -425,7 +417,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#renderTemplate-class' target='main' title='renderTemplate'>
+          <a href='class/JSONUtils.html#renderTemplate-static' target='main' title='renderTemplate'>
             .renderTemplate
           </a>
           <small>
@@ -433,7 +425,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/MemoryStore.html#reset-instance' target='main' title='reset'>
+          <a href='class/MemoryStore.html#reset-dynamic' target='main' title='reset'>
             #reset
           </a>
           <small>
@@ -441,15 +433,15 @@
           </small>
         </li>
         <li>
-          <a href='classes/QueryCache.html#reset-instance' target='main' title='reset'>
+          <a href='class/ModelCache.html#reset-dynamic' target='main' title='reset'>
             #reset
           </a>
           <small>
-            (QueryCache)
+            (ModelCache)
           </small>
         </li>
         <li>
-          <a href='classes/BackboneModelExtensions.html#resetSchema-class' target='main' title='resetSchema'>
+          <a href='class/BackboneModelExtensions.html#resetSchema-static' target='main' title='resetSchema'>
             .resetSchema
           </a>
           <small>
@@ -457,7 +449,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Utils.html#resetSchemas-class' target='main' title='resetSchemas'>
+          <a href='class/Utils.html#resetSchemas-static' target='main' title='resetSchemas'>
             .resetSchemas
           </a>
           <small>
@@ -465,7 +457,23 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#select-instance' target='main' title='select'>
+          <a href='class/NodeUtils.html#resetSchemasByDirectory-static' target='main' title='resetSchemasByDirectory'>
+            .resetSchemasByDirectory
+          </a>
+          <small>
+            (NodeUtils)
+          </small>
+        </li>
+        <li>
+          <a href='class/Schema.html#reverseRelation-dynamic' target='main' title='reverseRelation'>
+            #reverseRelation
+          </a>
+          <small>
+            (Schema)
+          </small>
+        </li>
+        <li>
+          <a href='class/Cursor.html#select-dynamic' target='main' title='select'>
             #select
           </a>
           <small>
@@ -473,7 +481,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/MemoryStore.html#set-instance' target='main' title='set'>
+          <a href='class/MemoryStore.html#set-dynamic' target='main' title='set'>
             #set
           </a>
           <small>
@@ -481,15 +489,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/QueryCache.html#set-instance' target='main' title='set'>
-            #set
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/Cursor.html#sort-instance' target='main' title='sort'>
+          <a href='class/Cursor.html#sort-dynamic' target='main' title='sort'>
             #sort
           </a>
           <small>
@@ -497,15 +497,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/QueryCache.html#storeKeyForModelTypes-instance' target='main' title='storeKeyForModelTypes'>
-            #storeKeyForModelTypes
-          </a>
-          <small>
-            (QueryCache)
-          </small>
-        </li>
-        <li>
-          <a href='classes/BackboneModelExtensions.html#stream-class' target='main' title='stream'>
+          <a href='class/BackboneModelExtensions.html#stream-static' target='main' title='stream'>
             .stream
           </a>
           <small>
@@ -513,7 +505,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#toJSON-instance' target='main' title='toJSON'>
+          <a href='class/Cursor.html#toJSON-dynamic' target='main' title='toJSON'>
             #toJSON
           </a>
           <small>
@@ -521,7 +513,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#toModel-instance' target='main' title='toModel'>
+          <a href='class/Cursor.html#toModel-dynamic' target='main' title='toModel'>
             #toModel
           </a>
           <small>
@@ -529,7 +521,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#toModels-instance' target='main' title='toModels'>
+          <a href='class/Cursor.html#toModels-dynamic' target='main' title='toModels'>
             #toModels
           </a>
           <small>
@@ -537,7 +529,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/JSONUtils.html#toQuery-class' target='main' title='toQuery'>
+          <a href='class/JSONUtils.html#toQuery-static' target='main' title='toQuery'>
             .toQuery
           </a>
           <small>
@@ -545,7 +537,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#values-instance' target='main' title='values'>
+          <a href='class/Cursor.html#values-dynamic' target='main' title='values'>
             #values
           </a>
           <small>
@@ -553,7 +545,7 @@
           </small>
         </li>
         <li>
-          <a href='classes/Cursor.html#whiteList-instance' target='main' title='whiteList'>
+          <a href='class/Cursor.html#whiteList-dynamic' target='main' title='whiteList'>
             #whiteList
           </a>
           <small>
