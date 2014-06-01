@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "jquery": "*",
-    "underscore": "1.5.x",
-    "backbone": ">=1.0.0",
+    "underscore": "1.x",
+    "backbone": "1.x",
     "moment": "2.x",
     "inflection": "1.x",
     "lru-cache": "2.3.x",
