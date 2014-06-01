@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.13
+  backbone-orm.js 0.5.15
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -190,7 +190,7 @@ module.exports = class JSONUtils
             # is_great: {method: 'isGreatFor', args: [options.user]}
           else if _.isString(args.method)
             fn_args = if _.isArray(args.args) then args.args.slice() else (if args.args then [args.args] else [])
-            fn_args.push((err, json) -> result[key] = json; callback())
+            fn_args.push((err, json) -> result[key] = json; callback(err))
             model[args.method].apply(model, fn_args)
 
           else

@@ -1,6 +1,10 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.15
+* Fix tests
+
 ### 0.5.14
+* Bug fix for join table query: merge query instead of overwrite
 * Fix for CoffeeScript change
 
 ### 0.5.13

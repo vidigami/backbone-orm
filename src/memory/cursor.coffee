@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.13
+  backbone-orm.js 0.5.15
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -42,7 +42,16 @@ IS_MATCH_FNS =
       return (mv > tv) or _.isEqual(mv, tv)
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
+<<<<<<< HEAD
 # @nodoc
+=======
+# TODO: handle merging of non-array types (eg. $lt, $ne)
+valueToArray = (value) -> return (if _.isArray(value) then value else (if _.isNull(value) then [] else (if value.$in then value.$in else [value])))
+mergeQuery = (query, key, value) ->
+  query[key] = if query.hasOwnProperty(key) then {$in: _.intersection(valueToArray(query[key]), valueToArray(value))} else value
+
+# @private
+>>>>>>> 2caf0db849cc202209d06b231266f78154d95727
 module.exports = class MemoryCursor extends Cursor
   queryToJSON: (callback) ->
     return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
@@ -151,8 +160,8 @@ module.exports = class MemoryCursor extends Cursor
     find_query = {}
     for key, value of @_find
       if (key.indexOf('.') < 0)
-        (find_query[key] = value; continue) unless reverse_relation = @model_type.reverseRelation(key)
-        (find_query[key] = value; continue) if not reverse_relation.embed and not reverse_relation.join_table
+        (mergeQuery(find_query, key, value); continue) unless reverse_relation = @model_type.reverseRelation(key)
+        (mergeQuery(find_query, key, value); continue) if not reverse_relation.embed and not reverse_relation.join_table
         do (key, value, reverse_relation) => queue.defer (callback) =>
           if reverse_relation.embed
 
@@ -162,26 +171,26 @@ module.exports = class MemoryCursor extends Cursor
             (related_query = {}).id = value
             reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
               return callback(err) if err
-              find_query._json = _.map(models_json, (test) -> test[reverse_relation.key])
+              mergeQuery(find_query, '_json', _.map(models_json, (test) -> test[reverse_relation.key]))
               callback()
           else
             (related_query = {})[key] = value
             related_query.$values = reverse_relation.reverse_relation.join_key
             reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
               return callback(err) if err
-              find_query.id = {$in: model_ids}
+              mergeQuery(find_query, 'id', {$in: model_ids})
               callback()
         continue
 
       [relation_key, value_key] = key.split('.')
-      (find_query[key] = value; continue) if @model_type.relationIsEmbedded(relation_key) # embedded so a nested query is possible in mongo
+      (mergeQuery(find_query, key, value); continue) if @model_type.relationIsEmbedded(relation_key) # embedded so a nested query is possible in mongo
 
       # do a join or lookup
       do (relation_key, value_key, value) => queue.defer (callback) =>
-        (find_query[key] = value; return callback()) unless relation = @model_type.relation(relation_key) # assume embedded
+        (mergeQuery(find_query, key, value); return callback()) unless relation = @model_type.relation(relation_key) # assume embedded
 
         if not relation.join_table and (value_key is 'id')
-          find_query[relation.foreign_key] = value
+          mergeQuery(find_query, relation.foreign_key, value)
           return callback()
 
         # TODO: optimize with a one-step join?
@@ -191,14 +200,14 @@ module.exports = class MemoryCursor extends Cursor
             return callback(err) if err
 
             if relation.join_table
-              (join_query = {})[relation.reverse_relation.join_key] = {$in: _.compact(related_ids)}
+              (join_query = {})[relation.reverse_relation.join_key] = {$in: related_ids}
               join_query.$values = relation.foreign_key
               relation.join_table.cursor(join_query).toJSON (err, model_ids) =>
                 return callback(err) if err
-                find_query.id = {$in: _.compact(model_ids)}
+                mergeQuery(find_query, 'id', {$in: model_ids})
                 callback()
             else
-              find_query[relation.foreign_key] = {$in: _.compact(related_ids)}
+              mergeQuery(find_query, relation.foreign_key, {$in: related_ids})
               callback()
 
         # foreign key is on this model
@@ -207,12 +216,11 @@ module.exports = class MemoryCursor extends Cursor
           related_query.$values = relation.foreign_key
           relation.reverse_model_type.cursor(related_query).toJSON (err, model_ids) =>
             return callback(err) if err
-
-            find_query.id = {$in: _.compact(model_ids)}
+            mergeQuery(find_query, 'id', {$in: model_ids})
             callback()
 
     queue.await (err) =>
-      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)}"
+      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)} find: #{Utils.inspect(@_find)}"
       callback(err, find_query)
 
   fetchIncludes: (json, callback) ->
