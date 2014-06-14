@@ -1,7 +1,7 @@
 {
   "name": "backbone-orm",
   "main": "backbone-orm.js",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "homepage": "http://vidigami.github.io/backbone-orm/",
   "authors": [
     "Kevin Malakoff (https://github.com/kmalakoff)",

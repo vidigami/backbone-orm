@@ -1,7 +1,7 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -30,7 +30,7 @@ module.exports = CacheCursor = (function(_super) {
 },{"../cursor":8,"underscore":63}],2:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -122,7 +122,7 @@ module.exports = MemoryStore = (function() {
 },{"inflection":60,"lru-cache":61,"underscore":63}],3:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -234,7 +234,7 @@ module.exports = ModelCache = (function() {
 },{"../queue":21,"./memory_store":2,"./sync":6,"backbone":"5kFNoY","underscore":63}],4:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -510,7 +510,7 @@ module.exports = QueryCache = (function() {
 },{"../index":"OJWkHV","../json_utils":17,"../queue":21,"./memory_store":2,"inflection":60,"underscore":63}],5:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -531,7 +531,7 @@ try {
 },{"../node/model_type_id":20,"./model_cache":3,"./query_cache":4}],6:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -694,7 +694,7 @@ module.exports = function(model_type, wrapped_sync_fn) {
 },{"../schema":25,"../utils":26,"./cursor":1,"underscore":63}],7:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -712,7 +712,7 @@ module.exports = new MemoryStore({
 },{"./cache/memory_store":2}],8:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -1162,7 +1162,7 @@ module.exports = Cursor = (function() {
 },{"./cache/singletons":5,"./utils":26,"underscore":63}],9:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -1282,7 +1282,7 @@ module.exports = DatabaseURL = (function() {
 },{"inflection":60,"underscore":63,"url":59}],10:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -1347,7 +1347,7 @@ if (!collection_type.prototype._orm_original_fns) {
 },{"../utils":26,"backbone":"5kFNoY","underscore":63}],11:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -2338,7 +2338,7 @@ module.exports = ModelStream = (function(_super) {
 },{"stream":58}],"OJWkHV":[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -2401,7 +2401,7 @@ module.exports=require('OJWkHV');
 },{}],17:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -2796,7 +2796,7 @@ module.exports = JSONUtils = (function() {
 },{"./queue":21,"moment":62,"underscore":63}],18:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -3275,7 +3275,7 @@ module.exports = MemoryCursor = (function(_super) {
 },{"../cursor":8,"../json_utils":17,"../queue":21,"../utils":26,"inflection":60,"moment":62,"underscore":63}],19:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -3468,7 +3468,7 @@ module.exports = function(type) {
 },{"../cache/singletons":5,"../json_utils":17,"../queue":21,"../schema":25,"../utils":26,"./cursor":18,"backbone":"5kFNoY","underscore":63}],20:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -3533,7 +3533,7 @@ module.exports = ModelTypeID = (function() {
 },{"crypto":33,"underscore":63}],21:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -3603,7 +3603,7 @@ module.exports = Queue = (function() {
 },{}],22:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -4202,7 +4202,7 @@ module.exports = Many = (function(_super) {
 },{"../queue":21,"../utils":26,"./relation":24,"backbone":"5kFNoY","inflection":60,"underscore":63}],23:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -4681,7 +4681,7 @@ module.exports = One = (function(_super) {
 },{"../queue":21,"../utils":26,"./relation":24,"backbone":"5kFNoY","inflection":60,"underscore":63}],24:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -4861,7 +4861,7 @@ module.exports = Relation = (function() {
 },{"../queue":21,"../utils":26,"backbone":"5kFNoY","inflection":60,"underscore":63}],25:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -5117,7 +5117,7 @@ module.exports = Schema = (function() {
 },{"./database_url":9,"./relations/many":22,"./relations/one":23,"./utils":26,"backbone":"5kFNoY","inflection":60,"underscore":63}],26:[function(require,module,exports){
 
 /*
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.

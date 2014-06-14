@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -42,16 +42,13 @@ IS_MATCH_FNS =
       return (mv > tv) or _.isEqual(mv, tv)
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
-<<<<<<< HEAD
 # @nodoc
-=======
 # TODO: handle merging of non-array types (eg. $lt, $ne)
 valueToArray = (value) -> return (if _.isArray(value) then value else (if _.isNull(value) then [] else (if value.$in then value.$in else [value])))
 mergeQuery = (query, key, value) ->
   query[key] = if query.hasOwnProperty(key) then {$in: _.intersection(valueToArray(query[key]), valueToArray(value))} else value
 
 # @private
->>>>>>> 2caf0db849cc202209d06b231266f78154d95727
 module.exports = class MemoryCursor extends Cursor
   queryToJSON: (callback) ->
     return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
