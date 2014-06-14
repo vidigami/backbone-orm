@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.5.15
+  backbone-orm.js 0.5.16
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
@@ -48,13 +48,26 @@ module.exports = class Schema
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
     return null
 
-  # All relations, including join tables
-  allRelations: ->
+  # column and relationship helpers
+  columns: ->
+    columns = _.keys(@fields)
+    columns.push('id') if not _.find(columns, (column) -> column is 'id')
+    columns.push(relation.foreign_key) for key, relation of @relations when (relation.type is 'belongsTo') and not relation.isVirtual() and not relation.isEmbedded()
+    return columns
+
+  joinTables: ->
+    return (relation.join_table for key, relation of @relations when not relation.isVirtual() and relation.join_table)
+
+  relatedModels: ->
     related_model_types = []
     for key, relation of @relations
       related_model_types.push(relation.reverse_model_type)
       related_model_types.push(relation.join_table) if relation.join_table
     return related_model_types
+
+  # TO DEPRECATE
+  allColumns: -> @columns()
+  allRelations: -> @relatedModels()
 
   # @nodoc
   generateBelongsTo: (reverse_model_type) ->
@@ -100,11 +113,6 @@ module.exports = class Schema
         sync: relation.model_type.createSync(JoinTable)
 
     return JoinTable
-
-  allColumns: ->
-    columns = _.keys(@fields)
-    columns.push(relation.foreign_key) for key, relation of @relations when relation.type is 'belongsTo'
-    return columns
 
   # Internal
 
