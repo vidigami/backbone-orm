@@ -2,7 +2,7 @@
   "name": "backbone-orm",
   "version": "0.5.16",
   "description": "A polystore ORM for Node.js and the browser",
-  "main": "./lib/index.js",
+  "main": "backbone-orm.js",
   "license": "MIT",
   "author": "Kevin Malakoff (https://github.com/kmalakoff)",
   "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
