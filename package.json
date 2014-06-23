@@ -32,6 +32,7 @@
     "gulp-coffee": "*",
     "gulp-compile-js": "*",
     "gulp-module-system": "*",
+    "gulp-header": "*",
     "event-stream": "*"
   },
   "dependencies": {
