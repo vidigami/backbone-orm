@@ -10,7 +10,7 @@ QueryCache = require('../../../backbone-orm').CacheSingletons.QueryCache
 Fabricator = require '../../fabricator'
 Utils = require('../../../backbone-orm').Utils
 JSONUtils = require('../../../backbone-orm').JSONUtils
-NodeUtils = require('../../../backbone-orm').Utils
+NodeUtils = require('../../../backbone-orm').NodeUtils
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

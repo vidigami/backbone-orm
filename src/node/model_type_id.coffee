@@ -6,6 +6,8 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
+return if window? # node-only
+
 _ = require 'underscore'
 crypto = require 'crypto'
 

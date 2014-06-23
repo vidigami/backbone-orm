@@ -6,6 +6,8 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
+return if window? # node-only
+
 fs = require 'fs'
 path = require 'path'
 _ = require 'underscore'

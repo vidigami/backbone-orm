@@ -22,7 +22,7 @@ HEADER = """
 """
 
 gulp.task 'build', ->
-  gulp.src(['src/**/*.coffee', '!src/node/*.coffee', 'client/node-dependencies/**/*.js'])
+  gulp.src(['src/**/*.coffee', 'client/node-dependencies/**/*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
     .pipe(compile({coffee: {bare: true, header: false}}))
     .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment']}}))
