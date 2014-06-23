@@ -13,16 +13,12 @@ require.shim([
   {symbol: 'moment', path: 'moment'}
   # {symbol: 'inflection', path: 'inflection'} # burned in
   {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
-  {symbol: 'fs', path: 'fs', optional: window?}
-  {symbol: 'path', path: 'path', optional: window?}
-  {symbol: 'crypto', path: 'crypto', optional: window?}
 ]) if require.shim
 
 module.exports =
   sync: require './memory/sync'
 
   Utils: require './utils'
-  NodeUtils: require './node/utils'
   JSONUtils: require './json_utils'
   Queue: require './queue'
   DatabaseURL: require './database_url'

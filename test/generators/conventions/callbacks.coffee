@@ -3,10 +3,11 @@ assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
+Fabricator = require '../../fabricator'
+
 try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
-Fabricator = require '../../fabricator'
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

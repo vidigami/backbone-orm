@@ -6,14 +6,14 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-return if window? # node-only
-
 fs = require 'fs'
 path = require 'path'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../queue'
-Utils = require '../utils'
+
+try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../backbone-orm')
+Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
 
 # @private
 module.exports = class NodeUtils
