@@ -1,5 +1,5 @@
 _ = require 'underscore'
-Queue = require '../lib/queue'
+Queue = require('../backbone-orm').Queue
 
 option_sets = require('./option_sets')
 # option_sets = option_sets.slice(0, 1)

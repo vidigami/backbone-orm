@@ -1,6 +1,6 @@
 assert = require 'assert'
 
-Queue = require '../../lib/queue'
+Queue = require('../../backbone-orm').Queue
 _ = require 'underscore'
 
 module.exports = (options, callback) ->

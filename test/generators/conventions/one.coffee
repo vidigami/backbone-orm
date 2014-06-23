@@ -2,13 +2,13 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../../../lib/queue'
+Queue = require('../../../backbone-orm').Queue
 
-ModelCache = require('../../../lib/cache/singletons').ModelCache
-QueryCache = require('../../../lib/cache/singletons').QueryCache
+ModelCache = require('../../../backbone-orm').CacheSingletons.ModelCache
+QueryCache = require('../../../backbone-orm').CacheSingletons.QueryCache
 Fabricator = require '../../fabricator'
-Utils = require '../../../lib/utils'
-JSONUtils = require '../../../lib/json_utils'
+Utils = require('../../../backbone-orm').Utils
+JSONUtils = require('../../../backbone-orm').JSONUtils
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

@@ -5,10 +5,11 @@
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 */
-(function() {
-  var globals = {requires: []};
-if (window.require) globals.requires.push(window.require);
+(function(require) {
+  var globals = {requires: []}, _root = this;
+
 if (typeof require !== "undefined" && require !== null) globals.requires.push(require);
+if (_root.require) globals.requires.push(_root.require);
 
 /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
 (function() {
@@ -92,7 +93,6 @@ if (typeof require !== "undefined" && require !== null) globals.requires.push(re
 
   // client shimming to add to local module system
   var shim = function(info) {
-    if (typeof window === "undefined") return;
     if (!isArray(info)) info = [info];
 
     var iterator = function(item) {
@@ -104,10 +104,10 @@ if (typeof require !== "undefined" && require !== null) globals.requires.push(re
       // use external require
       try { for (var ext_i = 0, ext_length = globals.requires.length; ext_i < ext_length; ext_i++) {if (dep = globals.requires[ext_i](item.path)) break;}} catch (e) {}
 
-      // use symbol path on window
+      // use symbol path on _root
       if (!dep && item.symbol) {
         var components = item.symbol.split('.');
-        dep = window;
+        dep = _root;
         for (var i = 0, length = components.length; i < length; i++) { if (!(dep = dep[components[i]])) break; }
       }
 
@@ -735,7 +735,7 @@ require.register('index', function(exports, require, module) {
  */
 var e;
 
-if ((typeof window !== "undefined" && window !== null) && require.shim) {
+if (require.shim) {
   require.shim([
     {
       symbol: '_',
@@ -1974,6 +1974,711 @@ module.exports = Utils = (function() {
 })();
 
 });
+require.register('cache/cursor', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var CacheCursor, _,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+_ = require('underscore');
+
+module.exports = CacheCursor = (function(_super) {
+  __extends(CacheCursor, _super);
+
+  function CacheCursor() {
+    return CacheCursor.__super__.constructor.apply(this, arguments);
+  }
+
+  CacheCursor.prototype.toJSON = function(callback) {
+    return this.wrapped_sync_fn('cursor', _.extend({}, this._find, this._cursor)).toJSON(callback);
+  };
+
+  return CacheCursor;
+
+})(require('../cursor'));
+
+});
+require.register('cache/memory_store', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var LRU, MemoryStore, inflection, _,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+_ = require('underscore');
+
+LRU = require('lru-cache');
+
+inflection = require('inflection');
+
+module.exports = MemoryStore = (function() {
+  function MemoryStore(options) {
+    var key, normalized_options, value;
+    if (options == null) {
+      options = {};
+    }
+    this.forEach = __bind(this.forEach, this);
+    this.reset = __bind(this.reset, this);
+    this.destroy = __bind(this.destroy, this);
+    this.get = __bind(this.get, this);
+    this.set = __bind(this.set, this);
+    normalized_options = {};
+    for (key in options) {
+      value = options[key];
+      if (key === 'destroy') {
+        normalized_options.dispose = value;
+      } else {
+        normalized_options[this._normalizeKey(key)] = value;
+      }
+    }
+    this.cache = new LRU(normalized_options);
+  }
+
+  MemoryStore.prototype.set = function(key, value, callback) {
+    if (value._orm_never_cache) {
+      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
+    }
+    this.cache.set(key, value);
+    if (typeof callback === "function") {
+      callback(null, value);
+    }
+    return this;
+  };
+
+  MemoryStore.prototype.get = function(key, callback) {
+    var value;
+    value = this.cache.get(key);
+    if (typeof callback === "function") {
+      callback(null, value);
+    }
+    return value;
+  };
+
+  MemoryStore.prototype.destroy = function(key, callback) {
+    this.cache.del(key);
+    if (typeof callback === "function") {
+      callback();
+    }
+    return this;
+  };
+
+  MemoryStore.prototype.reset = function(callback) {
+    this.cache.reset();
+    if (typeof callback === "function") {
+      callback();
+    }
+    return this;
+  };
+
+  MemoryStore.prototype._normalizeKey = function(key) {
+    key = inflection.underscore(key);
+    if (key.indexOf('_') < 0) {
+      return key.toLowerCase();
+    }
+    return inflection.camelize(key);
+  };
+
+  MemoryStore.prototype.forEach = function(callback) {
+    return this.cache.forEach(callback);
+  };
+
+  return MemoryStore;
+
+})();
+
+});
+require.register('cache/model_cache', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, _;
+
+Backbone = require('backbone');
+
+_ = require('underscore');
+
+Queue = require('../queue');
+
+MemoryStore = require('./memory_store');
+
+MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy'];
+
+module.exports = ModelCache = (function() {
+  function ModelCache() {
+    this.enabled = false;
+    this.caches = {};
+    this.options = {
+      modelTypes: {}
+    };
+    this.verbose = false;
+  }
+
+  ModelCache.prototype.configure = function(options) {
+    var key, value, value_key, value_value, values, _base;
+    if (options == null) {
+      options = {};
+    }
+    this.enabled = options.enabled;
+    this.reset(function() {});
+    for (key in options) {
+      value = options[key];
+      if (_.isObject(value)) {
+        (_base = this.options)[key] || (_base[key] = {});
+        values = this.options[key];
+        for (value_key in value) {
+          value_value = value[value_key];
+          values[value_key] = value_value;
+        }
+      } else {
+        this.options[key] = value;
+      }
+    }
+    return this;
+  };
+
+  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
+    var cache;
+    if (model_type.prototype._orm_never_cache || !(cache = this.getOrCreateCache(model_type.model_name))) {
+      return sync_fn;
+    }
+    model_type.cache = cache;
+    return require('./sync')(model_type, sync_fn);
+  };
+
+  ModelCache.prototype.reset = function(callback) {
+    var key, queue, value, _fn, _ref;
+    queue = new Queue();
+    _ref = this.caches;
+    _fn = function(value) {
+      return queue.defer(function(callback) {
+        return value.reset(callback);
+      });
+    };
+    for (key in _ref) {
+      value = _ref[key];
+      _fn(value);
+    }
+    return queue.await(callback);
+  };
+
+  ModelCache.prototype.hardReset = function() {
+    var key, value, _ref;
+    this.reset(function() {});
+    _ref = this.caches;
+    for (key in _ref) {
+      value = _ref[key];
+      delete this.caches[key];
+    }
+    return this;
+  };
+
+  ModelCache.prototype.getOrCreateCache = function(model_name) {
+    var model_cache, options, _base;
+    if (!this.enabled) {
+      return null;
+    }
+    if (!model_name) {
+      throw new Error("Missing model name for cache");
+    }
+    if (model_cache = this.caches[model_name]) {
+      return model_cache;
+    }
+    if (options = this.options.modelTypes[model_name]) {
+      return this.caches[model_name] = (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(_.pick(options, MEMORY_STORE_KEYS));
+    } else if (this.options.store || this.options.max || this.options.max_age) {
+      return this.caches[model_name] = (typeof (_base = this.options).store === "function" ? _base.store() : void 0) || new MemoryStore(_.pick(this.options, MEMORY_STORE_KEYS));
+    }
+    return null;
+  };
+
+  return ModelCache;
+
+})();
+
+});
+require.register('cache/query_cache', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+_ = require('underscore');
+
+inflection = require('inflection');
+
+Queue = require('../queue');
+
+JSONUtils = require('../json_utils');
+
+MemoryStore = require('./memory_store');
+
+CLONE_DEPTH = 2;
+
+module.exports = QueryCache = (function() {
+  function QueryCache() {
+    this.storeKeyForModelTypes = __bind(this.storeKeyForModelTypes, this);
+    this.getKeysForModelTypes = __bind(this.getKeysForModelTypes, this);
+    this.clearMetaForModelTypes = __bind(this.clearMetaForModelTypes, this);
+    this.clearModelTypes = __bind(this.clearModelTypes, this);
+    this.reset = __bind(this.reset, this);
+    this.hardReset = __bind(this.hardReset, this);
+    this.getMeta = __bind(this.getMeta, this);
+    this.getKey = __bind(this.getKey, this);
+    this.get = __bind(this.get, this);
+    this.set = __bind(this.set, this);
+    this.configure = __bind(this.configure, this);
+    this.enabled = false;
+  }
+
+  QueryCache.prototype.configure = function(options) {
+    var CacheSingletons, _ref;
+    if (options == null) {
+      options = {};
+    }
+    this.enabled = !!options.enabled;
+    this.verbose = !!options.verbose;
+    this.hits = this.misses = this.clears = 0;
+    this.store = options.store || new MemoryStore();
+    CacheSingletons = require('../index').CacheSingletons;
+    if ((_ref = CacheSingletons.ModelTypeID) != null) {
+      _ref.configure({
+        enabled: this.enabled,
+        verbose: this.verbose
+      });
+    }
+    return this;
+  };
+
+  QueryCache.prototype.cacheKey = function(model_type, query) {
+    return "" + model_type.model_id + "_" + (JSON.stringify(query));
+  };
+
+  QueryCache.prototype.cacheKeyMeta = function(model_type) {
+    return "meta_" + model_type.model_id;
+  };
+
+  QueryCache.prototype.set = function(model_type, query, related_model_types, value, callback) {
+    var cache_key, m, model_types;
+    if (!this.enabled) {
+      return callback();
+    }
+    if (this.verbose) {
+      console.log('QueryCache:set', model_type.model_name, (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = related_model_types.length; _i < _len; _i++) {
+          m = related_model_types[_i];
+          _results.push(m.model_name);
+        }
+        return _results;
+      })(), this.cacheKey(model_type, query), JSON.stringify(value), '\n-----------');
+    }
+    model_types = [model_type].concat(related_model_types || []);
+    cache_key = this.cacheKey(model_type, query);
+    return this.store.set(cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (function(_this) {
+      return function(err) {
+        if (err) {
+          return callback(err);
+        }
+        return _this.storeKeyForModelTypes(model_types, cache_key, callback);
+      };
+    })(this));
+  };
+
+  QueryCache.prototype.get = function(model_type, query, callback) {
+    if (!this.enabled) {
+      return callback();
+    }
+    return this.getKey(this.cacheKey(model_type, query), callback);
+  };
+
+  QueryCache.prototype.getKey = function(key, callback) {
+    if (!this.enabled) {
+      return callback();
+    }
+    return this.store.get(key, (function(_this) {
+      return function(err, value) {
+        if (err) {
+          return callback(err);
+        }
+        if (_.isUndefined(value) || _.isNull(value)) {
+          _this.misses++;
+          if (_this.verbose) {
+            console.log('QueryCache:miss', key, value, '\n-----------');
+          }
+          return callback();
+        } else {
+          _this.hits++;
+          if (_this.verbose) {
+            console.log('QueryCache:hit', key, value, '\n-----------');
+          }
+          return callback(null, JSONUtils.deepClone(value, CLONE_DEPTH));
+        }
+      };
+    })(this));
+  };
+
+  QueryCache.prototype.getMeta = function(model_type, callback) {
+    if (!this.enabled) {
+      return callback();
+    }
+    return this.store.get(this.cacheKeyMeta(model_type), callback);
+  };
+
+  QueryCache.prototype.hardReset = function(callback) {
+    if (!this.enabled) {
+      return callback();
+    }
+    if (this.verbose) {
+      console.log('QueryCache:hardReset');
+    }
+    this.hits = this.misses = this.clears = 0;
+    if (this.store) {
+      return this.store.reset(callback);
+    }
+    return callback();
+  };
+
+  QueryCache.prototype.reset = function(model_types, callback) {
+    var model_type, related_model_types, _i, _len;
+    if (arguments.length === 1) {
+      return this.hardReset(model_types);
+    }
+    if (!this.enabled) {
+      return callback();
+    }
+    if (!_.isArray(model_types)) {
+      model_types = [model_types];
+    }
+    related_model_types = [];
+    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
+      model_type = model_types[_i];
+      related_model_types = related_model_types.concat(model_type.schema().allRelations());
+    }
+    model_types = model_types.concat(related_model_types);
+    return this.clearModelTypes(model_types, callback);
+  };
+
+  QueryCache.prototype.clearModelTypes = function(model_types, callback) {
+    if (!model_types.length) {
+      return callback();
+    }
+    return this.getKeysForModelTypes(model_types, (function(_this) {
+      return function(err, to_clear) {
+        var key, queue, _fn, _i, _len, _ref;
+        if (err) {
+          return callback(err);
+        }
+        queue = new Queue();
+        queue.defer(function(callback) {
+          return _this.clearMetaForModelTypes(model_types, callback);
+        });
+        _ref = _.uniq(to_clear);
+        _fn = function(key) {
+          return queue.defer(function(callback) {
+            if (_this.verbose) {
+              console.log('QueryCache:cleared', key, '\n-----------');
+            }
+            _this.clears++;
+            return _this.store.destroy(key, callback);
+          });
+        };
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          key = _ref[_i];
+          _fn(key);
+        }
+        return queue.await(callback);
+      };
+    })(this));
+  };
+
+  QueryCache.prototype.clearMetaForModelTypes = function(model_types, callback) {
+    var model_type, queue, _fn, _i, _len;
+    queue = new Queue();
+    _fn = (function(_this) {
+      return function(model_type) {
+        return queue.defer(function(callback) {
+          if (_this.verbose) {
+            console.log('QueryCache:meta cleared', model_type.model_name, '\n-----------');
+          }
+          return _this.store.destroy(_this.cacheKeyMeta(model_type), callback);
+        });
+      };
+    })(this);
+    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
+      model_type = model_types[_i];
+      _fn(model_type);
+    }
+    return queue.await(callback);
+  };
+
+  QueryCache.prototype.getKeysForModelTypes = function(model_types, callback) {
+    var all_keys, model_type, queue, _fn, _i, _len;
+    all_keys = [];
+    queue = new Queue(1);
+    _fn = (function(_this) {
+      return function(model_type) {
+        return queue.defer(function(callback) {
+          return _this.getMeta(model_type, function(err, keys) {
+            if (err || !keys) {
+              return callback(err);
+            }
+            all_keys = all_keys.concat(keys);
+            return callback();
+          });
+        });
+      };
+    })(this);
+    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
+      model_type = model_types[_i];
+      _fn(model_type);
+    }
+    return queue.await(function(err) {
+      return callback(err, all_keys);
+    });
+  };
+
+  QueryCache.prototype.storeKeyForModelTypes = function(model_types, cache_key, callback) {
+    var model_type, queue, _fn, _i, _len;
+    queue = new Queue(1);
+    _fn = (function(_this) {
+      return function(model_type) {
+        return queue.defer(function(callback) {
+          var model_type_key;
+          model_type_key = _this.cacheKeyMeta(model_type);
+          return _this.store.get(model_type_key, function(err, keys) {
+            if (err) {
+              return callback(err);
+            }
+            (keys || (keys = [])).push(cache_key);
+            return _this.store.set(model_type_key, _.uniq(keys), callback);
+          });
+        });
+      };
+    })(this);
+    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
+      model_type = model_types[_i];
+      _fn(model_type);
+    }
+    return queue.await(callback);
+  };
+
+  return QueryCache;
+
+})();
+
+});
+require.register('cache/singletons', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var e;
+
+module.exports = {
+  ModelCache: new (require('./model_cache'))(),
+  QueryCache: new (require('./query_cache'))()
+};
+
+try {
+  module.exports.ModelTypeID = new (require('../node/model_type_id'))();
+} catch (_error) {
+  e = _error;
+}
+
+});
+require.register('cache/sync', function(exports, require, module) {
+
+/*
+  backbone-orm.js 0.5.16
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+ */
+var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
+
+_ = require('underscore');
+
+CacheCursor = require('./cursor');
+
+Schema = require('../schema');
+
+Utils = require('../utils');
+
+bbCallback = Utils.bbCallback;
+
+DESTROY_BATCH_LIMIT = 1000;
+
+DESTROY_THREADS = 100;
+
+CacheSync = (function() {
+  function CacheSync(model_type, wrapped_sync_fn) {
+    this.model_type = model_type;
+    this.wrapped_sync_fn = wrapped_sync_fn;
+  }
+
+  CacheSync.prototype.initialize = function() {
+    if (this.is_initialized) {
+      return;
+    }
+    this.is_initialized = true;
+    this.wrapped_sync_fn('initialize');
+    if (!this.model_type.model_name) {
+      throw new Error('Missing model_name for model');
+    }
+  };
+
+  CacheSync.prototype.read = function(model, options) {
+    var cached_model;
+    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
+      return options.success(cached_model.toJSON());
+    }
+    return this.wrapped_sync_fn('read', model, options);
+  };
+
+  CacheSync.prototype.create = function(model, options) {
+    return this.wrapped_sync_fn('create', model, bbCallback((function(_this) {
+      return function(err, json) {
+        var attributes, cache_model;
+        if (err) {
+          return options.error(err);
+        }
+        (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
+        model.set(attributes);
+        if (cache_model = _this.model_type.cache.get(model.id)) {
+          if (cache_model !== model) {
+            Utils.updateModel(cache_model, model);
+          }
+        } else {
+          _this.model_type.cache.set(model.id, model);
+        }
+        return options.success(json);
+      };
+    })(this)));
+  };
+
+  CacheSync.prototype.update = function(model, options) {
+    return this.wrapped_sync_fn('update', model, bbCallback((function(_this) {
+      return function(err, json) {
+        var cache_model;
+        if (err) {
+          return options.error(err);
+        }
+        if (cache_model = _this.model_type.cache.get(model.id)) {
+          if (cache_model !== model) {
+            Utils.updateModel(cache_model, model);
+          }
+        } else {
+          _this.model_type.cache.set(model.id, model);
+        }
+        return options.success(json);
+      };
+    })(this)));
+  };
+
+  CacheSync.prototype["delete"] = function(model, options) {
+    this.model_type.cache.destroy(model.id);
+    return this.wrapped_sync_fn('delete', model, bbCallback((function(_this) {
+      return function(err, json) {
+        if (err) {
+          return options.error(err);
+        }
+        return options.success(json);
+      };
+    })(this)));
+  };
+
+  CacheSync.prototype.resetSchema = function(options, callback) {
+    return this.model_type.cache.reset((function(_this) {
+      return function(err) {
+        if (err) {
+          return callback(err);
+        }
+        return _this.wrapped_sync_fn('resetSchema', options, callback);
+      };
+    })(this));
+  };
+
+  CacheSync.prototype.cursor = function(query) {
+    if (query == null) {
+      query = {};
+    }
+    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
+  };
+
+  CacheSync.prototype.destroy = function(query, callback) {
+    return this.model_type.each(_.extend({
+      $each: {
+        limit: DESTROY_BATCH_LIMIT,
+        threads: DESTROY_THREADS
+      }
+    }, query), ((function(_this) {
+      return function(model, callback) {
+        return model.destroy(callback);
+      };
+    })(this)), callback);
+  };
+
+  CacheSync.prototype.connect = function(url) {
+    this.model_type.cache.reset();
+    return this.wrapped_sync_fn('connect');
+  };
+
+  return CacheSync;
+
+})();
+
+module.exports = function(model_type, wrapped_sync_fn) {
+  var sync, sync_fn;
+  sync = new CacheSync(model_type, wrapped_sync_fn);
+  model_type.prototype.sync = sync_fn = function(method, model, options) {
+    if (options == null) {
+      options = {};
+    }
+    sync.initialize();
+    if (method === 'createSync') {
+      return wrapped_sync_fn.apply(null, arguments);
+    }
+    if (method === 'sync') {
+      return sync;
+    }
+    if (sync[method]) {
+      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+    }
+    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
+  };
+  return sync_fn;
+};
+
+});
 require.register('extensions/collection', function(exports, require, module) {
 
 /*
@@ -3059,711 +3764,6 @@ module.exports = ModelStream = (function(_super) {
   return ModelStream;
 
 })(stream.Readable);
-
-});
-require.register('cache/cursor', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var CacheCursor, _,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-_ = require('underscore');
-
-module.exports = CacheCursor = (function(_super) {
-  __extends(CacheCursor, _super);
-
-  function CacheCursor() {
-    return CacheCursor.__super__.constructor.apply(this, arguments);
-  }
-
-  CacheCursor.prototype.toJSON = function(callback) {
-    return this.wrapped_sync_fn('cursor', _.extend({}, this._find, this._cursor)).toJSON(callback);
-  };
-
-  return CacheCursor;
-
-})(require('../cursor'));
-
-});
-require.register('cache/memory_store', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var LRU, MemoryStore, inflection, _,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-_ = require('underscore');
-
-LRU = require('lru-cache');
-
-inflection = require('inflection');
-
-module.exports = MemoryStore = (function() {
-  function MemoryStore(options) {
-    var key, normalized_options, value;
-    if (options == null) {
-      options = {};
-    }
-    this.forEach = __bind(this.forEach, this);
-    this.reset = __bind(this.reset, this);
-    this.destroy = __bind(this.destroy, this);
-    this.get = __bind(this.get, this);
-    this.set = __bind(this.set, this);
-    normalized_options = {};
-    for (key in options) {
-      value = options[key];
-      if (key === 'destroy') {
-        normalized_options.dispose = value;
-      } else {
-        normalized_options[this._normalizeKey(key)] = value;
-      }
-    }
-    this.cache = new LRU(normalized_options);
-  }
-
-  MemoryStore.prototype.set = function(key, value, callback) {
-    if (value._orm_never_cache) {
-      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
-    }
-    this.cache.set(key, value);
-    if (typeof callback === "function") {
-      callback(null, value);
-    }
-    return this;
-  };
-
-  MemoryStore.prototype.get = function(key, callback) {
-    var value;
-    value = this.cache.get(key);
-    if (typeof callback === "function") {
-      callback(null, value);
-    }
-    return value;
-  };
-
-  MemoryStore.prototype.destroy = function(key, callback) {
-    this.cache.del(key);
-    if (typeof callback === "function") {
-      callback();
-    }
-    return this;
-  };
-
-  MemoryStore.prototype.reset = function(callback) {
-    this.cache.reset();
-    if (typeof callback === "function") {
-      callback();
-    }
-    return this;
-  };
-
-  MemoryStore.prototype._normalizeKey = function(key) {
-    key = inflection.underscore(key);
-    if (key.indexOf('_') < 0) {
-      return key.toLowerCase();
-    }
-    return inflection.camelize(key);
-  };
-
-  MemoryStore.prototype.forEach = function(callback) {
-    return this.cache.forEach(callback);
-  };
-
-  return MemoryStore;
-
-})();
-
-});
-require.register('cache/model_cache', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var Backbone, MEMORY_STORE_KEYS, MemoryStore, ModelCache, Queue, _;
-
-Backbone = require('backbone');
-
-_ = require('underscore');
-
-Queue = require('../queue');
-
-MemoryStore = require('./memory_store');
-
-MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy'];
-
-module.exports = ModelCache = (function() {
-  function ModelCache() {
-    this.enabled = false;
-    this.caches = {};
-    this.options = {
-      modelTypes: {}
-    };
-    this.verbose = false;
-  }
-
-  ModelCache.prototype.configure = function(options) {
-    var key, value, value_key, value_value, values, _base;
-    if (options == null) {
-      options = {};
-    }
-    this.enabled = options.enabled;
-    this.reset(function() {});
-    for (key in options) {
-      value = options[key];
-      if (_.isObject(value)) {
-        (_base = this.options)[key] || (_base[key] = {});
-        values = this.options[key];
-        for (value_key in value) {
-          value_value = value[value_key];
-          values[value_key] = value_value;
-        }
-      } else {
-        this.options[key] = value;
-      }
-    }
-    return this;
-  };
-
-  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-    var cache;
-    if (model_type.prototype._orm_never_cache || !(cache = this.getOrCreateCache(model_type.model_name))) {
-      return sync_fn;
-    }
-    model_type.cache = cache;
-    return require('./sync')(model_type, sync_fn);
-  };
-
-  ModelCache.prototype.reset = function(callback) {
-    var key, queue, value, _fn, _ref;
-    queue = new Queue();
-    _ref = this.caches;
-    _fn = function(value) {
-      return queue.defer(function(callback) {
-        return value.reset(callback);
-      });
-    };
-    for (key in _ref) {
-      value = _ref[key];
-      _fn(value);
-    }
-    return queue.await(callback);
-  };
-
-  ModelCache.prototype.hardReset = function() {
-    var key, value, _ref;
-    this.reset(function() {});
-    _ref = this.caches;
-    for (key in _ref) {
-      value = _ref[key];
-      delete this.caches[key];
-    }
-    return this;
-  };
-
-  ModelCache.prototype.getOrCreateCache = function(model_name) {
-    var model_cache, options, _base;
-    if (!this.enabled) {
-      return null;
-    }
-    if (!model_name) {
-      throw new Error("Missing model name for cache");
-    }
-    if (model_cache = this.caches[model_name]) {
-      return model_cache;
-    }
-    if (options = this.options.modelTypes[model_name]) {
-      return this.caches[model_name] = (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(_.pick(options, MEMORY_STORE_KEYS));
-    } else if (this.options.store || this.options.max || this.options.max_age) {
-      return this.caches[model_name] = (typeof (_base = this.options).store === "function" ? _base.store() : void 0) || new MemoryStore(_.pick(this.options, MEMORY_STORE_KEYS));
-    }
-    return null;
-  };
-
-  return ModelCache;
-
-})();
-
-});
-require.register('cache/query_cache', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-_ = require('underscore');
-
-inflection = require('inflection');
-
-Queue = require('../queue');
-
-JSONUtils = require('../json_utils');
-
-MemoryStore = require('./memory_store');
-
-CLONE_DEPTH = 2;
-
-module.exports = QueryCache = (function() {
-  function QueryCache() {
-    this.storeKeyForModelTypes = __bind(this.storeKeyForModelTypes, this);
-    this.getKeysForModelTypes = __bind(this.getKeysForModelTypes, this);
-    this.clearMetaForModelTypes = __bind(this.clearMetaForModelTypes, this);
-    this.clearModelTypes = __bind(this.clearModelTypes, this);
-    this.reset = __bind(this.reset, this);
-    this.hardReset = __bind(this.hardReset, this);
-    this.getMeta = __bind(this.getMeta, this);
-    this.getKey = __bind(this.getKey, this);
-    this.get = __bind(this.get, this);
-    this.set = __bind(this.set, this);
-    this.configure = __bind(this.configure, this);
-    this.enabled = false;
-  }
-
-  QueryCache.prototype.configure = function(options) {
-    var CacheSingletons, _ref;
-    if (options == null) {
-      options = {};
-    }
-    this.enabled = !!options.enabled;
-    this.verbose = !!options.verbose;
-    this.hits = this.misses = this.clears = 0;
-    this.store = options.store || new MemoryStore();
-    CacheSingletons = require('../index').CacheSingletons;
-    if ((_ref = CacheSingletons.ModelTypeID) != null) {
-      _ref.configure({
-        enabled: this.enabled,
-        verbose: this.verbose
-      });
-    }
-    return this;
-  };
-
-  QueryCache.prototype.cacheKey = function(model_type, query) {
-    return "" + model_type.model_id + "_" + (JSON.stringify(query));
-  };
-
-  QueryCache.prototype.cacheKeyMeta = function(model_type) {
-    return "meta_" + model_type.model_id;
-  };
-
-  QueryCache.prototype.set = function(model_type, query, related_model_types, value, callback) {
-    var cache_key, m, model_types;
-    if (!this.enabled) {
-      return callback();
-    }
-    if (this.verbose) {
-      console.log('QueryCache:set', model_type.model_name, (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = related_model_types.length; _i < _len; _i++) {
-          m = related_model_types[_i];
-          _results.push(m.model_name);
-        }
-        return _results;
-      })(), this.cacheKey(model_type, query), JSON.stringify(value), '\n-----------');
-    }
-    model_types = [model_type].concat(related_model_types || []);
-    cache_key = this.cacheKey(model_type, query);
-    return this.store.set(cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (function(_this) {
-      return function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return _this.storeKeyForModelTypes(model_types, cache_key, callback);
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.get = function(model_type, query, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.getKey(this.cacheKey(model_type, query), callback);
-  };
-
-  QueryCache.prototype.getKey = function(key, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.store.get(key, (function(_this) {
-      return function(err, value) {
-        if (err) {
-          return callback(err);
-        }
-        if (_.isUndefined(value) || _.isNull(value)) {
-          _this.misses++;
-          if (_this.verbose) {
-            console.log('QueryCache:miss', key, value, '\n-----------');
-          }
-          return callback();
-        } else {
-          _this.hits++;
-          if (_this.verbose) {
-            console.log('QueryCache:hit', key, value, '\n-----------');
-          }
-          return callback(null, JSONUtils.deepClone(value, CLONE_DEPTH));
-        }
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.getMeta = function(model_type, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.store.get(this.cacheKeyMeta(model_type), callback);
-  };
-
-  QueryCache.prototype.hardReset = function(callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    if (this.verbose) {
-      console.log('QueryCache:hardReset');
-    }
-    this.hits = this.misses = this.clears = 0;
-    if (this.store) {
-      return this.store.reset(callback);
-    }
-    return callback();
-  };
-
-  QueryCache.prototype.reset = function(model_types, callback) {
-    var model_type, related_model_types, _i, _len;
-    if (arguments.length === 1) {
-      return this.hardReset(model_types);
-    }
-    if (!this.enabled) {
-      return callback();
-    }
-    if (!_.isArray(model_types)) {
-      model_types = [model_types];
-    }
-    related_model_types = [];
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      related_model_types = related_model_types.concat(model_type.schema().allRelations());
-    }
-    model_types = model_types.concat(related_model_types);
-    return this.clearModelTypes(model_types, callback);
-  };
-
-  QueryCache.prototype.clearModelTypes = function(model_types, callback) {
-    if (!model_types.length) {
-      return callback();
-    }
-    return this.getKeysForModelTypes(model_types, (function(_this) {
-      return function(err, to_clear) {
-        var key, queue, _fn, _i, _len, _ref;
-        if (err) {
-          return callback(err);
-        }
-        queue = new Queue();
-        queue.defer(function(callback) {
-          return _this.clearMetaForModelTypes(model_types, callback);
-        });
-        _ref = _.uniq(to_clear);
-        _fn = function(key) {
-          return queue.defer(function(callback) {
-            if (_this.verbose) {
-              console.log('QueryCache:cleared', key, '\n-----------');
-            }
-            _this.clears++;
-            return _this.store.destroy(key, callback);
-          });
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          key = _ref[_i];
-          _fn(key);
-        }
-        return queue.await(callback);
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.clearMetaForModelTypes = function(model_types, callback) {
-    var model_type, queue, _fn, _i, _len;
-    queue = new Queue();
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          if (_this.verbose) {
-            console.log('QueryCache:meta cleared', model_type.model_name, '\n-----------');
-          }
-          return _this.store.destroy(_this.cacheKeyMeta(model_type), callback);
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(callback);
-  };
-
-  QueryCache.prototype.getKeysForModelTypes = function(model_types, callback) {
-    var all_keys, model_type, queue, _fn, _i, _len;
-    all_keys = [];
-    queue = new Queue(1);
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          return _this.getMeta(model_type, function(err, keys) {
-            if (err || !keys) {
-              return callback(err);
-            }
-            all_keys = all_keys.concat(keys);
-            return callback();
-          });
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(function(err) {
-      return callback(err, all_keys);
-    });
-  };
-
-  QueryCache.prototype.storeKeyForModelTypes = function(model_types, cache_key, callback) {
-    var model_type, queue, _fn, _i, _len;
-    queue = new Queue(1);
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          var model_type_key;
-          model_type_key = _this.cacheKeyMeta(model_type);
-          return _this.store.get(model_type_key, function(err, keys) {
-            if (err) {
-              return callback(err);
-            }
-            (keys || (keys = [])).push(cache_key);
-            return _this.store.set(model_type_key, _.uniq(keys), callback);
-          });
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(callback);
-  };
-
-  return QueryCache;
-
-})();
-
-});
-require.register('cache/singletons', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var e;
-
-module.exports = {
-  ModelCache: new (require('./model_cache'))(),
-  QueryCache: new (require('./query_cache'))()
-};
-
-try {
-  module.exports.ModelTypeID = new (require('../node/model_type_id'))();
-} catch (_error) {
-  e = _error;
-}
-
-});
-require.register('cache/sync', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
-
-_ = require('underscore');
-
-CacheCursor = require('./cursor');
-
-Schema = require('../schema');
-
-Utils = require('../utils');
-
-bbCallback = Utils.bbCallback;
-
-DESTROY_BATCH_LIMIT = 1000;
-
-DESTROY_THREADS = 100;
-
-CacheSync = (function() {
-  function CacheSync(model_type, wrapped_sync_fn) {
-    this.model_type = model_type;
-    this.wrapped_sync_fn = wrapped_sync_fn;
-  }
-
-  CacheSync.prototype.initialize = function() {
-    if (this.is_initialized) {
-      return;
-    }
-    this.is_initialized = true;
-    this.wrapped_sync_fn('initialize');
-    if (!this.model_type.model_name) {
-      throw new Error('Missing model_name for model');
-    }
-  };
-
-  CacheSync.prototype.read = function(model, options) {
-    var cached_model;
-    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
-      return options.success(cached_model.toJSON());
-    }
-    return this.wrapped_sync_fn('read', model, options);
-  };
-
-  CacheSync.prototype.create = function(model, options) {
-    return this.wrapped_sync_fn('create', model, bbCallback((function(_this) {
-      return function(err, json) {
-        var attributes, cache_model;
-        if (err) {
-          return options.error(err);
-        }
-        (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
-        model.set(attributes);
-        if (cache_model = _this.model_type.cache.get(model.id)) {
-          if (cache_model !== model) {
-            Utils.updateModel(cache_model, model);
-          }
-        } else {
-          _this.model_type.cache.set(model.id, model);
-        }
-        return options.success(json);
-      };
-    })(this)));
-  };
-
-  CacheSync.prototype.update = function(model, options) {
-    return this.wrapped_sync_fn('update', model, bbCallback((function(_this) {
-      return function(err, json) {
-        var cache_model;
-        if (err) {
-          return options.error(err);
-        }
-        if (cache_model = _this.model_type.cache.get(model.id)) {
-          if (cache_model !== model) {
-            Utils.updateModel(cache_model, model);
-          }
-        } else {
-          _this.model_type.cache.set(model.id, model);
-        }
-        return options.success(json);
-      };
-    })(this)));
-  };
-
-  CacheSync.prototype["delete"] = function(model, options) {
-    this.model_type.cache.destroy(model.id);
-    return this.wrapped_sync_fn('delete', model, bbCallback((function(_this) {
-      return function(err, json) {
-        if (err) {
-          return options.error(err);
-        }
-        return options.success(json);
-      };
-    })(this)));
-  };
-
-  CacheSync.prototype.resetSchema = function(options, callback) {
-    return this.model_type.cache.reset((function(_this) {
-      return function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return _this.wrapped_sync_fn('resetSchema', options, callback);
-      };
-    })(this));
-  };
-
-  CacheSync.prototype.cursor = function(query) {
-    if (query == null) {
-      query = {};
-    }
-    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
-  };
-
-  CacheSync.prototype.destroy = function(query, callback) {
-    return this.model_type.each(_.extend({
-      $each: {
-        limit: DESTROY_BATCH_LIMIT,
-        threads: DESTROY_THREADS
-      }
-    }, query), ((function(_this) {
-      return function(model, callback) {
-        return model.destroy(callback);
-      };
-    })(this)), callback);
-  };
-
-  CacheSync.prototype.connect = function(url) {
-    this.model_type.cache.reset();
-    return this.wrapped_sync_fn('connect');
-  };
-
-  return CacheSync;
-
-})();
-
-module.exports = function(model_type, wrapped_sync_fn) {
-  var sync, sync_fn;
-  sync = new CacheSync(model_type, wrapped_sync_fn);
-  model_type.prototype.sync = sync_fn = function(method, model, options) {
-    if (options == null) {
-      options = {};
-    }
-    sync.initialize();
-    if (method === 'createSync') {
-      return wrapped_sync_fn.apply(null, arguments);
-    }
-    if (method === 'sync') {
-      return sync;
-    }
-    if (sync[method]) {
-      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-    }
-    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
-  };
-  return sync_fn;
-};
 
 });
 require.register('memory/cursor', function(exports, require, module) {
@@ -7757,4 +7757,4 @@ return Object.prototype.toString.call(o);
     this['BackboneORM'] = require('index');
   }
 
-}).call(this);
+}).call(this, typeof require !== "undefined" ? require : undefined);

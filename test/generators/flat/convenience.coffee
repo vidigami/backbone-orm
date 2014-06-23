@@ -2,11 +2,11 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../../../lib/queue'
+Queue = require('../../../backbone-orm').Queue
 moment = require 'moment'
 
-ModelCache = require('../../../lib/cache/singletons').ModelCache
-QueryCache = require('../../../lib/cache/singletons').QueryCache
+ModelCache = require('../../../backbone-orm').CacheSingletons.ModelCache
+QueryCache = require('../../../backbone-orm').CacheSingletons.QueryCache
 Fabricator = require '../../fabricator'
 
 module.exports = (options, callback) ->

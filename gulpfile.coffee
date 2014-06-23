@@ -22,13 +22,6 @@ HEADER = """
 """
 
 gulp.task 'build', ->
-  gulp.src('src/**/*.coffee').pipe(coffee({bare: true, header: false}).on('error', gutil.log))
-    .pipe(gulp.dest('lib/'))
-
-gulp.task 'watch', ['build'], ->
-  gulp.watch './src/**/*.coffee', -> gulp.run 'build'
-
-gulp.task 'build_client', ->
   gulp.src(['src/**/*.coffee', '!src/node/*.coffee', 'client/node-dependencies/**/*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
     .pipe(compile({coffee: {bare: true, header: false}}))
@@ -36,14 +29,17 @@ gulp.task 'build_client', ->
     .pipe(header(HEADER, {pkg: require('./package.json')}))
     .pipe(gulp.dest('./'))
 
-gulp.task 'minify_client', ['build_client'], ->
+gulp.task 'watch', ['build'], ->
+  gulp.watch './src/**/*.coffee', -> gulp.run 'build'
+
+gulp.task 'minify', ['build'], ->
   gulp.src('backbone-orm.js')
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
     .pipe(header(HEADER, {pkg: require('./package.json')}))
     .pipe(gulp.dest('./'))
 
-gulp.task 'zip', ['minify_client'], ->
+gulp.task 'zip', ['minify'], ->
   gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))

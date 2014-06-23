@@ -1,6 +1,6 @@
 assert = require 'assert'
 
-DatabaseURL = require '../../lib/database_url'
+DatabaseURL = require('../../backbone-orm').DatabaseURL
 _ = require 'underscore'
 
 module.exports = (options, callback) ->

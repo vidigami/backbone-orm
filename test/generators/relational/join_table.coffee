@@ -2,9 +2,9 @@ util = require 'util'
 assert = require 'assert'
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../../../lib/queue'
+Queue = require('../../../backbone-orm').Queue
 
-ModelCache = require('../../../lib/cache/singletons').ModelCache
+ModelCache = require('../../../backbone-orm').CacheSingletons.ModelCache
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

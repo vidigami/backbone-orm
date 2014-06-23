@@ -7,14 +7,13 @@
 ###
 
 # ensure the client symbols are resolved
-if window? and require.shim
-  require.shim([
-    {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
-    {symbol: 'Backbone', path: 'backbone'}
-    {symbol: 'moment', path: 'moment'}
-    # {symbol: 'inflection', path: 'inflection'} # burned in
-    {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
-  ])
+require.shim([
+  {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
+  {symbol: 'Backbone', path: 'backbone'}
+  {symbol: 'moment', path: 'moment'}
+  # {symbol: 'inflection', path: 'inflection'} # burned in
+  {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
+]) if require.shim
 
 module.exports =
   sync: require './memory/sync'
