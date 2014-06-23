@@ -1,7 +1,8 @@
 assert = require 'assert'
-
-Queue = require('../../backbone-orm').Queue
 _ = require 'underscore'
+
+try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')
+Queue = BackboneORM.Queue
 
 module.exports = (options, callback) ->
 

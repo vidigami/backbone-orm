@@ -1,4 +1,5 @@
-Queue = require('../../backbone-orm').Queue
+try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')
+Queue = BackboneORM.Queue
 
 # each model should be fabricated with 'id', 'name', 'created_at', 'updated_at'
 # beforeEach should return the models_json for the current run

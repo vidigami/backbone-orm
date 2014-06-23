@@ -1,5 +1,6 @@
 _ = require 'underscore'
-Queue = require('../backbone-orm').Queue
+try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../backbone-orm')
+Queue = BackboneORM.Queue
 
 option_sets = require('./option_sets')
 # option_sets = option_sets.slice(0, 1)

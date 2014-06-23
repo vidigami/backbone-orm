@@ -1,7 +1,8 @@
 assert = require 'assert'
-
-DatabaseURL = require('../../backbone-orm').DatabaseURL
 _ = require 'underscore'
+
+try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')
+DatabaseURL = BackboneORM.DatabaseURL
 
 module.exports = (options, callback) ->
 
