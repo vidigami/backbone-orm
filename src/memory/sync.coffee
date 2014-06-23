@@ -16,7 +16,6 @@ Utils = require '../utils'
 JSONUtils = require '../json_utils'
 
 ModelCache = require('../cache/singletons').ModelCache
-QueryCache = require('../cache/singletons').QueryCache
 
 DESTROY_BATCH_LIMIT = 1000
 
@@ -54,51 +53,40 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
-    QueryCache.reset @model_type, (err) =>
-      return options.error?(err) if err
-      (attributes = {})[@model_type::idAttribute] = Utils.guid()
-      model.set(attributes)
-      model_json = @store[model.id] = model.toJSON()
-      options.success(JSONUtils.deepClone(model_json))
+    (attributes = {})[@model_type::idAttribute] = Utils.guid()
+    model.set(attributes)
+    model_json = @store[model.id] = model.toJSON()
+    options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   update: (model, options) ->
-    QueryCache.reset @model_type, (err) =>
-      return options.error?(err) if err
-      @store[model.id] = model_json = model.toJSON()
-      options.success(JSONUtils.deepClone(model_json))
+    @store[model.id] = model_json = model.toJSON()
+    options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   delete: (model, options) ->
-    QueryCache.reset @model_type, (err) =>
-      return options.error?(err) if err
-      return options.error(new Error('Model not found')) unless @store[model.id]
-      delete @store[model.id]
-      options.success()
+    return options.error(new Error('Model not found')) unless @store[model.id]
+    delete @store[model.id]
+    options.success()
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
 
   # @nodoc
-  resetSchema: (options, callback) ->
-    QueryCache.reset @model_type, (err) =>
-      return callback(err) if err
-      @destroy({}, callback)
+  resetSchema: (options, callback) -> @destroy({}, callback)
 
   # @nodoc
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
 
   # @nodoc
   destroy: (query, callback) ->
-    QueryCache.reset @model_type, (err) =>
-      return callback(err) if err
-      @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
-        ((model_json, callback) =>
-          Utils.patchRemoveByJSON @model_type, model_json, (err) =>
-            delete @store[model_json[@model_type::idAttribute]] unless err
-            callback(err)
-        ), callback
+    @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
+      ((model_json, callback) =>
+        Utils.patchRemoveByJSON @model_type, model_json, (err) =>
+          delete @store[model_json[@model_type::idAttribute]] unless err
+          callback(err)
+      ), callback
 
 module.exports = (type) ->
   if Utils.isCollection(new type()) # collection

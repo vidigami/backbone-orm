@@ -159,12 +159,10 @@ require.register('cursor', function(exports, require, module) {
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
-var CURSOR_KEYS, Cursor, QueryCache, Utils, _,
+var CURSOR_KEYS, Cursor, Utils, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 _ = require('underscore');
-
-QueryCache = require('./cache/singletons').QueryCache;
 
 Utils = require('./utils');
 
@@ -360,35 +358,10 @@ module.exports = Cursor = (function() {
   };
 
   Cursor.prototype.toJSON = function(callback) {
-    var parsed_query;
+    var model_types, parsed_query;
     parsed_query = _.extend({}, _.pick(this._cursor, CURSOR_KEYS), this._find);
-    return QueryCache.get(this.model_type, parsed_query, (function(_this) {
-      return function(err, cached_result) {
-        var model_types;
-        if (err) {
-          return callback(err);
-        }
-        if (!_.isUndefined(cached_result)) {
-          return callback(null, cached_result);
-        }
-        model_types = _this.relatedModelTypesInQuery();
-        return _this.queryToJSON(function(err, json) {
-          if (err) {
-            return callback(err);
-          }
-          if (!_.isNull(json)) {
-            return QueryCache.set(_this.model_type, parsed_query, model_types, json, function(err) {
-              if (err) {
-                console.log("Error setting query cache: " + err);
-              }
-              return callback(null, json);
-            });
-          } else {
-            return callback(null, json);
-          }
-        });
-      };
-    })(this));
+    model_types = this.relatedModelTypesInQuery();
+    return this.queryToJSON(callback);
   };
 
   Cursor.prototype.queryToJSON = function(callback) {
@@ -2226,284 +2199,6 @@ module.exports = ModelCache = (function() {
 })();
 
 });
-require.register('cache/query_cache', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var CLONE_DEPTH, JSONUtils, MemoryStore, QueryCache, Queue, inflection, _,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-_ = require('underscore');
-
-inflection = require('inflection');
-
-Queue = require('../queue');
-
-JSONUtils = require('../json_utils');
-
-MemoryStore = require('./memory_store');
-
-CLONE_DEPTH = 2;
-
-module.exports = QueryCache = (function() {
-  function QueryCache() {
-    this.storeKeyForModelTypes = __bind(this.storeKeyForModelTypes, this);
-    this.getKeysForModelTypes = __bind(this.getKeysForModelTypes, this);
-    this.clearMetaForModelTypes = __bind(this.clearMetaForModelTypes, this);
-    this.clearModelTypes = __bind(this.clearModelTypes, this);
-    this.reset = __bind(this.reset, this);
-    this.hardReset = __bind(this.hardReset, this);
-    this.getMeta = __bind(this.getMeta, this);
-    this.getKey = __bind(this.getKey, this);
-    this.get = __bind(this.get, this);
-    this.set = __bind(this.set, this);
-    this.configure = __bind(this.configure, this);
-    this.enabled = false;
-  }
-
-  QueryCache.prototype.configure = function(options) {
-    var CacheSingletons, _ref;
-    if (options == null) {
-      options = {};
-    }
-    this.enabled = !!options.enabled;
-    this.verbose = !!options.verbose;
-    this.hits = this.misses = this.clears = 0;
-    this.store = options.store || new MemoryStore();
-    CacheSingletons = require('../index').CacheSingletons;
-    if ((_ref = CacheSingletons.ModelTypeID) != null) {
-      _ref.configure({
-        enabled: this.enabled,
-        verbose: this.verbose
-      });
-    }
-    return this;
-  };
-
-  QueryCache.prototype.cacheKey = function(model_type, query) {
-    return "" + model_type.model_id + "_" + (JSON.stringify(query));
-  };
-
-  QueryCache.prototype.cacheKeyMeta = function(model_type) {
-    return "meta_" + model_type.model_id;
-  };
-
-  QueryCache.prototype.set = function(model_type, query, related_model_types, value, callback) {
-    var cache_key, m, model_types;
-    if (!this.enabled) {
-      return callback();
-    }
-    if (this.verbose) {
-      console.log('QueryCache:set', model_type.model_name, (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = related_model_types.length; _i < _len; _i++) {
-          m = related_model_types[_i];
-          _results.push(m.model_name);
-        }
-        return _results;
-      })(), this.cacheKey(model_type, query), JSON.stringify(value), '\n-----------');
-    }
-    model_types = [model_type].concat(related_model_types || []);
-    cache_key = this.cacheKey(model_type, query);
-    return this.store.set(cache_key, JSONUtils.deepClone(value, CLONE_DEPTH), (function(_this) {
-      return function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return _this.storeKeyForModelTypes(model_types, cache_key, callback);
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.get = function(model_type, query, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.getKey(this.cacheKey(model_type, query), callback);
-  };
-
-  QueryCache.prototype.getKey = function(key, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.store.get(key, (function(_this) {
-      return function(err, value) {
-        if (err) {
-          return callback(err);
-        }
-        if (_.isUndefined(value) || _.isNull(value)) {
-          _this.misses++;
-          if (_this.verbose) {
-            console.log('QueryCache:miss', key, value, '\n-----------');
-          }
-          return callback();
-        } else {
-          _this.hits++;
-          if (_this.verbose) {
-            console.log('QueryCache:hit', key, value, '\n-----------');
-          }
-          return callback(null, JSONUtils.deepClone(value, CLONE_DEPTH));
-        }
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.getMeta = function(model_type, callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    return this.store.get(this.cacheKeyMeta(model_type), callback);
-  };
-
-  QueryCache.prototype.hardReset = function(callback) {
-    if (!this.enabled) {
-      return callback();
-    }
-    if (this.verbose) {
-      console.log('QueryCache:hardReset');
-    }
-    this.hits = this.misses = this.clears = 0;
-    if (this.store) {
-      return this.store.reset(callback);
-    }
-    return callback();
-  };
-
-  QueryCache.prototype.reset = function(model_types, callback) {
-    var model_type, related_model_types, _i, _len;
-    if (arguments.length === 1) {
-      return this.hardReset(model_types);
-    }
-    if (!this.enabled) {
-      return callback();
-    }
-    if (!_.isArray(model_types)) {
-      model_types = [model_types];
-    }
-    related_model_types = [];
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      related_model_types = related_model_types.concat(model_type.schema().allRelations());
-    }
-    model_types = model_types.concat(related_model_types);
-    return this.clearModelTypes(model_types, callback);
-  };
-
-  QueryCache.prototype.clearModelTypes = function(model_types, callback) {
-    if (!model_types.length) {
-      return callback();
-    }
-    return this.getKeysForModelTypes(model_types, (function(_this) {
-      return function(err, to_clear) {
-        var key, queue, _fn, _i, _len, _ref;
-        if (err) {
-          return callback(err);
-        }
-        queue = new Queue();
-        queue.defer(function(callback) {
-          return _this.clearMetaForModelTypes(model_types, callback);
-        });
-        _ref = _.uniq(to_clear);
-        _fn = function(key) {
-          return queue.defer(function(callback) {
-            if (_this.verbose) {
-              console.log('QueryCache:cleared', key, '\n-----------');
-            }
-            _this.clears++;
-            return _this.store.destroy(key, callback);
-          });
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          key = _ref[_i];
-          _fn(key);
-        }
-        return queue.await(callback);
-      };
-    })(this));
-  };
-
-  QueryCache.prototype.clearMetaForModelTypes = function(model_types, callback) {
-    var model_type, queue, _fn, _i, _len;
-    queue = new Queue();
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          if (_this.verbose) {
-            console.log('QueryCache:meta cleared', model_type.model_name, '\n-----------');
-          }
-          return _this.store.destroy(_this.cacheKeyMeta(model_type), callback);
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(callback);
-  };
-
-  QueryCache.prototype.getKeysForModelTypes = function(model_types, callback) {
-    var all_keys, model_type, queue, _fn, _i, _len;
-    all_keys = [];
-    queue = new Queue(1);
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          return _this.getMeta(model_type, function(err, keys) {
-            if (err || !keys) {
-              return callback(err);
-            }
-            all_keys = all_keys.concat(keys);
-            return callback();
-          });
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(function(err) {
-      return callback(err, all_keys);
-    });
-  };
-
-  QueryCache.prototype.storeKeyForModelTypes = function(model_types, cache_key, callback) {
-    var model_type, queue, _fn, _i, _len;
-    queue = new Queue(1);
-    _fn = (function(_this) {
-      return function(model_type) {
-        return queue.defer(function(callback) {
-          var model_type_key;
-          model_type_key = _this.cacheKeyMeta(model_type);
-          return _this.store.get(model_type_key, function(err, keys) {
-            if (err) {
-              return callback(err);
-            }
-            (keys || (keys = [])).push(cache_key);
-            return _this.store.set(model_type_key, _.uniq(keys), callback);
-          });
-        });
-      };
-    })(this);
-    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-      model_type = model_types[_i];
-      _fn(model_type);
-    }
-    return queue.await(callback);
-  };
-
-  return QueryCache;
-
-})();
-
-});
 require.register('cache/singletons', function(exports, require, module) {
 
 /*
@@ -2513,18 +2208,9 @@ require.register('cache/singletons', function(exports, require, module) {
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
-var e;
-
 module.exports = {
-  ModelCache: new (require('./model_cache'))(),
-  QueryCache: new (require('./query_cache'))()
+  ModelCache: new (require('./model_cache'))()
 };
-
-try {
-  module.exports.ModelTypeID = new (require('../node/model_type_id'))();
-} catch (_error) {
-  e = _error;
-}
 
 });
 require.register('cache/sync', function(exports, require, module) {
@@ -4269,7 +3955,7 @@ require.register('memory/sync', function(exports, require, module) {
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
  */
-var Backbone, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, ModelCache, QueryCache, Queue, Schema, Utils, _;
+var Backbone, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, ModelCache, Queue, Schema, Utils, _;
 
 _ = require('underscore');
 
@@ -4286,8 +3972,6 @@ Utils = require('../utils');
 JSONUtils = require('../json_utils');
 
 ModelCache = require('../cache/singletons').ModelCache;
-
-QueryCache = require('../cache/singletons').QueryCache;
 
 DESTROY_BATCH_LIMIT = 1000;
 
@@ -4330,57 +4014,29 @@ MemorySync = (function() {
   };
 
   MemorySync.prototype.create = function(model, options) {
-    return QueryCache.reset(this.model_type, (function(_this) {
-      return function(err) {
-        var attributes, model_json;
-        if (err) {
-          return typeof options.error === "function" ? options.error(err) : void 0;
-        }
-        (attributes = {})[_this.model_type.prototype.idAttribute] = Utils.guid();
-        model.set(attributes);
-        model_json = _this.store[model.id] = model.toJSON();
-        return options.success(JSONUtils.deepClone(model_json));
-      };
-    })(this));
+    var attributes, model_json;
+    (attributes = {})[this.model_type.prototype.idAttribute] = Utils.guid();
+    model.set(attributes);
+    model_json = this.store[model.id] = model.toJSON();
+    return options.success(JSONUtils.deepClone(model_json));
   };
 
   MemorySync.prototype.update = function(model, options) {
-    return QueryCache.reset(this.model_type, (function(_this) {
-      return function(err) {
-        var model_json;
-        if (err) {
-          return typeof options.error === "function" ? options.error(err) : void 0;
-        }
-        _this.store[model.id] = model_json = model.toJSON();
-        return options.success(JSONUtils.deepClone(model_json));
-      };
-    })(this));
+    var model_json;
+    this.store[model.id] = model_json = model.toJSON();
+    return options.success(JSONUtils.deepClone(model_json));
   };
 
   MemorySync.prototype["delete"] = function(model, options) {
-    return QueryCache.reset(this.model_type, (function(_this) {
-      return function(err) {
-        if (err) {
-          return typeof options.error === "function" ? options.error(err) : void 0;
-        }
-        if (!_this.store[model.id]) {
-          return options.error(new Error('Model not found'));
-        }
-        delete _this.store[model.id];
-        return options.success();
-      };
-    })(this));
+    if (!this.store[model.id]) {
+      return options.error(new Error('Model not found'));
+    }
+    delete this.store[model.id];
+    return options.success();
   };
 
   MemorySync.prototype.resetSchema = function(options, callback) {
-    return QueryCache.reset(this.model_type, (function(_this) {
-      return function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return _this.destroy({}, callback);
-      };
-    })(this));
+    return this.destroy({}, callback);
   };
 
   MemorySync.prototype.cursor = function(query) {
@@ -4391,26 +4047,21 @@ MemorySync = (function() {
   };
 
   MemorySync.prototype.destroy = function(query, callback) {
-    return QueryCache.reset(this.model_type, (function(_this) {
-      return function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return _this.model_type.each(_.extend({
-          $each: {
-            limit: DESTROY_BATCH_LIMIT,
-            json: true
+    return this.model_type.each(_.extend({
+      $each: {
+        limit: DESTROY_BATCH_LIMIT,
+        json: true
+      }
+    }, query), ((function(_this) {
+      return function(model_json, callback) {
+        return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
+          if (!err) {
+            delete _this.store[model_json[_this.model_type.prototype.idAttribute]];
           }
-        }, query), (function(model_json, callback) {
-          return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
-            if (!err) {
-              delete _this.store[model_json[_this.model_type.prototype.idAttribute]];
-            }
-            return callback(err);
-          });
-        }), callback);
+          return callback(err);
+        });
       };
-    })(this));
+    })(this)), callback);
   };
 
   return MemorySync;
@@ -4453,77 +4104,6 @@ module.exports = function(type) {
   Utils.configureModelType(type);
   return ModelCache.configureSync(type, sync_fn);
 };
-
-});
-require.register('node/model_type_id', function(exports, require, module) {
-
-/*
-  backbone-orm.js 0.5.16
-  Copyright (c) 2013-2014 Vidigami
-  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
- */
-var ModelTypeID, crypto, _,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-if (typeof window !== "undefined" && window !== null) {
-  return;
-}
-
-_ = require('underscore');
-
-crypto = require('crypto');
-
-module.exports = ModelTypeID = (function() {
-  function ModelTypeID() {
-    this.generate = __bind(this.generate, this);
-    this.modelID = __bind(this.modelID, this);
-    this.reset = __bind(this.reset, this);
-    this.configure = __bind(this.configure, this);
-    this.enabled = false;
-    this.ids = {};
-  }
-
-  ModelTypeID.prototype.configure = function(options) {
-    if (options == null) {
-      options = {};
-    }
-    this.enabled = options.enabled;
-    return this;
-  };
-
-  ModelTypeID.prototype.reset = function() {
-    this.ids = {};
-    return this;
-  };
-
-  ModelTypeID.prototype.modelID = function(model_type) {
-    var e, name_url, url;
-    try {
-      url = _.result(new model_type, 'url');
-    } catch (_error) {
-      e = _error;
-    }
-    name_url = "" + (url || '') + "_" + model_type.model_name;
-    return crypto.createHash('md5').update(name_url).digest('hex');
-  };
-
-  ModelTypeID.prototype.generate = function(model_type) {
-    var id;
-    if (!(id = model_type.model_type_id)) {
-      id = this.modelID(model_type);
-      if (this.enabled && this.ids[id] && this.ids[id] !== model_type) {
-        throw new Error("Duplicate model name / url combination: " + model_type.model_name + ", " + (_.result(new model_type, 'url')) + ". Set a unique model_name property on one of the conflicting models.");
-      }
-    }
-    this.ids[id] = model_type;
-    return id;
-  };
-
-  return ModelTypeID;
-
-})();
 
 });
 require.register('node/utils', function(exports, require, module) {

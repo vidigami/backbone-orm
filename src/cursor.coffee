@@ -8,7 +8,6 @@
 
 _ = require 'underscore'
 
-QueryCache = require('./cache/singletons').QueryCache
 Utils = require './utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or']
@@ -126,20 +125,9 @@ module.exports = class Cursor
 
   toJSON: (callback) ->
     parsed_query = _.extend({}, _.pick(@_cursor, CURSOR_KEYS), @_find)
-    # Check query cache
-    QueryCache.get @model_type, parsed_query, (err, cached_result) =>
-      return callback(err) if err
-      return callback(null, cached_result) unless _.isUndefined(cached_result)
 
-      model_types = @relatedModelTypesInQuery()
-      @queryToJSON (err, json) =>
-        return callback(err) if err
-        unless _.isNull(json)
-          QueryCache.set @model_type, parsed_query, model_types, json, (err) ->
-            console.log "Error setting query cache: #{err}" if err # TODO: Update query cache, ignore errors
-            callback(null, json)
-        else
-          callback(null, json)
+    model_types = @relatedModelTypesInQuery()
+    @queryToJSON callback
 
   # @nodoc
   # Provided by a concrete cursor for a Backbone Sync type

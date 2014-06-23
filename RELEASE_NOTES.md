@@ -1,6 +1,9 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
 ### 0.5.16
+* Removed QueryCache
+
+### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels
 
 ### 0.5.15

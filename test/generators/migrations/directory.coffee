@@ -6,7 +6,6 @@ Backbone = require 'backbone'
 Queue = require('../../../backbone-orm').Queue
 
 ModelCache = require('../../../backbone-orm').CacheSingletons.ModelCache
-QueryCache = require('../../../backbone-orm').CacheSingletons.QueryCache
 Fabricator = require '../../fabricator'
 Utils = require('../../../backbone-orm').Utils
 JSONUtils = require('../../../backbone-orm').JSONUtils
@@ -52,7 +51,6 @@ module.exports = (options, callback) ->
 
       # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-      queue.defer (callback) -> QueryCache.configure({enabled: !!options.query_cache, verbose: false}).reset(callback) # configure query cache
 
       # destroy all - BY DIRECTORY
       queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
