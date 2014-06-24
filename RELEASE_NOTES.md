@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.17
+* Fixed module system problems
+
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels
 

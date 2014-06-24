@@ -1,8 +1,7 @@
 (function() {
-  
-var globals = {requires: []};
-if (window.require) globals.requires.push(window.require);
-if (typeof require !== "undefined" && require !== null) globals.requires.push(require);
+  var globals = {requires: []};
+if (typeof window !== "undefined" && !!window.require) globals.requires.push(window.require);
+if (typeof require !== "undefined" && !!require) globals.requires.push(require);
 
 /* local-only brunch-like require (based on https://github.com/brunch/commonjs-require-definition) */
 (function() {
