@@ -35,6 +35,7 @@ module.exports = class MemoryStore
     @cache.del(key)
     callback?()
     return @
+  del: @::destroy
 
   reset: (callback) =>
     @cache.reset()

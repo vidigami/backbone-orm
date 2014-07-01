@@ -22,6 +22,8 @@ module.exports =
   JSONUtils: require './json_utils'
   Queue: require './queue'
   DatabaseURL: require './database_url'
+  Fabricator: require './fabricator'
+  MemoryStore: require './cache/memory_store'
 
   # re-expose modules
   modules:
