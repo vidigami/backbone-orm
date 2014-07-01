@@ -6,9 +6,9 @@ Backbone = require 'backbone'
 try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
-Fabricator = require '../../fabricator'
 Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
+Fabricator = BackboneORM.Fabricator
 
 module.exports = (options, callback) ->
   DATABASE_URL = options.database_url or ''

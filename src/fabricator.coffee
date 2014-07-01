@@ -1,9 +1,7 @@
 util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
-
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../backbone-orm')
-Queue = BackboneORM.Queue
+Queue = require '../lib/queue'
 
 # Fabricator to generate test data.
 #
