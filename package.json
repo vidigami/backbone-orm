@@ -52,7 +52,6 @@
     "mocha": "*",
     "powerset": "*",
     "queue-async": "*",
-    "store-redis": "0.1.x",
     "webpack": "*",
     "wrench": "*",
     "jquery": "*",
