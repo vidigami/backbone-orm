@@ -80,7 +80,7 @@ module.exports = class MemoryCursor extends Cursor
 
           else
             find_queue = new Queue()
-            # console.log "\nmodel: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)} @store: #{Utils.inspect(@store)}"
+            # console.log "\nmodel: #{@model_type.model_name} find_query: #{Utils.toString(find_query)} @store: #{Utils.toString(@store)}"
 
             for id, model_json of @store
               do (model_json) => find_queue.defer (callback) =>
@@ -164,7 +164,7 @@ module.exports = class MemoryCursor extends Cursor
           if reverse_relation.embed
 
             # TODO: should a cursor be returned instead of a find_query?
-            throw Error "Embedded find is not yet supported. @_find: #{Utils.inspect(@_find)}"
+            throw Error "Embedded find is not yet supported. @_find: #{Utils.toString(@_find)}"
 
             (related_query = {}).id = value
             reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
@@ -218,7 +218,7 @@ module.exports = class MemoryCursor extends Cursor
             callback()
 
     queue.await (err) =>
-      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)} find: #{Utils.inspect(@_find)}"
+      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{Utils.toString(find_query)} find: #{Utils.toString(@_find)}"
       callback(err, find_query)
 
   fetchIncludes: (json, callback) ->
@@ -238,7 +238,7 @@ module.exports = class MemoryCursor extends Cursor
         do (key, model_json) => load_queue.defer (callback) =>
           relation.cursor(model_json, key).toJSON (err, related_json) ->
             return calback(err) if err
-            # console.log "\nkey: #{key}, model_json: #{Utils.inspect(model_json)}\nrelated_json: #{Utils.inspect(related_json)}"
+            # console.log "\nkey: #{key}, model_json: #{Utils.toString(model_json)}\nrelated_json: #{Utils.toString(related_json)}"
             delete model_json[relation.foriegn_key]
             model_json[key] = related_json
             callback()
@@ -263,12 +263,12 @@ module.exports = class MemoryCursor extends Cursor
         models_json = [models_json] unless _.isArray(models_json)
         for model_json in models_json
           model_value = model_json[key]
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{Utils.inspect(find_value)}, model_value: #{Utils.inspect(model_value)}\nmodel_json: #{Utils.inspect(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{Utils.toString(find_value)}, model_value: #{Utils.toString(model_value)}\nmodel_json: #{Utils.toString(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
 
           # an object might specify $lt, $lte, $gt, $gte, $ne
           if _.isObject(find_value)
             for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
-              # console.log "Testing operator: #{operator}, model_value: #{Utils.inspect(model_value)}, test_value: #{Utils.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+              # console.log "Testing operator: #{operator}, model_value: #{Utils.toString(model_value)}, test_value: #{Utils.toString(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
               was_handled = true
               break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
 
@@ -280,7 +280,7 @@ module.exports = class MemoryCursor extends Cursor
         # checked all models and none were a match
         return callback(null, false)
 
-      # console.log "\nNext model (#{key_path}): #{key} model_json: #{Utils.inspect(model_json)}"
+      # console.log "\nNext model (#{key_path}): #{key} model_json: #{Utils.toString(model_json)}"
 
       # fetch relation
       return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed

@@ -50,7 +50,7 @@ module.exports = class Many extends require('./relation')
 
     value = value.models if Utils.isCollection(value)
     value = [] if _.isUndefined(value) # Backbone clear or reset
-    throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{Utils.inspect(value)}" unless _.isArray(value)
+    throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{Utils.toString(value)}" unless _.isArray(value)
 
     Utils.orSet(model, 'rel_dirty', {})[@key] = true
     model.setLoaded(@key, _.all(value, (item) -> Utils.dataId(item) isnt item))
@@ -117,7 +117,7 @@ module.exports = class Many extends require('./relation')
     return if current_related_model is related_model
 
     # TODO: this is needed for model lifecycle - not knowing when a model is actually disposed and not wanting to remove a model from a relationship
-    # throw new Error "\nModel added twice: #{Utils.inspect(current_related_model)}\nand\n#{Utils.inspect(related_model)}" if current_related_model
+    # throw new Error "\nModel added twice: #{Utils.toString(current_related_model)}\nand\n#{Utils.toString(related_model)}" if current_related_model
     collection.remove(current_related_model) if current_related_model
     @reverse_model_type.cache.set(related_model.id, related_model) if @reverse_model_type.cache and related_model.id # make sure the latest model is in the cache
     collection.add(related_model)
@@ -151,7 +151,7 @@ module.exports = class Many extends require('./relation')
             attributes = {}
             attributes[@foreign_key] = model.id
             attributes[@reverse_relation.foreign_key] = related_id
-            # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.inspect(attributes)}"
+            # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.toString(attributes)}"
             join = new @join_table(attributes)
             join.save callback
 

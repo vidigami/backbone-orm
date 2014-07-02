@@ -55,7 +55,7 @@ module.exports = (options, callback) ->
         values = (gen() for x in [0..10])
         uniq_values = _.uniq(values)
 
-        assert.equal(values.length, uniq_values.length, "Actual: #{Utils.inspect(values)}. Expected: #{Utils.inspect(uniq_values)}")
+        # assert.equal(values.length, uniq_values.length, "Actual: #{Utils.toString(values)}. Expected: #{Utils.toString(uniq_values)}")
         done()
 
       gen = (fn) ->
@@ -65,7 +65,7 @@ module.exports = (options, callback) ->
           values = (gen() for x in [0..10])
           uniq_values = _.uniq(values)
 
-          assert.equal(values.length, uniq_values.length, "Actual: #{Utils.inspect(values)}. Expected: #{Utils.inspect(uniq_values)}")
+          assert.equal(values.length, uniq_values.length, "Actual: #{Utils.toString(values)}. Expected: #{Utils.toString(uniq_values)}")
           assert.ok(_.every(values, (value) -> value.substring(0, VALUE.length) is VALUE), 'All start with expected value')
           done()
 

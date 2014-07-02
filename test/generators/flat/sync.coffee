@@ -63,7 +63,7 @@ module.exports = (options, callback) ->
         new_model = new Flat({id: model.id})
         new_model.fetch (err) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{Utils.inspect(model.toJSON())}\nActual: #{Utils.inspect(new_model.toJSON())}")
+          assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{Utils.toString(model.toJSON())}\nActual: #{Utils.toString(new_model.toJSON())}")
           done()
 
 #    it 'destroys a model', (done) ->

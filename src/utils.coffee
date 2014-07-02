@@ -252,4 +252,4 @@ module.exports = class Utils
     else
       return if Utils.inspect(model[field]) > Utils.inspect(other_model[field]) then 1 else -1
 
-  inspect: (json) -> try return JSON.stringify(json) catch err then return 'Failed to inspect'
+  @toString: (json) -> try return JSON.stringify(json) catch err then return 'Failed to inspect'

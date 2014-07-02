@@ -62,10 +62,10 @@ module.exports = class JSONUtils
   #
   @toQuery: (values, depth=0) ->
     return 'null' if _.isNull(values)
-    return Utils.inspect(values) if _.isArray(values)
+    return Utils.toString(values) if _.isArray(values)
     return values.toJSON() if _.isDate(values) or values.toJSON
     if _.isObject(values)
-      return Utils.inspect(values) if depth > 0
+      return Utils.toString(values) if depth > 0
       result = {}
       result[key] = JSONUtils.toQuery(value, 1) for key, value of values
       return result

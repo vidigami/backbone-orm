@@ -75,7 +75,7 @@ module.exports = (model_type, query, iterator, callback) ->
     # interval length
     start_ms = range.start.getTime()
     length_ms = moment.duration((if _.isUndefined(options.length) then 1 else options.length), options.type).asMilliseconds()
-    throw Error("length_ms is invalid: #{length_ms} for range: #{Utils.inspect(range)}") unless length_ms
+    throw Error("length_ms is invalid: #{length_ms} for range: #{Utils.toString(range)}") unless length_ms
 
     query = _.omit(query, '$interval')
     query.$sort = [key]

@@ -97,7 +97,7 @@ module.exports = (options, callback) ->
             assert.ok(!!owner, 'found owner')
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.inspect(test_model.toJSON())}\nActual: #{Utils.inspect(test_model.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.toString(test_model.toJSON())}\nActual: #{Utils.toString(test_model.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
