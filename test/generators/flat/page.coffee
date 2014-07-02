@@ -1,11 +1,10 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-Backbone = require 'backbone'
+assert = assert or require?('chai').assert
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
+Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
 module.exports = (options, callback) ->
@@ -104,7 +103,7 @@ module.exports = (options, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.equal(data.total_rows, 1, 'has the correct total_rows')
           assert.equal(data.rows.length, 1, 'has the correct row.length')
-          assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{util.inspect(expected)}\nActual: #{util.inspect(actual)}")
+          assert.deepEqual(expected = model.toJSON().id, actual = data.rows[0].id, "\nExpected: #{Utils.inspect(expected)}\nActual: #{Utils.inspect(actual)}")
           done()
 
     it 'Ensure paging of one always returns an array of one', (done) ->

@@ -1,4 +1,4 @@
-assert = require 'assert'
+assert = assert or require?('chai').assert
 _ = require 'underscore'
 
 try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')

@@ -3,13 +3,12 @@ es = require 'event-stream'
 
 gulp = require 'gulp'
 gutil = require 'gulp-util'
-coffee = require 'gulp-coffee'
-compile = require 'gulp-compile-js'
-modules = require 'gulp-module-system'
+webpack = require 'gulp-webpack-config'
 rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
 header = require 'gulp-header'
 zip = require 'gulp-zip'
+runTests = require './config/run_tests'
 
 HEADER = """
 /*
@@ -21,28 +20,36 @@ HEADER = """
 */\n
 """
 
-gulp.task 'build', ->
-  gulp.src(['src/**/*.coffee', 'client/node-dependencies/**/*.js'])
-    .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
-    .pipe(compile({coffee: {bare: true, header: false}}))
-    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment']}}))
+gulp.task 'build', buildLibraries = (callback) ->
+  gulp.src('config/builds/library/**/*.webpack.config.coffee', {read: false, buffer: false})
+    .pipe(webpack())
     .pipe(header(HEADER, {pkg: require('./package.json')}))
-    .pipe(gulp.dest('./'))
+    .pipe(gulp.dest((file) -> file.base))
+    .on('end', callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'watch', ['build'], ->
-  gulp.watch './src/**/*.coffee', -> gulp.run 'build'
+gulp.task 'watch', ['build'], (callback) ->
+  gulp.watch './src/**/*.coffee', (callback) -> buildLibraries(callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'minify', ['build'], ->
-  gulp.src('backbone-orm.js')
+gulp.task 'minify', ['build'], (callback) ->
+  gulp.src(['*.js', '!*.min.js', '!_temp/**/*.js', '!node_modules/'])
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
     .pipe(header(HEADER, {pkg: require('./package.json')}))
-    .pipe(gulp.dest('./'))
+    .pipe(gulp.dest((file) -> file.base))
+    .on('end', callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'zip', ['minify'], ->
+gulp.task 'test', ['minify'], (callback) ->
+  runTests (err) -> process.exit(if err then 1 else 0)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
+gulp.task 'zip', ['minify'], (callback) ->
   gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))
     .pipe(gulp.dest('client/'))
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'release', ['build', 'zip'], ->

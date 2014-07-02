@@ -1,10 +1,8 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-Backbone = require 'backbone'
-moment = require 'moment'
+assert = assert or require?('chai').assert
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
+moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator

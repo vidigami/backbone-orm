@@ -1,9 +1,7 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-Backbone = require 'backbone'
+assert = assert or require?('chai').assert
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
@@ -99,7 +97,7 @@ module.exports = (options, callback) ->
             assert.ok(!!owner, 'found owner')
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(test_model.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.inspect(test_model.toJSON())}\nActual: #{Utils.inspect(test_model.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()

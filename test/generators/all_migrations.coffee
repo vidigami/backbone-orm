@@ -5,5 +5,5 @@ Queue = BackboneORM.Queue
 # beforeEach should return the models_json for the current run
 module.exports = (options, callback) ->
   queue = new Queue(1)
-  queue.defer (callback) -> require('./migrations/directory')(options, callback)
+  queue.defer (callback) -> require('./migrations/directory.node')(options, callback)
   queue.await callback

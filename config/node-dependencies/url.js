@@ -20,8 +20,8 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var punycode = { encode : function (s) { return s } };
-var util = require('util');
-var shims = require('_shims');
+var util = require('./util');
+var shims = require('./_shims');
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;

@@ -11,7 +11,7 @@ path = require 'path'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
 Queue = BackboneORM.Queue
 Utils = BackboneORM.Utils
 

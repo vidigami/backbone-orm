@@ -1,11 +1,10 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-Backbone = require 'backbone'
+assert = assert or require?('chai').assert
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
+Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
 module.exports = (options, callback) ->
@@ -64,7 +63,7 @@ module.exports = (options, callback) ->
         new_model = new Flat({id: model.id})
         new_model.fetch (err) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{util.inspect(model.toJSON())}\nActual: #{util.inspect(new_model.toJSON())}")
+          assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{Utils.inspect(model.toJSON())}\nActual: #{Utils.inspect(new_model.toJSON())}")
           done()
 
 #    it 'destroys a model', (done) ->

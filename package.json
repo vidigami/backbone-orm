@@ -5,35 +5,49 @@
   "main": "backbone-orm.js",
   "license": "MIT",
   "author": "Kevin Malakoff (https://github.com/kmalakoff)",
-  "contributors": ["Gwilym Humphreys (https://github.com/gwilymhumphreys)"],
-  "repository": {"type": "git", "url": "https://github.com/vidigami/backbone-orm.git"},
-  "keywords": ["backbone", "orm", "backbone-orm"],
-  "engines": {"node": "*"},
+  "contributors": [
+    "Gwilym Humphreys (https://github.com/gwilymhumphreys)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vidigami/backbone-orm.git"
+  },
+  "keywords": [
+    "backbone",
+    "orm",
+    "backbone-orm"
+  ],
+  "engines": {
+    "node": "*"
+  },
   "scripts": {
-    "test": "gulp build --require coffee-script/register; NODE_ENV=test mocha test/suite.coffee --compilers coffee:coffee-script/register --reporter spec --timeout 10000",
+    "test": "gulp test --require coffee-script/register",
     "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "gulp build --require coffee-script/register",
     "watch": "gulp watch --require coffee-script/register",
     "release": "gulp release --require coffee-script/register",
-    "clean": "rm -rf lib/*",
-    "prepublish": "gulp release --require coffee-script/register"
+    "clean": "rm -rf lib/*"
   },
   "devDependencies": {
-    "coffee-script": "*",
+    "chai": "^1.9.1",
     "codo": "2.x",
+    "coffee-loader": "^0.7.2",
+    "coffee-script": "*",
+    "event-stream": "*",
+    "gulp": "*",
+    "gulp-header": "*",
+    "gulp-mocha": "*",
+    "gulp-rename": "*",
+    "gulp-uglify": "*",
+    "gulp-util": "*",
+    "gulp-webpack-config": "*",
+    "gulp-zip": "*",
     "mocha": "*",
     "powerset": "*",
+    "queue-async": "*",
     "store-redis": "0.1.x",
-    "gulp": "*",
-    "gulp-util": "*",
-    "gulp-uglify": "*",
-    "gulp-rename": "*",
-    "gulp-zip": "*",
-    "gulp-coffee": "*",
-    "gulp-compile-js": "*",
-    "gulp-module-system": "*",
-    "gulp-header": "*",
-    "event-stream": "*"
+    "webpack": "*",
+    "wrench": "*"
   },
   "dependencies": {
     "underscore": ">=1.2.0",

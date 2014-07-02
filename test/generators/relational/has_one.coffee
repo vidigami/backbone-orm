@@ -1,9 +1,7 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-Backbone = require 'backbone'
+assert = assert or require?('chai').assert
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
@@ -171,7 +169,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -204,7 +202,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -237,7 +235,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -270,7 +268,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -303,7 +301,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -336,7 +334,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{util.inspect(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{util.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{Utils.inspect(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{Utils.inspect(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
     patchAddTests(false)
@@ -754,7 +752,7 @@ module.exports = (options, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
           if test_model.relationIsEmbedded('flat')
-            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().flat)}. Actual: #{util.inspect(flat.toJSON())}")
+            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{Utils.inspect(test_model.toJSON().flat)}. Actual: #{Utils.inspect(flat.toJSON())}")
           else
             assert.deepEqual(test_model.toJSON().flat_id, flat.id, "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.id}")
           assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
@@ -771,7 +769,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.inspect(test_model.toJSON().reverse)}. Actual: #{Utils.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
           done()
 
@@ -806,7 +804,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.inspect(test_model.toJSON().reverse)}. Actual: #{Utils.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverse_id in owner json')
 
           reverse.get 'owner', (err, owner) ->
@@ -815,7 +813,7 @@ module.exports = (options, callback) ->
             assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.inspect(test_model.toJSON())}\nActual: #{Utils.inspect(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
@@ -880,7 +878,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
           if test_model.relationIsEmbedded('reverse_as')
-            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{util.inspect(test_model.toJSON().reverse)}. Actual: #{util.inspect(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{Utils.inspect(test_model.toJSON().reverse)}. Actual: #{Utils.inspect(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
 
           reverse.get 'owner_as', (err, owner) ->
@@ -889,7 +887,7 @@ module.exports = (options, callback) ->
             assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{util.inspect(test_model.toJSON())}\nActual: #{util.inspect(owner.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.inspect(test_model.toJSON())}\nActual: #{Utils.inspect(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
@@ -1044,7 +1042,7 @@ module.exports = (options, callback) ->
 
             queue.defer checkReverseFn(reverse1, owner0) # confirm it also is related
             queue.defer checkReverseFn(reverse0, owner0) # confirm it stayed
-            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
+            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{Utils.inspect(owner1.get('reverse'))}")
             callback()
 
           # save and recheck
@@ -1078,10 +1076,10 @@ module.exports = (options, callback) ->
                 queue.defer checkReverseFn(reverse0b, owner0) # confirm it moved
 
                 # TODO: determine reason on SQL for updated_at missing
-                # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{util.inspect(reverse1.toJSON())}.\nActual: #{util.inspect(reverse0b.toJSON())}")
-                assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{util.inspect(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{util.inspect(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
+                # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{Utils.inspect(reverse1.toJSON())}.\nActual: #{Utils.inspect(reverse0b.toJSON())}")
+                assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{Utils.inspect(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{Utils.inspect(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
 
-                assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{util.inspect(owner1.get('reverse'))}")
+                assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{Utils.inspect(owner1.get('reverse'))}")
               callback()
 
           queue.await (err) ->

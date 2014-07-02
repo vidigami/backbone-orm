@@ -1,7 +1,6 @@
-util = require 'util'
 _ = require 'underscore'
 moment = require 'moment'
-Queue = require '../lib/queue'
+Queue = require './queue'
 
 # Fabricator to generate test data.
 #

@@ -1,9 +1,10 @@
-util = require 'util'
-assert = require 'assert'
-_ = require 'underscore'
-moment = require 'moment'
+assert = assert or require?('chai').assert
 
-Fabricator = require '../fabricator'
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
+moment = BackboneORM.modules.moment
+Utils = BackboneORM.Utils
+Fabricator = BackboneORM.Fabricator
 
 module.exports = (options, callback) ->
 
@@ -54,7 +55,7 @@ module.exports = (options, callback) ->
         values = (gen() for x in [0..10])
         uniq_values = _.uniq(values)
 
-        assert.equal(values.length, uniq_values.length, "Actual: #{util.inspect(values)}. Expected: #{util.inspect(uniq_values)}")
+        assert.equal(values.length, uniq_values.length, "Actual: #{Utils.inspect(values)}. Expected: #{Utils.inspect(uniq_values)}")
         done()
 
       gen = (fn) ->
@@ -64,7 +65,7 @@ module.exports = (options, callback) ->
           values = (gen() for x in [0..10])
           uniq_values = _.uniq(values)
 
-          assert.equal(values.length, uniq_values.length, "Actual: #{util.inspect(values)}. Expected: #{util.inspect(uniq_values)}")
+          assert.equal(values.length, uniq_values.length, "Actual: #{Utils.inspect(values)}. Expected: #{Utils.inspect(uniq_values)}")
           assert.ok(_.every(values, (value) -> value.substring(0, VALUE.length) is VALUE), 'All start with expected value')
           done()
 

@@ -6,15 +6,6 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-# ensure the symbols are resolved
-require.shim([
-  {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
-  {symbol: 'Backbone', path: 'backbone'}
-  {symbol: 'moment', path: 'moment'}
-  # {symbol: 'inflection', path: 'inflection'} # burned in
-  {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
-]) if require.shim
-
 module.exports =
   sync: require './memory/sync'
 
@@ -24,6 +15,11 @@ module.exports =
   DatabaseURL: require './database_url'
   Fabricator: require './fabricator'
   MemoryStore: require './cache/memory_store'
+
+  Cursor: require './cursor'
+  Schema: require './schema'
+  ConnectionPool: require './connection_pool'
+  CacheSingletons: require './cache/singletons'
 
   # re-expose modules
   modules:
@@ -35,10 +31,8 @@ module.exports =
     moment: require 'moment'
     inflection: require 'inflection'
 
-  Cursor: require './cursor'
-  Schema: require './schema'
-  ConnectionPool: require './connection_pool'
-  CacheSingletons: require './cache/singletons'
+  _: require 'underscore'
+  Backbone: require 'backbone'
 
 # re-expose modules
 try module.exports.modules.stream = require('stream') catch e

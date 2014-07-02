@@ -22,8 +22,8 @@
 // Query String Utilities
 
 var QueryString = exports;
-var util = require('util');
-var shims = require('_shims');
+var util = require('./util');
+var shims = require('./_shims');
 
 // If obj.hasOwnProperty has been overridden, then calling
 // obj.hasOwnProperty(prop) will break.
