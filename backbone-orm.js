@@ -90,7 +90,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    underscore: __webpack_require__(1),
 	    backbone: __webpack_require__(2),
 	    moment: __webpack_require__(3),
-	    inflection: __webpack_require__(24)
+	    inflection: __webpack_require__(26)
 	  },
 	  _: __webpack_require__(1),
 	  Backbone: __webpack_require__(2)
@@ -151,7 +151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	Queue = __webpack_require__(7);
 
@@ -1062,7 +1062,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	URL = __webpack_require__(16);
 
@@ -1708,7 +1708,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	One = __webpack_require__(21);
 
@@ -2183,7 +2183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	LRU = __webpack_require__(19);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	module.exports = MemoryStore = (function() {
 	  function MemoryStore(options) {
@@ -2306,8 +2306,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	var punycode = { encode : function (s) { return s } };
-	var util = __webpack_require__(25);
-	var shims = __webpack_require__(26);
+	var util = __webpack_require__(24);
+	var shims = __webpack_require__(25);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -3008,8 +3008,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Query String Utilities
 
 	var QueryString = exports;
-	var util = __webpack_require__(25);
-	var shims = __webpack_require__(26);
+	var util = __webpack_require__(24);
+	var shims = __webpack_require__(25);
 
 	// If obj.hasOwnProperty has been overridden, then calling
 	// obj.hasOwnProperty(prop) will break.
@@ -3149,7 +3149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	moment = __webpack_require__(3);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	Queue = __webpack_require__(7);
 
@@ -4610,7 +4610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	Queue = __webpack_require__(7);
 
@@ -5094,7 +5094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	Queue = __webpack_require__(7);
 
@@ -5799,6 +5799,294 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	var shims = __webpack_require__(25);
+
+	// NOTE: These type checking functions intentionally don't use `instanceof`
+	// because it is fragile and can be easily faked with `Object.create()`.
+	function isArray(ar) {
+	return shims.isArray(ar);
+	}
+	exports.isArray = isArray;
+
+	function isBoolean(arg) {
+	return typeof arg === 'boolean';
+	}
+	exports.isBoolean = isBoolean;
+
+	function isNull(arg) {
+	return arg === null;
+	}
+	exports.isNull = isNull;
+
+	function isNullOrUndefined(arg) {
+	return arg == null;
+	}
+	exports.isNullOrUndefined = isNullOrUndefined;
+
+	function isNumber(arg) {
+	return typeof arg === 'number';
+	}
+	exports.isNumber = isNumber;
+
+	function isString(arg) {
+	return typeof arg === 'string';
+	}
+	exports.isString = isString;
+
+	function isObject(arg) {
+	return typeof arg === 'object' && arg;
+	}
+	exports.isObject = isObject;
+
+	function objectToString(o) {
+	return Object.prototype.toString.call(o);
+	}
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//
+	// The shims in this file are not fully implemented shims for the ES5
+	// features, but do work for the particular usecases there is in
+	// the other modules.
+	//
+
+	var toString = Object.prototype.toString;
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	// Array.isArray is supported in IE9
+	function isArray(xs) {
+	  return toString.call(xs) === '[object Array]';
+	}
+	exports.isArray = typeof Array.isArray === 'function' ? Array.isArray : isArray;
+
+	// Array.prototype.indexOf is supported in IE9
+	exports.indexOf = function indexOf(xs, x) {
+	  if (xs.indexOf) return xs.indexOf(x);
+	  for (var i = 0; i < xs.length; i++) {
+	    if (x === xs[i]) return i;
+	  }
+	  return -1;
+	};
+
+	// Array.prototype.filter is supported in IE9
+	exports.filter = function filter(xs, fn) {
+	  if (xs.filter) return xs.filter(fn);
+	  var res = [];
+	  for (var i = 0; i < xs.length; i++) {
+	    if (fn(xs[i], i, xs)) res.push(xs[i]);
+	  }
+	  return res;
+	};
+
+	// Array.prototype.forEach is supported in IE9
+	exports.forEach = function forEach(xs, fn, self) {
+	  if (xs.forEach) return xs.forEach(fn, self);
+	  for (var i = 0; i < xs.length; i++) {
+	    fn.call(self, xs[i], i, xs);
+	  }
+	};
+
+	// Array.prototype.map is supported in IE9
+	exports.map = function map(xs, fn) {
+	  if (xs.map) return xs.map(fn);
+	  var out = new Array(xs.length);
+	  for (var i = 0; i < xs.length; i++) {
+	    out[i] = fn(xs[i], i, xs);
+	  }
+	  return out;
+	};
+
+	// Array.prototype.reduce is supported in IE9
+	exports.reduce = function reduce(array, callback, opt_initialValue) {
+	  if (array.reduce) return array.reduce(callback, opt_initialValue);
+	  var value, isValueSet = false;
+
+	  if (2 < arguments.length) {
+	    value = opt_initialValue;
+	    isValueSet = true;
+	  }
+	  for (var i = 0, l = array.length; l > i; ++i) {
+	    if (array.hasOwnProperty(i)) {
+	      if (isValueSet) {
+	        value = callback(value, array[i], i, array);
+	      }
+	      else {
+	        value = array[i];
+	        isValueSet = true;
+	      }
+	    }
+	  }
+
+	  return value;
+	};
+
+	// String.prototype.substr - negative index don't work in IE8
+	if ('ab'.substr(-1) !== 'b') {
+	  exports.substr = function (str, start, length) {
+	    // did we get a negative start, calculate how much it is from the beginning of the string
+	    if (start < 0) start = str.length + start;
+
+	    // call the original function
+	    return str.substr(start, length);
+	  };
+	} else {
+	  exports.substr = function (str, start, length) {
+	    return str.substr(start, length);
+	  };
+	}
+
+	// String.prototype.trim is supported in IE9
+	exports.trim = function (str) {
+	  if (str.trim) return str.trim();
+	  return str.replace(/^\s+|\s+$/g, '');
+	};
+
+	// Function.prototype.bind is supported in IE9
+	exports.bind = function () {
+	  var args = Array.prototype.slice.call(arguments);
+	  var fn = args.shift();
+	  if (fn.bind) return fn.bind.apply(fn, args);
+	  var self = args.shift();
+	  return function () {
+	    fn.apply(self, args.concat([Array.prototype.slice.call(arguments)]));
+	  };
+	};
+
+	// Object.create is supported in IE9
+	function create(prototype, properties) {
+	  var object;
+	  if (prototype === null) {
+	    object = { '__proto__' : null };
+	  }
+	  else {
+	    if (typeof prototype !== 'object') {
+	      throw new TypeError(
+	        'typeof prototype[' + (typeof prototype) + '] != \'object\''
+	      );
+	    }
+	    var Type = function () {};
+	    Type.prototype = prototype;
+	    object = new Type();
+	    object.__proto__ = prototype;
+	  }
+	  if (typeof properties !== 'undefined' && Object.defineProperties) {
+	    Object.defineProperties(object, properties);
+	  }
+	  return object;
+	}
+	exports.create = typeof Object.create === 'function' ? Object.create : create;
+
+	// Object.keys and Object.getOwnPropertyNames is supported in IE9 however
+	// they do show a description and number property on Error objects
+	function notObject(object) {
+	  return ((typeof object != "object" && typeof object != "function") || object === null);
+	}
+
+	function keysShim(object) {
+	  if (notObject(object)) {
+	    throw new TypeError("Object.keys called on a non-object");
+	  }
+
+	  var result = [];
+	  for (var name in object) {
+	    if (hasOwnProperty.call(object, name)) {
+	      result.push(name);
+	    }
+	  }
+	  return result;
+	}
+
+	// getOwnPropertyNames is almost the same as Object.keys one key feature
+	//  is that it returns hidden properties, since that can't be implemented,
+	//  this feature gets reduced so it just shows the length property on arrays
+	function propertyShim(object) {
+	  if (notObject(object)) {
+	    throw new TypeError("Object.getOwnPropertyNames called on a non-object");
+	  }
+
+	  var result = keysShim(object);
+	  if (exports.isArray(object) && exports.indexOf(object, 'length') === -1) {
+	    result.push('length');
+	  }
+	  return result;
+	}
+
+	var keys = typeof Object.keys === 'function' ? Object.keys : keysShim;
+	var getOwnPropertyNames = typeof Object.getOwnPropertyNames === 'function' ?
+	  Object.getOwnPropertyNames : propertyShim;
+
+	if (new Error().hasOwnProperty('description')) {
+	  var ERROR_PROPERTY_FILTER = function (obj, array) {
+	    if (toString.call(obj) === '[object Error]') {
+	      array = exports.filter(array, function (name) {
+	        return name !== 'description' && name !== 'number' && name !== 'message';
+	      });
+	    }
+	    return array;
+	  };
+
+	  exports.keys = function (object) {
+	    return ERROR_PROPERTY_FILTER(object, keys(object));
+	  };
+	  exports.getOwnPropertyNames = function (object) {
+	    return ERROR_PROPERTY_FILTER(object, getOwnPropertyNames(object));
+	  };
+	} else {
+	  exports.keys = keys;
+	  exports.getOwnPropertyNames = getOwnPropertyNames;
+	}
+
+	// Object.getOwnPropertyDescriptor - supported in IE8 but only on dom elements
+	function valueObject(value, key) {
+	  return { value: value[key] };
+	}
+
+	if (typeof Object.getOwnPropertyDescriptor === 'function') {
+	  try {
+	    Object.getOwnPropertyDescriptor({'a': 1}, 'a');
+	    exports.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+	  } catch (e) {
+	    // IE8 dom element issue - use a try catch and default to valueObject
+	    exports.getOwnPropertyDescriptor = function (value, key) {
+	      try {
+	        return Object.getOwnPropertyDescriptor(value, key);
+	      } catch (e) {
+	        return valueObject(value, key);
+	      }
+	    };
+	  }
+	} else {
+	  exports.getOwnPropertyDescriptor = valueObject;
+	}
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	 * inflection
 	 * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -6450,294 +6738,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	var shims = __webpack_require__(26);
-
-	// NOTE: These type checking functions intentionally don't use `instanceof`
-	// because it is fragile and can be easily faked with `Object.create()`.
-	function isArray(ar) {
-	return shims.isArray(ar);
-	}
-	exports.isArray = isArray;
-
-	function isBoolean(arg) {
-	return typeof arg === 'boolean';
-	}
-	exports.isBoolean = isBoolean;
-
-	function isNull(arg) {
-	return arg === null;
-	}
-	exports.isNull = isNull;
-
-	function isNullOrUndefined(arg) {
-	return arg == null;
-	}
-	exports.isNullOrUndefined = isNullOrUndefined;
-
-	function isNumber(arg) {
-	return typeof arg === 'number';
-	}
-	exports.isNumber = isNumber;
-
-	function isString(arg) {
-	return typeof arg === 'string';
-	}
-	exports.isString = isString;
-
-	function isObject(arg) {
-	return typeof arg === 'object' && arg;
-	}
-	exports.isObject = isObject;
-
-	function objectToString(o) {
-	return Object.prototype.toString.call(o);
-	}
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	//
-	// The shims in this file are not fully implemented shims for the ES5
-	// features, but do work for the particular usecases there is in
-	// the other modules.
-	//
-
-	var toString = Object.prototype.toString;
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-	// Array.isArray is supported in IE9
-	function isArray(xs) {
-	  return toString.call(xs) === '[object Array]';
-	}
-	exports.isArray = typeof Array.isArray === 'function' ? Array.isArray : isArray;
-
-	// Array.prototype.indexOf is supported in IE9
-	exports.indexOf = function indexOf(xs, x) {
-	  if (xs.indexOf) return xs.indexOf(x);
-	  for (var i = 0; i < xs.length; i++) {
-	    if (x === xs[i]) return i;
-	  }
-	  return -1;
-	};
-
-	// Array.prototype.filter is supported in IE9
-	exports.filter = function filter(xs, fn) {
-	  if (xs.filter) return xs.filter(fn);
-	  var res = [];
-	  for (var i = 0; i < xs.length; i++) {
-	    if (fn(xs[i], i, xs)) res.push(xs[i]);
-	  }
-	  return res;
-	};
-
-	// Array.prototype.forEach is supported in IE9
-	exports.forEach = function forEach(xs, fn, self) {
-	  if (xs.forEach) return xs.forEach(fn, self);
-	  for (var i = 0; i < xs.length; i++) {
-	    fn.call(self, xs[i], i, xs);
-	  }
-	};
-
-	// Array.prototype.map is supported in IE9
-	exports.map = function map(xs, fn) {
-	  if (xs.map) return xs.map(fn);
-	  var out = new Array(xs.length);
-	  for (var i = 0; i < xs.length; i++) {
-	    out[i] = fn(xs[i], i, xs);
-	  }
-	  return out;
-	};
-
-	// Array.prototype.reduce is supported in IE9
-	exports.reduce = function reduce(array, callback, opt_initialValue) {
-	  if (array.reduce) return array.reduce(callback, opt_initialValue);
-	  var value, isValueSet = false;
-
-	  if (2 < arguments.length) {
-	    value = opt_initialValue;
-	    isValueSet = true;
-	  }
-	  for (var i = 0, l = array.length; l > i; ++i) {
-	    if (array.hasOwnProperty(i)) {
-	      if (isValueSet) {
-	        value = callback(value, array[i], i, array);
-	      }
-	      else {
-	        value = array[i];
-	        isValueSet = true;
-	      }
-	    }
-	  }
-
-	  return value;
-	};
-
-	// String.prototype.substr - negative index don't work in IE8
-	if ('ab'.substr(-1) !== 'b') {
-	  exports.substr = function (str, start, length) {
-	    // did we get a negative start, calculate how much it is from the beginning of the string
-	    if (start < 0) start = str.length + start;
-
-	    // call the original function
-	    return str.substr(start, length);
-	  };
-	} else {
-	  exports.substr = function (str, start, length) {
-	    return str.substr(start, length);
-	  };
-	}
-
-	// String.prototype.trim is supported in IE9
-	exports.trim = function (str) {
-	  if (str.trim) return str.trim();
-	  return str.replace(/^\s+|\s+$/g, '');
-	};
-
-	// Function.prototype.bind is supported in IE9
-	exports.bind = function () {
-	  var args = Array.prototype.slice.call(arguments);
-	  var fn = args.shift();
-	  if (fn.bind) return fn.bind.apply(fn, args);
-	  var self = args.shift();
-	  return function () {
-	    fn.apply(self, args.concat([Array.prototype.slice.call(arguments)]));
-	  };
-	};
-
-	// Object.create is supported in IE9
-	function create(prototype, properties) {
-	  var object;
-	  if (prototype === null) {
-	    object = { '__proto__' : null };
-	  }
-	  else {
-	    if (typeof prototype !== 'object') {
-	      throw new TypeError(
-	        'typeof prototype[' + (typeof prototype) + '] != \'object\''
-	      );
-	    }
-	    var Type = function () {};
-	    Type.prototype = prototype;
-	    object = new Type();
-	    object.__proto__ = prototype;
-	  }
-	  if (typeof properties !== 'undefined' && Object.defineProperties) {
-	    Object.defineProperties(object, properties);
-	  }
-	  return object;
-	}
-	exports.create = typeof Object.create === 'function' ? Object.create : create;
-
-	// Object.keys and Object.getOwnPropertyNames is supported in IE9 however
-	// they do show a description and number property on Error objects
-	function notObject(object) {
-	  return ((typeof object != "object" && typeof object != "function") || object === null);
-	}
-
-	function keysShim(object) {
-	  if (notObject(object)) {
-	    throw new TypeError("Object.keys called on a non-object");
-	  }
-
-	  var result = [];
-	  for (var name in object) {
-	    if (hasOwnProperty.call(object, name)) {
-	      result.push(name);
-	    }
-	  }
-	  return result;
-	}
-
-	// getOwnPropertyNames is almost the same as Object.keys one key feature
-	//  is that it returns hidden properties, since that can't be implemented,
-	//  this feature gets reduced so it just shows the length property on arrays
-	function propertyShim(object) {
-	  if (notObject(object)) {
-	    throw new TypeError("Object.getOwnPropertyNames called on a non-object");
-	  }
-
-	  var result = keysShim(object);
-	  if (exports.isArray(object) && exports.indexOf(object, 'length') === -1) {
-	    result.push('length');
-	  }
-	  return result;
-	}
-
-	var keys = typeof Object.keys === 'function' ? Object.keys : keysShim;
-	var getOwnPropertyNames = typeof Object.getOwnPropertyNames === 'function' ?
-	  Object.getOwnPropertyNames : propertyShim;
-
-	if (new Error().hasOwnProperty('description')) {
-	  var ERROR_PROPERTY_FILTER = function (obj, array) {
-	    if (toString.call(obj) === '[object Error]') {
-	      array = exports.filter(array, function (name) {
-	        return name !== 'description' && name !== 'number' && name !== 'message';
-	      });
-	    }
-	    return array;
-	  };
-
-	  exports.keys = function (object) {
-	    return ERROR_PROPERTY_FILTER(object, keys(object));
-	  };
-	  exports.getOwnPropertyNames = function (object) {
-	    return ERROR_PROPERTY_FILTER(object, getOwnPropertyNames(object));
-	  };
-	} else {
-	  exports.keys = keys;
-	  exports.getOwnPropertyNames = getOwnPropertyNames;
-	}
-
-	// Object.getOwnPropertyDescriptor - supported in IE8 but only on dom elements
-	function valueObject(value, key) {
-	  return { value: value[key] };
-	}
-
-	if (typeof Object.getOwnPropertyDescriptor === 'function') {
-	  try {
-	    Object.getOwnPropertyDescriptor({'a': 1}, 'a');
-	    exports.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-	  } catch (e) {
-	    // IE8 dom element issue - use a try catch and default to valueObject
-	    exports.getOwnPropertyDescriptor = function (value, key) {
-	      try {
-	        return Object.getOwnPropertyDescriptor(value, key);
-	      } catch (e) {
-	        return valueObject(value, key);
-	      }
-	    };
-	  }
-	} else {
-	  exports.getOwnPropertyDescriptor = valueObject;
-	}
-
-/***/ },
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -6749,55 +6749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
 	 */
-	var ModelStream, e, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	try {
-	  stream = __webpack_require__(4);
-	} catch (_error) {
-	  e = _error;
-	}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
 
 
 /***/ },
@@ -7134,7 +7086,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	inflection = __webpack_require__(24);
+	inflection = __webpack_require__(26);
 
 	Queue = __webpack_require__(7);
 

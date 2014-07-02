@@ -41,7 +41,8 @@ gulp.task 'minify', ['build'], (callback) ->
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test', ['minify'], (callback) ->
+gulp.task 'test', (callback) ->
+# gulp.task 'test', ['minify'], (callback) ->
   runTests (err) -> process.exit(if err then 1 else 0)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
@@ -49,7 +50,7 @@ gulp.task 'zip', ['minify'], (callback) ->
   gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))
-    .pipe(gulp.dest('client/'))
+    .pipe(gulp.dest('./'))
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'release', ['build', 'zip'], ->
