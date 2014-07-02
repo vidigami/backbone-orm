@@ -1,7 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
-### 0.5.16
+### 0.6.0
 * Removed QueryCache
+* Moved to webpack for industrial packaging across Node.js and browser
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels
