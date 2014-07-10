@@ -39,7 +39,7 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Backbone.Collection (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "Backbone.Collection (cache: #{options.cache}", ->
     after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)

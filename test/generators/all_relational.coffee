@@ -1,4 +1,4 @@
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
 Queue = BackboneORM.Queue
 
 # each model should be fabricated with 'id', 'name', 'created_at', 'updated_at'

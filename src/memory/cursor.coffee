@@ -118,7 +118,7 @@ module.exports = class MemoryCursor extends Cursor
         queue.defer (callback) =>
           if @_cursor.$sort
             $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-            json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
+            json.sort (model, next_model) => Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
           if @_cursor.$offset
             number = json.length - @_cursor.$offset

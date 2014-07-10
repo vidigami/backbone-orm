@@ -40,7 +40,7 @@ module.exports = (options, callback) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSON DSL (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "JSON DSL (cache: #{options.cache}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     after (done) -> callback(); done()

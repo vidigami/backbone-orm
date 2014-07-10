@@ -28,7 +28,7 @@ module.exports = (options, callback) ->
     constructor: -> super {objectMode: true}; @count = 0
     _write: (model, encoding, next) -> @count++; next()
 
-  describe "Model.interval (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "Model.interval (cache: #{options.cache}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()

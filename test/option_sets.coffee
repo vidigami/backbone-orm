@@ -5,7 +5,6 @@ ARG_OPTIONS =
   all: '-a'
   none: '-n'
   cache: '-c'
-  query_cache: '-q'
   embed: '-e'
 OPTION_KEYS = _.without(_.keys(ARG_OPTIONS), 'all', 'none')
 

@@ -24,7 +24,7 @@ module.exports = (options, callback) ->
     model: Flat
     sync: SYNC(Flats)
 
-  describe "Callbacks (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "Callbacks (cache: #{options.cache}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()

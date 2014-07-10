@@ -26,7 +26,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
-  describe "self model relations (cache: #{options.cache}, query_cache: #{options.query_cache}, embed: #{options.embed})", ->
+  describe "self model relations (cache: #{options.cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([SelfReference], done)
     after (done) -> callback(); done()

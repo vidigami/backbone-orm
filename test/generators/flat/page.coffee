@@ -20,7 +20,7 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Model.page (cache: #{options.cache}, query_cache: #{options.query_cache})", ->
+  describe "Model.page (cache: #{options.cache}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     after (done) -> callback(); done()

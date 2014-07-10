@@ -44,7 +44,7 @@ module.exports = class Utils
   @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   # @nodoc
-  @inspect: (obj) -> try return Utils.inspect(obj) catch err then return "inspect: #{err}"
+  @toString: (json) -> try return JSON.stringify(json) catch err then return 'Failed to inspect'
 
   # @nodoc
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
@@ -242,14 +242,12 @@ module.exports = class Utils
     field = fields[0]
     field = field[0] if _.isArray(field) # for mongo
 
-    if field.charAt(0) is '-'
-      field = field.substr(1)
-      desc = true
+    # reverse
+    (field = field.substr(1); desc = true) if field.charAt(0) is '-'
+
     if model[field] == other_model[field]
       return if fields.length > 1 then @jsonFieldCompare(model, other_model, fields.splice(1)) else 0
     if desc
-      return if Utils.inspect(model[field]) < Utils.inspect(other_model[field]) then 1 else -1
+      return if Utils.toString(model[field]) < Utils.toString(other_model[field]) then 1 else -1
     else
-      return if Utils.inspect(model[field]) > Utils.inspect(other_model[field]) then 1 else -1
-
-  @toString: (json) -> try return JSON.stringify(json) catch err then return 'Failed to inspect'
+      return if Utils.toString(model[field]) > Utils.toString(other_model[field]) then 1 else -1

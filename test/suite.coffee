@@ -3,7 +3,7 @@ _ = BackboneORM._
 Queue = BackboneORM.Queue
 
 option_sets = require('./option_sets')
-# option_sets = option_sets.slice(0, 1)
+option_sets = option_sets.slice(0, 1)
 
 queue = new Queue(1)
 for options in option_sets

@@ -1,7 +1,7 @@
 assert = assert or require?('chai').assert
 _ = require 'underscore'
 
-try BackboneORM = require 'backbone-orm' catch err then BackboneORM = require('../../backbone-orm')
+BackboneORM = window?.BackboneORM or require?('backbone-orm')
 Queue = BackboneORM.Queue
 
 module.exports = (options, callback) ->
