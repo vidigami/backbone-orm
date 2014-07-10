@@ -8,7 +8,10 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -28,10 +31,8 @@ module.exports = (options, callback) ->
     constructor: -> super {objectMode: true}; @count = 0
     _write: (model, encoding, next) -> @count++; next()
 
-  describe "Model.interval (cache: #{options.cache}", ->
-
+  describe "Model.interval #{options.$tags} @slow", ->
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -67,7 +68,7 @@ module.exports = (options, callback) ->
           ), callback
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
@@ -88,7 +89,7 @@ module.exports = (options, callback) ->
             callback()
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
@@ -112,7 +113,7 @@ module.exports = (options, callback) ->
           ), callback
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
@@ -136,7 +137,7 @@ module.exports = (options, callback) ->
           ), callback
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT/2, interval_count, "Interval count. Expected: #{BASE_COUNT/2}\nActual: #{interval_count}")
         assert.equal(BASE_COUNT, processed_count, "Processed count. Expected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()

@@ -6,7 +6,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -24,10 +27,9 @@ module.exports = (options, callback) ->
     model: Flat
     sync: SYNC(Flats)
 
-  describe "Callbacks (cache: #{options.cache}", ->
+  describe "Callbacks #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -58,12 +60,12 @@ module.exports = (options, callback) ->
 
             model = new Flat({id: flat.id})
             model.fetch (err, flat) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.equal(flat, model, 'returned the model')
               assert.equal(flat.get('name'), 'Bob', 'name matches')
               done()
-          error: ->
-            assert.ok(false, "No errors: #{err}")
+          error: (err) ->
+            assert.ifError(err and false)
         }
 
       it 'Model.save (attrs, options) - non callback', (done) ->
@@ -74,12 +76,12 @@ module.exports = (options, callback) ->
 
             model = new Flat({id: flat.id})
             model.fetch (err, flat) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.equal(flat, model, 'returned the model')
               assert.equal(flat.get('name'), 'Bob', 'name matches')
               done()
-          error: ->
-            assert.ok(false, "No errors: #{err}")
+          error: (err) ->
+            assert.ifError(err and false)
         }
 
       it 'Model.save (key, value, options) - non callback', (done) ->
@@ -90,23 +92,23 @@ module.exports = (options, callback) ->
 
             model = new Flat({id: flat.id})
             model.fetch (err, flat) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.equal(flat, model, 'returned the model')
               assert.equal(flat.get('name'), 'Bob', 'name matches')
               done()
-          error: ->
-            assert.ok(false, "No errors: #{err}")
+          error: (err) ->
+            assert.ifError(err and false)
         }
 
       it 'Model.destroy (options) - non callback', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: model_id = flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
 
@@ -116,14 +118,14 @@ module.exports = (options, callback) ->
                 model.fetch (err) ->
                   assert.ok(err, "Model not found: #{err}")
                   done()
-              error: ->
-                assert.ok(false, "No errors: #{err}")
+              error: (err) ->
+                assert.ifError(err and false)
             }
 
       it 'Model.fetch (options) - non callback', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
@@ -132,14 +134,14 @@ module.exports = (options, callback) ->
               assert.equal(flat, model, 'returned the model')
               assert.equal(flat.get('name'), 'Bob', 'name matches')
               done()
-            error: ->
-              assert.ok(false, "No errors: #{err}")
+            error: (err) ->
+              assert.ifError(err and false)
           }
 
       it 'Collection.fetch (options)  - non callback', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           flats = new Flats()
@@ -149,8 +151,8 @@ module.exports = (options, callback) ->
               assert.equal(flat.id, model.id, 'returned the model')
               assert.equal(flat.get('name'), 'Bob', 'name matches')
               done()
-            error: ->
-              assert.ok(false, "No errors: #{err}")
+            error: (err) ->
+              assert.ifError(err and false)
           }
 
     ##############################
@@ -162,12 +164,12 @@ module.exports = (options, callback) ->
       it 'Model.save (callback)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -175,12 +177,12 @@ module.exports = (options, callback) ->
       it 'Model.save (attrs, callback)', (done) ->
         flat = new Flat()
         flat.save {name: 'Bob'}, (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -188,12 +190,12 @@ module.exports = (options, callback) ->
       it 'Model.save (attrs, options, callback)', (done) ->
         flat = new Flat()
         flat.save {name: 'Bob'}, {}, (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -201,12 +203,12 @@ module.exports = (options, callback) ->
       it 'Model.save (key, value, options, callback)', (done) ->
         flat = new Flat()
         flat.save 'name', 'Bob', {}, (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -214,17 +216,17 @@ module.exports = (options, callback) ->
       it 'Model.destroy (no options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: model_id = flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
 
             flat.destroy (err) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               model = new Flat({id: model_id})
               model.fetch (err) ->
                 assert.ok(err, "Model not found: #{err}")
@@ -233,17 +235,17 @@ module.exports = (options, callback) ->
       it 'Model.destroy (with options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: model_id = flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
 
             flat.destroy {}, (err) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               model = new Flat({id: model_id})
               model.fetch (err) ->
                 assert.ok(err, "Model not found: #{err}")
@@ -252,12 +254,12 @@ module.exports = (options, callback) ->
       it 'Model.fetch (no options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -265,12 +267,12 @@ module.exports = (options, callback) ->
       it 'Model.fetch (with options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           model = new Flat({id: flat.id})
           model.fetch {}, (err, flat) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(flat, model, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
             done()
@@ -278,12 +280,12 @@ module.exports = (options, callback) ->
       it 'Collection.fetch (no options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           flats = new Flats()
           flats.fetch (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             model = flats.get(flat.id)
             assert.equal(flat.id, model.id, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')
@@ -292,12 +294,12 @@ module.exports = (options, callback) ->
       it 'Collection.fetch (with options)', (done) ->
         flat = new Flat({name: 'Bob'})
         flat.save (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(flat, model, 'returned the model')
 
           flats = new Flats()
           flats.fetch {}, (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             model = flats.get(flat.id)
             assert.equal(flat.id, model.id, 'returned the model')
             assert.equal(flat.get('name'), 'Bob', 'name matches')

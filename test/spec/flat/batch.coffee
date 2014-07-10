@@ -6,8 +6,13 @@ moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
 
-module.exports = (options, callback) ->
+  # load the globally defined test parameters (used by backbone-mongo, backbone-http, etc.)
+  # (either load it in the browser with a script tag, use karma's options to load it in the browser, or use mocha --require ./test_parameters ...)
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -20,10 +25,10 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Model.each (cache: #{options.cache}", ->
+  # use tags to grep out certain option sets https://github.com/visionmedia/mocha/wiki/Tagging
+  describe "Model.each #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -45,13 +50,13 @@ module.exports = (options, callback) ->
 
       queue = new Queue(1)
       queue.defer (callback) ->
-        Flat.each callback, (model, callback) ->
+        Flat.eachC callback, (model, callback) ->
           assert.ok(!!model, 'model returned')
           processed_count++
           callback()
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()
 
@@ -60,12 +65,12 @@ module.exports = (options, callback) ->
 
       queue = new Queue(1)
       queue.defer (callback) ->
-        Flat.each callback, (model, callback) ->
+        Flat.eachC callback, (model, callback) ->
           assert.ok(!!model, 'model returned')
           processed_count++
           callback()
 
       queue.await (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT, processed_count, "\nExpected: #{BASE_COUNT}\nActual: #{processed_count}")
         done()

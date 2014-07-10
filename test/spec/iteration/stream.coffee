@@ -6,7 +6,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -31,7 +34,7 @@ module.exports = (options, callback) ->
     was_called = false
     call_done = (err) ->
       return if was_called; was_called = true
-      assert.ok(!err, "No errors: #{err}")
+      assert.ifError(err)
       done()
 
     Flat.stream(query)
@@ -41,10 +44,8 @@ module.exports = (options, callback) ->
         call_done()
       .on 'error', call_done
 
-  describe "Stream (cache: #{options.cache}", ->
-
+  describe "Stream #{options.$tags}", ->
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -67,7 +68,7 @@ module.exports = (options, callback) ->
       was_called = false
       call_done = (err) ->
         return if was_called; was_called = true
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         done()
 
       stream = Flat.stream()
@@ -82,7 +83,7 @@ module.exports = (options, callback) ->
 
     it 'should support pipe interface with query (name)', (done) ->
       Flat.cursor({$one: true}).toModels (err, model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         pipeCheck({name: model.get('name')}, 1, done)
 
     it 'should support pipe interface with query (limit)', (done) ->
@@ -95,7 +96,7 @@ module.exports = (options, callback) ->
       was_called = false
       call_done = (err) ->
         return if was_called; was_called = true
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         done()
 
       filter = true

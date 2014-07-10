@@ -6,7 +6,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -24,10 +27,10 @@ module.exports = (options, callback) ->
       updated_at: Fabricator.date
     }, callback)
     queue.await (err) ->
-      assert.ok(!err, "No errors: #{err}")
+      assert.ifError(err)
       collection = new collection_type()
       collection.fetch (err, fetched_collection) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT, collection.models.length, "collection_type Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
         assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched collection_type Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
         done()
@@ -39,8 +42,7 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Backbone.Collection (cache: #{options.cache}", ->
-    after (done) -> callback(); done()
+  describe "Backbone.Collection #{options.$tags}", ->
     beforeEach (done) ->
       queue = new Queue(1)
 

@@ -7,7 +7,10 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -20,10 +23,9 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Backbone Sync (cache: #{options.cache}", ->
+  describe "Backbone Sync #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -57,25 +59,25 @@ module.exports = (options, callback) ->
 
     it 'fetches model data', (done) ->
       Flat.findOne (err, model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(!!model, 'got model')
 
         new_model = new Flat({id: model.id})
         new_model.fetch (err) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{Utils.toString(model.toJSON())}\nActual: #{Utils.toString(new_model.toJSON())}")
           done()
 
 #    it 'destroys a model', (done) ->
 #      Flat.findOne (err, model) ->
-#        assert.ok(!err, "No errors: #{err}")
+#        assert.ifError(err)
 #        assert.ok(!!model, 'got model')
 #        model_id = model.id
 #
 #        model.destroy (err) ->
-#          assert.ok(!err, "No errors: #{err}")
+#          assert.ifError(err)
 #
 #          Flat.find model_id, (err, model) ->
-#            assert.ok(!err, "No errors: #{err}")
+#            assert.ifError(err)
 #            assert.ok(!model, "Model not found after destroy")
 #            done()

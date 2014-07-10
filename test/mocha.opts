@@ -1,0 +1,5 @@
+--compilers coffee:coffee-script/register
+--require test/parameters
+--reporter spec
+--timeout 10000
+--grep @no_options

@@ -7,7 +7,10 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -29,10 +32,9 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Many (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "Many #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       MODELS = {}
 
@@ -73,10 +75,10 @@ module.exports = (options, callback) ->
 
     it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
       Owner.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(test_model, 'found model')
         test_model.get 'reverses', (err, reverses) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(reverses.length, 'found related reverses')
           if test_model.relationIsEmbedded('reverses')
             assert.deepEqual(test_model.toJSON().reverses[0], reverses[0].toJSON(), "Serialized embedded. Expected: #{test_model.toJSON().reverses}. Actual: #{reverses[0].toJSON()}")
@@ -85,7 +87,7 @@ module.exports = (options, callback) ->
           reverse = reverses[0]
 
           reverse.get 'owners', (err, owners) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.ok(owners.length, 'found related models')
 
             owner = _.find(owners, (test) -> test_model.id is test.id)

@@ -7,7 +7,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -20,10 +23,8 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Convenience Methods (cache: #{options.cache}", ->
-
+  describe "Convenience Methods #{options.$tags}", ->
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -43,7 +44,7 @@ module.exports = (options, callback) ->
     describe 'count', ->
       it 'Handles a count query', (done) ->
         Flat.count (err, count) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(count, BASE_COUNT, "Expected: #{count}. Actual: #{BASE_COUNT}")
           done()
 
@@ -103,35 +104,35 @@ module.exports = (options, callback) ->
     describe 'all', ->
       it 'Handles an all query', (done) ->
         Flat.all (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
           done()
 
     describe 'exists', ->
       it 'Handles an exist with no query', (done) ->
         Flat.exists (err, exists) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(exists, 'something exists')
           done()
 
       it 'Handles an exist query', (done) ->
         Flat.findOne (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(model, 'found a model')
 
           Flat.exists {name: model.get('name')}, (err, exists) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.ok(exists, "the model exists by name. Expected: #{true}. Actual: #{exists}")
 
             Flat.exists {name: "#{model.get('name')}_thingy"}, (err, exists) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.ok(!exists, "the model does not exist by bad name. Expected: #{false}. Actual: #{exists}")
 
               Flat.exists {created_at: model.get('created_at')}, (err, exists) ->
-                assert.ok(!err, "No errors: #{err}")
+                assert.ifError(err)
                 assert.ok(exists, "the model exists by created_at. Expected: #{true}. Actual: #{exists}")
 
                 Flat.exists {created_at: moment('2001-04-25T01:32:21.196Z').toDate()}, (err, exists) ->
-                  assert.ok(!err, "No errors: #{err}")
+                  assert.ifError(err)
                   assert.ok(!exists, "the model does not exist by bad created_at. Expected: #{false}. Actual: #{exists}")
                   done()

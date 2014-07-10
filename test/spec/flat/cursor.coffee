@@ -6,7 +6,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -21,10 +24,9 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Flat)
 
-  describe "Model.cursor (cache: #{options.cache}", ->
+  describe "Model.cursor #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -45,28 +47,28 @@ module.exports = (options, callback) ->
 
     it 'Handles a count query to json', (done) ->
       Flat.cursor({$count: true}).toJSON (err, count) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.equal(BASE_COUNT, count, "\nExpected: #{BASE_COUNT}\nActual: #{count}")
         done()
 
     it 'Cursor makes json', (done) ->
       Flat.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(test_model, 'found model')
 
         Flat.cursor({id: test_model.id}).toJSON (err, json) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(json, 'cursor toJSON gives us json')
           assert.ok(json.length, 'json is an array with a length')
           done()
 
     it 'Cursor makes models', (done) ->
       Flat.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(test_model, 'found model')
 
         Flat.cursor({name: test_model.get('name')}).toModels (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(models, 'cursor toModels gives us models')
           for model in models
             assert.ok(model instanceof Flat, 'model is the correct type')
@@ -76,11 +78,11 @@ module.exports = (options, callback) ->
       ALBUM_NAME = 'Test1'
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         limit = 3
         Flat.cursor({name: ALBUM_NAME}).limit(limit).toModels (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(models, 'cursor toModels gives us models')
           assert.equal(models.length, limit, 'found models')
           done()
@@ -91,11 +93,11 @@ module.exports = (options, callback) ->
       ALBUM_NAME = 'Test2'
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         limit = 2; offset = 1
         Flat.cursor({name: ALBUM_NAME}).limit(limit).offset(offset).toModels (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(models, 'cursor toModels gives us models')
           assert.equal(limit, models.length, "\nExpected: #{limit}, Actual: #{models.length}")
           done()
@@ -107,10 +109,10 @@ module.exports = (options, callback) ->
       FIELD_NAMES = ['id', 'name']
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
           for json in models_json
             assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested values')
@@ -123,10 +125,10 @@ module.exports = (options, callback) ->
     #   FIELD_NAMES = ['json_data.foo.bar']
 
     #   runTest = (err) ->
-    #     assert.ok(!err, "No errors: #{err}")
+    #     assert.ifError(err)
 
     #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-    #       assert.ok(!err, "No errors: #{err}")
+    #       assert.ifError(err)
     #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
     #       for json in models_json
     #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
@@ -140,10 +142,10 @@ module.exports = (options, callback) ->
       FIELD_NAMES = ['id', 'name']
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         Flat.cursor({name: ALBUM_NAME}).values(FIELD_NAMES).toJSON (err, values) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
             assert.ok(_.isArray(json), 'cursor data values is an array')
@@ -157,10 +159,10 @@ module.exports = (options, callback) ->
     #   FIELD_NAMES = ['json_data.foo.bar']
 
     #   runTest = (err) ->
-    #     assert.ok(!err, "No errors: #{err}")
+    #     assert.ifError(err)
 
     #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-    #       assert.ok(!err, "No errors: #{err}")
+    #       assert.ifError(err)
     #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
     #       for json in models_json
     #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
@@ -174,10 +176,10 @@ module.exports = (options, callback) ->
       FIELD_NAMES = ['id', 'name']
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         Flat.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
           for json in models_json
             assert.equal(_.size(json), WHITE_LIST.length, 'gets only the requested values')
@@ -193,10 +195,10 @@ module.exports = (options, callback) ->
       FIELD_NAMES = ['id', 'name']
 
       runTest = (err) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         Flat.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values
             assert.ok(_.isArray(json), 'cursor data values is an array')
@@ -208,12 +210,12 @@ module.exports = (options, callback) ->
 
     it 'Cursor can perform an $in query', (done) ->
       Flat.findOne (err, test_model) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(test_model, 'found model')
         $in = ['random_string', 'some_9', test_model.get('name')]
 
         Flat.cursor({name: {$in: $in}}).toModels (err, models) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(models, 'cursor toModels gives us models')
           assert.ok(models.length, 'cursor toModels gives us one model')
           for model in models
@@ -222,7 +224,7 @@ module.exports = (options, callback) ->
 
     it 'Cursor can retrieve a boolean as a boolean', (done) ->
       Flat.cursor({$one: true}).toJSON (err, json) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(json, 'found json')
         assert.equal(typeof json.boolean, 'boolean', "Is a boolean:\nExpected: 'boolean', Actual: #{typeof json.boolean}")
         assert.deepEqual(json.boolean, true, "Bool matches:\nExpected: #{true}, Actual: #{json.boolean}")

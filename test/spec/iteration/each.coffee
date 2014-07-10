@@ -6,7 +6,10 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -19,10 +22,9 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Model.each (cache: #{options.cache}", ->
+  describe "Model.each #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -50,7 +52,7 @@ module.exports = (options, callback) ->
             callback()
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             done()
 
@@ -58,7 +60,7 @@ module.exports = (options, callback) ->
         processed_count = 0
 
         summary = (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             done()
 
@@ -69,7 +71,7 @@ module.exports = (options, callback) ->
 
       it 'callback for queried models', (done) ->
         Flat.findOne (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(!!model, 'model returned')
 
           processed_count = 0
@@ -81,19 +83,19 @@ module.exports = (options, callback) ->
               callback()
             ),
             (err) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.equal(1, processed_count)
               done()
 
       it 'callback for queried models - eachC (CoffeeScript friendly)', (done) ->
         Flat.findOne (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(!!model, 'model returned')
 
           processed_count = 0
 
           summary = (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(1, processed_count)
             done()
 
@@ -112,13 +114,13 @@ module.exports = (options, callback) ->
             callback()
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(3, processed_count)
             done()
 
       it 'callback for queried models with limit and offset', (done) ->
         Flat.findOne (err, model) ->
-          assert.ok(!err, "No errors: #{err}")
+          assert.ifError(err)
           assert.ok(!!model, 'model returned')
 
           processed_count = 0
@@ -130,7 +132,7 @@ module.exports = (options, callback) ->
               callback()
             ),
             (err) ->
-              assert.ok(!err, "No errors: #{err}")
+              assert.ifError(err)
               assert.equal(1, processed_count)
               done()
 
@@ -146,7 +148,7 @@ module.exports = (options, callback) ->
             callback()
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             done()
 
@@ -160,7 +162,7 @@ module.exports = (options, callback) ->
             callback()
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             done()
 
@@ -175,7 +177,7 @@ module.exports = (options, callback) ->
             callback()
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             done()
 
@@ -190,7 +192,7 @@ module.exports = (options, callback) ->
             _.delay (-> results.push(processed_count); callback()), 10
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             assert.deepEqual(results, _.map([1..BASE_COUNT], -> BASE_COUNT))
             done()
@@ -205,7 +207,7 @@ module.exports = (options, callback) ->
             _.delay (-> results.push(processed_count); callback()), 10
           ),
           (err) ->
-            assert.ok(!err, "No errors: #{err}")
+            assert.ifError(err)
             assert.equal(BASE_COUNT, processed_count)
             assert.deepEqual(results, [1..BASE_COUNT])
             done()

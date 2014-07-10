@@ -7,7 +7,10 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -20,10 +23,9 @@ module.exports = (options, callback) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Model.sort (cache: #{options.cache}", ->
+  describe "Model.sort #{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -43,27 +45,27 @@ module.exports = (options, callback) ->
     it 'Handles a sort by one field query', (done) ->
       SORT_FIELD = 'name'
       Flat.find {$sort: SORT_FIELD}, (err, models) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(Utils.isSorted(models, [SORT_FIELD]))
         done()
 
     it 'Handles a sort by multiple fields query', (done) ->
       SORT_FIELDS = ['name', 'id']
       Flat.find {$sort: SORT_FIELDS}, (err, models) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()
 
     it 'Handles a reverse sort by fields query', (done) ->
       SORT_FIELDS = ['-name', 'id']
       Flat.find {$sort: SORT_FIELDS}, (err, models) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
         assert.ok(Utils.isSorted(models, SORT_FIELDS))
         done()
 
     it 'should sort by id', (done) ->
       Flat.cursor().sort('id').toModels (err, models) ->
-        assert.ok(!err, "No errors: #{err}")
+        assert.ifError(err)
 
         ids = (model.id for model in models)
         sorted_ids = _.clone(ids).sort()

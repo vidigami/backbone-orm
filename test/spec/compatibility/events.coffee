@@ -7,7 +7,10 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+_.each (require '../../option_sets'), module.exports = (options) ->
+  return if options.embed or options.query_cache
+  options = _.extend({}, options, test_parameters) if test_parameters?
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -31,54 +34,7 @@ module.exports = (options, callback) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Many to Many (cache: #{options.cache}, embed: #{options.embed})", ->
-
-    before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
-    after (done) -> callback(); done()
-    beforeEach (done) ->
-      relation = Owner.relation('reverses')
-      delete relation.virtual
-      MODELS = {}
-
-      queue = new Queue(1)
-
-      # reset caches
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
-
-      # create all
-      queue.defer (callback) ->
-        create_queue = new Queue()
-
-        create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
-          name: Fabricator.uniqueId('reverses_')
-          created_at: Fabricator.date
-        }, (err, models) -> MODELS.reverse = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
-          name: Fabricator.uniqueId('owners_')
-          created_at: Fabricator.date
-        }, (err, models) -> MODELS.owner = models; callback(err))
-
-        create_queue.await callback
-
-      # link and save all
-      queue.defer (callback) ->
-        save_queue = new Queue()
-
-        for owner in MODELS.owner
-          do (owner) -> save_queue.defer (callback) ->
-            owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, callback
-
-        save_queue.await callback
-
-      queue.await done
-
-  describe "Backbone Events (cache: #{options.cache}", ->
-
-    after (done) -> callback(); done()
-
+  describe "Backbone Events #{options.$tags}", ->
     describe 'Triggering', ->
 
       # https://github.com/vidigami/backbone-mongo/issues/4
