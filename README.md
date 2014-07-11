@@ -156,3 +156,5 @@ Please run tests before submitting a pull request.
 ```
 $ npm test
 ```
+
+To run specific groups of tests, [use mocha `--grep` option on the tags](https://github.com/visionmedia/mocha/wiki/Tagging)

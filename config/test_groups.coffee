@@ -6,6 +6,8 @@ gutil = require 'gulp-util'
 module.exports = TEST_GROUPS = {}
 TEST_GROUPS.full = []
 TEST_GROUPS.full.push({name: "full_full", files: ['./_temp/webpack/backbone-orm.tests.js']})
+TEST_GROUPS.new_ = []
+TEST_GROUPS.new_.push({name: "new_full", files: ['./_temp/webpack/backbone-orm.tests_new.js']})
 
 # ###############################
 # # AMD

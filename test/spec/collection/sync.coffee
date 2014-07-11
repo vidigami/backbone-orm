@@ -8,6 +8,9 @@ Fabricator = BackboneORM.Fabricator
 
 _.each (require '../../option_sets'), module.exports = (options) ->
   return if options.embed or options.query_cache
+
+  # As an alternative to using a global variable (which can be acceptable for testing only), move this code to a 'before' section,
+  # and use `this.parent.test_parameters`, since `this` will be set to a testing context by mocha, and that can be shared
   options = _.extend({}, options, test_parameters) if test_parameters?
 
   DATABASE_URL = options.database_url or ''
