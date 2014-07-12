@@ -7,7 +7,7 @@ module.exports = _.extend  _.clone(require '../../webpack/base-config.coffee'), 
   output:
     path: '.'
     filename: 'backbone-orm.js'
-    library: 'kb'
+    library: 'BackboneORM'
     libraryTarget: 'umd'
 
   externals: [

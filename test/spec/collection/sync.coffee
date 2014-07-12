@@ -6,12 +6,14 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
 
   # As an alternative to using a global variable (which can be acceptable for testing only), move this code to a 'before' section,
   # and use `this.parent.test_parameters`, since `this` will be set to a testing context by mocha, and that can be shared
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
@@ -45,7 +47,9 @@ _.each (require '../../option_sets'), module.exports = (options) ->
     schema: BASE_SCHEMA
     sync: SYNC(Model)
 
-  describe "Backbone.Collection #{options.$tags}", ->
+  describe "Backbone.Collection #{options.$parameter_tags or ''}#{options.$tags}", ->
+    options = _.extend({}, options, @parent.parameters) if @parent.parameters
+
     beforeEach (done) ->
       queue = new Queue(1)
 

@@ -7,9 +7,11 @@ ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
@@ -23,7 +25,7 @@ _.each (require '../../option_sets'), module.exports = (options) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Backbone Sync #{options.$tags}", ->
+  describe "Backbone Sync #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->

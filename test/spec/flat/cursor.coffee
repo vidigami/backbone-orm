@@ -6,25 +6,29 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+# allow `__test__parameters` to be a global in both node and browser
+parameters = __test__parameters if __test__parameters?
+
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
-  DATABASE_URL = options.database_url or ''
-  BASE_SCHEMA = options.schema or {}
-  SYNC = options.sync
-  BASE_COUNT = 5
+  describe "Model.cursor #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
+    DATABASE_URL = options.database_url or ''
+    BASE_SCHEMA = options.schema or {}
+    SYNC = options.sync
+    BASE_COUNT = 5
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: _.defaults({
-      boolean: 'Boolean'
-    }, BASE_SCHEMA)
-    sync: SYNC(Flat)
+    ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
-  describe "Model.cursor #{options.$tags}", ->
+    class Flat extends Backbone.Model
+      urlRoot: "#{DATABASE_URL}/flats"
+      schema: _.defaults({
+        boolean: 'Boolean'
+      }, BASE_SCHEMA)
+      sync: SYNC(Flat)
 
     before (done) -> return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
@@ -120,22 +124,22 @@ _.each (require '../../option_sets'), module.exports = (options) ->
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
-    # it 'Cursor can select fields from json', (done) ->
-    #   ALBUM_NAME = 'Test3'
-    #   FIELD_NAMES = ['json_data.foo.bar']
+    it.skip 'Cursor can select fields from json', (done) ->
+      ALBUM_NAME = 'Test3'
+      FIELD_NAMES = ['json_data.foo.bar']
 
-    #   runTest = (err) ->
-    #     assert.ifError(err)
+      runTest = (err) ->
+        assert.ifError(err)
 
-    #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-    #       assert.ifError(err)
-    #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
-    #       for json in models_json
-    #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
-    #         assert.equal(_.size(json.json_data), 1, 'gets only the requested value')
-    #       done()
+        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+          assert.ifError(err)
+          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+          for json in models_json
+            assert.equal(_.size(json), FIELD_NAMES.length, 'gets the requested parent value')
+            assert.equal(_.size(json.json_data), 1, 'gets only the requested value')
+          done()
 
-    #   Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
     it 'Cursor can select values', (done) ->
       ALBUM_NAME = 'Test4'
@@ -154,21 +158,21 @@ _.each (require '../../option_sets'), module.exports = (options) ->
 
       Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
-    # it 'Cursor can select values from json', (done) ->
-    #   ALBUM_NAME = 'Test3'
-    #   FIELD_NAMES = ['json_data.foo.bar']
+    it.skip 'Cursor can select values from json', (done) ->
+      ALBUM_NAME = 'Test3'
+      FIELD_NAMES = ['json_data.foo.bar']
 
-    #   runTest = (err) ->
-    #     assert.ifError(err)
+      runTest = (err) ->
+        assert.ifError(err)
 
-    #     Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
-    #       assert.ifError(err)
-    #       assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
-    #       for json in models_json
-    #         assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
-    #       done()
+        Flat.cursor({name: ALBUM_NAME}).select(FIELD_NAMES).toJSON (err, models_json) ->
+          assert.ifError(err)
+          assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
+          for json in models_json
+            assert.equal(_.size(json), FIELD_NAMES.length, 'gets only the requested value')
+          done()
 
-    #   Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
+      Flat.each ((model, callback) -> model.save {name: ALBUM_NAME}, callback), runTest
 
     it 'Cursor can select the intersection of a whitelist and fields', (done) ->
       ALBUM_NAME = 'Test3'

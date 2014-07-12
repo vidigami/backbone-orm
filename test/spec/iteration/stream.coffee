@@ -6,46 +6,60 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+streams = window?.stream or require?('stream')
+WritableStream = streams?.Writable
+TransformStream = streams?.Transform
+
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
-  DATABASE_URL = options.database_url or ''
-  BASE_SCHEMA = options.schema or {}
-  SYNC = options.sync
-  BASE_COUNT = 5
+  describeMaybeSkip = if WritableStream then describe else describe.skip
+  describeMaybeSkip "Stream #{options.$parameter_tags or ''}#{options.$tags}", ->
+    DATABASE_URL = options.database_url or ''
+    BASE_SCHEMA = options.schema or {}
+    SYNC = options.sync
+    BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
+    Flat = null
+    Counter = null
+    Filter = null
+    pipeCheck = null
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
+    before (done) ->
+      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
-  class Counter extends require('stream').Writable
-    constructor: -> super {objectMode: true}; @count = 0
-    _write: (model, encoding, next) -> @count++; next()
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
 
-  class Filter extends require('stream').Transform
-    constructor: (@fn) -> super {objectMode: true}
-    _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
+      class Counter extends WritableStream
+        constructor: -> super {objectMode: true}; @count = 0
+        _write: (model, encoding, next) -> @count++; next()
 
-  pipeCheck = (query, expected, done) ->
-    was_called = false
-    call_done = (err) ->
-      return if was_called; was_called = true
-      assert.ifError(err)
-      done()
+      class Filter extends TransformStream
+        constructor: (@fn) -> super {objectMode: true}
+        _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
 
-    Flat.stream(query)
-      .pipe(counter = new Counter())
-      .on 'finish', ->
-        assert.equal(counter.count, expected)
-        call_done()
-      .on 'error', call_done
+      pipeCheck = (query, expected, done) ->
+        was_called = false
+        call_done = (err) ->
+          return if was_called; was_called = true
+          assert.ifError(err)
+          done()
 
-  describe "Stream #{options.$tags}", ->
-    before (done) -> return done() unless options.before; options.before([Flat], done)
+        Flat.stream(query)
+          .pipe(counter = new Counter())
+          .on 'finish', ->
+            assert.equal(counter.count, expected)
+            call_done()
+          .on 'error', call_done
+
+      return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 

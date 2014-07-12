@@ -6,25 +6,29 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
+  describe "Model.each #{options.$parameter_tags or ''}#{options.$tags}", ->
+    Flat = null
+    before (done) ->
+      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
-  describe "Model.each #{options.$tags}", ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
 
-    before (done) -> return done() unless options.before; options.before([Flat], done)
+      return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 

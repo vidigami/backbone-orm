@@ -7,32 +7,42 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
+try
+  streams = require('stream')
+  WritableStream = streams.Writable
 
-_.each (require '../../option_sets'), module.exports = (options) ->
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
-  options = _.extend({}, options, test_parameters) if test_parameters?
+  options = _.extend({}, options, parameters) if parameters
 
-  DATABASE_URL = options.database_url or ''
-  BASE_SCHEMA = options.schema or {}
-  SYNC = options.sync
-  BASE_COUNT = 50
+  describeMaybeSkip = if WritableStream then describe else describe.skip
+  describeMaybeSkip "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
+    DATABASE_URL = options.database_url or ''
+    BASE_SCHEMA = options.schema or {}
+    SYNC = options.sync
+    BASE_COUNT = 50
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
+    DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
+    DATE_STEP_MS = 1000
 
-  DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
-  DATE_STEP_MS = 1000
+    Flat = null
+    Counter = null
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
+    before (done) ->
+      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
-  class Counter extends require('stream').Writable
-    constructor: -> super {objectMode: true}; @count = 0
-    _write: (model, encoding, next) -> @count++; next()
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
 
-  describe "Model.interval #{options.$tags} @slow", ->
-    before (done) -> return done() unless options.before; options.before([Flat], done)
+      class Counter extends WritableStream
+        constructor: -> super {objectMode: true}; @count = 0
+        _write: (model, encoding, next) -> @count++; next()
+
+      return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 

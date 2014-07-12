@@ -8,7 +8,7 @@ rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
 header = require 'gulp-header'
 zip = require 'gulp-zip'
-runTests = require './config/run_tests'
+runTests = null  # require './config/run_tests'  # this require is slow
 
 HEADER = """
 /*
@@ -42,6 +42,7 @@ gulp.task 'minify', ['build'], (callback) ->
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'test', ['minify'], (callback) ->
+  runTests or= require './config/run_tests'
   runTests (err) -> process.exit(if err then 1 else 0)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
