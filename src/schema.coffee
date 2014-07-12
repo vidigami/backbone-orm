@@ -124,7 +124,7 @@ module.exports = class Schema
 
     # unrecognized
     unless type = RELATION_VARIANTS[options.type]
-      throw new Error "Unexpected type name is not a string: #{Utils.toString(options)}" unless _.isString(options.type)
+      throw new Error "Unexpected type name is not a string: #{JSONUtils.stringify(options)}" unless _.isString(options.type)
       return @fields[key] = options
 
     options.type = type
@@ -152,7 +152,7 @@ module.exports = class Schema
       options = options.slice(1)
 
     # too many options
-    throw new Error "Unexpected field options array: #{Utils.toString(options)}" if options.length > 1
+    throw new Error "Unexpected field options array: #{JSONUtils.stringify(options)}" if options.length > 1
 
     # options object
     _.extend(result, options[0]) if options.length is 1

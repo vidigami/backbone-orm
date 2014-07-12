@@ -1,104 +1,100 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 moment = BackboneORM.modules.moment
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+describe 'Fabricator', ->
+  describe 'value', ->
 
-  describe 'Fabricator', ->
-    after (done) -> callback(); done()
+    it 'generate undefined', (done) ->
+      VALUE = undefined
+      gen = Fabricator.value
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      done()
 
-    describe 'value', ->
+    it 'generate integers', (done) ->
+      VALUE = 29029
+      gen = Fabricator.value(VALUE)
 
-      it 'generate undefined', (done) ->
-        VALUE = undefined
-        gen = Fabricator.value
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        done()
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      done()
 
-      it 'generate integers', (done) ->
-        VALUE = 29029
-        gen = Fabricator.value(VALUE)
+    it 'generate strings', (done) ->
+      VALUE = 'value1'
+      gen = Fabricator.value(VALUE)
 
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        done()
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      assert.equal(gen(), VALUE)
+      done()
 
-      it 'generate strings', (done) ->
-        VALUE = 'value1'
-        gen = Fabricator.value(VALUE)
+    it 'generate dates', (done) ->
+      VALUE = new Date()
+      gen = Fabricator.value(VALUE)
 
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        assert.equal(gen(), VALUE)
-        done()
+      assert.equal(gen().valueOf(), VALUE.valueOf())
+      assert.equal(gen().valueOf(), VALUE.valueOf())
+      assert.equal(gen().valueOf(), VALUE.valueOf())
+      done()
 
-      it 'generate dates', (done) ->
-        VALUE = new Date()
-        gen = Fabricator.value(VALUE)
+  describe 'uniqueId', ->
 
-        assert.equal(gen().valueOf(), VALUE.valueOf())
-        assert.equal(gen().valueOf(), VALUE.valueOf())
-        assert.equal(gen().valueOf(), VALUE.valueOf())
-        done()
+    it 'just numbers', (done) ->
+      gen = Fabricator.uniqueId
+      values = (gen() for x in [0..10])
+      uniq_values = _.uniq(values)
 
-    describe 'uniqueId', ->
+      # assert.equal(values.length, uniq_values.length, "Actual: #{JSONUtils.stringify(values)}. Expected: #{JSONUtils.stringify(uniq_values)}")
+      done()
 
-      it 'just numbers', (done) ->
-        gen = Fabricator.uniqueId
+    gen = (fn) ->
+      it "with string (#{fn})", (done) ->
+        VALUE = 'name_'
+        gen = Fabricator[fn](VALUE)
         values = (gen() for x in [0..10])
         uniq_values = _.uniq(values)
 
-        # assert.equal(values.length, uniq_values.length, "Actual: #{Utils.toString(values)}. Expected: #{Utils.toString(uniq_values)}")
+        assert.equal(values.length, uniq_values.length, "Actual: #{JSONUtils.stringify(values)}. Expected: #{JSONUtils.stringify(uniq_values)}")
+        assert.ok(_.every(values, (value) -> value.substring(0, VALUE.length) is VALUE), 'All start with expected value')
         done()
 
-      gen = (fn) ->
-        it "with string (#{fn})", (done) ->
-          VALUE = 'name_'
-          gen = Fabricator[fn](VALUE)
-          values = (gen() for x in [0..10])
-          uniq_values = _.uniq(values)
+    gen('uniqueId')
+    gen('uniqueString')
 
-          assert.equal(values.length, uniq_values.length, "Actual: #{Utils.toString(values)}. Expected: #{Utils.toString(uniq_values)}")
-          assert.ok(_.every(values, (value) -> value.substring(0, VALUE.length) is VALUE), 'All start with expected value')
-          done()
+  describe 'date', ->
 
-      gen('uniqueId')
-      gen('uniqueString')
+    it 'generate now', (done) ->
+      gen = Fabricator.date
 
-    describe 'date', ->
+      assert.ok(gen().valueOf() <= (new Date()).valueOf())
+      assert.ok(gen().valueOf() <= (new Date()).valueOf())
+      assert.ok(gen().valueOf() <= (new Date()).valueOf())
+      done()
 
-      it 'generate now', (done) ->
-        gen = Fabricator.date
+    it 'generate dates in steps (ms)', (done) ->
+      STEP = 100
+      gen = Fabricator.date(STEP)
+      START = gen()
 
-        assert.ok(gen().valueOf() <= (new Date()).valueOf())
-        assert.ok(gen().valueOf() <= (new Date()).valueOf())
-        assert.ok(gen().valueOf() <= (new Date()).valueOf())
-        done()
+      assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
+      assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
+      assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
+      done()
 
-      it 'generate dates in steps (ms)', (done) ->
-        STEP = 100
-        gen = Fabricator.date(STEP)
-        START = gen()
+    it 'generate dates in steps (ms) with start', (done) ->
+      STEP = 100
+      START = moment().add('days', 1).add('minutes', 10).toDate()
+      gen = Fabricator.date(START, STEP)
 
-        assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
-        assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
-        assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
-        done()
-
-      it 'generate dates in steps (ms) with start', (done) ->
-        STEP = 100
-        START = moment().add('days', 1).add('minutes', 10).toDate()
-        gen = Fabricator.date(START, STEP)
-
-        assert.equal(gen().valueOf() - START.valueOf(), 0*STEP)
-        assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
-        assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
-        assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
-        done()
+      assert.equal(gen().valueOf() - START.valueOf(), 0*STEP)
+      assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
+      assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
+      assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
+      done()

@@ -44,9 +44,6 @@ module.exports = class Utils
   @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   # @nodoc
-  @toString: (json) -> try return JSON.stringify(json) catch err then return 'Failed to inspect'
-
-  # @nodoc
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
 
   # @nodoc
@@ -248,6 +245,6 @@ module.exports = class Utils
     if model[field] == other_model[field]
       return if fields.length > 1 then @jsonFieldCompare(model, other_model, fields.splice(1)) else 0
     if desc
-      return if Utils.toString(model[field]) < Utils.toString(other_model[field]) then 1 else -1
+      return if JSONUtils.stringify(model[field]) < JSONUtils.stringify(other_model[field]) then 1 else -1
     else
-      return if Utils.toString(model[field]) > Utils.toString(other_model[field]) then 1 else -1
+      return if JSONUtils.stringify(model[field]) > JSONUtils.stringify(other_model[field]) then 1 else -1

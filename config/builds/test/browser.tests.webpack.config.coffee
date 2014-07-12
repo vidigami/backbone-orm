@@ -2,7 +2,7 @@ path = require 'path'
 _ = require 'underscore'
 
 module.exports = _.extend  _.clone(require '../../webpack/base-config.coffee'), {
-  entry: './test/suite.coffee'
+  entry: ['./test/parameters.coffee'].concat((require '../../files').tests_browser)
   output:
     path: '.'
     filename: '_temp/webpack/backbone-orm.tests.js'

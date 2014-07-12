@@ -1,6 +1,6 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -9,7 +9,7 @@ Fabricator = BackboneORM.Fabricator
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
-  return if options.embed or options.query_cache
+  return if options.embed
 
   # As an alternative to using a global variable (which can be acceptable for testing only), move this code to a 'before' section,
   # and use `this.parent.test_parameters`, since `this` will be set to a testing context by mocha, and that can be shared

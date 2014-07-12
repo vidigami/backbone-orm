@@ -2,3 +2,4 @@
 --require test/parameters
 --timeout 10000
 --grep @no_options
+--reporter spec

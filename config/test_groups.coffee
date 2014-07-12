@@ -5,7 +5,7 @@ gutil = require 'gulp-util'
 FILES = require './files'
 
 module.exports = TEST_GROUPS = {}
-TEST_GROUPS.browser_globals = [{name: "browser_globals", files: FILES.local_dependancies.concat(['./backbone-orm.js', './test/parameters.coffee', './test/option_sets.coffee'], FILES.tests_core)}]
+TEST_GROUPS.browser_globals = [{name: "browser_globals", files: FILES.local_dependencies.concat(['./backbone-orm.js', './test/parameters.coffee', './test/option_sets.coffee'], FILES.tests_browser)}]
 
 # ###############################
 # # AMD
@@ -24,14 +24,13 @@ TEST_GROUPS.browser_globals = [{name: "browser_globals", files: FILES.local_depe
 ###############################
 # Webpack
 ###############################
-TEST_GROUPS.webpack = []
+# TEST_GROUPS.webpack = []
 # TEST_GROUPS.webpack.push({name: "webpack_generated", files: ['./_temp/webpack/backbone-orm.tests.js']})
-# TEST_GROUPS.webpack.push({name: "webpack_full", files: ['./_temp/webpack/backbone-orm.tests_new.js']})
-for file in FILES.tests_webpack
-  try webpack_config = require "../#{file}"
-  if webpack_config
-    test_file = webpack_config.output.filename
-    TEST_GROUPS.webpack.push({name: "webpack_#{path.basename(test_file, '.js')}", files: [test_file]})
+# for file in FILES.tests_webpack
+#   try webpack_config = require "../#{file}"
+#   if webpack_config
+#     test_file = webpack_config.output.filename
+#     TEST_GROUPS.webpack.push({name: "webpack_#{path.basename(test_file, '.js')}", files: [test_file]})
 
 # ###############################
 # # Browserify

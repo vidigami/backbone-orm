@@ -16,22 +16,16 @@ module.exports = (callback) ->
       .pipe(gulp.dest('node_modules/backbone-orm'))
       .on('end', callback)
 
-  # run node tests
-  queue.defer (callback) ->
-    gutil.log 'Running legacy Node.js tests'
-    gulp.src('test/suite.coffee')
-      .pipe(mocha({}))
-      .pipe(es.writeArray (err, array) -> callback(err))
-
-  queue.defer (callback) ->
-    gutil.log 'Running Node.js tests'
-    # ensure that globals for the target backend are loaded
-    global.test_parameters = require '../test/parameters'
-    gulp.src('test/spec/**/*.coffee')
-      .pipe(mocha({}))
-      .pipe es.writeArray (err, array) ->
-        delete global.test_parameters
-        callback(err)
+  # # run node tests
+  # queue.defer (callback) ->
+  #   gutil.log 'Running Node.js tests'
+  #   # ensure that globals for the target backend are loaded
+  #   global.test_parameters = require '../test/parameters'
+  #   gulp.src('test/spec/**/*.coffee')
+  #     .pipe(mocha({}))
+  #     .pipe es.writeArray (err, array) ->
+  #       delete global.test_parameters
+  #       callback(err)
 
   # run browser tests
   queue.defer (callback) ->

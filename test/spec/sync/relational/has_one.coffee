@@ -1,6 +1,6 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -8,7 +8,11 @@ Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
+  options = _.extend({}, options, parameters) if parameters
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -53,7 +57,6 @@ module.exports = (options, callback) ->
   describe "hasOne (cache: #{options.cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       relation = Owner.relation('flat')
       delete relation.virtual
@@ -169,7 +172,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -202,7 +205,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -235,7 +238,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -268,7 +271,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -301,7 +304,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -334,7 +337,7 @@ module.exports = (options, callback) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{Utils.toString(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{Utils.toString(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
                   done()
 
     patchAddTests(false)
@@ -752,7 +755,7 @@ module.exports = (options, callback) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(flat, 'found related model')
           if test_model.relationIsEmbedded('flat')
-            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().flat)}. Actual: #{Utils.toString(flat.toJSON())}")
+            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().flat)}. Actual: #{JSONUtils.stringify(flat.toJSON())}")
           else
             assert.deepEqual(test_model.toJSON().flat_id, flat.id, "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.id}")
           assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
@@ -769,7 +772,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().reverse)}. Actual: #{Utils.toString(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().reverse)}. Actual: #{JSONUtils.stringify(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
           done()
 
@@ -804,7 +807,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().reverse)}. Actual: #{Utils.toString(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().reverse)}. Actual: #{JSONUtils.stringify(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverse_id in owner json')
 
           reverse.get 'owner', (err, owner) ->
@@ -813,7 +816,7 @@ module.exports = (options, callback) ->
             assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.toString(test_model.toJSON())}\nActual: #{Utils.toString(owner.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
@@ -878,7 +881,7 @@ module.exports = (options, callback) ->
           assert.equal(test_model.id, reverse.get('owner_as_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_as_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_as_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_as_id}")
           if test_model.relationIsEmbedded('reverse_as')
-            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().reverse)}. Actual: #{Utils.toString(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse_as, reverse.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().reverse)}. Actual: #{JSONUtils.stringify(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_as_id, 'No reverse_as_id in owner json')
 
           reverse.get 'owner_as', (err, owner) ->
@@ -887,7 +890,7 @@ module.exports = (options, callback) ->
             assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.toString(test_model.toJSON())}\nActual: #{Utils.toString(owner.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
@@ -1042,7 +1045,7 @@ module.exports = (options, callback) ->
 
             queue.defer checkReverseFn(reverse1, owner0) # confirm it also is related
             queue.defer checkReverseFn(reverse0, owner0) # confirm it stayed
-            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{Utils.toString(owner1.get('reverse'))}")
+            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
             callback()
 
           # save and recheck
@@ -1076,10 +1079,10 @@ module.exports = (options, callback) ->
                 queue.defer checkReverseFn(reverse0b, owner0) # confirm it moved
 
                 # TODO: determine reason on SQL for updated_at missing
-                # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{Utils.toString(reverse1.toJSON())}.\nActual: #{Utils.toString(reverse0b.toJSON())}")
-                assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{Utils.toString(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{Utils.toString(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
+                # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(reverse1.toJSON())}.\nActual: #{JSONUtils.stringify(reverse0b.toJSON())}")
+                assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
 
-                assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{Utils.toString(owner1.get('reverse'))}")
+                assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
               callback()
 
           queue.await (err) ->

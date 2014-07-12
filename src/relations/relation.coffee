@@ -78,7 +78,7 @@ module.exports = class Relation
               attributes = {}
               attributes[@foreign_key] = model.id
               attributes[@reverse_relation.foreign_key] = related_id
-              # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.toString(attributes)}"
+              # console.log "Creating join for: #{@model_type.model_name} join: #{JSONUtils.stringify(attributes)}"
               join = new @join_table(attributes)
               join.save callback
 

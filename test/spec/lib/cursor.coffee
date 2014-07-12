@@ -1,2 +1,1 @@
-module.exports = (options, callback) ->
-  callback()
+# TODO

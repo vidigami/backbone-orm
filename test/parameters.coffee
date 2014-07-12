@@ -1,4 +1,4 @@
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../backbone-orm')
 
 exports =
   sync: BackboneORM.sync

@@ -22,7 +22,7 @@ module.exports = (callback) ->
 
   # build webpack
   queue.defer (callback) ->
-    gulp.src(['config/builds/test/**/*.webpack.config.coffee', '!config/builds/test/**/*.pre.webpack.config.coffee'], {read: false, buffer: false})
+    gulp.src(['config/builds/test/**/*.webpack.config.coffee'], {read: false, buffer: false})
       .pipe(webpack())
       .pipe(es.writeArray (err, array) -> callback(err))
 

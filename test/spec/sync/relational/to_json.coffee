@@ -1,6 +1,6 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -8,7 +8,11 @@ Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
-module.exports = (options, callback) ->
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
+  options = _.extend({}, options, parameters) if parameters
+
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
@@ -42,7 +46,6 @@ module.exports = (options, callback) ->
   describe "JSONUtils.toJSON (cache: #{options.cache}", ->
 
     before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
-    after (done) -> callback(); done()
     beforeEach (done) ->
       MODELS = {}
 

@@ -1,6 +1,6 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
@@ -14,7 +14,7 @@ try
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
-  return if options.embed or options.query_cache
+  return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
   describeMaybeSkip = if WritableStream then describe else describe.skip

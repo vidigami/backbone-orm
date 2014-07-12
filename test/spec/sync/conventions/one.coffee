@@ -1,6 +1,6 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM or require?('backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -11,7 +11,6 @@ Fabricator = BackboneORM.Fabricator
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
-  return if options.query_cache
   options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
@@ -121,7 +120,7 @@ _.each option_sets, exports = (options) ->
           assert.ifError(err)
           assert.ok(flat, 'found related model')
           if test_model.relationIsEmbedded('flat')
-            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().flat)}. Actual: #{Utils.toString(flat.toJSON())}")
+            assert.deepEqual(test_model.toJSON().flat, flat.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().flat)}. Actual: #{JSONUtils.stringify(flat.toJSON())}")
           else
             assert.deepEqual(test_model.toJSON().flat_id, flat.id, "Serialized id only. Expected: #{test_model.toJSON().flat_id}. Actual: #{flat.id}")
           assert.equal(test_model.get('flat_id'), flat.id, "\nExpected: #{test_model.get('flat_id')}\nActual: #{flat.id}")
@@ -147,7 +146,7 @@ _.each option_sets, exports = (options) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().reverse)}. Actual: #{Utils.toString(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().reverse)}. Actual: #{JSONUtils.stringify(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
           done()
 
@@ -162,7 +161,7 @@ _.each option_sets, exports = (options) ->
           assert.equal(test_model.id, reverse.get('owner_id'), "\nExpected: #{test_model.id}\nActual: #{reverse.get('owner_id')}")
           assert.equal(test_model.id, reverse.toJSON().owner_id, "\nReverse toJSON has an owner_id. Expected: #{test_model.id}\nActual: #{reverse.toJSON().owner_id}")
           if test_model.relationIsEmbedded('reverse')
-            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{Utils.toString(test_model.toJSON().reverse)}. Actual: #{Utils.toString(reverse.toJSON())}")
+            assert.deepEqual(test_model.toJSON().reverse, reverse.toJSON(), "Serialized embed. Expected: #{JSONUtils.stringify(test_model.toJSON().reverse)}. Actual: #{JSONUtils.stringify(reverse.toJSON())}")
           assert.ok(!test_model.toJSON().reverse_id, 'No reverese_id in owner json')
 
           reverse.get 'owner', (err, owner) ->
@@ -171,7 +170,7 @@ _.each option_sets, exports = (options) ->
             assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
 
             if Owner.cache
-              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{Utils.toString(test_model.toJSON())}\nActual: #{Utils.toString(owner.toJSON())}")
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
