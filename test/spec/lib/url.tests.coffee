@@ -1,7 +1,7 @@
 assert = assert or require?('chai').assert
 _ = require 'underscore'
 
-BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
 DatabaseURL = BackboneORM.DatabaseURL
 
 describe 'DatabaseURL', ->

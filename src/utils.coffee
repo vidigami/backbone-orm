@@ -18,9 +18,6 @@ modelExtensions = null
 S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
 
 module.exports = class Utils
-  ##############################################
-  # Schema
-
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
 
@@ -39,6 +36,9 @@ module.exports = class Utils
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
       return callback(new Error("Failed to migrate schemas: #{failed_schemas.join(', ')}")) if failed_schemas.length
       callback()
+
+  # @nodoc
+  @inspect: (json) -> console.log 'warning: Utils.inspect has been deprecated. Use JSONUtils.stringify instead'; JSONUtils.stringify(json)
 
   # @nodoc
   @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())

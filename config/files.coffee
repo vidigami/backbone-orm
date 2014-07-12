@@ -16,4 +16,4 @@ module.exports =
 
   test_parameters: './test/parameters.coffee'
   tests_webpack: ("./config/builds/test/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/builds/test') when /\.webpack.config.coffee$/.test(filename))
-  tests_browser: ("./test/spec/sync/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/../test/spec/sync') when /\.coffee$/.test(filename))
+  tests_browser: ("./test/spec/sync/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/../test/spec/sync') when /\.tests.coffee$/.test(filename))
