@@ -42,7 +42,7 @@ _.each option_sets, exports = (options) ->
   }, BASE_SCHEMA)
   Owner::sync = SYNC(Owner)
 
-  describe "Many to Many with resetSchemasByDirectory (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "Node: Many to Many with resetSchemasByDirectory (cache: #{options.cache}, embed: #{options.embed})", ->
 
     before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     beforeEach (done) ->

@@ -159,7 +159,7 @@ $ npm test
 
 To run specific groups of tests, [use mocha `--grep` option on tags stated in the test descriptions](https://github.com/visionmedia/mocha/wiki/Tagging).
 By default, when using mocha from the command line, `--grep @no_options` is used; use
-`mocha --grep '' test/spec/**/*.coffee` to run all tests.
+`mocha --grep '' test/**/*.tests.coffee` to run all tests.
 
 In the browser, to run the tests, use `karma start ./config/karma/manual-config.coffee`
 
