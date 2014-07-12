@@ -1,14 +1,11 @@
 _ = window?.BackboneORM?._ or require 'underscore'
-# powerset = require 'powerset'
-# include powerset directly so that powerset doesn't need to be required on the client
+
+# embed powerset so doesn't need to be required on the client
 _array_reduce = Array.prototype.reduce
 powerset = (input) ->
   return _array_reduce.call(input, ((powerset, item) ->
     next = [item]
-    return powerset.reduce(((powerset, item) ->
-      powerset.push(item.concat(next))
-      return powerset
-    ), powerset)
+    return powerset.reduce(((powerset, item) -> powerset.push(item.concat(next)); return powerset), powerset)
   ), [[]])
 
 ARG_OPTIONS =
@@ -32,5 +29,7 @@ options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
 option_set.$tags = getTags(option_set) for option_set in exports
 
-# (if window? then window else if global? then global).__test__option_sets = exports; module?.exports = exports
+# TODO: fix options - dependency ordering
+exports = [exports[0]]
+
 window?.__test__option_sets = exports; module?.exports = exports
