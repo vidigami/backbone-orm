@@ -40,5 +40,4 @@ module.exports = (options, callback) ->
       queue.await done
 
     describe 'TODO', ->
-      it 'TODO', (done) ->
-          done()
+      it 'TODO', (done) -> done()
