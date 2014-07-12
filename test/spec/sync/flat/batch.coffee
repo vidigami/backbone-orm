@@ -7,7 +7,7 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-option_sets = window?.__test__option_sets or require?('../../option_sets')
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 
 _.each option_sets, exports = (options) ->

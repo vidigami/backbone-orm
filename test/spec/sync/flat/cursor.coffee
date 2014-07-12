@@ -6,7 +6,7 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-option_sets = window?.__test__option_sets or require?('../../option_sets')
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
 # allow `__test__parameters` to be a global in both node and browser
 parameters = __test__parameters if __test__parameters?
 

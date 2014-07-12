@@ -11,7 +11,7 @@ try
   streams = require('stream')
   WritableStream = streams.Writable
 
-option_sets = window?.__test__option_sets or require?('../../option_sets')
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
   return if options.embed or options.query_cache
