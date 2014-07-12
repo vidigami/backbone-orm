@@ -11,9 +11,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define(["underscore", "backbone", "moment", "stream"], factory);
 	else if(typeof exports === 'object')
-		exports["kb"] = factory(require("underscore"), require("backbone"), require("moment"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
+		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), require("moment"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
-		root["kb"] = factory(root["_"], root["Backbone"], root["moment"], root["stream"]);
+		root["BackboneORM"] = factory(root["_"], root["Backbone"], root["moment"], root["stream"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_4__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
