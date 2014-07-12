@@ -15,5 +15,5 @@ module.exports =
   local_dependancies: local_dependancies
 
   test_parameters: './test/parameters.coffee'
-  tests_core: ("./test/spec/#{filename}" for filename in wrench.readdirSyncRecursive('./test/spec') when /\.coffee$/.test(filename))
-  tests_webpack: ("./config/builds/test/#{filename}" for filename in wrench.readdirSyncRecursive('./config/builds/test') when /\.webpack.config.coffee$/.test(filename))
+  tests_core: ("./test/spec/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/../test/spec') when /\.coffee$/.test(filename))
+  tests_webpack: ("./config/builds/test/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/builds/test') when /\.webpack.config.coffee$/.test(filename))
