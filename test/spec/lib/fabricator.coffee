@@ -4,6 +4,7 @@ BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') 
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 moment = BackboneORM.modules.moment
 Utils = BackboneORM.Utils
+JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
 describe 'Fabricator', ->

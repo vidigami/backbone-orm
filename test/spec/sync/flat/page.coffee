@@ -5,6 +5,7 @@ _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
+JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
