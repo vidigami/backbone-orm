@@ -40,7 +40,6 @@
     "gulp-concat": "*",
     "gulp-header": "*",
     "gulp-mocha": "^0.4.1",
-    "gulp-mocha-phantomjs": "*",
     "gulp-webpack-config": "*",
     "gulp-rename": "*",
     "gulp-require-src": "*",
