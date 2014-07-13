@@ -124,7 +124,7 @@ module.exports = (options) ->
         reverses: -> ['hasMany', Reverse]
       }, BASE_SCHEMA)
       sync: SYNC(Owner)
-  ()
+  )()
 
   #############################
   # Other
