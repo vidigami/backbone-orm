@@ -3270,15 +3270,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _fn = function(model_json) {
 	                return find_queue.defer(function(callback) {
 	                  var find_keys, next;
+	                  if (exists && json.length) {
+	                    return callback();
+	                  }
 	                  find_keys = _.keys(find_query);
 	                  next = function(err, is_match) {
-	                    if (err) {
+	                    if (err || !is_match) {
 	                      return callback(err);
 	                    }
-	                    if (!is_match) {
-	                      return callback();
-	                    }
-	                    if (!find_keys.length || (exists && (keys.length !== find_keys.length))) {
+	                    if (!find_keys.length) {
 	                      json.push(JSONUtils.deepClone(model_json));
 	                      return callback();
 	                    }
@@ -6019,8 +6019,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (_this.reverse_relation.type === 'hasMany') {
 	              return add(callback);
 	            }
-	            (query = {})[_this.reverse_relation.foreign_key] = related_id;
-	            return _this.join_table.find(query, function(err, join_table_json) {
+	            (query = {
+	              $one: true
+	            })[_this.reverse_relation.foreign_key] = related_id;
+	            return _this.join_table.cursor(query).toJSON(function(err, join_table_json) {
 	              if (err) {
 	                return callback(err);
 	              }

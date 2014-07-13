@@ -84,14 +84,12 @@ module.exports = class MemoryCursor extends Cursor
 
             for id, model_json of @store
               do (model_json) => find_queue.defer (callback) =>
+                return callback() if exists and json.length # exists only needs one result
+
                 find_keys = _.keys(find_query)
                 next = (err, is_match) =>
-                  # done conditions
-                  return callback(err) if err
-                  return callback() unless is_match
-                  if not find_keys.length or (exists and (keys.length isnt find_keys.length)) # exists only needs one result
-                    json.push(JSONUtils.deepClone(model_json))
-                    return callback()
+                  return callback(err) if err or not is_match # done conditions
+                  (json.push(JSONUtils.deepClone(model_json)); return callback()) unless find_keys.length
 
                   # check next key
                   @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
