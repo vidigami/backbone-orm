@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.5.18
+* Fixed exists bug
+
 ### 0.5.17
 * Fixed module system problems
 
