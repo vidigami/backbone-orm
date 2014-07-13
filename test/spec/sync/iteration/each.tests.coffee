@@ -17,7 +17,6 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-
   describe "Model.each #{options.$parameter_tags or ''}#{options.$tags}", ->
     Flat = null
     before (done) ->
