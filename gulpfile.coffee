@@ -29,7 +29,7 @@ gulp.task 'build', buildLibraries = (callback) ->
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'watch', ['build'], (callback) ->
-  gulp.watch './src/**/*.coffee', (callback) -> buildLibraries(callback)
+  gulp.watch './src/**/*.coffee', -> buildLibraries(->)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'minify', ['build'], (callback) ->
@@ -41,8 +41,8 @@ gulp.task 'minify', ['build'], (callback) ->
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test', ['minify'], (callback) ->
-# gulp.task 'test', (callback) ->
+# gulp.task 'test', ['minify'], (callback) ->
+gulp.task 'test', (callback) ->
   runTests or= require './config/run_tests'
   runTests (err) -> process.exit(if err then 1 else 0)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455

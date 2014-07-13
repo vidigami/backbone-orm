@@ -1,6 +1,6 @@
-wrench = require 'wrench'
 path = require 'path'
 fs = require 'fs'
+Wrench = require 'wrench'
 
 # TODO: determine if browser tests should always use bower versions, or if npm versions are fine
 try bower_dir = fs.readdirSync('bower_components')
@@ -15,5 +15,5 @@ module.exports =
   local_dependencies: local_dependencies
 
   test_parameters: './test/parameters.coffee'
-  tests_webpack: ("./config/builds/test/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/builds/test') when /\.webpack.config.coffee$/.test(filename))
-  tests_browser: ("./test/spec/sync/#{filename}" for filename in wrench.readdirSyncRecursive(__dirname + '/../test/spec/sync') when /\.tests.coffee$/.test(filename))
+  tests_webpack: ("./config/builds/test/#{filename}" for filename in Wrench.readdirSyncRecursive(__dirname + '/builds/test') when /\.webpack.config.coffee$/.test(filename))
+  tests_browser: ("./test/spec/sync/#{filename}" for filename in Wrench.readdirSyncRecursive(__dirname + '/../test/spec/sync') when /\.tests.coffee$/.test(filename))

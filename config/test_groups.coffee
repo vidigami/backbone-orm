@@ -32,13 +32,9 @@ TEST_GROUPS.browser_globals = [{name: "browser_globals", files: FILES.local_depe
 #     test_file = webpack_config.output.filename
 #     TEST_GROUPS.webpack.push({name: "webpack_#{path.basename(test_file, '.js')}", files: [test_file]})
 
-# ###############################
-# # Browserify
-# ###############################
-# TEST_GROUPS.browserify = []
-# for test_name, test_info of require('./browserify/tests')
-#   TEST_GROUPS.browserify.push({
-#     name: "browserify_#{test_name}",
-#     files: test_info.output,
-#     build: {destination: test_info.output, options: test_info.options, files: test_info.files}
-#   })
+###############################
+# Browserify
+###############################
+TEST_GROUPS.browserify = []
+for test_name, test_info of require('./browserify/tests')
+  TEST_GROUPS.browserify.push({name: "browserify_#{test_name}", files: [test_info.output], build: {destination: test_info.output, options: test_info.options, files: test_info.files}})

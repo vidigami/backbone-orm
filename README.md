@@ -157,12 +157,23 @@ Please run tests before submitting a pull request.
 $ npm test
 ```
 
-To run specific groups of tests, [use mocha `--grep` option on tags stated in the test descriptions](https://github.com/visionmedia/mocha/wiki/Tagging).
-By default, when using mocha from the command line, `--grep @no_options` is used; use
-`mocha --grep '' test/**/*.tests.coffee` to run all tests.
+To run all tests (Node.js only):
+
+```
+mocha --grep '' test/**/*.tests.coffee
+```
+
+To run specific groups of tests, [use mocha `--grep` option on tags stated in the test descriptions](https://github.com/visionmedia/mocha/wiki/Tagging); for example:
+
+```
+mocha --grep @cache test/**/*.tests.coffee
+```
 
 In the browser, to run the tests, use `karma start ./config/karma/manual-config.coffee`
 
-To test your own backend, you need to create a file like `test/parameters.coffee` that sets the global variable
+# To add a new sync
+
+1. you need to create a file like `test/parameters.coffee` that sets the global variable
 `__test__parameters`, which sets the `sync` function for the tests to use. _This is the same approach taken by the
 [promises-aplus test suite](https://github.com/promises-aplus/promises-tests)._
+

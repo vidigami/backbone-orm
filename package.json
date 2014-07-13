@@ -28,11 +28,12 @@
     "release": "gulp release --require coffee-script/register"
   },
   "devDependencies": {
-    "chai": "^1.9.1",
     "codo": "2.x",
     "coffee-loader": "^0.7.2",
     "coffee-script": "*",
     "event-stream": "*",
+    "mocha": "*",
+    "chai": "*",
     "gulp": "*",
     "gulp-browserify": "^0.5.0",
     "gulp-compile-js": "*",
@@ -47,8 +48,6 @@
     "gulp-util": "*",
     "gulp-wrap-amd-infer": "*",
     "gulp-zip": "*",
-    "mocha": "*",
-    "powerset": "*",
     "queue-async": "*",
     "webpack": "*",
     "wrench": "*",
