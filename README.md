@@ -157,11 +157,22 @@ Please run tests before submitting a pull request.
 $ npm test
 ```
 
+# One Time
 To run all tests (Node.js only):
 
 ```
 mocha --grep '' test/**/*.tests.coffee
 ```
+
+# TDD
+To run all tests (Node.js only) in multiple terminals run:
+
+```
+npm run watch
+mocha --grep '' test/**/*.tests.coffee --watch
+```
+
+# Test Options
 
 To run specific groups of tests, [use mocha `--grep` option on tags stated in the test descriptions](https://github.com/visionmedia/mocha/wiki/Tagging); for example:
 
@@ -169,11 +180,8 @@ To run specific groups of tests, [use mocha `--grep` option on tags stated in th
 mocha --grep @cache test/**/*.tests.coffee
 ```
 
-In the browser, to run the tests, use `karma start ./config/karma/manual-config.coffee`
-
-# To add a new sync
+# For Sync Writers
 
 1. you need to create a file like `test/parameters.coffee` that sets the global variable
 `__test__parameters`, which sets the `sync` function for the tests to use. _This is the same approach taken by the
 [promises-aplus test suite](https://github.com/promises-aplus/promises-tests)._
-
