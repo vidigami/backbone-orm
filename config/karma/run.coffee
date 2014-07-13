@@ -21,5 +21,5 @@ module.exports = (callback) ->
         karma.start _.defaults({files: test.files}, BASE_CONFIG), (return_value) -> callback(new Error "Tests failed: #{return_value}" if return_value)
 
   queue.await (err) ->
-    # Wrench.rmdirSyncRecursive('./_temp', true) unless err
+    Wrench.rmdirSyncRecursive('./_temp', true) unless err
     callback(err)

@@ -27,11 +27,18 @@ module.exports = (callback) ->
       .pipe(gulp.dest('node_modules/backbone-orm'))
       .on('end', callback)
 
-  # # build webpack
-  # queue.defer (callback) ->
-  #   gulp.src(['config/builds/test/**/*.webpack.config.coffee'], {read: false, buffer: false})
-  #     .pipe(webpack())
-  #     .pipe(es.writeArray (err, array) -> callback(err))
+  # compile coffeescript config
+  queue.defer (callback) ->
+    gulp.src(['./test/option_sets.coffee', './test/parameters.coffee'])
+      .pipe(compile({coffee: {bare: true}}))
+      .pipe(gulp.dest('_temp'))
+      .on('end', callback)
+
+  # build webpack
+  queue.defer (callback) ->
+    gulp.src(['config/builds/test/**/*.webpack.config.coffee'], {read: false, buffer: false})
+      .pipe(webpack())
+      .pipe(es.writeArray (err, array) -> callback(err))
 
   # build test browserify
   for test in TEST_GROUPS.browserify or []
@@ -43,14 +50,14 @@ module.exports = (callback) ->
         .pipe(gulp.dest(path.dirname(test.build.destination)))
         .on('end', callback)
 
-  # # wrap AMD tests
-  # for test in TEST_GROUPS.amd or []
-  #   do (test) -> queue.defer (callback) ->
-  #     gulp.src(test.build.files)
-  #       .pipe(compile({coffee: {bare: true, header: false}}))
-  #       .pipe(wrapAMD(test.build.options))
-  #       .pipe(gulp.dest(test.build.destination))
-  #       .on('end', callback)
+  # wrap AMD tests
+  for test in TEST_GROUPS.amd or []
+    do (test) -> queue.defer (callback) ->
+      gulp.src(test.build.files)
+        .pipe(compile({coffee: {bare: true, header: false}}))
+        .pipe(wrapAMD(test.build.options))
+        .pipe(gulp.dest(test.build.destination))
+        .on('end', callback)
 
   # uninstall backbone-orm
   queue.await (err) ->

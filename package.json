@@ -62,7 +62,8 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
     "inflection": "*",
-    "lru-cache": "*"
+    "lru-cache": "*",
+    "lodash": "*"
   },
   "dependencies": {
     "underscore": ">=1.2.0",
