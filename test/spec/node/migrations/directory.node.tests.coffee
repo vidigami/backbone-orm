@@ -44,7 +44,6 @@ _.each option_sets, exports = (options) ->
 
   describe "Node: Many to Many with resetSchemasByDirectory (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Reverse, Owner], done)
     beforeEach (done) ->
       relation = Owner.relation('reverses')
       delete relation.virtual

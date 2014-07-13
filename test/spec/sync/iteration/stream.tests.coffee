@@ -5,6 +5,7 @@ _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
+Utils = BackboneORM.Utils
 
 streams = window?.stream or require?('stream')
 WritableStream = streams?.Writable
@@ -29,6 +30,7 @@ _.each option_sets, exports = (options) ->
     Filter = null
     pipeCheck = null
 
+    # TODO: document why before is necessary
     before (done) ->
       ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
@@ -45,21 +47,15 @@ _.each option_sets, exports = (options) ->
         constructor: (@fn) -> super {objectMode: true}
         _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
 
-      pipeCheck = (query, expected, done) ->
-        was_called = false
-        call_done = (err) ->
-          return if was_called; was_called = true
-          assert.ifError(err)
-          done()
+      pipeCheck = (query, expected, callback) ->
+        done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
 
         Flat.stream(query)
           .pipe(counter = new Counter())
-          .on 'finish', ->
-            assert.equal(counter.count, expected)
-            call_done()
-          .on 'error', call_done
+          .on 'finish', -> assert.equal(counter.count, expected); done()
+          .on 'error', done
 
-      return done() unless options.before; options.before([Flat], done)
+      return done()
     beforeEach (done) ->
       queue = new Queue(1)
 
@@ -76,21 +72,14 @@ _.each option_sets, exports = (options) ->
 
       queue.await done
 
-    it 'should support data interface', (done) ->
+    it 'should support data interface', (callback) ->
       model_count = 0
-
-      was_called = false
-      call_done = (err) ->
-        return if was_called; was_called = true
-        assert.ifError(err)
-        done()
+      done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
 
       stream = Flat.stream()
       stream.on 'data', (model) -> model_count++
-      stream.on 'error', call_done
-      stream.on 'end', ->
-        assert.equal(model_count, BASE_COUNT)
-        call_done()
+      stream.on 'end', -> assert.equal(model_count, BASE_COUNT); done()
+      stream.on 'error', done
 
     it 'should support pipe interface', (done) ->
       pipeCheck(null, BASE_COUNT, done)

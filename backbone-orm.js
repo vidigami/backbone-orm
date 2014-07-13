@@ -204,9 +204,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 
-	  Utils.inspect = function(json) {
-	    console.log('warning: Utils.inspect has been deprecated. Use JSONUtils.stringify instead');
-	    return JSONUtils.stringify(json);
+	  Utils.debounceCallback = function(callback) {
+	    var debounced_callback;
+	    return debounced_callback = function() {
+	      if (debounced_callback.was_called) {
+	        return;
+	      }
+	      debounced_callback.was_called = true;
+	      return callback.apply(null, Array.prototype.slice.call(arguments, 0));
+	    };
 	  };
 
 	  Utils.guid = function() {

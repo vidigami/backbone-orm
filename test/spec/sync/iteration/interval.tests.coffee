@@ -7,9 +7,7 @@ Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 Fabricator = BackboneORM.Fabricator
-try
-  streams = require('stream')
-  WritableStream = streams.Writable
+try WritableStream = require('stream').Writable
 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
@@ -30,6 +28,7 @@ _.each option_sets, exports = (options) ->
     Flat = null
     Counter = null
 
+    # TODO: document why before is necessary
     before (done) ->
       ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
 
@@ -42,7 +41,8 @@ _.each option_sets, exports = (options) ->
         constructor: -> super {objectMode: true}; @count = 0
         _write: (model, encoding, next) -> @count++; next()
 
-      return done() unless options.before; options.before([Flat], done)
+      return done()
+
     beforeEach (done) ->
       queue = new Queue(1)
 

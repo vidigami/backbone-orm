@@ -38,7 +38,8 @@ module.exports = class Utils
       callback()
 
   # @nodoc
-  @inspect: (json) -> console.log 'warning: Utils.inspect has been deprecated. Use JSONUtils.stringify instead'; JSONUtils.stringify(json)
+  @debounceCallback = (callback) ->
+    return debounced_callback = -> return if debounced_callback.was_called; debounced_callback.was_called = true; callback.apply(null, Array.prototype.slice.call(arguments, 0))
 
   # @nodoc
   @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())

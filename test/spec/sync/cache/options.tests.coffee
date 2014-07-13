@@ -25,7 +25,6 @@ _.each option_sets, exports = (options) ->
 
   describe "Cache Options (embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 

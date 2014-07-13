@@ -45,7 +45,6 @@ _.each option_sets, exports = (options) ->
 
   describe "JSONUtils.toJSON (cache: #{options.cache}", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     beforeEach (done) ->
       MODELS = {}
 

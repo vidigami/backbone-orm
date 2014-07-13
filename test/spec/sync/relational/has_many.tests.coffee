@@ -63,7 +63,6 @@ _.each option_sets, exports = (options) ->
 
   describe "hasMany (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, ForeignReverse, Owner], done)
     beforeEach (done) ->
       relation = Owner.relation('reverses')
       delete relation.virtual

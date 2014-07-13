@@ -32,7 +32,6 @@ _.each option_sets, exports = (options) ->
 
   describe "self model relations (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([SelfReference], done)
     beforeEach (done) ->
       MODELS = {}
 

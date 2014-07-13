@@ -60,7 +60,6 @@ _.each option_sets, exports = (options) ->
 
   describe "hasOne (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, OForeignReverse, OOwner], done)
     beforeEach (done) ->
       relation = OOwner.relation('flat')
       delete relation.virtual

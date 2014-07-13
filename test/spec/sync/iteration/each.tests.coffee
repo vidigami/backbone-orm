@@ -18,16 +18,11 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Model.each #{options.$parameter_tags or ''}#{options.$tags}", ->
-    Flat = null
-    before (done) ->
-      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
+    class Flat extends Backbone.Model
+      urlRoot: "#{DATABASE_URL}/flats"
+      schema: BASE_SCHEMA
+      sync: SYNC(Flat)
 
-      class Flat extends Backbone.Model
-        urlRoot: "#{DATABASE_URL}/flats"
-        schema: BASE_SCHEMA
-        sync: SYNC(Flat)
-
-      return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 

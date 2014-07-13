@@ -42,7 +42,6 @@ _.each option_sets, exports = (options) ->
 
   describe "One #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat, Reverse, Owner], done)
     beforeEach (done) ->
       MODELS = {}
       queue = new Queue(1)

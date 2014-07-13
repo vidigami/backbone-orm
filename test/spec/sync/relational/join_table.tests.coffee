@@ -35,7 +35,6 @@ _.each option_sets, exports = (options) ->
   second_ids = []
   describe 'Join Table Functionality', ->
 
-    before (done) -> return done() unless options.before; options.before([FirstModel, SecondModel], done)
     beforeEach (done) ->
       queue = new Queue(1)
       queue.defer (callback) -> FirstModel.resetSchema(callback)

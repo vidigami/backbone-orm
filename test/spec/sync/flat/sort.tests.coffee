@@ -27,7 +27,6 @@ _.each option_sets, exports = (options) ->
 
   describe "Model.sort #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    before (done) -> return done() unless options.before; options.before([Flat], done)
     beforeEach (done) ->
       queue = new Queue(1)
 
