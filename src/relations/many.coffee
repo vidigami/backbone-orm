@@ -158,8 +158,8 @@ module.exports = class Many extends require('./relation')
           return add(callback) if @reverse_relation.type is 'hasMany'
 
           # check for changes
-          (query = {})[@reverse_relation.foreign_key] = related_id
-          return @join_table.find query, (err, join_table_json) =>
+          (query = {$one: true})[@reverse_relation.foreign_key] = related_id
+          return @join_table.cursor(query).toJSON (err, join_table_json) =>
             return callback(err) if err
             return add(callback) unless join_table_json # create a new join table entry
             return callback() if join_table_json[@foreign_key] is model.id # already related
