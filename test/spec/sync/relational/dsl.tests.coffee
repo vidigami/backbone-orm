@@ -3,8 +3,8 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
-ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
+ModelCache = BackboneORM.CacheSingletons.ModelCache
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
@@ -46,18 +46,17 @@ _.each option_sets, exports = (options) ->
 
   describe "JSON DSL (cache: #{options.cache}", ->
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -93,7 +92,7 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
 
     # renderTemplate (no dsl)

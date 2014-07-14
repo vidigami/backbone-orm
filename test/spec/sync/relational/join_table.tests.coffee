@@ -3,6 +3,7 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
@@ -35,10 +36,14 @@ _.each option_sets, exports = (options) ->
   second_ids = []
   describe 'Join Table Functionality', ->
 
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
     beforeEach (done) ->
       queue = new Queue(1)
-      queue.defer (callback) -> FirstModel.resetSchema(callback)
-      queue.defer (callback) -> SecondModel.resetSchema(callback)
       queue.defer (callback) ->
         models = []
         models.push new FirstModel()

@@ -63,20 +63,19 @@ _.each option_sets, exports = (options) ->
 
   describe "hasMany (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -119,7 +118,7 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
 #    it 'Can fetch and serialize a custom foreign key', (done) ->
 #      Owner.findOne (err, test_model) ->

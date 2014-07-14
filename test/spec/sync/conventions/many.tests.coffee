@@ -36,18 +36,17 @@ _.each option_sets, exports = (options) ->
 
   describe "Many #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset query cache
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -72,7 +71,7 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
     it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
       Owner.findOne (err, test_model) ->

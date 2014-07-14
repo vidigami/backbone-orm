@@ -3,6 +3,7 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
@@ -49,12 +50,16 @@ _.each option_sets, exports = (options) ->
   describe "Backbone.Collection #{options.$parameter_tags or ''}#{options.$tags}", ->
     options = _.extend({}, options, @parent.parameters) if @parent.parameters
 
-    beforeEach (done) ->
-      queue = new Queue(1)
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Model], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
 
-      # reset caches
+    beforeEach (callback) ->
+      queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-      queue.await done
+      queue.await callback
 
     it 'fetch models using pre-configured model', (done) ->
       class Collection extends Backbone.Collection

@@ -28,20 +28,15 @@ _.each option_sets, exports = (options) ->
 
   describe "Model.page #{options.$parameter_tags or ''}#{options.$tags}", ->
 
+    afterEach (callback) -> Utils.resetSchemas [Flat], callback
     beforeEach (done) ->
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      queue.defer (callback) -> Flat.resetSchema(callback)
-
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
       }, callback)
-
       queue.await done
 
     it 'Cursor can chain limit with paging', (done) ->

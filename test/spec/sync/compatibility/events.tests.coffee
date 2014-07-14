@@ -18,10 +18,8 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
-  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
-
+  attribute_change_count = 0
+  reset_change_count = 0
   class Reverse extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/reverses"
     schema: _.defaults({
@@ -36,7 +34,24 @@ _.each option_sets, exports = (options) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
+    initialize: ->
+      super
+      @on 'change:reverses', -> attribute_change_count++
+      @get('reverses').on 'reset', -> reset_change_count++
+
   describe "Backbone Events #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
+      queue = new Queue(1)
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.await callback
+
     describe 'Triggering', ->
 
       # https://github.com/vidigami/backbone-mongo/issues/4
@@ -44,30 +59,11 @@ _.each option_sets, exports = (options) ->
         attribute_change_count = 0
         reset_change_count = 0
 
-        class ManyModel extends Backbone.Model
-          urlRoot: "#{DATABASE_URL}/reverses"
-          schema: _.defaults({
-            owners: -> ['hasMany', MainModel]
-          }, BASE_SCHEMA)
-          sync: SYNC(ManyModel)
-
-        class MainModel extends Backbone.Model
-          urlRoot: "#{DATABASE_URL}/owners"
-          schema: _.defaults({
-            reverses: -> ['hasMany', ManyModel]
-          }, BASE_SCHEMA)
-          sync: SYNC(MainModel)
-
-          initialize: ->
-            super
-            @on 'change:reverses', -> attribute_change_count++
-            @get('reverses').on 'reset', -> reset_change_count++
-
         assert.equal(attribute_change_count, 0)
         assert.equal(reset_change_count, 0)
 
-        main = new MainModel()
-        many = new ManyModel({foo: 'bar'})
+        main = new Owner()
+        many = new Reverse({foo: 'bar'})
         assert.equal(attribute_change_count, 0)
         assert.equal(reset_change_count, 0)
 

@@ -27,21 +27,16 @@ _.each option_sets, exports = (options) ->
 
   describe "Model.sort #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    beforeEach (done) ->
+    afterEach (callback) -> Utils.resetSchemas [Flat], callback
+    beforeEach (callback) ->
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      queue.defer (callback) -> Flat.resetSchema(callback)
-
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
       }, callback)
-
-      queue.await done
+      queue.await callback
 
     it 'Handles a sort by one field query', (done) ->
       SORT_FIELD = 'name'

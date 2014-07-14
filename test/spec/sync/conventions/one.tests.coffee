@@ -42,17 +42,17 @@ _.each option_sets, exports = (options) ->
 
   describe "One #{options.$parameter_tags or ''}#{options.$tags}", ->
 
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
     beforeEach (done) ->
       MODELS = {}
+
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 

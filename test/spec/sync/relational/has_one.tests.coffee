@@ -26,7 +26,7 @@ _.each option_sets, exports = (options) ->
     model_name: 'Flat'
     urlRoot: "#{DATABASE_URL}/o_flats"
     schema: _.defaults({
-      owner: -> ['hasOne', OOwner]
+      owner: -> ['hasOne', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Flat)
 
@@ -34,45 +34,45 @@ _.each option_sets, exports = (options) ->
     model_name: 'Reverse'
     urlRoot: "#{DATABASE_URL}/o_reverses"
     schema: _.defaults({
-      owner: -> ['belongsTo', OOwner]
-      owner_as: -> ['belongsTo', OOwner, as: 'reverse_as']
+      owner: -> ['belongsTo', Owner]
+      owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
-  class OForeignReverse extends Backbone.Model
+  class ForeignReverse extends Backbone.Model
     model_name: 'ForeignReverse'
     urlRoot: "#{DATABASE_URL}/o_foreign_reverses"
     schema: _.defaults({
-      owner: -> ['belongsTo', OOwner, foreign_key: 'ownerish_id']
+      owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
     }, BASE_SCHEMA)
-    sync: SYNC(OForeignReverse)
+    sync: SYNC(ForeignReverse)
 
-  class OOwner extends Backbone.Model
+  class Owner extends Backbone.Model
     model_name: 'Owner'
     urlRoot: "#{DATABASE_URL}/o_owners"
     schema: _.defaults({
       flat: -> ['belongsTo', Flat, embed: options.embed]
       reverse: -> ['hasOne', Reverse]
       reverse_as: -> ['hasOne', Reverse, as: 'owner_as']
-      foreign_reverse: -> ['hasOne', OForeignReverse]
+      foreign_reverse: -> ['hasOne', ForeignReverse]
     }, BASE_SCHEMA)
-    sync: SYNC(OOwner)
+    sync: SYNC(Owner)
 
   describe "hasOne (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    beforeEach (done) ->
-      relation = OOwner.relation('flat')
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
+      relation = Owner.relation('flat')
       delete relation.virtual
       MODELS = {}
       queue = new Queue(1)
 
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, OForeignReverse, OOwner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -84,11 +84,11 @@ _.each option_sets, exports = (options) ->
           name: Fabricator.uniqueId('reverse_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.reverse = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(OForeignReverse, BASE_COUNT, {
+        create_queue.defer (callback) -> Fabricator.create(ForeignReverse, BASE_COUNT, {
           name: Fabricator.uniqueId('foreign_reverse_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.foreign_reverse = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(OOwner, BASE_COUNT, {
+        create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
           name: Fabricator.uniqueId('owner_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.owner = models; callback(err))
@@ -112,10 +112,10 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
     it 'Can fetch and serialize a custom foreign key', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -133,7 +133,7 @@ _.each option_sets, exports = (options) ->
         assert.ok(test_model, 'found model')
 
         flat_id = test_model.id
-        new_model = new OOwner({flat_id: flat_id})
+        new_model = new Owner({flat_id: flat_id})
 
         new_model.save (err) ->
           assert.ok(!err, "No errors: #{err}")
@@ -149,7 +149,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -164,7 +164,7 @@ _.each option_sets, exports = (options) ->
 
               if unload
                 ModelCache.reset(->) # TODO: make async # reset cache
-                owner = new OOwner({id: owner.id})
+                owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
                 updated_reverse = owner.get('reverse')
@@ -182,7 +182,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -197,7 +197,7 @@ _.each option_sets, exports = (options) ->
 
               if unload
                 ModelCache.reset(->) # TODO: make async # reset cache
-                owner = new OOwner({id: owner.id})
+                owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
                 updated_reverse = owner.get('reverse')
@@ -215,7 +215,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -230,7 +230,7 @@ _.each option_sets, exports = (options) ->
 
               if unload
                 ModelCache.reset(->) # TODO: make async # reset cache
-                owner = new OOwner({id: owner.id})
+                owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse, (err) ->
                 assert.ok(!err, "No errors: #{err}")
                 updated_reverse = owner.get('reverse')
@@ -256,7 +256,7 @@ _.each option_sets, exports = (options) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, "loaded correct model.")
 
-            OOwner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
+            Owner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(another_owner_json, "loaded another model.")
               assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
@@ -289,7 +289,7 @@ _.each option_sets, exports = (options) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, "loaded correct model.")
 
-            OOwner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
+            Owner.cursor({id: {$ne: owner.id}, $one: true}).toJSON (err, another_owner_json) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(another_owner_json, "loaded another model.")
               assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
@@ -322,7 +322,7 @@ _.each option_sets, exports = (options) ->
             assert.ok(!err, "No errors: #{err}")
             assert.ok(owner, "loaded correct model.")
 
-            OOwner.cursor({id: {$ne: owner.id}}).toModel (err, another_owner) ->
+            Owner.cursor({id: {$ne: owner.id}}).toModel (err, another_owner) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(another_owner, "loaded another model.")
               assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
@@ -351,7 +351,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -362,7 +362,7 @@ _.each option_sets, exports = (options) ->
             destroyed_model = reverse
             if unload
               ModelCache.reset(->) # TODO: make async # reset cache
-              owner = new OOwner({id: owner.id})
+              owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model.id, (err) ->
               assert.ok(!err, "No errors: #{err}")
 
@@ -372,7 +372,7 @@ _.each option_sets, exports = (options) ->
                 assert.ok(!err, "No errors: #{err}")
                 assert.ok(!reverse, "loaded correct models.")
 
-                OOwner.findOne owner.id, (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
                   assert.ok(owner, 'found owners')
 
@@ -385,7 +385,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -396,7 +396,7 @@ _.each option_sets, exports = (options) ->
             destroyed_model = reverse
             if unload
               ModelCache.reset(->) # TODO: make async # reset cache
-              owner = new OOwner({id: owner.id})
+              owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model.toJSON(), (err) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -405,7 +405,7 @@ _.each option_sets, exports = (options) ->
                 assert.ok(!err, "No errors: #{err}")
                 assert.ok(!reverse, "loaded correct models.")
 
-                OOwner.findOne owner.id, (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
                   assert.ok(owner, 'found owners')
 
@@ -418,7 +418,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -429,7 +429,7 @@ _.each option_sets, exports = (options) ->
             destroyed_model = reverse
             if unload
               ModelCache.reset(->) # TODO: make async # reset cache
-              owner = new OOwner({id: owner.id})
+              owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model, (err) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -438,7 +438,7 @@ _.each option_sets, exports = (options) ->
                 assert.ok(!err, "No errors: #{err}")
                 assert.ok(!reverse, "loaded correct models.")
 
-                OOwner.findOne owner.id, (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
                   assert.ok(owner, 'found owners')
 
@@ -451,7 +451,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        OOwner.findOne (err, owner) ->
+        Owner.findOne (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found owners')
 
@@ -462,7 +462,7 @@ _.each option_sets, exports = (options) ->
             destroyed_model = reverse
             if unload
               ModelCache.reset(->) # TODO: make async # reset cache
-              owner = new OOwner({id: owner.id})
+              owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', [destroyed_model], (err) ->
               assert.ok(!err, "No errors: #{err}")
               assert.ok(!owner.get('reverse'), "destroyed in memory relationship.")
@@ -471,7 +471,7 @@ _.each option_sets, exports = (options) ->
                 assert.ok(!err, "No errors: #{err}")
                 assert.ok(!reverse, "loaded correct models.")
 
-                OOwner.findOne owner.id, (err, owner) ->
+                Owner.findOne owner.id, (err, owner) ->
                   assert.ok(!err, "No errors: #{err}")
                   assert.ok(owner, 'found owners')
 
@@ -623,7 +623,7 @@ _.each option_sets, exports = (options) ->
       related_key = 'flat'
       related_id_accessor = 'flat_id'
 
-      OOwner.cursor().include(related_key).toModel (err, owner) ->
+      Owner.cursor().include(related_key).toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         owner_id = owner.id
@@ -632,7 +632,7 @@ _.each option_sets, exports = (options) ->
         assert.ok(related, 'included related')
 
         (attributes = {})[related_key] = related
-        new_owner = new OOwner(attributes)
+        new_owner = new Owner(attributes)
         owner1 = null; new_owner1 = null; new_owner_id = null
 
         assert.equal(related, owner.get(related_key), "Didn't modify previous related. Expected: #{related}. Actual: #{owner.get(related_key)}")
@@ -656,8 +656,8 @@ _.each option_sets, exports = (options) ->
           callback()
 
         # load
-        queue.defer (callback) -> OOwner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
-        queue.defer (callback) -> OOwner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
+        queue.defer (callback) -> Owner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
+        queue.defer (callback) -> Owner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
 
         # check
         queue.defer (callback) ->
@@ -682,7 +682,7 @@ _.each option_sets, exports = (options) ->
       related_key = 'reverse'
       related_id_accessor = 'reverse_id'
 
-      OOwner.cursor().include(related_key).toModel (err, owner) ->
+      Owner.cursor().include(related_key).toModel (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
         related = owner.get(related_key)
@@ -691,7 +691,7 @@ _.each option_sets, exports = (options) ->
         assert.ok(related, 'included related')
 
         (attributes = {})[related_key] = related
-        new_owner = new OOwner(attributes)
+        new_owner = new Owner(attributes)
         owner1 = null; new_owner1 = null; new_owner_id = null
 
         assert.equal(null, owner.get(related_key), "Modified previous related. Expected: #{null}. Actual: #{owner.get(related_key)}")
@@ -715,8 +715,8 @@ _.each option_sets, exports = (options) ->
           callback()
 
         # load
-        queue.defer (callback) -> OOwner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
-        queue.defer (callback) -> OOwner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
+        queue.defer (callback) -> Owner.find owner_id, (err, _owner) -> callback(err, owner1 = _owner)
+        queue.defer (callback) -> Owner.find new_owner_id, (err, _owner) -> callback(err, new_owner1 = _owner)
 
         # check
         queue.defer (callback) ->
@@ -739,7 +739,7 @@ _.each option_sets, exports = (options) ->
     #     assert.ok(test_model, 'found model')
 
     #     reverse_id = test_model.id
-    #     new_model = new OOwner()
+    #     new_model = new Owner()
     #     new_model.save (err) ->
     #       assert.ok(!err, "No errors: #{err}")
     #       new_model.set({reverse_id: reverse_id})
@@ -750,7 +750,7 @@ _.each option_sets, exports = (options) ->
     #         done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -765,7 +765,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Handles a get query for a hasOne relation', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -780,7 +780,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Can retrieve an id for a hasOne relation via async virtual method', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         test_model.get 'reverse_id', (err, id) ->
@@ -789,7 +789,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Can retrieve a belongsTo id synchronously and then a model asynchronously from get methods', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.ok(test_model.get('flat_id'), 'Has the belongsTo id')
@@ -800,7 +800,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -818,14 +818,14 @@ _.each option_sets, exports = (options) ->
             assert.ok(owner, 'found original model')
             assert.deepEqual(reverse.toJSON().owner_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_id}. Actual: #{owner.id}")
 
-            if OOwner.cache
+            if Owner.cache
               assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
     it 'Appends json for a related model', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -844,11 +844,11 @@ _.each option_sets, exports = (options) ->
 
     # TODO: delay the returning of memory models related models to test lazy loading properly
     it 'Fetches a relation from the store if not present', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
-        fetched_owner = new OOwner({id: test_model.id})
+        fetched_owner = new Owner({id: test_model.id})
         fetched_owner.fetch (err) ->
           assert.ok(!err, "No errors: #{err}")
           delete fetched_owner.attributes.reverse
@@ -866,7 +866,7 @@ _.each option_sets, exports = (options) ->
     #          assert.equal(reverse, null, 'has not loaded the model initially')
 
     it 'Has an id loaded for a belongsTo and not for a hasOne relation', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
         assert.ok(test_model.get('flat_id'), 'belongsTo id is loaded')
@@ -874,7 +874,7 @@ _.each option_sets, exports = (options) ->
         done()
 
     it 'Handles a get query for a hasOne and belongsTo two sided relation as "as" fields', (done) ->
-      OOwner.findOne (err, test_model) ->
+      Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
 
@@ -892,25 +892,25 @@ _.each option_sets, exports = (options) ->
             assert.ok(owner, 'found original model')
             assert.deepEqual(reverse.toJSON().owner_as_id, owner.id, "Serialized id only. Expected: #{reverse.toJSON().owner_as_id}. Actual: #{owner.id}")
 
-            if OOwner.cache
+            if Owner.cache
               assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(owner.toJSON())}")
             else
               assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
             done()
 
     it 'Can include a related (belongsTo) model', (done) ->
-      OOwner.cursor({$one: true}).include('flat').toJSON (err, json) ->
+      Owner.cursor({$one: true}).include('flat').toJSON (err, json) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(json, 'found model')
         assert.ok(json.flat, "Has a related flat")
         assert.ok(json.flat.id, "Related model has an id")
 
-        unless OOwner.relationIsEmbedded('flat') # TODO: confirm this is correct
+        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
           assert.equal(json.flat_id, json.flat.id, "\nRelated model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
         done()
 
     it 'Can include a related (hasOne) model', (done) ->
-      OOwner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
+      Owner.cursor({$one: true}).include('reverse').toJSON (err, json) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(json, 'found model')
         assert.ok(json.reverse, "Has a related reverse")
@@ -919,7 +919,7 @@ _.each option_sets, exports = (options) ->
         done()
 
     it 'Can include multiple related models', (done) ->
-      OOwner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
+      Owner.cursor({$one: true}).include('reverse', 'flat').toJSON (err, json) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(json, 'found model')
         assert.ok(json.reverse, "Has a related reverse")
@@ -927,7 +927,7 @@ _.each option_sets, exports = (options) ->
         assert.ok(json.flat, "Has a related flat")
         assert.ok(json.flat.id, "Included model has an id")
 
-        unless OOwner.relationIsEmbedded('flat') # TODO: confirm this is correct
+        unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
           assert.equal(json.flat_id, json.flat.id, "\nIncluded model has the correct id: Expected: #{json.flat_id}\nActual: #{json.flat.id}")
         assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
         done()
@@ -937,10 +937,10 @@ _.each option_sets, exports = (options) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(flat, 'found model')
 
-        OOwner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
+        Owner.cursor({$one: true, 'flat.id': flat.id}).toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found model')
-          unless OOwner.relationIsEmbedded('flat') # TODO: confirm this is correct
+          unless Owner.relationIsEmbedded('flat') # TODO: confirm this is correct
             assert.equal(flat.id, owner.flat_id, "\nRelated model has the correct id: Expected: #{flat.id}\nActual: #{owner.flat_id}")
           done()
 
@@ -948,7 +948,7 @@ _.each option_sets, exports = (options) ->
       Flat.findOne (err, flat) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(flat, 'found model')
-        OOwner.cursor({$one: true, 'flat.name': flat.get('name')}).include('flat').toJSON (err, owner) ->
+        Owner.cursor({$one: true, 'flat.name': flat.get('name')}).include('flat').toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(owner, 'found model')
           assert.ok(owner.flat, "Has a related flat")
@@ -961,11 +961,11 @@ _.each option_sets, exports = (options) ->
       Reverse.findOne (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'Reverse found model')
-        OOwner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
+        Owner.cursor({$one: true, 'reverse.name': reverse.get('name')}).toJSON (err, owner) ->
           assert.ok(!err, "No errors: #{err}")
-          assert.ok(owner, 'OOwner found model')
+          assert.ok(owner, 'Owner found model')
 
-          unless OOwner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
             assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
           done()
 
@@ -973,7 +973,7 @@ _.each option_sets, exports = (options) ->
       Reverse.findOne (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'found model')
-        OOwner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
+        Owner.cursor({'reverse.name': reverse.get('name')}).include('reverse').toJSON (err, json) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(json, "found json")
           assert.equal(json.length, 1, "json has the correct number or results. Expecting: 1. Actual #{json.length}")
@@ -981,7 +981,7 @@ _.each option_sets, exports = (options) ->
           assert.ok(owner.reverse, "Has a related reverse")
           assert.ok(owner.reverse.id, "Related model has an id")
 
-          unless OOwner.relationIsEmbedded('reverse') # TODO: confirm this is correct
+          unless Owner.relationIsEmbedded('reverse') # TODO: confirm this is correct
             assert.equal(reverse.get('owner_id'), owner.id, "\nRelated model has the correct id: Expected: #{reverse.get('owner_id')}\nActual: #{owner.id}")
           assert.equal(reverse.get('name'), owner.reverse.name, "\nIncluded model has the correct name: Expected: #{reverse.get('name')}\nActual: #{owner.reverse.name}")
           done()
@@ -990,7 +990,7 @@ _.each option_sets, exports = (options) ->
       # TODO: implement embedded find
       return done() if options.embed
 
-      OOwner.findOne (err, owner) ->
+      Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
 
@@ -1003,7 +1003,7 @@ _.each option_sets, exports = (options) ->
       # TODO: implement embedded find
       return done() if options.embed
 
-      OOwner.findOne (err, owner) ->
+      Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(owner, 'found model')
 
@@ -1023,9 +1023,9 @@ _.each option_sets, exports = (options) ->
           assert.equal(expected_owner, reverse.get('owner'), "Reverse owner is correct. Expected: #{expected_owner}. Actual: #{reverse.get('owner')}")
           callback()
 
-        OOwner.cursor().limit(2).include('reverse').toModels (err, owners) ->
+        Owner.cursor().limit(2).include('reverse').toModels (err, owners) ->
           if virtual # set as virtual relationship after including reverse
-            relation = OOwner.relation('reverse')
+            relation = Owner.relation('reverse')
             relation.virtual = true
 
           assert.ok(!err, "No errors: #{err}")
@@ -1034,8 +1034,8 @@ _.each option_sets, exports = (options) ->
           owner0 = owners[0]; owner0_id = owner0.id; reverse0 = owner0.get('reverse')
           owner1 = owners[1]; owner1_id = owner1.id; reverse1 = owner1.get('reverse')
 
-          assert.ok(owner0.get('reverse'), "OOwner0 has 1 reverse.")
-          assert.ok(owner1.get('reverse'), "OOwner1 has 1 reverse.")
+          assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
+          assert.ok(owner1.get('reverse'), "Owner1 has 1 reverse.")
 
           queue = new Queue(1)
           queue.defer checkReverseFn(reverse0, owner0)
@@ -1043,12 +1043,12 @@ _.each option_sets, exports = (options) ->
           queue.defer (callback) ->
             owner0.set({reverse: reverse1})
 
-            assert.ok(owner0.get('reverse'), "OOwner0 has 1 reverse.")
-            assert.ok(!owner1.get('reverse'), "OOwner1 has no reverse.")
+            assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
+            assert.ok(!owner1.get('reverse'), "Owner1 has no reverse.")
 
             queue.defer checkReverseFn(reverse1, owner0) # confirm it also is related
             queue.defer checkReverseFn(reverse0, owner0) # confirm it stayed
-            assert.equal(null, owner1.get('reverse'), "OOwner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
+            assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
             callback()
 
           # save and recheck
@@ -1056,7 +1056,7 @@ _.each option_sets, exports = (options) ->
           queue.defer (callback) -> owner1.save callback
           queue.defer (callback) ->
             ModelCache.reset(->) # TODO: make async # reset cache
-            OOwner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
+            Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
 
@@ -1073,11 +1073,11 @@ _.each option_sets, exports = (options) ->
               reverse1b = owner1.get('reverse')
 
               if virtual
-                assert.ok(owner0.get('reverse'), "OOwner0 has 1 reverse.")
-                assert.ok(owner1.get('reverse'), "OOwner1 has 1 reverse.")
+                assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
+                assert.ok(owner1.get('reverse'), "Owner1 has 1 reverse.")
               else
-                assert.ok(owner0.get('reverse'), "OOwner0 has 1 reverse.")
-                assert.ok(!owner1.get('reverse'), "OOwner1 has no reverse.")
+                assert.ok(owner0.get('reverse'), "Owner0 has 1 reverse.")
+                assert.ok(!owner1.get('reverse'), "Owner1 has no reverse.")
 
                 queue.defer checkReverseFn(reverse0b, owner0) # confirm it moved
 
@@ -1085,7 +1085,7 @@ _.each option_sets, exports = (options) ->
                 # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(reverse1.toJSON())}.\nActual: #{JSONUtils.stringify(reverse0b.toJSON())}")
                 assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
 
-                assert.equal(null, owner1.get('reverse'), "OOwner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
+                assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
               callback()
 
           queue.await (err) ->
@@ -1098,9 +1098,9 @@ _.each option_sets, exports = (options) ->
     it 'does not serialize virtual attributes', (done) ->
       json_key = if options.embed then 'flat' else 'flat_id'
 
-      OOwner.findOne (err, owner) ->
+      Owner.findOne (err, owner) ->
         assert.ok(!err, "No errors: #{err}")
-        assert.ok(owner, 'OOwners found')
+        assert.ok(owner, 'Owners found')
         flat_id = owner.get('flat').id
 
         json = owner.toJSON()
@@ -1112,10 +1112,10 @@ _.each option_sets, exports = (options) ->
         virtual_json = owner.toJSON()
         assert.ok(!virtual_json.hasOwnProperty(json_key), 'Did not serialize flat')
 
-        owner_with_flat = new OOwner(json)
+        owner_with_flat = new Owner(json)
         assert.equal(owner_with_flat.get('flat').id, flat_id, 'Virtual with flat was deserialized')
 
-        owner_with_virtual_flat = new OOwner(virtual_json)
+        owner_with_virtual_flat = new Owner(virtual_json)
         assert.equal(owner_with_virtual_flat.get('flat'), null, 'Virtual without flat was deserialized')
         done()
 
@@ -1123,7 +1123,7 @@ _.each option_sets, exports = (options) ->
         #   assert.ok(!err, "No errors: #{err}")
 
         #   ModelCache.reset(->) # TODO: make async # reset cache
-        #   OOwner.find owner.id, (err, loaded_owner) ->
+        #   Owner.find owner.id, (err, loaded_owner) ->
         #     assert.ok(!err, "No errors: #{err}")
         #     assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')
         #     done()

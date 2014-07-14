@@ -34,22 +34,17 @@ _.each option_sets, exports = (options) ->
 
   describe "Model.find #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    beforeEach (done) ->
+    afterEach (callback) -> Utils.resetSchemas [Flat], callback
+    beforeEach (callback) ->
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      queue.defer (callback) -> Flat.resetSchema(callback)
-
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date(START_DATE, DATE_INTERVAL_MS)
         updated_at: Fabricator.date
         boolean: true
       }, callback)
-
-      queue.await done
+      queue.await callback
 
     it 'Handles a limit query', (done) ->
       Flat.find {$limit: 3}, (err, models) ->

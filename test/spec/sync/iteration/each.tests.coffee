@@ -3,6 +3,7 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
@@ -17,27 +18,28 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
+  class Flat extends Backbone.Model
+    urlRoot: "#{DATABASE_URL}/flats"
+    schema: BASE_SCHEMA
+    sync: SYNC(Flat)
+
   describe "Model.each #{options.$parameter_tags or ''}#{options.$tags}", ->
-    class Flat extends Backbone.Model
-      urlRoot: "#{DATABASE_URL}/flats"
-      schema: BASE_SCHEMA
-      sync: SYNC(Flat)
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      queue.defer (callback) -> Flat.resetSchema(callback)
-
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
       }, callback)
-
-      queue.await done
+      queue.await callback
 
     describe "Queries", ->
 

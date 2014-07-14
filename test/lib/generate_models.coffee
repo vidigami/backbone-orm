@@ -72,7 +72,7 @@ module.exports = (options) ->
       model_name: 'Flat'
       urlRoot: "#{DATABASE_URL}/o_flats"
       schema: _.defaults({
-        owner: -> ['hasOne', OOwner]
+        owner: -> ['hasOne', Owner]
       }, BASE_SCHEMA)
       sync: SYNC(Flat)
 
@@ -80,29 +80,29 @@ module.exports = (options) ->
       model_name: 'Reverse'
       urlRoot: "#{DATABASE_URL}/o_reverses"
       schema: _.defaults({
-        owner: -> ['belongsTo', OOwner]
-        owner_as: -> ['belongsTo', OOwner, as: 'reverse_as']
+        owner: -> ['belongsTo', Owner]
+        owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
       }, BASE_SCHEMA)
       sync: SYNC(Reverse)
 
-    results.push class OForeignReverse extends Backbone.Model
+    results.push class ForeignReverse extends Backbone.Model
       model_name: 'ForeignReverse'
       urlRoot: "#{DATABASE_URL}/o_foreign_reverses"
       schema: _.defaults({
-        owner: -> ['belongsTo', OOwner, foreign_key: 'ownerish_id']
+        owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
       }, BASE_SCHEMA)
-      sync: SYNC(OForeignReverse)
+      sync: SYNC(ForeignReverse)
 
-    results.push class OOwner extends Backbone.Model
+    results.push class Owner extends Backbone.Model
       model_name: 'Owner'
       urlRoot: "#{DATABASE_URL}/o_owners"
       schema: _.defaults({
         flat: -> ['belongsTo', Flat, embed: options.embed]
         reverse: -> ['hasOne', Reverse]
         reverse_as: -> ['hasOne', Reverse, as: 'owner_as']
-        foreign_reverse: -> ['hasOne', OForeignReverse]
+        foreign_reverse: -> ['hasOne', ForeignReverse]
       }, BASE_SCHEMA)
-      sync: SYNC(OOwner)
+      sync: SYNC(Owner)
   )()
 
   #############################

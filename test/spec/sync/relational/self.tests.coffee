@@ -32,18 +32,17 @@ _.each option_sets, exports = (options) ->
 
   describe "self model relations (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [SelfReference], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [SelfReference], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -85,7 +84,7 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
     it 'Can create a model and update the relationship (self reference, belongsTo)', (done) ->
       related_key = 'self_references'

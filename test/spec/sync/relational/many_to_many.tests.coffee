@@ -40,20 +40,19 @@ _.each option_sets, exports = (options) ->
 
   describe "Many to Many (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    beforeEach (done) ->
+    afterEach (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.await callback
+
+    beforeEach (callback) ->
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
 
@@ -78,7 +77,7 @@ _.each option_sets, exports = (options) ->
 
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
     it 'Can create a model and load a related model by id (hasMany)', (done) ->
       Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->

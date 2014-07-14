@@ -4,6 +4,7 @@ BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') 
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
@@ -26,21 +27,17 @@ _.each option_sets, exports = (options) ->
     sync: SYNC(Flat)
 
   describe "Convenience Methods #{options.$parameter_tags or ''}#{options.$tags}", ->
-    beforeEach (done) ->
+
+    afterEach (callback) -> Utils.resetSchemas [Flat], callback
+    beforeEach (callback) ->
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      queue.defer (callback) -> Flat.resetSchema(callback)
-
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
       }, callback)
-
-      queue.await done
+      queue.await callback
 
     describe 'count', ->
       it 'Handles a count query', (done) ->
