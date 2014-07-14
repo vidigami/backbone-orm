@@ -139,7 +139,7 @@ _.each option_sets, exports = (options) ->
             done()
 
     patchAddTests = (unload) ->
-#    unload = false
+      # unload = false
       it "Can manually add a relationship by related_id (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         # TODO: implement embedded find
         return done() if options.embed
@@ -449,7 +449,7 @@ _.each option_sets, exports = (options) ->
                     assert.equal(0, reverses.length, "loaded correct models. Expected: #{0}. Actual: #{reverses.length}")
                     done()
 
-      it "Can manually delete a relationship by related_id (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
+      it "Can manually delete a relationship by related_id from Reverse (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
         Reverse.findOne (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')

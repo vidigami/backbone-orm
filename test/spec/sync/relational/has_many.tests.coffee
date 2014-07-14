@@ -119,79 +119,79 @@ _.each option_sets, exports = (options) ->
 
       queue.await callback
 
-#    it 'Can fetch and serialize a custom foreign key', (done) ->
-#      Owner.findOne (err, test_model) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.ok(test_model, 'found model')
-#
-#        test_model.get 'foreign_reverses', (err, related_models) ->
-#          assert.ok(!err, "No errors: #{err}")
-#          assert.equal(1, related_models.length, "found related models. Expected: #{1}. Actual: #{related_models.length}")
-#
-#          for related_model in related_models
-#            related_json = related_model.toJSON()
-#            assert.equal(test_model.id, related_json.ownerish_id, "Serialized the foreign id. Expected: #{test_model.id}. Actual: #{related_json.ownerish_id}")
-#          done()
-#
-#    it 'Can create a model and load a related model by id (hasMany)', (done) ->
-#      Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
-#
-#        new_model = new Owner()
-#        new_model.save (err) ->
-#          assert.ok(!err, "No errors: #{err}")
-#          new_model.set({reverses: reverse_ids})
-#          new_model.get 'reverses', (err, reverses) ->
-#            assert.ok(!err, "No errors: #{err}")
-#            assert.equal(4, reverses.length, "found 4 related model. Actual: #{reverses.length}")
-#            assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
-#            done()
-#
-#    it 'Can create a model and load a related model by id (hasMany)', (done) ->
-#      Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
-#
-#        new_model = new Owner()
-#        new_model.save (err) ->
-#          assert.ok(!err, "No errors: #{err}")
-#          new_model.set({reverse_ids: reverse_ids})
-#          new_model.get 'reverses', (err, reverses) ->
-#            assert.ok(!err, "No errors: #{err}")
-#            assert.equal(4, reverses.length, "found 4 related model. Actual: #{reverses.length}")
-#            assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
-#            done()
-#
-#    it 'Can create a model and load a related model by id (belongsTo)', (done) ->
-#      Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
-#
-#        new_model = new Reverse()
-#        new_model.save (err) ->
-#          assert.ok(!err, "No errors: #{err}")
-#          new_model.set({owner: owner_ids[0]})
-#          new_model.get 'owner', (err, owner) ->
-#            assert.ok(!err, "No errors: #{err}")
-#            assert.ok(owner, 'loaded a model')
-#            assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
-#            done()
-#
-#    it 'Can create a model and load a related model by id (belongsTo)', (done) ->
-#      Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
-#        assert.ok(!err, "No errors: #{err}")
-#        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
-#
-#        new_model = new Reverse()
-#        new_model.save (err) ->
-#          assert.ok(!err, "No errors: #{err}")
-#          new_model.set({owner_id: owner_ids[0]})
-#          new_model.get 'owner', (err, owner) ->
-#            assert.ok(!err, "No errors: #{err}")
-#            assert.ok(owner, 'loaded a model')
-#            assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
-#            done()
+    it.skip 'Can fetch and serialize a custom foreign key', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        test_model.get 'foreign_reverses', (err, related_models) ->
+          assert.ok(!err, "No errors: #{err}")
+          assert.equal(1, related_models.length, "found related models. Expected: #{1}. Actual: #{related_models.length}")
+
+          for related_model in related_models
+            related_json = related_model.toJSON()
+            assert.equal(test_model.id, related_json.ownerish_id, "Serialized the foreign id. Expected: #{test_model.id}. Actual: #{related_json.ownerish_id}")
+          done()
+
+    it.skip 'Can create a model and load a related model by id (hasMany)', (done) ->
+      Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
+
+        new_model = new Owner()
+        new_model.save (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          new_model.set({reverses: reverse_ids})
+          new_model.get 'reverses', (err, reverses) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(4, reverses.length, "found 4 related model. Actual: #{reverses.length}")
+            assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
+            done()
+
+    it.skip 'Can create a model and load a related model by id (hasMany)', (done) ->
+      Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(4, reverse_ids.length, "found 4 reverses. Actual: #{reverse_ids.length}")
+
+        new_model = new Owner()
+        new_model.save (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          new_model.set({reverse_ids: reverse_ids})
+          new_model.get 'reverses', (err, reverses) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.equal(4, reverses.length, "found 4 related model. Actual: #{reverses.length}")
+            assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
+            done()
+
+    it.skip 'Can create a model and load a related model by id (belongsTo)', (done) ->
+      Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
+
+        new_model = new Reverse()
+        new_model.save (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          new_model.set({owner: owner_ids[0]})
+          new_model.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, 'loaded a model')
+            assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
+            done()
+
+    it.skip 'Can create a model and load a related model by id (belongsTo)', (done) ->
+      Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.equal(4, owner_ids.length, "found 4 owners. Actual: #{owner_ids.length}")
+
+        new_model = new Reverse()
+        new_model.save (err) ->
+          assert.ok(!err, "No errors: #{err}")
+          new_model.set({owner_id: owner_ids[0]})
+          new_model.get 'owner', (err, owner) ->
+            assert.ok(!err, "No errors: #{err}")
+            assert.ok(owner, 'loaded a model')
+            assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
+            done()
 
     patchAddTests = (unload) ->
       it "Can manually add a relationship by related_id (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -905,7 +905,6 @@ _.each option_sets, exports = (options) ->
                 assert.equal(test_model.id, owner.id, "Owner Expected: #{test_model.id}\nActual: #{owner.id}")
               done()
 
-#
     it 'Can include related (one-way hasMany) models', (done) ->
       Owner.cursor({$one: true}).include('flats').toJSON (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
