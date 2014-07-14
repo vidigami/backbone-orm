@@ -19,6 +19,7 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   class Reverse extends Backbone.Model
+    model_name: 'Reverse'
     urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
     schema: _.defaults({
       owners: -> ['HasMany', Owner]
@@ -26,6 +27,7 @@ _.each option_sets, exports = (options) ->
     sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
+    model_name: 'Owner'
     urlRoot: "#{DATABASE_URL}/many_to_many_owners"
     schema: _.defaults({
       reverses: -> ['has_many', Reverse]
