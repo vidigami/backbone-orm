@@ -19,7 +19,8 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
+    model_name: 'Flat'
+    urlRoot: "#{DATABASE_URL}/one_flats"
     schema: _.defaults({
       owner: -> ['hasOne', Owner]
     }, BASE_SCHEMA)
@@ -27,18 +28,21 @@ _.each option_sets, exports = (options) ->
     sync: SYNC(Flat)
 
   class Reverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/reverses"
+    model_name: 'Reverse'
+    urlRoot: "#{DATABASE_URL}/one_reverses"
     schema: _.defaults({
       owner: -> ['belongsTo', Owner]
     }, BASE_SCHEMA)
     sync: SYNC(Reverse)
 
   class Owner extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/owners"
+    model_name: 'Owner'
+    urlRoot: "#{DATABASE_URL}/one_owners"
     schema: _.defaults({
       flat: -> ['belongsTo', Flat]
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
+    cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
   describe "JSONUtils.toJSON (cache: #{options.cache}", ->
