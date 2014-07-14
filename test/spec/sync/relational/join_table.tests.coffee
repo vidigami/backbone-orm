@@ -36,14 +36,16 @@ _.each option_sets, exports = (options) ->
   second_ids = []
   describe 'Join Table Functionality', ->
 
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.await callback
 
     beforeEach (done) ->
       queue = new Queue(1)
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.defer (callback) ->
         models = []
         models.push new FirstModel()

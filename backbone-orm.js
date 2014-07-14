@@ -6399,6 +6399,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    queue = new Queue();
 	    _ref = this.caches;
 	    _fn = function(value) {
+	      delete this.caches[key];
 	      return queue.defer(function(callback) {
 	        return value.reset(callback);
 	      });
@@ -6408,17 +6409,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _fn(value);
 	    }
 	    return queue.await(callback);
-	  };
-
-	  ModelCache.prototype.hardReset = function() {
-	    var key, value, _ref;
-	    this.reset(function() {});
-	    _ref = this.caches;
-	    for (key in _ref) {
-	      value = _ref[key];
-	      delete this.caches[key];
-	    }
-	    return this;
 	  };
 
 	  ModelCache.prototype.getOrCreateCache = function(model_name) {

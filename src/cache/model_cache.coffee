@@ -48,13 +48,8 @@ module.exports = class ModelCache
   reset: (callback) ->
     queue = new Queue()
     for key, value of @caches
-      do (value) -> queue.defer (callback) -> value.reset(callback)
+      do (value) -> delete @caches[key]; queue.defer (callback) -> value.reset(callback)
     queue.await callback
-
-  hardReset: ->
-    @reset(->)
-    delete @caches[key] for key, value of @caches
-    return @
 
   # @nodoc
   getOrCreateCache: (model_name) ->

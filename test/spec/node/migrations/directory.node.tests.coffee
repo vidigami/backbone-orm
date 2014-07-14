@@ -21,8 +21,6 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
   # manually clear the cache so the model can be rebootstrapped
   delete require.cache[require.resolve('./directory/folder/reverse')]
   delete require.cache[require.resolve('./directory/owner')]
@@ -44,23 +42,22 @@ _.each option_sets, exports = (options) ->
 
   describe "Node: Many to Many with resetSchemasByDirectory (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    beforeEach (done) ->
+    after (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
+      queue.await callback
+
+    beforeEach (callback) ->
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
-
-      # reset caches
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
-
-      # destroy all - BY DIRECTORY
       queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
-
-      # create all
       queue.defer (callback) ->
         create_queue = new Queue()
-
         create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
           name: Fabricator.uniqueId('reverses_')
           created_at: Fabricator.date
@@ -69,20 +66,17 @@ _.each option_sets, exports = (options) ->
           name: Fabricator.uniqueId('owners_')
           created_at: Fabricator.date
         }, (err, models) -> MODELS.owner = models; callback(err))
-
         create_queue.await callback
 
       # link and save all
       queue.defer (callback) ->
         save_queue = new Queue()
-
         for owner in MODELS.owner
           do (owner) -> save_queue.defer (callback) ->
             owner.save {reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, callback
-
         save_queue.await callback
 
-      queue.await done
+      queue.await callback
 
     it 'Can create a model and load a related model by id (hasMany)', (done) ->
       Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->

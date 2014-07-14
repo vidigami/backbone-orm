@@ -41,15 +41,16 @@ _.each option_sets, exports = (options) ->
 
   describe "Backbone Events #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.await callback
 
     beforeEach (callback) ->
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.await callback
 
     describe 'Triggering', ->

@@ -15,8 +15,7 @@ _.each option_sets, exports = (options) ->
   return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
-  describeMaybeSkip = if WritableStream then describe else describe.skip
-  describeMaybeSkip "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
+  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
     DATABASE_URL = options.database_url or ''
     BASE_SCHEMA = options.schema or {}
     SYNC = options.sync
@@ -25,33 +24,21 @@ _.each option_sets, exports = (options) ->
     DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
     DATE_STEP_MS = 1000
 
-    Flat = null
-    Counter = null
+    class Flat extends Backbone.Model
+      urlRoot: "#{DATABASE_URL}/flats"
+      schema: BASE_SCHEMA
+      sync: SYNC(Flat)
 
-    # TODO: document why before is necessary
-    before (done) ->
-      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
-      class Flat extends Backbone.Model
-        urlRoot: "#{DATABASE_URL}/flats"
-        schema: BASE_SCHEMA
-        sync: SYNC(Flat)
-
-      class Counter extends WritableStream
-        constructor: -> super {objectMode: true}; @count = 0
-        _write: (model, encoding, next) -> @count++; next()
-
-      return done()
-
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
 
     beforeEach (callback) ->
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date(DATE_START, DATE_STEP_MS)
@@ -129,8 +116,14 @@ _.each option_sets, exports = (options) ->
         done()
 
     it 'callback for all models (model and no range) using stream', (done) ->
+      return done() unless WritableStream # no streams
+
       processed_count = 0
       interval_count = 0
+
+      class Counter extends WritableStream
+        constructor: -> super {objectMode: true}; @count = 0
+        _write: (model, encoding, next) -> @count++; next()
 
       queue = new Queue(1)
 

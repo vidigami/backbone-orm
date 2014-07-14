@@ -40,8 +40,6 @@ _.each option_sets, exports = (options) ->
         assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched collection_type Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
         done()
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
   class Model extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/models"
     schema: BASE_SCHEMA
@@ -50,15 +48,16 @@ _.each option_sets, exports = (options) ->
   describe "Backbone.Collection #{options.$parameter_tags or ''}#{options.$tags}", ->
     options = _.extend({}, options, @parent.parameters) if @parent.parameters
 
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Model], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Model], callback
       queue.await callback
 
     beforeEach (callback) ->
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Model], callback
       queue.await callback
 
     it 'fetch models using pre-configured model', (done) ->

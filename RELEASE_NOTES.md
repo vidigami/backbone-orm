@@ -5,6 +5,7 @@ Please refer to the following release notes when upgrading your version of Backb
 * Moved to webpack for industrial packaging across Node.js and browser
 * Redesigned test so they can be run from the command line and handle TDD correctly
 * Deprecated Utils.inspect and moved to JSONUtils.stringify.
+* Removed ModelCache.hardReset or ModelCache.reset instead.
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels

@@ -18,8 +18,6 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
   class Flat extends Backbone.Model
@@ -63,10 +61,10 @@ _.each option_sets, exports = (options) ->
 
   describe "hasMany (cache: #{options.cache}, embed: #{options.embed})", ->
 
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner, SelfReference], callback
       queue.await callback
 
     beforeEach (callback) ->
@@ -76,6 +74,7 @@ _.each option_sets, exports = (options) ->
 
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner, SelfReference], callback
       queue.defer (callback) ->
         create_queue = new Queue()
 

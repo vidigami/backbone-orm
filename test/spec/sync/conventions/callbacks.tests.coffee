@@ -18,8 +18,6 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
-
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
     schema: BASE_SCHEMA
@@ -32,15 +30,16 @@ _.each option_sets, exports = (options) ->
 
   describe "Callbacks #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
 
     beforeEach (callback) ->
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date

@@ -7,9 +7,7 @@ Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Fabricator = BackboneORM.Fabricator
 
-streams = window?.stream or require?('stream')
-WritableStream = streams?.Writable
-TransformStream = streams?.Transform
+try WritableStream = require('stream').Writable; TransformStream = require('stream').Transform
 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
@@ -18,54 +16,45 @@ _.each option_sets, exports = (options) ->
   return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
-  describeMaybeSkip = if WritableStream then describe else describe.skip
-  describeMaybeSkip "Stream #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Stream #{options.$parameter_tags or ''}#{options.$tags}", ->
+    return unless WritableStream # no streams
+
     DATABASE_URL = options.database_url or ''
     BASE_SCHEMA = options.schema or {}
     SYNC = options.sync
     BASE_COUNT = 5
 
-    Flat = null
-    Counter = null
-    Filter = null
-    pipeCheck = null
+    class Flat extends Backbone.Model
+      urlRoot: "#{DATABASE_URL}/flats"
+      schema: BASE_SCHEMA
+      sync: SYNC(Flat)
 
-    # TODO: document why before is necessary
-    before (done) ->
-      ModelCache.configure({enabled: !!options.cache, max: 100}).hardReset() # configure model cache
+    class Counter extends WritableStream
+      constructor: -> super {objectMode: true}; @count = 0
+      _write: (model, encoding, next) -> @count++; next()
 
-      class Flat extends Backbone.Model
-        urlRoot: "#{DATABASE_URL}/flats"
-        schema: BASE_SCHEMA
-        sync: SYNC(Flat)
+    class Filter extends TransformStream
+      constructor: (@fn) -> super {objectMode: true}
+      _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
 
-      class Counter extends WritableStream
-        constructor: -> super {objectMode: true}; @count = 0
-        _write: (model, encoding, next) -> @count++; next()
+    pipeCheck = (query, expected, callback) ->
+      done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
 
-      class Filter extends TransformStream
-        constructor: (@fn) -> super {objectMode: true}
-        _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
+      Flat.stream(query)
+        .pipe(counter = new Counter())
+        .on 'finish', -> assert.equal(counter.count, expected); done()
+        .on 'error', done
 
-      pipeCheck = (query, expected, callback) ->
-        done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
-
-        Flat.stream(query)
-          .pipe(counter = new Counter())
-          .on 'finish', -> assert.equal(counter.count, expected); done()
-          .on 'error', done
-
-      return done()
-
-    afterEach (callback) ->
+    after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
 
     beforeEach (callback) ->
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')
         created_at: Fabricator.date
