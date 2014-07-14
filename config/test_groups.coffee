@@ -10,10 +10,10 @@ module.exports = TEST_GROUPS = {}
 # Browser Globals
 ###############################
 LIBRARIES =
-  backbone_underscore: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat('./backbone-orm.js')
-  backbone_underscore_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat('./backbone-orm.min.js')
-  backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat('./backbone-orm.js')
-  backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat('./backbone-orm.min.js')
+  backbone_underscore: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat(['./backbone-orm.js'])
+  backbone_underscore_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat(['./backbone-orm.min.js'])
+  backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat(['./backbone-orm.js'])
+  backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat(['./backbone-orm.min.js'])
 
 TEST_GROUPS.browser_globals = []
 for library_name, library_files of LIBRARIES
