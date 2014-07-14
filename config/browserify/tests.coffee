@@ -1,3 +1,5 @@
+path = require 'path'
+
 module.exports =
   underscore:
     output: './_temp/browserify/backbone-orm-underscore.tests.js'
@@ -13,5 +15,5 @@ module.exports =
     options:
       ignore: ['../../../option_sets', '../../../backbone-orm', '../../../../backbone-orm']
       shim:
-        'underscore': {path: './node_modules/lodash/lodash.js', exports: '_'}
+        'underscore': {path: path.resolve(path.join('.', path.relative('.', require.resolve('lodash')))), exports: '_'}
         'backbone-orm': {path: './backbone-orm.js', exports: 'BackboneORM', depends: {jquery: 'jQuery', underscore: '_', backbone: 'Backbone', moment: 'moment', stream: 'stream'}}

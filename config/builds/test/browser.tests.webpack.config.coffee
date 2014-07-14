@@ -19,5 +19,3 @@ module.exports.resolve.alias =
   util: path.resolve('./config/node-dependencies/util.js')
   moment: path.resolve(path.join('.', path.relative('.', require.resolve('moment'))))
   stream: path.resolve('./stream.js')
-
-console.log module.exports.resolve.alias
