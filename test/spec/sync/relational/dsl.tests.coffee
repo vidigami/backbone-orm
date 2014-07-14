@@ -39,7 +39,7 @@ _.each option_sets, exports = (options) ->
     model_name: 'Owner'
     urlRoot: "#{DATABASE_URL}/one_owners"
     schema: _.defaults({
-      flat: -> ['belongsTo', Flat]
+      flat: -> ['belongsTo', Flat, embed: options.embed]
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
@@ -235,6 +235,7 @@ _.each option_sets, exports = (options) ->
         assert.ok(test_model, 'found model')
 
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
+          assert.ifError(err)
           assert.ok(json, 'Returned json')
 
           assertRelated = (model_json) ->
@@ -264,7 +265,7 @@ _.each option_sets, exports = (options) ->
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
-#          console.log 'REVERSES?:', json[RELATED_FIELD][SECOND_RELATED_FIELD][0].attributes
+          # console.log 'REVERSES?:', json[RELATED_FIELD][SECOND_RELATED_FIELD][0].attributes
           assertRelated = (model_json) ->
             assert.ok(model_json, 'Returned related model')
             assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')

@@ -15,24 +15,28 @@ LIBRARIES =
   backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat('./backbone-orm.js')
   backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat('./backbone-orm.min.js')
 
+TEST_CONFIG = ['./test/parameters.coffee', './test/option_sets.coffee']
+TEST_CONFIG_JS = ['./_temp/parameters.js', './_temp/option_sets.js']
+TEST_SOURCES = ['./test/spec/lib/**/*.tests.coffee', './test/spec/sync/**/*.tests.coffee']
+
 TEST_GROUPS.browser_globals = []
 for library_name, library_files of LIBRARIES
-  TEST_GROUPS.browser_globals.push({name: "browser_globals_#{library_name}", files: library_files.concat(['./_temp/parameters.js', './_temp/option_sets.js', './test/spec/lib/**/*.tests.coffee', './test/spec/sync/**/*.tests.coffee'])})
+  TEST_GROUPS.browser_globals.push({name: "browser_globals_#{library_name}", files: library_files.concat(TEST_CONFIG, TEST_SOURCES)})
 
 ###############################
 # AMD
 ###############################
 AMD_OPTIONS = require './amd/gulp-options'
 TEST_GROUPS.amd = []
-for test in TEST_GROUPS.browser_globals when (test.name.indexOf('_min') < 0 and test.name.indexOf('legacy_') < 0 and test.name.indexOf('parse_') < 0)
-  test_files = ['./node_modules/chai/chai.js', './stream.js'].concat(test.files); files = []; test_patterns = []; path_files = []
+for library_name, library_files of LIBRARIES when not (/^legacy_|^parse_|_min$/).test(library_name)
+  test_files = ['./node_modules/chai/chai.js', './stream.js'].concat(library_files, TEST_CONFIG_JS, TEST_SOURCES); files = []; test_patterns = []; path_files = []
   files.push({pattern: './test/lib/requirejs-2.1.14.js'})
   for file in test_files
     (test_patterns.push(file); continue) if file.indexOf('.tests.') >= 0
     files.push({pattern: file, included: false})
     path_files.push(file)
-  files.push("_temp/amd/#{test.name}/**/*.js")
-  TEST_GROUPS.amd.push({name: "amd_#{test.name}", files: files, build: {files: test_patterns, destination: "_temp/amd/#{test.name}", options: _.extend({path_files: path_files}, AMD_OPTIONS)}})
+  files.push("_temp/amd/#{library_name}/**/*.js")
+  TEST_GROUPS.amd.push({name: "amd_#{library_name}", files: files, build: {files: test_patterns, destination: "_temp/amd/#{library_name}", options: _.extend({path_files: path_files}, AMD_OPTIONS)}})
 
 ###############################
 # Webpack
