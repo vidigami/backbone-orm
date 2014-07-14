@@ -974,8 +974,7 @@ _.each option_sets, exports = (options) ->
 
         reverse = owner.get('reverses').at(0)
         owner.patchAdd 'reverses', reverse, (err) ->
-
-          assert.ok(!err, "No errors: #{err}")
+          assert.ok(err, 'Should fail to add again')
 
           assert.equal(2, owner.get('reverses').length, "Reverse not added again to relation. Expected: #{2}. Actual: #{owner.get('reverses').length}")
           done()
@@ -990,8 +989,7 @@ _.each option_sets, exports = (options) ->
           assert.ok(!err, "No errors: #{err}")
 
           owner.patchAdd 'reverses', reverse.id, (err) ->
-
-            assert.ok(!err, "No errors: #{err}")
+            assert.ok(err, 'Should fail to add again')
 
             owner.get 'reverses', (err, reverses) ->
               assert.ok(!err, "No errors: #{err}")

@@ -6009,12 +6009,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return callback(new Error("Many.patchAdd: cannot add an new model. Please save first."));
 	            }
 	            add = function(callback) {
-	              var attributes, join;
-	              attributes = {};
-	              attributes[_this.foreign_key] = model.id;
+	              var attributes;
+	              (attributes = {})[_this.foreign_key] = model.id;
 	              attributes[_this.reverse_relation.foreign_key] = related_id;
-	              join = new _this.join_table(attributes);
-	              return join.save(callback);
+	              return _this.join_table.exists(attributes, function(err, exists) {
+	                if (err) {
+	                  return callback(err);
+	                }
+	                if (exists) {
+	                  return callback(new Error("Join already exists: " + (JSON.stringify(attributes))));
+	                }
+	                return new _this.join_table(attributes).save(callback);
+	              });
 	            };
 	            if (_this.reverse_relation.type === 'hasMany') {
 	              return add(callback);

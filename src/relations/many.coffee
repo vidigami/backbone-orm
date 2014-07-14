@@ -148,12 +148,12 @@ module.exports = class Many extends require('./relation')
           return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
 
           add = (callback) =>
-            attributes = {}
-            attributes[@foreign_key] = model.id
+            (attributes = {})[@foreign_key] = model.id
             attributes[@reverse_relation.foreign_key] = related_id
-            # console.log "Creating join for: #{@model_type.model_name} join: #{JSONUtils.stringify(attributes)}"
-            join = new @join_table(attributes)
-            join.save callback
+            @join_table.exists attributes, (err, exists) =>
+              return callback(err) if err
+              return callback(new Error "Join already exists: #{JSON.stringify(attributes)}") if exists
+              new @join_table(attributes).save callback
 
           # just create another entry
           return add(callback) if @reverse_relation.type is 'hasMany'
