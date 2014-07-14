@@ -22,7 +22,7 @@ _.each option_sets, exports = (options) ->
 
   class Reverse extends Backbone.Model
     model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/m2m_reverses"
+    urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
     schema: _.defaults({
       owners: -> ['hasMany', Owner]
     }, BASE_SCHEMA)
@@ -30,7 +30,7 @@ _.each option_sets, exports = (options) ->
 
   class Owner extends Backbone.Model
     model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/m2m_owners"
+    urlRoot: "#{DATABASE_URL}/many_to_many_owners"
     schema: _.defaults({
       reverses: -> ['hasMany', Reverse]
     }, BASE_SCHEMA)

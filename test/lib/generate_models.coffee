@@ -70,7 +70,7 @@ module.exports = (options) ->
   (->
     results.push class Flat extends Backbone.Model
       model_name: 'Flat'
-      urlRoot: "#{DATABASE_URL}/o_flats"
+      urlRoot: "#{DATABASE_URL}/one_flats"
       schema: _.defaults({
         owner: -> ['hasOne', Owner]
       }, BASE_SCHEMA)
@@ -78,7 +78,7 @@ module.exports = (options) ->
 
     results.push class Reverse extends Backbone.Model
       model_name: 'Reverse'
-      urlRoot: "#{DATABASE_URL}/o_reverses"
+      urlRoot: "#{DATABASE_URL}/one_reverses"
       schema: _.defaults({
         owner: -> ['belongsTo', Owner]
         owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
@@ -87,7 +87,7 @@ module.exports = (options) ->
 
     results.push class ForeignReverse extends Backbone.Model
       model_name: 'ForeignReverse'
-      urlRoot: "#{DATABASE_URL}/o_foreign_reverses"
+      urlRoot: "#{DATABASE_URL}/one_foreign_reverses"
       schema: _.defaults({
         owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
       }, BASE_SCHEMA)
@@ -95,7 +95,7 @@ module.exports = (options) ->
 
     results.push class Owner extends Backbone.Model
       model_name: 'Owner'
-      urlRoot: "#{DATABASE_URL}/o_owners"
+      urlRoot: "#{DATABASE_URL}/one_owners"
       schema: _.defaults({
         flat: -> ['belongsTo', Flat, embed: options.embed]
         reverse: -> ['hasOne', Reverse]
@@ -111,7 +111,7 @@ module.exports = (options) ->
   (->
     results.push class Reverse extends Backbone.Model
       model_name: 'Reverse'
-      urlRoot: "#{DATABASE_URL}/m2m_reverses"
+      urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
       schema: _.defaults({
         owners: -> ['hasMany', Owner]
       }, BASE_SCHEMA)
@@ -119,7 +119,7 @@ module.exports = (options) ->
 
     results.push class Owner extends Backbone.Model
       model_name: 'Owner'
-      urlRoot: "#{DATABASE_URL}/m2m_owners"
+      urlRoot: "#{DATABASE_URL}/many_to_many_owners"
       schema: _.defaults({
         reverses: -> ['hasMany', Reverse]
       }, BASE_SCHEMA)

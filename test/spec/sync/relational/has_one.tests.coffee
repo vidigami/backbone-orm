@@ -22,7 +22,7 @@ _.each option_sets, exports = (options) ->
 
   class Flat extends Backbone.Model
     model_name: 'Flat'
-    urlRoot: "#{DATABASE_URL}/o_flats"
+    urlRoot: "#{DATABASE_URL}/one_flats"
     schema: _.defaults({
       owner: -> ['hasOne', Owner]
     }, BASE_SCHEMA)
@@ -30,7 +30,7 @@ _.each option_sets, exports = (options) ->
 
   class Reverse extends Backbone.Model
     model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/o_reverses"
+    urlRoot: "#{DATABASE_URL}/one_reverses"
     schema: _.defaults({
       owner: -> ['belongsTo', Owner]
       owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
@@ -39,7 +39,7 @@ _.each option_sets, exports = (options) ->
 
   class ForeignReverse extends Backbone.Model
     model_name: 'ForeignReverse'
-    urlRoot: "#{DATABASE_URL}/o_foreign_reverses"
+    urlRoot: "#{DATABASE_URL}/one_foreign_reverses"
     schema: _.defaults({
       owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
     }, BASE_SCHEMA)
@@ -47,7 +47,7 @@ _.each option_sets, exports = (options) ->
 
   class Owner extends Backbone.Model
     model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/o_owners"
+    urlRoot: "#{DATABASE_URL}/one_owners"
     schema: _.defaults({
       flat: -> ['belongsTo', Flat, embed: options.embed]
       reverse: -> ['hasOne', Reverse]
