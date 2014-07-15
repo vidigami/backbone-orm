@@ -20,6 +20,7 @@ module.exports = class Many extends require('./relation')
     @virtual_id_accessor or= "#{inflection.singularize(@key)}_ids"
     @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
     @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
+    @_adding_ids = {}
     unless @collection_type
       reverse_model_type = @reverse_model_type
 
@@ -112,6 +113,10 @@ module.exports = class Many extends require('./relation')
     return json[json_key] = collection.toJSON() if @embed
 
   add: (model, related_model) ->
+    # Fixes 'Uncaught Maximum call stack size exceeded' in backbone-mongo tests
+    if related_model.id
+      adding_count = @_adding_ids[related_model.id] = (@_adding_ids[related_model.id] or 0) + 1
+
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
@@ -120,7 +125,10 @@ module.exports = class Many extends require('./relation')
     # throw new Error "\nModel added twice: #{JSONUtils.stringify(current_related_model)}\nand\n#{JSONUtils.stringify(related_model)}" if current_related_model
     collection.remove(current_related_model) if current_related_model
     @reverse_model_type.cache.set(related_model.id, related_model) if @reverse_model_type.cache and related_model.id # make sure the latest model is in the cache
-    collection.add(related_model)
+
+    return_value = collection.add(related_model, silent: adding_count > 1)
+    @_adding_ids[related_model.id]-- if related_model.id
+    return return_value
 
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)

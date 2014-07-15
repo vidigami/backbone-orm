@@ -5834,6 +5834,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!this.foreign_key) {
 	      this.foreign_key = inflection.foreign_key(this.as || this.model_type.model_name);
 	    }
+	    this._adding_ids = {};
 	    if (!this.collection_type) {
 	      reverse_model_type = this.reverse_model_type;
 	      Collection = (function(_super1) {
@@ -6003,7 +6004,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.add = function(model, related_model) {
-	    var collection, current_related_model;
+	    var adding_count, collection, current_related_model, return_value;
+	    if (related_model.id) {
+	      adding_count = this._adding_ids[related_model.id] = (this._adding_ids[related_model.id] || 0) + 1;
+	    }
 	    collection = this._ensureCollection(model);
 	    current_related_model = collection.get(related_model.id);
 	    if (current_related_model === related_model) {
@@ -6015,7 +6019,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.reverse_model_type.cache && related_model.id) {
 	      this.reverse_model_type.cache.set(related_model.id, related_model);
 	    }
-	    return collection.add(related_model);
+	    return_value = collection.add(related_model, {
+	      silent: adding_count > 1
+	    });
+	    if (related_model.id) {
+	      this._adding_ids[related_model.id]--;
+	    }
+	    return return_value;
 	  };
 
 	  Many.prototype.remove = function(model, related_model) {
