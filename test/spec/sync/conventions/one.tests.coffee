@@ -18,33 +18,36 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
-
-  class Reverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/reverses"
-    schema: _.defaults({
-      owner: -> ['belongs_to', Owner]
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class Owner extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/owners"
-    schema: _.defaults({
-      flat: -> ['BelongsTo', Flat, embed: options.embed]
-      reverse: -> ['has_one', Reverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
   describe "One #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    Flat = Reverse = Owner = null
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
+
+      class Reverse extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/reverses"
+        schema: _.defaults({
+          owner: -> ['belongs_to', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/owners"
+        schema: _.defaults({
+          flat: -> ['BelongsTo', Flat, embed: options.embed]
+          reverse: -> ['has_one', Reverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
       queue.await callback
+    after -> Flat = Reverse = Owner = null
 
     beforeEach (done) ->
       MODELS = {}

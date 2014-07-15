@@ -18,29 +18,32 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  class Reverse extends Backbone.Model
-    model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
-    schema: _.defaults({
-      owners: -> ['HasMany', Owner]
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class Owner extends Backbone.Model
-    model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/many_to_many_owners"
-    schema: _.defaults({
-      reverses: -> ['has_many', Reverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
   describe "Many #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    Reverse = Owner = null
+    before ->
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
+        schema: _.defaults({
+          owners: -> ['HasMany', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/many_to_many_owners"
+        schema: _.defaults({
+          reverses: -> ['has_many', Reverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.await callback
+    after -> Reverse = Owner = null
 
     beforeEach (callback) ->
       MODELS = {}

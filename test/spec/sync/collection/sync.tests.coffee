@@ -21,38 +21,39 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  runTest = (collection_type, done) ->
-    model_type = collection_type::model
-
-    queue = new Queue(1)
-    queue.defer (callback) -> model_type.resetSchema(callback)
-    queue.defer (callback) -> Fabricator.create(model_type, BASE_COUNT, {
-      name: Fabricator.uniqueId('model_')
-      created_at: Fabricator.date
-      updated_at: Fabricator.date
-    }, callback)
-    queue.await (err) ->
-      assert.ifError(err)
-      collection = new collection_type()
-      collection.fetch (err, fetched_collection) ->
-        assert.ifError(err)
-        assert.equal(BASE_COUNT, collection.models.length, "collection_type Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
-        assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched collection_type Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
-        done()
-
-  class Model extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/models"
-    schema: BASE_SCHEMA
-    sync: SYNC(Model)
-
   describe "Backbone.Collection #{options.$parameter_tags or ''}#{options.$tags}", ->
-    options = _.extend({}, options, @parent.parameters) if @parent.parameters
+    runTest = (collection_type, done) ->
+      model_type = collection_type::model
+
+      queue = new Queue(1)
+      queue.defer (callback) -> model_type.resetSchema(callback)
+      queue.defer (callback) -> Fabricator.create(model_type, BASE_COUNT, {
+        name: Fabricator.uniqueId('model_')
+        created_at: Fabricator.date
+        updated_at: Fabricator.date
+      }, callback)
+      queue.await (err) ->
+        assert.ifError(err)
+        collection = new collection_type()
+        collection.fetch (err, fetched_collection) ->
+          assert.ifError(err)
+          assert.equal(BASE_COUNT, collection.models.length, "collection_type Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
+          assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched collection_type Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
+          done()
+
+    Model = null
+    before ->
+      class Model extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/models"
+        schema: BASE_SCHEMA
+        sync: SYNC(Model)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Model], callback
       queue.await callback
+    after -> Model = null
 
     beforeEach (callback) ->
       queue = new Queue(1)

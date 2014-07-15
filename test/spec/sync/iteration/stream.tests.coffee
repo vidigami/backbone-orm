@@ -16,26 +16,28 @@ _.each option_sets, exports = (options) ->
   return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 5
+
   describe "Stream #{options.$parameter_tags or ''}#{options.$tags}", ->
     return unless WritableStream # no streams
 
-    DATABASE_URL = options.database_url or ''
-    BASE_SCHEMA = options.schema or {}
-    SYNC = options.sync
-    BASE_COUNT = 5
+    Flat = Counter = Filter = null
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
 
-    class Flat extends Backbone.Model
-      urlRoot: "#{DATABASE_URL}/flats"
-      schema: BASE_SCHEMA
-      sync: SYNC(Flat)
+      class Counter extends WritableStream
+        constructor: -> super {objectMode: true}; @count = 0
+        _write: (model, encoding, next) -> @count++; next()
 
-    class Counter extends WritableStream
-      constructor: -> super {objectMode: true}; @count = 0
-      _write: (model, encoding, next) -> @count++; next()
-
-    class Filter extends TransformStream
-      constructor: (@fn) -> super {objectMode: true}
-      _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
+      class Filter extends TransformStream
+        constructor: (@fn) -> super {objectMode: true}
+        _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
 
     pipeCheck = (query, expected, callback) ->
       done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
@@ -49,7 +51,9 @@ _.each option_sets, exports = (options) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
+      queue.defer (callback) -> Flat = Counter = Filter = null; callback()
       queue.await callback
+    after -> Flat = Counter = Filter = null
 
     beforeEach (callback) ->
       queue = new Queue(1)

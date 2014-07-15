@@ -6,6 +6,7 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
+# TODO: handle double callbacks, to provide promise-like guarantees
 module.exports = class Queue
   constructor: (@parallelism) ->
     @parallelism or= Infinity

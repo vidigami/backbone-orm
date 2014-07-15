@@ -15,25 +15,28 @@ _.each option_sets, exports = (options) ->
   return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 5
+
   describe "Model.cursor #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    DATABASE_URL = options.database_url or ''
-    BASE_SCHEMA = options.schema or {}
-    SYNC = options.sync
-    BASE_COUNT = 5
-
-    class Flat extends Backbone.Model
-      urlRoot: "#{DATABASE_URL}/flats"
-      schema: _.defaults({
-        boolean: 'Boolean'
-      }, BASE_SCHEMA)
-      sync: SYNC(Flat)
+    Flat = null
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: _.defaults({
+          boolean: 'Boolean'
+        }, BASE_SCHEMA)
+        sync: SYNC(Flat)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
+    after -> Flat = null
 
     beforeEach (callback) ->
       queue = new Queue(1)

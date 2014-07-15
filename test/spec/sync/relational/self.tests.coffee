@@ -20,21 +20,23 @@ _.each option_sets, exports = (options) ->
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
-  class SelfReference extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/self_references"
-    schema: _.defaults({
-      owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
-      self_references: -> ['hasMany', SelfReference, as: 'owner']
-    }, BASE_SCHEMA)
-    sync: SYNC(SelfReference)
-
   describe "self model relations #{options.$parameter_tags or ''}#{options.$tags}", ->
+    SelfReference = null
+    before ->
+      class SelfReference extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/self_references"
+        schema: _.defaults({
+          owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
+          self_references: -> ['hasMany', SelfReference, as: 'owner']
+        }, BASE_SCHEMA)
+        sync: SYNC(SelfReference)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [SelfReference], callback
       queue.await callback
+    after -> SelfReference = null
 
     beforeEach (callback) ->
       MODELS = {}

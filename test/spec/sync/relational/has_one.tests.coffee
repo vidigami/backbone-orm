@@ -20,49 +20,51 @@ _.each option_sets, exports = (options) ->
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
-  class Flat extends Backbone.Model
-    model_name: 'Flat'
-    urlRoot: "#{DATABASE_URL}/one_flats"
-    schema: _.defaults({
-      owner: -> ['hasOne', Owner]
-    }, BASE_SCHEMA)
-    sync: SYNC(Flat)
-
-  class Reverse extends Backbone.Model
-    model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/one_reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner]
-      owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class ForeignReverse extends Backbone.Model
-    model_name: 'ForeignReverse'
-    urlRoot: "#{DATABASE_URL}/one_foreign_reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
-    }, BASE_SCHEMA)
-    sync: SYNC(ForeignReverse)
-
-  class Owner extends Backbone.Model
-    model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/one_owners"
-    schema: _.defaults({
-      flat: -> ['belongsTo', Flat, embed: options.embed]
-      reverse: -> ['hasOne', Reverse]
-      reverse_as: -> ['hasOne', Reverse, as: 'owner_as']
-      foreign_reverse: -> ['hasOne', ForeignReverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
   describe "hasOne #{options.$parameter_tags or ''}#{options.$tags}", ->
+    Flat = Reverse = ForeignReverse = Owner = null
+    before ->
+      class Flat extends Backbone.Model
+        model_name: 'Flat'
+        urlRoot: "#{DATABASE_URL}/one_flats"
+        schema: _.defaults({
+          owner: -> ['hasOne', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Flat)
+
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/one_reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner]
+          owner_as: -> ['belongsTo', Owner, as: 'reverse_as']
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class ForeignReverse extends Backbone.Model
+        model_name: 'ForeignReverse'
+        urlRoot: "#{DATABASE_URL}/one_foreign_reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
+        }, BASE_SCHEMA)
+        sync: SYNC(ForeignReverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/one_owners"
+        schema: _.defaults({
+          flat: -> ['belongsTo', Flat, embed: options.embed]
+          reverse: -> ['hasOne', Reverse]
+          reverse_as: -> ['hasOne', Reverse, as: 'owner_as']
+          foreign_reverse: -> ['hasOne', ForeignReverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.await callback
+    after -> Flat = Reverse = ForeignReverse = Owner = null
 
     beforeEach (callback) ->
       relation = Owner.relation('flat')

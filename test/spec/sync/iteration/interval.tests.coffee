@@ -14,25 +14,28 @@ _.each option_sets, exports = (options) ->
   return if options.embed
   options = _.extend({}, options, parameters) if parameters
 
-  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
-    DATABASE_URL = options.database_url or ''
-    BASE_SCHEMA = options.schema or {}
-    SYNC = options.sync
-    BASE_COUNT = 50
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 50
 
+  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
     DATE_START = new Date('2013-06-09T08:00:00.000Z')
     DATE_STEP_MS = 1000
 
-    class Flat extends Backbone.Model
-      urlRoot: "#{DATABASE_URL}/flats"
-      schema: BASE_SCHEMA
-      sync: SYNC(Flat)
+    Flat = null
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
+    after -> Flat = null
 
     beforeEach (callback) ->
       queue = new Queue(1)

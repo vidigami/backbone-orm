@@ -18,40 +18,44 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  class Flat extends Backbone.Model
-    model_name: 'Flat'
-    urlRoot: "#{DATABASE_URL}/one_flats"
-    schema: _.defaults({
-      owner: -> ['hasOne', Owner]
-    }, BASE_SCHEMA)
-    cat: (field, meow, callback) -> callback(null, @get(field) + meow)
-    sync: SYNC(Flat)
-
-  class Reverse extends Backbone.Model
-    model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/one_reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner]
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class Owner extends Backbone.Model
-    model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/one_owners"
-    schema: _.defaults({
-      flat: -> ['belongsTo', Flat, embed: options.embed]
-      reverses: -> ['hasMany', Reverse]
-    }, BASE_SCHEMA)
-    cat: (field, meow, callback) -> callback(null, @get(field) + meow)
-    sync: SYNC(Owner)
-
   describe "JSON DSL #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    Flat = Reverse = Owner = null
+
+    before ->
+      class Flat extends Backbone.Model
+        model_name: 'Flat'
+        urlRoot: "#{DATABASE_URL}/one_flats"
+        schema: _.defaults({
+          owner: -> ['hasOne', Owner]
+        }, BASE_SCHEMA)
+        cat: (field, meow, callback) -> callback(null, @get(field) + meow)
+        sync: SYNC(Flat)
+
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/one_reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/one_owners"
+        schema: _.defaults({
+          flat: -> ['belongsTo', Flat, embed: options.embed]
+          reverses: -> ['hasMany', Reverse]
+        }, BASE_SCHEMA)
+        cat: (field, meow, callback) -> callback(null, @get(field) + meow)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
       queue.await callback
+    after -> Flat = Reverse = Owner = null
 
     beforeEach (callback) ->
       MODELS = {}

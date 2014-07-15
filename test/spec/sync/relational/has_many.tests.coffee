@@ -20,52 +20,47 @@ _.each option_sets, exports = (options) ->
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
-
-  class Reverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner]
-      another_owner: -> ['belongsTo', Owner, as: 'more_reverses']
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class ForeignReverse extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/foreign_reverses"
-    schema: _.defaults({
-      owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
-    }, BASE_SCHEMA)
-    sync: SYNC(ForeignReverse)
-
-  class Owner extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/owners"
-    schema: _.defaults({
-      flats: -> ['hasMany', Flat]
-      reverses: -> ['hasMany', Reverse]
-      more_reverses: -> ['hasMany', Reverse, as: 'another_owner']
-      foreign_reverses: -> ['hasMany', ForeignReverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
-  class SelfReference extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/self_references"
-    schema: _.defaults({
-      owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
-      self_references: -> ['hasMany', SelfReference, as: 'owner']
-      is_base: 'Boolean'
-    }, BASE_SCHEMA)
-    sync: SYNC(SelfReference)
 
   describe "hasMany #{options.$parameter_tags or ''}#{options.$tags}", ->
+    Flat = Reverse = ForeignReverse = Owner = null
+
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
+
+      class Reverse extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner]
+          another_owner: -> ['belongsTo', Owner, as: 'more_reverses']
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class ForeignReverse extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/foreign_reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner, foreign_key: 'ownerish_id']
+        }, BASE_SCHEMA)
+        sync: SYNC(ForeignReverse)
+
+      class Owner extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/owners"
+        schema: _.defaults({
+          flats: -> ['hasMany', Flat]
+          reverses: -> ['hasMany', Reverse]
+          more_reverses: -> ['hasMany', Reverse, as: 'another_owner']
+          foreign_reverses: -> ['hasMany', ForeignReverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner, SelfReference], callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.await callback
+    after -> Flat = Reverse = ForeignReverse = Owner = null
 
     beforeEach (callback) ->
       relation = Owner.relation('reverses')
@@ -74,7 +69,7 @@ _.each option_sets, exports = (options) ->
 
       queue = new Queue(1)
       queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner, SelfReference], callback
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.defer (callback) ->
         create_queue = new Queue()
 

@@ -20,29 +20,31 @@ _.each option_sets, exports = (options) ->
 
   OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
 
-  class Reverse extends Backbone.Model
-    model_name: 'Reverse'
-    urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
-    schema: _.defaults({
-      owners: -> ['hasMany', Owner]
-    }, BASE_SCHEMA)
-    sync: SYNC(Reverse)
-
-  class Owner extends Backbone.Model
-    model_name: 'Owner'
-    urlRoot: "#{DATABASE_URL}/many_to_many_owners"
-    schema: _.defaults({
-      reverses: -> ['hasMany', Reverse]
-    }, BASE_SCHEMA)
-    sync: SYNC(Owner)
-
   describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
+    Reverse = Owner = null
+    before ->
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
+        schema: _.defaults({
+          owners: -> ['hasMany', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/many_to_many_owners"
+        schema: _.defaults({
+          reverses: -> ['hasMany', Reverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.await callback
+    after -> Reverse = Owner = null
 
     beforeEach (callback) ->
       relation = Owner.relation('reverses')

@@ -16,29 +16,31 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  class FirstModel extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/firsts"
-    schema: _.defaults({
-      seconds: -> ['hasMany', SecondModel]
-    }, BASE_SCHEMA)
-    sync: SYNC(FirstModel)
-
-  class SecondModel extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/seconds"
-    schema: _.defaults({
-      firsts: -> ['hasMany', FirstModel]
-    }, BASE_SCHEMA)
-    sync: SYNC(SecondModel)
-
   first_id = null
   second_ids = []
   describe "Join Table Functionality #{options.$parameter_tags or ''}#{options.$tags}", ->
+    FirstModel = SecondModel = null
+    before ->
+      class FirstModel extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/firsts"
+        schema: _.defaults({
+          seconds: -> ['hasMany', SecondModel]
+        }, BASE_SCHEMA)
+        sync: SYNC(FirstModel)
+
+      class SecondModel extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/seconds"
+        schema: _.defaults({
+          firsts: -> ['hasMany', FirstModel]
+        }, BASE_SCHEMA)
+        sync: SYNC(SecondModel)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.await callback
+    after -> FirstModel = SecondModel = null
 
     beforeEach (done) ->
       queue = new Queue(1)

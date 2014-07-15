@@ -18,23 +18,26 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  class Flat extends Backbone.Model
-    urlRoot: "#{DATABASE_URL}/flats"
-    schema: BASE_SCHEMA
-    sync: SYNC(Flat)
-
-  class Flats extends Backbone.Collection
-    url: "#{DATABASE_URL}/flats"
-    model: Flat
-    sync: SYNC(Flats)
-
   describe "Callbacks #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    Flat = Flats = null
+    before ->
+      class Flat extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/flats"
+        schema: BASE_SCHEMA
+        sync: SYNC(Flat)
+
+      class Flats extends Backbone.Collection
+        url: "#{DATABASE_URL}/flats"
+        model: Flat
+        sync: SYNC(Flats)
 
     after (callback) ->
       queue = new Queue()
       queue.defer (callback) -> ModelCache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.await callback
+    after -> Flat = Flats = null
 
     beforeEach (callback) ->
       queue = new Queue(1)
