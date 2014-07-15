@@ -28,7 +28,7 @@ _.each option_sets, exports = (options) ->
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
-  describe "self model relations (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "self model relations #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

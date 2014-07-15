@@ -40,7 +40,7 @@ _.each option_sets, exports = (options) ->
   }, BASE_SCHEMA)
   Owner::sync = SYNC(Owner)
 
-  describe "Node: Many to Many with resetSchemasByDirectory (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "Node: Many to Many with resetSchemasByDirectory #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

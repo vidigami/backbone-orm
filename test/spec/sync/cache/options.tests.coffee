@@ -22,7 +22,7 @@ _.each option_sets, exports = (options) ->
     schema: BASE_SCHEMA
     sync: SYNC(Flat)
 
-  describe "Cache Options (embed: #{options.embed})", ->
+  describe "Cache Options #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

@@ -36,7 +36,7 @@ _.each option_sets, exports = (options) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "Many to Many (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

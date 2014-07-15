@@ -418,7 +418,7 @@ _.each option_sets, exports = (options) ->
       Flat.findOne (err, test_model) ->
         assert.ifError(err)
         assert.ok(test_model, 'found model')
-        $in = [999, test_model.id]
+        $in = [options.dummy_id or 999, test_model.id]
 
         Flat.find {id: {$in: $in}}, (err, models) ->
           assert.ifError(err)
@@ -449,7 +449,7 @@ _.each option_sets, exports = (options) ->
       Flat.findOne (err, test_model) ->
         assert.ifError(err)
         assert.ok(test_model, 'found model')
-        $nin = [999, 9999]
+        $nin = [options.dummy_id or 999, options.dummy_id_2 or 9999]
 
         Flat.find {id: {$nin: $nin}}, (err, models) ->
           assert.ifError(err)

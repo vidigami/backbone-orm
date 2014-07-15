@@ -45,7 +45,7 @@ _.each option_sets, exports = (options) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSONUtils.toJSON (cache: #{options.cache}", ->
+  describe "JSONUtils.toJSON #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

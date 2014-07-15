@@ -23,12 +23,12 @@ if process?
 arrayToOptions = (keys) -> results = {}; results[key] = (key in keys) for key in OPTION_KEYS; return results
 
 # constructs a string to be used in describe https://github.com/visionmedia/mocha/wiki/Tagging
-getTags = (options) -> tags = []; tags.push("@#{option_key}") for option_key in OPTION_KEYS when options[option_key]; return if tags.length then tags.join(' ') else '@no_options'
+getTags = (options) -> tags = []; tags.push("@#{if options[option_key] then '' else 'no_'}#{option_key}") for option_key in OPTION_KEYS; s = tags.join(' '); s += ' @no_options' if options.none or not _.any(options); return s
 
 options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
 option_set.$tags = getTags(option_set) for option_set in exports
 
-# exports = [exports[0]] # run one set of options
+# exports = [exports[0]] # run one set of options -- useful only when doing full browser tests, otherwise just use `--grep @no_options`
 
 window?.__test__option_sets = exports; module?.exports = exports

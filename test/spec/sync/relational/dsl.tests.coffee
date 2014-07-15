@@ -45,7 +45,7 @@ _.each option_sets, exports = (options) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSON DSL (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "JSON DSL #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()
@@ -253,6 +253,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     # flat: {$select: ['name', 'reverses']}
+    # TODO: fails on mongo with embed: true
     it 'Handles rendering a related fields hasMany related field with $select', (done) ->
       FIELD = 'name'
       RELATED_FIELD = 'owner'
@@ -327,6 +328,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     #   album:         {$select: ['id', 'name']}
+    # TODO: fails on mongo with embed: true
     it 'Handles rendering a belongsTo relation in the dsl with a cursor query', (done) ->
       FIELD = 'owner'
       FIELDS = ['id', 'name']
@@ -344,6 +346,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     #   an_owner:         {key: 'owner', $select: ['id', 'name']}
+    # TODO: fails on mongo with embed: true
     it 'Handles rendering a belongsTo relation in the dsl with a key and cursor query', (done) ->
       FIELD = 'owner'
       FIELD_AS = 'an_owner'

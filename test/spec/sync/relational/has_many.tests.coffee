@@ -59,7 +59,7 @@ _.each option_sets, exports = (options) ->
     }, BASE_SCHEMA)
     sync: SYNC(SelfReference)
 
-  describe "hasMany (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "hasMany #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

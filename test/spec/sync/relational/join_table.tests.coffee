@@ -32,7 +32,7 @@ _.each option_sets, exports = (options) ->
 
   first_id = null
   second_ids = []
-  describe 'Join Table Functionality', ->
+  describe "Join Table Functionality #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()

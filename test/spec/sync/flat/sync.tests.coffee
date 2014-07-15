@@ -43,20 +43,20 @@ _.each option_sets, exports = (options) ->
       }, callback)
       queue.await callback
 
-#    it 'saves a model and assigns an id', (done) ->
-#      bob = new Flat({name: 'Bob'})
-#      assert.equal(bob.get('name'), 'Bob', 'name before save is Bob')
-#      assert.ok(!bob.id, 'id before save doesn\'t exist')
-#
-#      queue = new Queue(1)
-#      queue.defer (callback) -> bob.save callback
-#
-#      queue.defer (callback) ->
-#        assert.equal(bob.get('name'), 'Bob', 'name after save is Bob')
-#        assert.ok(!!bob.id, 'id after save is assigned')
-#        callback()
-#
-#      queue.await done
+    it.skip 'saves a model and assigns an id', (done) ->
+      bob = new Flat({name: 'Bob'})
+      assert.equal(bob.get('name'), 'Bob', 'name before save is Bob')
+      assert.ok(!bob.id, 'id before save doesn\'t exist')
+
+      queue = new Queue(1)
+      queue.defer (callback) -> bob.save callback
+
+      queue.defer (callback) ->
+        assert.equal(bob.get('name'), 'Bob', 'name after save is Bob')
+        assert.ok(!!bob.id, 'id after save is assigned')
+        callback()
+
+      queue.await done
 
     it 'fetches model data', (done) ->
       Flat.findOne (err, model) ->
@@ -69,16 +69,16 @@ _.each option_sets, exports = (options) ->
           assert.deepEqual(model.toJSON(), new_model.toJSON(), "\nExpected: #{JSONUtils.stringify(model.toJSON())}\nActual: #{JSONUtils.stringify(new_model.toJSON())}")
           done()
 
-#    it 'destroys a model', (done) ->
-#      Flat.findOne (err, model) ->
-#        assert.ifError(err)
-#        assert.ok(!!model, 'got model')
-#        model_id = model.id
-#
-#        model.destroy (err) ->
-#          assert.ifError(err)
-#
-#          Flat.find model_id, (err, model) ->
-#            assert.ifError(err)
-#            assert.ok(!model, "Model not found after destroy")
-#            done()
+    it.skip 'destroys a model', (done) ->
+      Flat.findOne (err, model) ->
+        assert.ifError(err)
+        assert.ok(!!model, 'got model')
+        model_id = model.id
+
+        model.destroy (err) ->
+          assert.ifError(err)
+
+          Flat.find model_id, (err, model) ->
+            assert.ifError(err)
+            assert.ok(!model, "Model not found after destroy")
+            done()

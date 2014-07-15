@@ -56,7 +56,7 @@ _.each option_sets, exports = (options) ->
     }, BASE_SCHEMA)
     sync: SYNC(Owner)
 
-  describe "hasOne (cache: #{options.cache}, embed: #{options.embed})", ->
+  describe "hasOne #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
       queue = new Queue()
