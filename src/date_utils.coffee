@@ -7,13 +7,28 @@
 ###
 
 _ = require 'underscore'
-moment = require 'moment'
+
+UNITS_TO_MS =
+  milliseconds: {milliseconds: 1}
+  seconds: {milliseconds: 1000}
+  minutes: {milliseconds: 60*1000}
+  hours: {milliseconds: 24*60*1000}
+  days: {days: 1}
+  weeks: {days: 7}
+  months: {months: 1}
+  years: {years: 1}
 
 module.exports = class DateUtils
   @durationAsMilliseconds: (count, units) ->
-    moment.duration(count, units).asMilliseconds()
+    throw new Error "DateUtils.durationAsMilliseconds :Unrecognized units: #{units}" unless lookup = UNITS_TO_MS[units]
 
-  @isBefore: (mv, tv) -> return moment(mv).isBefore(tv)
-  @isBeforeOrSame: (mv, tv) -> mvm = moment(mv); return mvm.isBefore(tv) or mvm.isSame(tv)
-  @isAfter: (mv, tv) -> return moment(mv).isAfter(tv)
-  @isAfterOrSame: (mv, tv) -> mvm = moment(mv); return mvm.isAfter(tv) or mvm.isSame(tv)
+    # from moment duration
+    return count * lookup.milliseconds if lookup.milliseconds
+    return count * 864e5 * lookup.days if lookup.days
+    return count * lookup.months * 2592e6 if lookup.months
+    return count * lookup.years * 31536e6 if lookup.years
+
+  @isBefore: (mv, tv) -> mv.getTime() < tv.getTime()
+  @isBeforeOrSame: (mv, tv) -> !DateUtils.isAfter(mv, tv)
+  @isAfter: (mv, tv) -> mv.getTime() > tv.getTime()
+  @isAfterOrSame: (mv, tv) -> !DateUtils.isBefore(mv, tv)

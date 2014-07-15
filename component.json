@@ -8,8 +8,7 @@
   "keywords": ["backbone", "orm", "backbone-orm"],
   "dependencies": {
     "jashkenas/underscore": "*",
-    "jashkenas/backbone": "*",
-    "moment/moment": "*"
+    "jashkenas/backbone": "*"
   },
   "license": "MIT",
   "main": "backbone-orm.js",

@@ -11,8 +11,7 @@
   "keywords": ["backbone", "orm", "backbone-orm"],
   "dependencies": {
     "underscore": ">=1.2.0",
-    "backbone": ">=1.0.0",
-    "moment": ">=1.0.0"
+    "backbone": ">=1.0.0"
   },
   "license": "MIT",
   "ignore": [

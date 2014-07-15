@@ -10,10 +10,10 @@ module.exports = TEST_GROUPS = {}
 # Browser Globals
 ###############################
 LIBRARIES =
-  backbone_underscore: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat(['./backbone-orm.js'])
-  backbone_underscore_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone', 'moment']).concat(['./backbone-orm.min.js'])
-  backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat(['./backbone-orm.js'])
-  backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone', 'moment']).concat(['./backbone-orm.min.js'])
+  # backbone_underscore: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.js'])
+  backbone_underscore_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.min.js'])
+  backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.js'])
+  backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.min.js'])
 
 TEST_CONFIG = ['./test/parameters.coffee', './test/option_sets.coffee']
 TEST_CONFIG_JS = ['./_temp/parameters.js', './_temp/option_sets.js']

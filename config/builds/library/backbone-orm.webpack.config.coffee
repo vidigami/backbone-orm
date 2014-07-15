@@ -14,7 +14,6 @@ module.exports = _.extend  _.clone(require '../../webpack/base-config.coffee'), 
     {jquery: {root: 'jQuery', amd: 'jquery', commonjs: 'jquery', commonjs2: 'jquery'}}
     {underscore: {root: '_', amd: 'underscore', commonjs: 'underscore', commonjs2: 'underscore'}}
     {backbone: {root: 'Backbone', amd: 'backbone', commonjs: 'backbone', commonjs2: 'backbone'}}
-    {moment: 'moment'}
     {stream: 'stream'}
   ]
 }

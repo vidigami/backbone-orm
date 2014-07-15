@@ -28,29 +28,26 @@
     "release": "gulp release --require coffee-script/register"
   },
   "devDependencies": {
+    "chai": "*",
     "codo": "2.x",
     "coffee-loader": "^0.7.2",
     "coffee-script": "*",
     "event-stream": "*",
-    "mocha": "*",
-    "chai": "*",
     "gulp": "*",
     "gulp-browserify": "^0.5.0",
     "gulp-compile-js": "*",
     "gulp-concat": "*",
     "gulp-header": "*",
     "gulp-mocha": "^0.4.1",
-    "gulp-webpack-config": "*",
     "gulp-rename": "*",
     "gulp-require-src": "*",
     "gulp-shell": "*",
     "gulp-uglify": "*",
     "gulp-util": "*",
+    "gulp-webpack-config": "*",
     "gulp-wrap-amd-infer": "*",
     "gulp-zip": "*",
-    "queue-async": "*",
-    "webpack": "*",
-    "wrench": "*",
+    "inflection": "*",
     "jquery": "*",
     "karma": "*",
     "karma-chai": "^0.1.0",
@@ -61,13 +58,16 @@
     "karma-mocha": "^0.1.4",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
-    "inflection": "*",
+    "karma-spec-reporter": "0.0.13",
+    "lodash": "*",
     "lru-cache": "*",
-    "lodash": "*"
+    "mocha": "*",
+    "queue-async": "*",
+    "webpack": "*",
+    "wrench": "*"
   },
   "dependencies": {
     "underscore": ">=1.2.0",
-    "backbone": ">=1.0.0",
-    "moment": ">=1.0.0"
+    "backbone": ">=1.0.0"
   }
 }
