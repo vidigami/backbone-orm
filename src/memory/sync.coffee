@@ -105,3 +105,6 @@ module.exports = (type) ->
 
   Utils.configureModelType(type)
   return ModelCache.configureSync(type, sync_fn)
+
+module.exports.Sync = MemorySync
+module.exports.Cursor = MemoryCursor

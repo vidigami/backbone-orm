@@ -2167,6 +2167,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return ModelCache.configureSync(type, sync_fn);
 	};
 
+	module.exports.Sync = MemorySync;
+
+	module.exports.Cursor = MemoryCursor;
+
 
 /***/ },
 /* 14 */
