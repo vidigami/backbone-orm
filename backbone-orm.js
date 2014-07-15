@@ -621,9 +621,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (_.isString(values)) {
 	      if ((values.length >= 20) && values[values.length - 1] === 'Z') {
 	        if (_.isNaN((date = new Date(values)).getTime())) {
-	          return date;
-	        } else {
 	          return values;
+	        } else {
+	          return date;
 	        }
 	      }
 	      if (values === 'true') {

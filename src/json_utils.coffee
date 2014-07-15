@@ -43,7 +43,7 @@ module.exports = class JSONUtils
     else if _.isString(values)
       # Date
       if (values.length >= 20) and values[values.length-1] is 'Z'
-        return if _.isNaN((date = new Date(values)).getTime()) then date else values
+        return if _.isNaN((date = new Date(values)).getTime()) then values else date
 
       # Boolean
       return true if values is 'true'
