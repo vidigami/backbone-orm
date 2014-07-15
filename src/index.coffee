@@ -21,6 +21,9 @@ module.exports =
   ConnectionPool: require './connection_pool'
   CacheSingletons: require './cache/singletons'
 
+  _: require 'underscore'
+  Backbone: require 'backbone'
+
   # re-expose modules
   modules:
     url: require 'url'
@@ -30,9 +33,6 @@ module.exports =
     backbone: require 'backbone'
     moment: require 'moment'
     inflection: require 'inflection'
-
-  _: require 'underscore'
-  Backbone: require 'backbone'
 
 # re-expose modules
 try module.exports.modules.stream = require('stream') catch e

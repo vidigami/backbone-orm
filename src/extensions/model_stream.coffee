@@ -7,7 +7,7 @@
 ###
 
 # stream is large so it is optional on the browser
-try stream = require('stream') catch e
+try stream = require 'stream'
 if stream?.Readable
   # @nodoc
   module.exports = class ModelStream extends stream.Readable

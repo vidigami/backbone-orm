@@ -81,6 +81,8 @@ class MemorySync
 
   # @nodoc
   destroy: (query, callback) ->
+    [query, callback] = [{}, query] if arguments.length is 1
+
     @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
       ((model_json, callback) =>
         Utils.patchRemoveByJSON @model_type, model_json, (err) =>

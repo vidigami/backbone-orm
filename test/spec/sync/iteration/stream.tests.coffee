@@ -42,8 +42,8 @@ _.each option_sets, exports = (options) ->
 
       Flat.stream(query)
         .pipe(counter = new Counter())
-        .on 'finish', -> assert.equal(counter.count, expected); done()
-        .on 'error', done
+        .on('finish', -> assert.equal(counter.count, expected); done())
+        .on('error', done)
 
     after (callback) ->
       queue = new Queue()

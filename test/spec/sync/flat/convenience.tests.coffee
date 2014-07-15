@@ -73,6 +73,19 @@ _.each option_sets, exports = (options) ->
 
         queue.await done
 
+      it 'destroy all', (done) ->
+        Flat.count (err, count) ->
+          assert.ifError(err)
+          assert.equal(count, BASE_COUNT)
+
+          Flat.destroy (err) ->
+            assert.ifError(err)
+
+            Flat.count (err, count) ->
+              assert.ifError(err)
+              assert.equal(count, 0)
+              done()
+
       it 'counts by query with multiple', (done) ->
         bob = new Flat({name: 'Bob'})
         fred = new Flat({name: 'Fred'})
