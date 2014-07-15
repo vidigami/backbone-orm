@@ -34,7 +34,7 @@ _.each option_sets, exports = (options) ->
 
     beforeEach (callback) ->
       queue = new Queue(1)
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')

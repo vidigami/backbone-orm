@@ -16,8 +16,6 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  ModelCache.configure({enabled: !!options.cache, max: 100}) # configure caching
-
   class FirstModel extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/firsts"
     schema: _.defaults({
@@ -44,7 +42,7 @@ _.each option_sets, exports = (options) ->
 
     beforeEach (done) ->
       queue = new Queue(1)
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}).reset(callback) # configure model cache
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
       queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.defer (callback) ->
         models = []

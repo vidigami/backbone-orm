@@ -6368,26 +6368,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.verbose = false;
 	  }
 
-	  ModelCache.prototype.configure = function(options) {
-	    var key, value, value_key, value_value, values, _base;
+	  ModelCache.prototype.configure = function(options, callback) {
 	    if (options == null) {
 	      options = {};
 	    }
 	    this.enabled = options.enabled;
-	    this.reset(function() {});
-	    for (key in options) {
-	      value = options[key];
-	      if (_.isObject(value)) {
-	        (_base = this.options)[key] || (_base[key] = {});
-	        values = this.options[key];
-	        for (value_key in value) {
-	          value_value = value[value_key];
-	          values[value_key] = value_value;
+	    this.reset((function(_this) {
+	      return function(err) {
+	        var key, value, value_key, value_value, values, _base;
+	        if (err) {
+	          return callback(err);
 	        }
-	      } else {
-	        this.options[key] = value;
-	      }
-	    }
+	        for (key in options) {
+	          value = options[key];
+	          if (_.isObject(value)) {
+	            (_base = _this.options)[key] || (_base[key] = {});
+	            values = _this.options[key];
+	            for (value_key in value) {
+	              value_value = value[value_key];
+	              values[value_key] = value_value;
+	            }
+	          } else {
+	            _this.options[key] = value;
+	          }
+	        }
+	        return callback();
+	      };
+	    })(this));
 	    return this;
 	  };
 
@@ -6404,12 +6411,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var key, queue, value, _fn, _ref;
 	    queue = new Queue();
 	    _ref = this.caches;
-	    _fn = function(value) {
-	      delete this.caches[key];
-	      return queue.defer(function(callback) {
-	        return value.reset(callback);
-	      });
-	    };
+	    _fn = (function(_this) {
+	      return function(value) {
+	        delete _this.caches[key];
+	        return queue.defer(function(callback) {
+	          return value.reset(callback);
+	        });
+	      };
+	    })(this);
 	    for (key in _ref) {
 	      value = _ref[key];
 	      _fn(value);

@@ -28,16 +28,18 @@ module.exports = class ModelCache
   #   max_age/maxAge: default maximum number of items or max size of the cache
   #   model_types/modelTypes: {'ModelName': options}
   #
-  configure: (options={}) ->
+  configure: (options={}, callback) ->
     @enabled = options.enabled
-    @reset(->)
-    for key, value of options
-      if _.isObject(value)
-        @options[key] or= {}
-        values = @options[key]
-        values[value_key] = value_value for value_key, value_value of value
-      else
-        @options[key] = value
+    @reset (err) =>
+      return callback(err) if err
+      for key, value of options
+        if _.isObject(value)
+          @options[key] or= {}
+          values = @options[key]
+          values[value_key] = value_value for value_key, value_value of value
+        else
+          @options[key] = value
+      callback()
     return @
 
   configureSync: (model_type, sync_fn) ->
@@ -48,7 +50,7 @@ module.exports = class ModelCache
   reset: (callback) ->
     queue = new Queue()
     for key, value of @caches
-      do (value) -> delete @caches[key]; queue.defer (callback) -> value.reset(callback)
+      do (value) => delete @caches[key]; queue.defer (callback) -> value.reset(callback)
     queue.await callback
 
   # @nodoc
