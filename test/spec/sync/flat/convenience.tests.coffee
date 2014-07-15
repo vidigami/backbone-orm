@@ -2,7 +2,6 @@ assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
-moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -147,7 +146,7 @@ _.each option_sets, exports = (options) ->
                 assert.ifError(err)
                 assert.ok(exists, "the model exists by created_at. Expected: #{true}. Actual: #{exists}")
 
-                Flat.exists {created_at: moment('2001-04-25T01:32:21.196Z').toDate()}, (err, exists) ->
+                Flat.exists {created_at: new Date('2001-04-25T01:32:21.196Z')}, (err, exists) ->
                   assert.ifError(err)
                   assert.ok(!exists, "the model does not exist by bad created_at. Expected: #{false}. Actual: #{exists}")
                   done()

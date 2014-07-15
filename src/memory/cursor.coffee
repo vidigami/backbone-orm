@@ -7,12 +7,12 @@
 ###
 
 _ = require 'underscore'
-moment = require 'moment'
 inflection = require 'inflection'
 
 Queue = require '../queue'
 Utils = require '../utils'
 JSONUtils = require '../json_utils'
+DateUtils = require '../date_utils'
 Cursor = require '../cursor'
 
 IS_MATCH_FNS =
@@ -20,25 +20,23 @@ IS_MATCH_FNS =
 
   $lt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return (if _.isDate(tv) then moment(mv).isBefore(tv) else mv < tv)
+    return (if _.isDate(tv) then DateUtils.isBefore(mv, tv) else mv < tv)
 
   $lte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
     if _.isDate(tv)
-      mvm = moment(mv)
-      return mvm.isBefore(tv) or mvm.isSame(tv)
+      return DateUtils.isBeforeOrSame(mv, tv)
     else
       return (mv < tv) or _.isEqual(mv, tv)
 
   $gt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return (if _.isDate(tv) then moment(mv).isAfter(tv) else mv > tv)
+    return (if _.isDate(tv) then DateUtils.isAfter(mv, tv) else mv > tv)
 
   $gte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
     if _.isDate(tv)
-      mvm = moment(mv)
-      return mvm.isAfter(tv) or mvm.isSame(tv)
+      return DateUtils.isAfterOrSame(mv, tv)
     else
       return (mv > tv) or _.isEqual(mv, tv)
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)

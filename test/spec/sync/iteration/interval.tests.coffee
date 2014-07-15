@@ -2,7 +2,6 @@ assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
-moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache
@@ -21,7 +20,7 @@ _.each option_sets, exports = (options) ->
     SYNC = options.sync
     BASE_COUNT = 50
 
-    DATE_START = moment.utc('2013-06-09T08:00:00.000Z').toDate()
+    DATE_START = new Date('2013-06-09T08:00:00.000Z')
     DATE_STEP_MS = 1000
 
     class Flat extends Backbone.Model

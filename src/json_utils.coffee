@@ -7,7 +7,6 @@
 ###
 
 _ = require 'underscore'
-moment = require 'moment'
 Queue = require './queue'
 Utils = require './utils'
 
@@ -44,8 +43,7 @@ module.exports = class JSONUtils
     else if _.isString(values)
       # Date
       if (values.length >= 20) and values[values.length-1] is 'Z'
-        date = moment.utc(values)
-        return if date and date.isValid() then date.toDate() else values
+        return if _.isNaN((date = new Date(values)).getTime()) then date else values
 
       # Boolean
       return true if values is 'true'
@@ -54,9 +52,7 @@ module.exports = class JSONUtils
       return match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
 
       # stringified JSON
-      try
-        return JSONUtils.parse(values) if values = JSON.parse(values)
-      catch err
+      try return JSONUtils.parse(values) if values = JSON.parse(values)
     return values
 
   # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
@@ -263,7 +259,7 @@ module.exports = class JSONUtils
   @deepClone = (obj, depth) =>
     return obj if not obj or (typeof obj isnt 'object')   # a value
     return String::slice.call(obj) if _.isString(obj)     # a string
-    return new Date(obj.valueOf()) if _.isDate(obj)       # a date
+    return new Date(obj.getTime()) if _.isDate(obj)       # a date
     return obj.clone() if _.isFunction(obj.clone)         # a specialized clone function
 
     if _.isArray(obj)                                     # an array

@@ -2,7 +2,6 @@ assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
-moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 Utils = BackboneORM.Utils
 ModelCache = BackboneORM.CacheSingletons.ModelCache

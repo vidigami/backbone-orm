@@ -1,5 +1,4 @@
 _ = require 'underscore'
-moment = require 'moment'
 Queue = require './queue'
 
 # Fabricator to generate test data.
@@ -61,10 +60,11 @@ module.exports = class Fabricator
   # @overload date(start, step_ms)
   #   Creates a new date/time for each call in fixed milliseconds from a specified date/time
   @date: (start, step_ms) ->
-    return moment.utc().toDate() if arguments.length is 0
+    now = new Date()
+    return now if arguments.length is 0
 
-    [start, step_ms] = [moment.utc().toDate(), start] if arguments.length is 1
-    current_ms = start.valueOf()
+    [start, step_ms] = [now, start] if arguments.length is 1
+    current_ms = start.getTime()
     return ->
       current = new Date(current_ms)
       current_ms += step_ms

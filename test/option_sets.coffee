@@ -29,6 +29,6 @@ options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
 option_set.$tags = getTags(option_set) for option_set in exports
 
-# exports = [exports[0]] # run one set of options -- useful only when doing full browser tests, otherwise just use `--grep @no_options`
+exports = [exports[0]] # run one set of options -- useful only when doing full browser tests, otherwise just use `--grep @no_options`
 
 window?.__test__option_sets = exports; module?.exports = exports

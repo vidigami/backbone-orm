@@ -11,6 +11,7 @@ module.exports =
 
   Utils: require './utils'
   JSONUtils: require './json_utils'
+  DateUtils: require './date_utils'
   Queue: require './queue'
   DatabaseURL: require './database_url'
   Fabricator: require './fabricator'
@@ -31,7 +32,6 @@ module.exports =
     'lru-cache': require 'lru-cache'
     underscore: require 'underscore'
     backbone: require 'backbone'
-    moment: require 'moment'
     inflection: require 'inflection'
 
 # re-expose modules

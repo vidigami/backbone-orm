@@ -2,7 +2,6 @@ assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
-moment = BackboneORM.modules.moment
 Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
@@ -40,9 +39,9 @@ describe 'Fabricator', ->
       VALUE = new Date()
       gen = Fabricator.value(VALUE)
 
-      assert.equal(gen().valueOf(), VALUE.valueOf())
-      assert.equal(gen().valueOf(), VALUE.valueOf())
-      assert.equal(gen().valueOf(), VALUE.valueOf())
+      assert.equal(gen().getTime(), VALUE.getTime())
+      assert.equal(gen().getTime(), VALUE.getTime())
+      assert.equal(gen().getTime(), VALUE.getTime())
       done()
 
   describe 'uniqueId', ->
@@ -74,9 +73,9 @@ describe 'Fabricator', ->
     it 'generate now', (done) ->
       gen = Fabricator.date
 
-      assert.ok(gen().valueOf() <= (new Date()).valueOf())
-      assert.ok(gen().valueOf() <= (new Date()).valueOf())
-      assert.ok(gen().valueOf() <= (new Date()).valueOf())
+      assert.ok(gen().getTime() <= (new Date()).getTime())
+      assert.ok(gen().getTime() <= (new Date()).getTime())
+      assert.ok(gen().getTime() <= (new Date()).getTime())
       done()
 
     it 'generate dates in steps (ms)', (done) ->
@@ -84,18 +83,18 @@ describe 'Fabricator', ->
       gen = Fabricator.date(STEP)
       START = gen()
 
-      assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
-      assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
-      assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 1*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 2*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 3*STEP)
       done()
 
     it 'generate dates in steps (ms) with start', (done) ->
       STEP = 100
-      START = moment().add('days', 1).add('minutes', 10).toDate()
+      START = new Date(); START.setDate(START.getDate(), + 1)
       gen = Fabricator.date(START, STEP)
 
-      assert.equal(gen().valueOf() - START.valueOf(), 0*STEP)
-      assert.equal(gen().valueOf() - START.valueOf(), 1*STEP)
-      assert.equal(gen().valueOf() - START.valueOf(), 2*STEP)
-      assert.equal(gen().valueOf() - START.valueOf(), 3*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 0*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 1*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 2*STEP)
+      assert.equal(gen().getTime() - START.getTime(), 3*STEP)
       done()

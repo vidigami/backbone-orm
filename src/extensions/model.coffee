@@ -8,7 +8,6 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-moment = require 'moment'
 Queue = require '../queue'
 
 Utils = require '../utils'
@@ -133,7 +132,7 @@ module.exports = (model_type) ->
     if arguments.length is 2
       [query, callback] = [{}, query]
     else if arguments.length is 3
-      [options, query, callback] = [moment.utc().toDate(), {}, query]
+      [options, query, callback] = [new Date(), {}, query]
     else
       query = _.clone(query)
     query.$one = true

@@ -2,7 +2,6 @@ assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
-moment = BackboneORM.modules.moment
 Queue = BackboneORM.Queue
 ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
@@ -21,7 +20,7 @@ _.each option_sets, exports = (options) ->
 
   DATE_INTERVAL_MS = 1000
   START_DATE = new Date()
-  END_DATE = moment(START_DATE).add('milliseconds', (BASE_COUNT - 1) * DATE_INTERVAL_MS).toDate()
+  END_DATE = new Date(START_DATE.getTime() + (BASE_COUNT - 1) * DATE_INTERVAL_MS)
 
   class Flat extends Backbone.Model
     urlRoot: "#{DATABASE_URL}/flats"
@@ -265,7 +264,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Handles $lt and $lte boundary conditions with step', (done) ->
-      NEXT_DATE = moment(START_DATE).add('milliseconds', DATE_INTERVAL_MS).toDate()
+      NEXT_DATE = new Date(START_DATE.getTime() + DATE_INTERVAL_MS)
 
       Flat.find {created_at: {$lt: NEXT_DATE}}, (err, models) ->
         assert.ifError(err)
@@ -331,7 +330,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Handles $gt and $gte boundary conditions with step', (done) ->
-      PREVIOUS_DATE = moment(END_DATE).add('milliseconds', -DATE_INTERVAL_MS).toDate()
+      PREVIOUS_DATE = new Date(END_DATE.getTime() - DATE_INTERVAL_MS)
 
       Flat.find {created_at: {$gt: PREVIOUS_DATE}}, (err, models) ->
         assert.ifError(err)
