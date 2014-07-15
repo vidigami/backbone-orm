@@ -29,6 +29,4 @@ module.exports = class DateUtils
     return count * lookup.years * 31536e6 if lookup.years
 
   @isBefore: (mv, tv) -> mv.getTime() < tv.getTime()
-  @isBeforeOrSame: (mv, tv) -> !DateUtils.isAfter(mv, tv)
   @isAfter: (mv, tv) -> mv.getTime() > tv.getTime()
-  @isAfterOrSame: (mv, tv) -> !DateUtils.isBefore(mv, tv)

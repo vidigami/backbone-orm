@@ -24,10 +24,7 @@ IS_MATCH_FNS =
 
   $lte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    if _.isDate(tv)
-      return DateUtils.isBeforeOrSame(mv, tv)
-    else
-      return (mv < tv) or _.isEqual(mv, tv)
+    return if _.isDate(tv) then !DateUtils.isAfter(mv, tv) else (mv <= tv)
 
   $gt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
@@ -35,10 +32,8 @@ IS_MATCH_FNS =
 
   $gte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    if _.isDate(tv)
-      return DateUtils.isAfterOrSame(mv, tv)
-    else
-      return (mv > tv) or _.isEqual(mv, tv)
+    return if _.isDate(tv) then !DateUtils.isBefore(mv, tv) else (mv >= tv)
+
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @nodoc

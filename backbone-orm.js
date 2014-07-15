@@ -1033,16 +1033,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return mv.getTime() < tv.getTime();
 	  };
 
-	  DateUtils.isBeforeOrSame = function(mv, tv) {
-	    return !DateUtils.isAfter(mv, tv);
-	  };
-
 	  DateUtils.isAfter = function(mv, tv) {
 	    return mv.getTime() > tv.getTime();
-	  };
-
-	  DateUtils.isAfterOrSame = function(mv, tv) {
-	    return !DateUtils.isBefore(mv, tv);
 	  };
 
 	  return DateUtils;
@@ -3260,9 +3252,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw Error('Cannot compare to null');
 	    }
 	    if (_.isDate(tv)) {
-	      return DateUtils.isBeforeOrSame(mv, tv);
+	      return !DateUtils.isAfter(mv, tv);
 	    } else {
-	      return (mv < tv) || _.isEqual(mv, tv);
+	      return mv <= tv;
 	    }
 	  },
 	  $gt: function(mv, tv) {
@@ -3276,9 +3268,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw Error('Cannot compare to null');
 	    }
 	    if (_.isDate(tv)) {
-	      return DateUtils.isAfterOrSame(mv, tv);
+	      return !DateUtils.isBefore(mv, tv);
 	    } else {
-	      return (mv > tv) || _.isEqual(mv, tv);
+	      return mv >= tv;
 	    }
 	  }
 	};
