@@ -45,7 +45,7 @@ _.each option_sets, exports = (options) ->
     cat: (field, meow, callback) -> callback(null, @get(field) + meow)
     sync: SYNC(Owner)
 
-  describe "JSON DSL (cache: #{options.cache}", ->
+  describe "JSON DSL (cache: #{options.cache}, embed: #{options.embed})", ->
 
     after (callback) ->
       queue = new Queue()
@@ -265,14 +265,14 @@ _.each option_sets, exports = (options) ->
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
 
-          # console.log 'REVERSES?:', json[RELATED_FIELD][SECOND_RELATED_FIELD][0].attributes
-          assertRelated = (model_json) ->
-            assert.ok(model_json, 'Returned related model')
-            assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
-            assert.ok(model_json.name, 'Related model has data')
+          unless options.embed # embed doesn't know reverse
+            assertRelated = (model_json) ->
+              assert.ok(model_json, 'Returned related model')
+              assert.ok(!(model_json instanceof Backbone.Model), 'Related model is not a backbone model')
+              assert.ok(model_json.name, 'Related model has data')
 
-          assertRelated(json[RELATED_FIELD])
-          assertRelated(model_json) for model_json in json[RELATED_FIELD][SECOND_RELATED_FIELD]
+            assertRelated(json[RELATED_FIELD])
+            assertRelated(model_json) for model_json in json[RELATED_FIELD][SECOND_RELATED_FIELD]
 
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
@@ -372,9 +372,12 @@ _.each option_sets, exports = (options) ->
         assert.ok(test_model, 'found model')
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
-          assert.ok(related = json[FIELD], 'json has related model')
-          for field in FIELDS
-            assert.ok(related[field], "Related json has a #{field} field")
+
+          unless options.embed # embed doesn't know reverse
+            assert.ok(related = json[FIELD], 'json has related model')
+            for field in FIELDS
+              assert.ok(related[field], "Related json has a #{field} field")
+
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 
@@ -390,9 +393,12 @@ _.each option_sets, exports = (options) ->
         assert.ok(test_model, 'found model')
         JSONUtils.renderTemplate test_model, TEMPLATE, (err, json) ->
           assert.ok(json, 'Returned json')
-          assert.ok(related = json[FIELD_AS], 'json has related model')
-          for field in FIELDS
-            assert.ok(related[field], "Related json has a #{field} field")
+
+          unless options.embed # embed doesn't know reverse
+            assert.ok(related = json[FIELD_AS], 'json has related model')
+            for field in FIELDS
+              assert.ok(related[field], "Related json has a #{field} field")
+
           assert.ok(!json.updated_at, 'Does not have an excluded field')
           done()
 

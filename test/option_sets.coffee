@@ -29,7 +29,6 @@ options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
 option_set.$tags = getTags(option_set) for option_set in exports
 
-# TODO: fix options - dependency ordering
-exports = [exports[0]]
+# exports = [exports[0]] # run one set of options
 
 window?.__test__option_sets = exports; module?.exports = exports
