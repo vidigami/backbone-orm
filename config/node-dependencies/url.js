@@ -21,7 +21,6 @@
 
 var punycode = { encode : function (s) { return s } };
 var _ = require('underscore');
-
 var shims = require('./_shims');
 
 exports.parse = urlParse;
@@ -109,11 +108,17 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
   }
 
+  // Copy chrome, IE, opera backslash-handling behavior.
+  // See: https://code.google.com/p/chromium/issues/detail?id=25916
+  var hashSplit = url.split('#');
+  hashSplit[0] = hashSplit[0].replace(/\\/g, '/');
+  url = hashSplit.join('#');
+
   var rest = url;
 
   // trim before proceeding.
   // This is to support parse stuff like "  http://foo.com  \n"
-  rest = shims.trim(rest);
+  rest = rest.trim();
 
   var proto = protocolPattern.exec(rest);
   if (proto) {
@@ -375,13 +380,13 @@ Url.prototype.format = function() {
 
   if (this.query &&
       _.isObject(this.query) &&
-      _.keys(this.query).length) {
+      Object.keys(this.query).length) {
     query = querystring.stringify(this.query);
   }
 
   var search = this.search || (query && ('?' + query)) || '';
 
-  if (protocol && shims.substr(protocol, -1) !== ':') protocol += ':';
+  if (protocol && protocol.substr(-1) !== ':') protocol += ':';
 
   // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
   // unless they had them to begin with.
@@ -425,7 +430,7 @@ Url.prototype.resolveObject = function(relative) {
   }
 
   var result = new Url();
-  shims.forEach(_.keys(this), function(k) {
+  Object.keys(this).forEach(function(k) {
     result[k] = this[k];
   }, this);
 
@@ -442,7 +447,7 @@ Url.prototype.resolveObject = function(relative) {
   // hrefs like //foo/bar always cut to the protocol.
   if (relative.slashes && !relative.protocol) {
     // take everything except the protocol from relative
-    shims.forEach(_.keys(relative), function(k) {
+    Object.keys(relative).forEach(function(k) {
       if (k !== 'protocol')
         result[k] = relative[k];
     });
@@ -467,7 +472,7 @@ Url.prototype.resolveObject = function(relative) {
     // because that's known to be hostless.
     // anything else is assumed to be absolute.
     if (!slashedProtocol[relative.protocol]) {
-      shims.forEach(_.keys(relative), function(k) {
+      Object.keys(relative).forEach(function(k) {
         result[k] = relative[k];
       });
       result.href = result.format();
@@ -612,7 +617,7 @@ Url.prototype.resolveObject = function(relative) {
   var up = 0;
   for (var i = srcPath.length; i >= 0; i--) {
     last = srcPath[i];
-    if (last == '.') {
+    if (last === '.') {
       srcPath.splice(i, 1);
     } else if (last === '..') {
       srcPath.splice(i, 1);
@@ -635,7 +640,7 @@ Url.prototype.resolveObject = function(relative) {
     srcPath.unshift('');
   }
 
-  if (hasTrailingSlash && (shims.substr(srcPath.join('/'), -1) !== '/')) {
+  if (hasTrailingSlash && (srcPath.join('/').substr(-1) !== '/')) {
     srcPath.push('');
   }
 
