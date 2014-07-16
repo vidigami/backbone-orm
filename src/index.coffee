@@ -31,6 +31,7 @@ module.exports =
     url: require 'url'
     querystring: require 'querystring'
     'lru-cache': require 'lru-cache'
+    inflection: require 'inflection'
     underscore: require 'underscore'
     backbone: require 'backbone'
 

@@ -1,7 +1,7 @@
+_ = require 'underscore'
+
 module.exports = class Utils
-  @conventions = null
+  @conventions = _.clone(require './defaults')
 
   @set: (_conventions) -> Utils.conventions = _conventions
   @get: -> Utils.conventions
-
-Utils.set(require './defaults')
