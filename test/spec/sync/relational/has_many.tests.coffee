@@ -98,17 +98,22 @@ _.each option_sets, exports = (options) ->
 
       # link and save all
       queue.defer (callback) ->
-        save_queue = new Queue()
+        save_queue = new Queue(1)
 
+        link_tasks = []
         for owner in MODELS.owner
-          do (owner) -> save_queue.defer (callback) ->
-            owner.set({
+          link_task =
+            owner: owner
+            values:
               flats: [MODELS.flat.pop(), MODELS.flat.pop()]
               reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
               more_reverses: [MODELS.more_reverse.pop(), MODELS.more_reverse.pop()]
               foreign_reverses: [MODELS.foreign_reverse.pop()]
-            })
-            owner.save callback
+          link_tasks.push(link_task)
+
+        for link_task in link_tasks then do (link_task) -> save_queue.defer (callback) ->
+          link_task.owner.set(link_task.values)
+          link_task.owner.save callback
 
         save_queue.await callback
 
