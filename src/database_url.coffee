@@ -7,8 +7,8 @@
 ###
 
 _ = require 'underscore'
-inflection = require 'inflection'
 URL = require 'url'
+ConventionUtils = require './conventions/utils'
 
 SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href']
 
@@ -68,4 +68,5 @@ module.exports = class DatabaseURL
     result.password = if auth_parts.length > 1 then auth_parts[1] else null
     return result
 
-  modelName: -> return if @table then inflection.classify(inflection.singularize(@table)) else null
+  modelName: ->
+    return if @table then ConventionUtils.conventions.modelName(@table, false) else null

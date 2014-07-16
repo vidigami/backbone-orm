@@ -7,6 +7,7 @@
 ###
 
 module.exports =
+  ConventionUtils: require './conventions/utils'
   sync: require './memory/sync'
 
   Utils: require './utils'
@@ -32,7 +33,6 @@ module.exports =
     'lru-cache': require 'lru-cache'
     underscore: require 'underscore'
     backbone: require 'backbone'
-    inflection: require 'inflection'
 
 # re-expose modules
 try module.exports.modules.stream = require('stream') catch e

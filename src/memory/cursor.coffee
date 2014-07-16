@@ -7,7 +7,6 @@
 ###
 
 _ = require 'underscore'
-inflection = require 'inflection'
 
 Queue = require '../queue'
 Utils = require '../utils'

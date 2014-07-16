@@ -8,16 +8,13 @@
 
 _ = require 'underscore'
 LRU = require 'lru-cache'
-inflection = require 'inflection'
 
 module.exports = class MemoryStore
   constructor: (options={}) ->
     normalized_options = {}
     for key, value of options
-      if key is 'destroy'
-        normalized_options.dispose = value
-      else
-        normalized_options[@_normalizeKey(key)] = value
+      if key is 'destroy' then (key = 'dispose') else if key is 'max_age' then (key = 'maxAge')
+      normalized_options[key] = value
     @cache = new LRU(normalized_options)
 
   set: (key, value, callback) =>
@@ -42,11 +39,4 @@ module.exports = class MemoryStore
     callback?()
     return @
 
-  # @private
-  _normalizeKey: (key) ->
-    key = inflection.underscore(key)
-    return key.toLowerCase() if key.indexOf('_') < 0
-    return inflection.camelize(key)
-
   forEach: (callback) => @cache.forEach(callback)
-

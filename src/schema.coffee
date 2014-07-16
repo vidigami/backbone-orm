@@ -8,7 +8,7 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-inflection = require 'inflection'
+ConventionUtils = require './conventions/utils'
 
 One = require './relations/one'
 Many = require './relations/many'
@@ -72,7 +72,7 @@ module.exports = class Schema
 
   # @nodoc
   generateBelongsTo: (reverse_model_type) ->
-    key = inflection.underscore(reverse_model_type.model_name)
+    key = ConventionUtils.conventions.attribute(reverse_model_type.model_name)
     return relation if relation = @relations[key] # already exists
 
     if @raw[key] # not intitialized yet, intialize now
@@ -86,9 +86,9 @@ module.exports = class Schema
     return relation
 
   @joinTableURL: (relation) ->
-    model_name1 = inflection.pluralize(inflection.underscore(relation.model_type.model_name))
-    model_name2 = inflection.pluralize(inflection.underscore(relation.reverse_relation.model_type.model_name))
-    return if model_name1.localeCompare(model_name2) < 0 then "#{model_name1}_#{model_name2}" else "#{model_name2}_#{model_name1}"
+    table_name1 = ConventionUtils.conventions.tableName(relation.model_type.model_name)
+    table_name2 = ConventionUtils.conventions.tableName(relation.reverse_relation.model_type.model_name)
+    return if table_name1.localeCompare(table_name2) < 0 then "#{table_name1}_#{table_name2}" else "#{table_name2}_#{table_name1}"
 
   # @nodoc
   generateJoinTable: (relation) ->
@@ -96,7 +96,7 @@ module.exports = class Schema
     schema[relation.join_key] = ['Integer', indexed: true]
     schema[relation.reverse_relation.join_key] = ['Integer', indexed: true]
     url = Schema.joinTableURL(relation)
-    name = inflection.pluralize(inflection.classify(url))
+    name = ConventionUtils.conventions.modelName(url, true)
 
     try
       # @nodoc

@@ -10,7 +10,6 @@ URL = require 'url'
 DatabaseURL = require './database_url'
 Backbone = require 'backbone'
 _ = require 'underscore'
-inflection = require 'inflection'
 Queue = require './queue'
 JSONUtils = require './json_utils'
 modelExtensions = null

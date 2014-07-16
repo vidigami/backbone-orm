@@ -8,18 +8,17 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-inflection = require 'inflection'
 Queue = require '../queue'
-
 Utils = require '../utils'
+ConventionUtils = require '../conventions/utils'
 
 # @nodoc
 module.exports = class One extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @virtual_id_accessor or= "#{@key}_id"
-    @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
-    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
+    @virtual_id_accessor or= ConventionUtils.conventions.foreignKey(@key)
+    @join_key = @foreign_key or ConventionUtils.conventions.foreignKey(@model_type.model_name) unless @join_key
+    @foreign_key = ConventionUtils.conventions.foreignKey(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)
