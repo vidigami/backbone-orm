@@ -21,4 +21,3 @@ module.exports = _.extend  _.clone(require '../../webpack/base-config.coffee'), 
 module.exports.resolve.alias =
   querystring: path.resolve('./config/node-dependencies/querystring.js')
   url: path.resolve('./config/node-dependencies/url.js')
-  util: path.resolve('./config/node-dependencies/util.js')

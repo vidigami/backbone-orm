@@ -16,5 +16,4 @@ module.exports.resolve.alias =
   'backbone-orm': path.resolve('./backbone-orm.js')
   querystring: path.resolve('./config/node-dependencies/querystring.js')
   url: path.resolve('./config/node-dependencies/url.js')
-  util: path.resolve('./config/node-dependencies/util.js')
   stream: path.resolve('./stream.js')
