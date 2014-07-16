@@ -423,7 +423,7 @@ parseTests =
     path: "/bar"
 
 
-  # KM: removed - localized urls
+  # KM: removed - localized urls - would need to bundle punycode
 
   # IDNA tests
   # "http://www.日本語.com/":
