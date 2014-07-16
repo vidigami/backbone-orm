@@ -22,8 +22,7 @@
 // Query String Utilities
 
 var QueryString = exports;
-var util = require('./util');
-var shims = require('./_shims');
+var _ = require('underscore');
 
 // If obj.hasOwnProperty has been overridden, then calling
 // obj.hasOwnProperty(prop) will break.
@@ -49,11 +48,11 @@ return encodeURIComponent(str);
 };
 
 var stringifyPrimitive = function(v) {
-if (util.isString(v))
+if (_.isString(v))
   return v;
-if (util.isBoolean(v))
+if (_.isBoolean(v))
   return v ? 'true' : 'false';
-if (util.isNumber(v))
+if (_.isNumber(v))
   return isFinite(v) ? v : '';
 return '';
 };
@@ -62,15 +61,15 @@ return '';
 QueryString.stringify = QueryString.encode = function(obj, sep, eq, name) {
 sep = sep || '&';
 eq = eq || '=';
-if (util.isNull(obj)) {
+if (_.isNull(obj)) {
   obj = undefined;
 }
 
-if (util.isObject(obj)) {
-  return shims.map(shims.keys(obj), function(k) {
+if (_.isObject(obj)) {
+  return _.map(_.keys(obj), function(k) {
     var ks = QueryString.escape(stringifyPrimitive(k)) + eq;
-    if (util.isArray(obj[k])) {
-      return shims.map(obj[k], function(v) {
+    if (_.isArray(obj[k])) {
+      return _.map(obj[k], function(v) {
         return ks + QueryString.escape(stringifyPrimitive(v));
       }).join(sep);
     } else {
@@ -91,7 +90,7 @@ sep = sep || '&';
 eq = eq || '=';
 var obj = {};
 
-if (!util.isString(qs) || qs.length === 0) {
+if (!_.isString(qs) || qs.length === 0) {
   return obj;
 }
 
@@ -99,7 +98,7 @@ var regexp = /\+/g;
 qs = qs.split(sep);
 
 var maxKeys = 1000;
-if (options && util.isNumber(options.maxKeys)) {
+if (options && _.isNumber(options.maxKeys)) {
   maxKeys = options.maxKeys;
 }
 
@@ -132,7 +131,7 @@ for (var i = 0; i < len; ++i) {
 
   if (!hasOwnProperty(obj, k)) {
     obj[k] = v;
-  } else if (util.isArray(obj[k])) {
+  } else if (_.isArray(obj[k])) {
     obj[k].push(v);
   } else {
     obj[k] = [obj[k], v];

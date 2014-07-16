@@ -2400,8 +2400,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	var punycode = { encode : function (s) { return s } };
-	var util = __webpack_require__(27);
-	var shims = __webpack_require__(28);
+	var _ = __webpack_require__(1);
+
+	var shims = __webpack_require__(27);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -2476,7 +2477,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    querystring = __webpack_require__(18);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
-	  if (url && util.isObject(url) && url instanceof Url) return url;
+	  if (url && _.isObject(url) && url instanceof Url) return url;
 
 	  var u = new Url;
 	  u.parse(url, parseQueryString, slashesDenoteHost);
@@ -2484,7 +2485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
-	  if (!util.isString(url)) {
+	  if (!_.isString(url)) {
 	    throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
 	  }
 
@@ -2722,7 +2723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // If it's an obj, this is a no-op.
 	  // this way, you can call url_format() on strings
 	  // to clean up potentially wonky urls.
-	  if (util.isString(obj)) obj = urlParse(obj);
+	  if (_.isString(obj)) obj = urlParse(obj);
 	  if (!(obj instanceof Url)) return Url.prototype.format.call(obj);
 	  return obj.format();
 	}
@@ -2753,8 +2754,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  if (this.query &&
-	      util.isObject(this.query) &&
-	      shims.keys(this.query).length) {
+	      _.isObject(this.query) &&
+	      _.keys(this.query).length) {
 	    query = querystring.stringify(this.query);
 	  }
 
@@ -2797,14 +2798,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	Url.prototype.resolveObject = function(relative) {
-	  if (util.isString(relative)) {
+	  if (_.isString(relative)) {
 	    var rel = new Url();
 	    rel.parse(relative, false, true);
 	    relative = rel;
 	  }
 
 	  var result = new Url();
-	  shims.forEach(shims.keys(this), function(k) {
+	  shims.forEach(_.keys(this), function(k) {
 	    result[k] = this[k];
 	  }, this);
 
@@ -2821,7 +2822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // hrefs like //foo/bar always cut to the protocol.
 	  if (relative.slashes && !relative.protocol) {
 	    // take everything except the protocol from relative
-	    shims.forEach(shims.keys(relative), function(k) {
+	    shims.forEach(_.keys(relative), function(k) {
 	      if (k !== 'protocol')
 	        result[k] = relative[k];
 	    });
@@ -2846,7 +2847,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // because that's known to be hostless.
 	    // anything else is assumed to be absolute.
 	    if (!slashedProtocol[relative.protocol]) {
-	      shims.forEach(shims.keys(relative), function(k) {
+	      shims.forEach(_.keys(relative), function(k) {
 	        result[k] = relative[k];
 	      });
 	      result.href = result.format();
@@ -2937,7 +2938,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    srcPath = srcPath.concat(relPath);
 	    result.search = relative.search;
 	    result.query = relative.query;
-	  } else if (!util.isNullOrUndefined(relative.search)) {
+	  } else if (!(_.isNull(relative.search) || _.isUndefined(relative.search))) {
 	    // just pull out the search.
 	    // like href='?foo'.
 	    // Put this after the other two cases because it simplifies the booleans
@@ -2956,7 +2957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    result.search = relative.search;
 	    result.query = relative.query;
 	    //to support http.request
-	    if (!util.isNull(result.pathname) || !util.isNull(result.search)) {
+	    if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
 	      result.path = (result.pathname ? result.pathname : '') +
 	                    (result.search ? result.search : '');
 	    }
@@ -3050,7 +3051,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  //to support request.http
-	  if (!util.isNull(result.pathname) || !util.isNull(result.search)) {
+	  if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
 	    result.path = (result.pathname ? result.pathname : '') +
 	                  (result.search ? result.search : '');
 	  }
@@ -3102,8 +3103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Query String Utilities
 
 	var QueryString = exports;
-	var util = __webpack_require__(27);
-	var shims = __webpack_require__(28);
+	var _ = __webpack_require__(1);
 
 	// If obj.hasOwnProperty has been overridden, then calling
 	// obj.hasOwnProperty(prop) will break.
@@ -3129,11 +3129,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var stringifyPrimitive = function(v) {
-	if (util.isString(v))
+	if (_.isString(v))
 	  return v;
-	if (util.isBoolean(v))
+	if (_.isBoolean(v))
 	  return v ? 'true' : 'false';
-	if (util.isNumber(v))
+	if (_.isNumber(v))
 	  return isFinite(v) ? v : '';
 	return '';
 	};
@@ -3142,15 +3142,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	QueryString.stringify = QueryString.encode = function(obj, sep, eq, name) {
 	sep = sep || '&';
 	eq = eq || '=';
-	if (util.isNull(obj)) {
+	if (_.isNull(obj)) {
 	  obj = undefined;
 	}
 
-	if (util.isObject(obj)) {
-	  return shims.map(shims.keys(obj), function(k) {
+	if (_.isObject(obj)) {
+	  return _.map(_.keys(obj), function(k) {
 	    var ks = QueryString.escape(stringifyPrimitive(k)) + eq;
-	    if (util.isArray(obj[k])) {
-	      return shims.map(obj[k], function(v) {
+	    if (_.isArray(obj[k])) {
+	      return _.map(obj[k], function(v) {
 	        return ks + QueryString.escape(stringifyPrimitive(v));
 	      }).join(sep);
 	    } else {
@@ -3171,7 +3171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	eq = eq || '=';
 	var obj = {};
 
-	if (!util.isString(qs) || qs.length === 0) {
+	if (!_.isString(qs) || qs.length === 0) {
 	  return obj;
 	}
 
@@ -3179,7 +3179,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	qs = qs.split(sep);
 
 	var maxKeys = 1000;
-	if (options && util.isNumber(options.maxKeys)) {
+	if (options && _.isNumber(options.maxKeys)) {
 	  maxKeys = options.maxKeys;
 	}
 
@@ -3212,7 +3212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  if (!hasOwnProperty(obj, k)) {
 	    obj[k] = v;
-	  } else if (util.isArray(obj[k])) {
+	  } else if (_.isArray(obj[k])) {
 	    obj[k].push(v);
 	  } else {
 	    obj[k] = [obj[k], v];
@@ -4624,15 +4624,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Utils = __webpack_require__(4);
 
-	ModelStream = __webpack_require__(29);
+	ModelStream = __webpack_require__(28);
 
-	modelEach = __webpack_require__(30);
+	modelEach = __webpack_require__(29);
 
-	modelInterval = __webpack_require__(31);
+	modelInterval = __webpack_require__(30);
 
 	DatabaseURL = __webpack_require__(8);
 
-	__webpack_require__(32);
+	__webpack_require__(31);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, fn, key, overrides, _findOrClone, _results;
@@ -5801,7 +5801,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(33));
+	})(__webpack_require__(32));
 
 
 /***/ },
@@ -6423,7 +6423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(33));
+	})(__webpack_require__(32));
 
 
 /***/ },
@@ -6524,7 +6524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return sync_fn;
 	    }
 	    model_type.cache = cache;
-	    return __webpack_require__(34)(model_type, sync_fn);
+	    return __webpack_require__(33)(model_type, sync_fn);
 	  };
 
 	  ModelCache.prototype.reset = function(callback) {
@@ -6574,108 +6574,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	var shims = __webpack_require__(28);
-
-	// NOTE: These type checking functions intentionally don't use `instanceof`
-	// because it is fragile and can be easily faked with `Object.create()`.
-	function isArray(ar) {
-	return shims.isArray(ar);
-	}
-	exports.isArray = isArray;
-
-	function isBoolean(arg) {
-	return typeof arg === 'boolean';
-	}
-	exports.isBoolean = isBoolean;
-
-	function isNull(arg) {
-	return arg === null;
-	}
-	exports.isNull = isNull;
-
-	function isNullOrUndefined(arg) {
-	return arg == null;
-	}
-	exports.isNullOrUndefined = isNullOrUndefined;
-
-	function isNumber(arg) {
-	return typeof arg === 'number';
-	}
-	exports.isNumber = isNumber;
-
-	function isString(arg) {
-	return typeof arg === 'string';
-	}
-	exports.isString = isString;
-
-	function isObject(arg) {
-	return typeof arg === 'object' && arg;
-	}
-	exports.isObject = isObject;
-
-	function objectToString(o) {
-	return Object.prototype.toString.call(o);
-	}
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
 	//
 	// The shims in this file are not fully implemented shims for the ES5
 	// features, but do work for the particular usecases there is in
 	// the other modules.
 	//
-
-	var toString = Object.prototype.toString;
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-	// Array.isArray is supported in IE9
-	function isArray(xs) {
-	  return toString.call(xs) === '[object Array]';
-	}
-	exports.isArray = typeof Array.isArray === 'function' ? Array.isArray : isArray;
-
-	// Array.prototype.indexOf is supported in IE9
-	exports.indexOf = function indexOf(xs, x) {
-	  if (xs.indexOf) return xs.indexOf(x);
-	  for (var i = 0; i < xs.length; i++) {
-	    if (x === xs[i]) return i;
-	  }
-	  return -1;
-	};
-
-	// Array.prototype.filter is supported in IE9
-	exports.filter = function filter(xs, fn) {
-	  if (xs.filter) return xs.filter(fn);
-	  var res = [];
-	  for (var i = 0; i < xs.length; i++) {
-	    if (fn(xs[i], i, xs)) res.push(xs[i]);
-	  }
-	  return res;
-	};
 
 	// Array.prototype.forEach is supported in IE9
 	exports.forEach = function forEach(xs, fn, self) {
@@ -6683,40 +6586,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (var i = 0; i < xs.length; i++) {
 	    fn.call(self, xs[i], i, xs);
 	  }
-	};
-
-	// Array.prototype.map is supported in IE9
-	exports.map = function map(xs, fn) {
-	  if (xs.map) return xs.map(fn);
-	  var out = new Array(xs.length);
-	  for (var i = 0; i < xs.length; i++) {
-	    out[i] = fn(xs[i], i, xs);
-	  }
-	  return out;
-	};
-
-	// Array.prototype.reduce is supported in IE9
-	exports.reduce = function reduce(array, callback, opt_initialValue) {
-	  if (array.reduce) return array.reduce(callback, opt_initialValue);
-	  var value, isValueSet = false;
-
-	  if (2 < arguments.length) {
-	    value = opt_initialValue;
-	    isValueSet = true;
-	  }
-	  for (var i = 0, l = array.length; l > i; ++i) {
-	    if (array.hasOwnProperty(i)) {
-	      if (isValueSet) {
-	        value = callback(value, array[i], i, array);
-	      }
-	      else {
-	        value = array[i];
-	        isValueSet = true;
-	      }
-	    }
-	  }
-
-	  return value;
 	};
 
 	// String.prototype.substr - negative index don't work in IE8
@@ -6740,126 +6609,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return str.replace(/^\s+|\s+$/g, '');
 	};
 
-	// Function.prototype.bind is supported in IE9
-	exports.bind = function () {
-	  var args = Array.prototype.slice.call(arguments);
-	  var fn = args.shift();
-	  if (fn.bind) return fn.bind.apply(fn, args);
-	  var self = args.shift();
-	  return function () {
-	    fn.apply(self, args.concat([Array.prototype.slice.call(arguments)]));
-	  };
-	};
-
-	// Object.create is supported in IE9
-	function create(prototype, properties) {
-	  var object;
-	  if (prototype === null) {
-	    object = { '__proto__' : null };
-	  }
-	  else {
-	    if (typeof prototype !== 'object') {
-	      throw new TypeError(
-	        'typeof prototype[' + (typeof prototype) + '] != \'object\''
-	      );
-	    }
-	    var Type = function () {};
-	    Type.prototype = prototype;
-	    object = new Type();
-	    object.__proto__ = prototype;
-	  }
-	  if (typeof properties !== 'undefined' && Object.defineProperties) {
-	    Object.defineProperties(object, properties);
-	  }
-	  return object;
-	}
-	exports.create = typeof Object.create === 'function' ? Object.create : create;
-
-	// Object.keys and Object.getOwnPropertyNames is supported in IE9 however
-	// they do show a description and number property on Error objects
-	function notObject(object) {
-	  return ((typeof object != "object" && typeof object != "function") || object === null);
-	}
-
-	function keysShim(object) {
-	  if (notObject(object)) {
-	    throw new TypeError("Object.keys called on a non-object");
-	  }
-
-	  var result = [];
-	  for (var name in object) {
-	    if (hasOwnProperty.call(object, name)) {
-	      result.push(name);
-	    }
-	  }
-	  return result;
-	}
-
-	// getOwnPropertyNames is almost the same as Object.keys one key feature
-	//  is that it returns hidden properties, since that can't be implemented,
-	//  this feature gets reduced so it just shows the length property on arrays
-	function propertyShim(object) {
-	  if (notObject(object)) {
-	    throw new TypeError("Object.getOwnPropertyNames called on a non-object");
-	  }
-
-	  var result = keysShim(object);
-	  if (exports.isArray(object) && exports.indexOf(object, 'length') === -1) {
-	    result.push('length');
-	  }
-	  return result;
-	}
-
-	var keys = typeof Object.keys === 'function' ? Object.keys : keysShim;
-	var getOwnPropertyNames = typeof Object.getOwnPropertyNames === 'function' ?
-	  Object.getOwnPropertyNames : propertyShim;
-
-	if (new Error().hasOwnProperty('description')) {
-	  var ERROR_PROPERTY_FILTER = function (obj, array) {
-	    if (toString.call(obj) === '[object Error]') {
-	      array = exports.filter(array, function (name) {
-	        return name !== 'description' && name !== 'number' && name !== 'message';
-	      });
-	    }
-	    return array;
-	  };
-
-	  exports.keys = function (object) {
-	    return ERROR_PROPERTY_FILTER(object, keys(object));
-	  };
-	  exports.getOwnPropertyNames = function (object) {
-	    return ERROR_PROPERTY_FILTER(object, getOwnPropertyNames(object));
-	  };
-	} else {
-	  exports.keys = keys;
-	  exports.getOwnPropertyNames = getOwnPropertyNames;
-	}
-
-	// Object.getOwnPropertyDescriptor - supported in IE8 but only on dom elements
-	function valueObject(value, key) {
-	  return { value: value[key] };
-	}
-
-	if (typeof Object.getOwnPropertyDescriptor === 'function') {
-	  try {
-	    Object.getOwnPropertyDescriptor({'a': 1}, 'a');
-	    exports.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-	  } catch (e) {
-	    // IE8 dom element issue - use a try catch and default to valueObject
-	    exports.getOwnPropertyDescriptor = function (value, key) {
-	      try {
-	        return Object.getOwnPropertyDescriptor(value, key);
-	      } catch (e) {
-	        return valueObject(value, key);
-	      }
-	    };
-	  }
-	} else {
-	  exports.getOwnPropertyDescriptor = valueObject;
-	}
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6920,7 +6672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6997,7 +6749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7162,7 +6914,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7232,7 +6984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7416,7 +7168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7431,7 +7183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	CacheCursor = __webpack_require__(35);
+	CacheCursor = __webpack_require__(34);
 
 	Schema = __webpack_require__(11);
 
@@ -7584,7 +7336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
