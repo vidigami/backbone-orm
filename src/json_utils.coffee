@@ -47,8 +47,10 @@ module.exports = class JSONUtils
           result[key] = value unless _.isNaN(value = +result[key])
 
         # convert id attributes
-        else if type = model_type?.schema().type(key)
-          result[key] = +result[key] if (type is 'Integer') or (type.schema?().type('id') is 'Integer')
+        else if model_type
+          key_parts = key.split('.') # queries like 'flat.id'
+          if type = model_type?.schema().type(key_parts[0])
+            result[key] = +result[key] if (type is 'Integer') or (type.schema?().type(key_parts[1] or 'id') is 'Integer')
 
       return result
     else if _.isString(values)
