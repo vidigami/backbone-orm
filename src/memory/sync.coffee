@@ -35,7 +35,7 @@ class MemorySync
   # @nodoc
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
-    @schema = new Schema(@model_type, {id: 'Integer'})
+    @schema = new Schema(@model_type, {id: {type: 'Integer'}})
     @store = @model_type.store or= {}
     @id = 0
 

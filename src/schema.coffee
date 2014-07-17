@@ -44,7 +44,7 @@ module.exports = class Schema
     relation.initialize() for key, relation of @relations
     return
 
-  type: (key) -> return @fields[key] or @relations[key]?.reverse_model_type
+  type: (key) -> return @fields[key]?.type or @relations[key]?.reverse_model_type
   relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)

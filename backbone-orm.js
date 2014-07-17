@@ -1821,8 +1821,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.type = function(key) {
-	    var _ref;
-	    return this.fields[key] || ((_ref = this.relations[key]) != null ? _ref.reverse_model_type : void 0);
+	    var _ref, _ref1;
+	    return ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0);
 	  };
 
 	  Schema.prototype.relation = function(key) {
@@ -2133,7 +2133,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.model_type = model_type;
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
 	    this.schema = new Schema(this.model_type, {
-	      id: 'Integer'
+	      id: {
+	        type: 'Integer'
+	      }
 	    });
 	    this.store = (_base = this.model_type).store || (_base.store = {});
 	    this.id = 0;
