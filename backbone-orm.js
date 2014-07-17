@@ -9,7 +9,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["underscore", "backbone", "stream"], factory);
+		define(["underscore", "backbone"], (function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) { return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]); }));
 	else if(typeof exports === 'object')
 		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else

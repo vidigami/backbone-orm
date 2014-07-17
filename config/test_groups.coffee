@@ -26,17 +26,25 @@ for library_name, library_files of LIBRARIES
 ###############################
 # AMD
 ###############################
+AMD_LIBRARIES = {}
+for library_name, library_files of LIBRARIES when not (/^legacy_|^parse_|_min$/).test(library_name)
+  AMD_LIBRARIES[library_name] = ['./stream.js'].concat(library_files)
+  AMD_LIBRARIES["#{library_name}_no_stream"] = library_files
 AMD_OPTIONS = require './amd/gulp-options'
 TEST_GROUPS.amd = []
-for library_name, library_files of LIBRARIES when not (/^legacy_|^parse_|_min$/).test(library_name)
-  test_files = ['./node_modules/chai/chai.js', './stream.js'].concat(library_files, TEST_CONFIG_JS, TEST_SOURCES); files = []; test_patterns = []; path_files = []
+for library_name, library_files of AMD_LIBRARIES
+  test_files = ['./node_modules/chai/chai.js'].concat(library_files, TEST_CONFIG_JS, TEST_SOURCES); files = []; test_patterns = []; path_files = ['parameters']
   files.push({pattern: './test/lib/requirejs-2.1.14.js'})
   for file in test_files
     (test_patterns.push(file); continue) if file.indexOf('.tests.') >= 0
     files.push({pattern: file, included: false})
     path_files.push(file)
   files.push("_temp/amd/#{library_name}/**/*.js")
-  TEST_GROUPS.amd.push({name: "amd_#{library_name}", files: files, build: {files: test_patterns, destination: "_temp/amd/#{library_name}", options: _.extend({path_files: path_files}, AMD_OPTIONS)}})
+  amd_options = _.extend({path_files: path_files}, AMD_OPTIONS)
+  unless _.any(test_files, (test_file) -> /\bstream\b/.test(test_file))
+    amd_options = _.clone(amd_options)
+    amd_options.shims['backbone-orm'].deps = _.without(amd_options.shims['backbone-orm'].deps, 'stream')
+  TEST_GROUPS.amd.push({name: "amd_#{library_name}", files: files, build: {files: test_patterns, destination: "_temp/amd/#{library_name}", options: amd_options}})
 
 ###############################
 # Webpack

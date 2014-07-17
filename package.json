@@ -63,7 +63,7 @@
     "lru-cache": "*",
     "mocha": "*",
     "queue-async": "*",
-    "webpack": "*",
+    "webpack": "git+https://github.com/forivall/webpack#master",
     "wrench": "*"
   },
   "dependencies": {
