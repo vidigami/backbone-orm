@@ -1794,10 +1794,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = Schema = (function() {
-	  function Schema(model_type) {
+	  function Schema(model_type, fields) {
 	    this.model_type = model_type;
+	    this.fields = fields != null ? fields : {};
 	    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
-	    this.fields = {};
 	    this.relations = {};
 	    this.virtual_accessors = {};
 	  }
@@ -1818,6 +1818,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      relation = _ref1[key];
 	      relation.initialize();
 	    }
+	  };
+
+	  Schema.prototype.type = function(key) {
+	    var _ref;
+	    return this.fields[key] || ((_ref = this.relations[key]) != null ? _ref.reverse_model_type : void 0);
 	  };
 
 	  Schema.prototype.relation = function(key) {
@@ -2127,7 +2132,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _base;
 	    this.model_type = model_type;
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
-	    this.schema = new Schema(this.model_type);
+	    this.schema = new Schema(this.model_type, {
+	      id: 'Integer'
+	    });
 	    this.store = (_base = this.model_type).store || (_base.store = {});
 	    this.id = 0;
 	  }

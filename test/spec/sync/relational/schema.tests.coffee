@@ -1,0 +1,112 @@
+assert = assert or require?('chai').assert
+
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
+Queue = BackboneORM.Queue
+Utils = BackboneORM.Utils
+ModelCache = BackboneORM.CacheSingletons.ModelCache
+JSONUtils = BackboneORM.JSONUtils
+Fabricator = BackboneORM.Fabricator
+
+option_sets = window?.__test__option_sets or require?('../../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
+  options = _.extend({}, options, parameters) if parameters
+
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 5
+
+  describe "Schema #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    Flat = Reverse = Owner = null
+
+    before ->
+      class Flat extends Backbone.Model
+        model_name: 'Flat'
+        urlRoot: "#{DATABASE_URL}/one_flats"
+        schema: _.defaults({
+          owner: -> ['hasOne', Owner]
+        }, BASE_SCHEMA)
+        cat: (field, meow, callback) -> callback(null, @get(field) + meow)
+        sync: SYNC(Flat)
+
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/one_reverses"
+        schema: _.defaults({
+          owner: -> ['belongsTo', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/one_owners"
+        schema: _.defaults({
+          flat: -> ['belongsTo', Flat, embed: options.embed]
+          reverses: -> ['hasMany', Reverse]
+        }, BASE_SCHEMA)
+        cat: (field, meow, callback) -> callback(null, @get(field) + meow)
+        sync: SYNC(Owner)
+
+    after (callback) ->
+      queue = new Queue()
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
+      queue.await callback
+    after -> Flat = Reverse = Owner = null
+
+    beforeEach (callback) ->
+      MODELS = {}
+
+      queue = new Queue(1)
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
+      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
+      queue.defer (callback) ->
+        create_queue = new Queue()
+
+        create_queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
+          name: Fabricator.uniqueId('flat_')
+          created_at: Fabricator.date
+          updated_at: Fabricator.date
+        }, (err, models) -> MODELS.flat = models; callback(err))
+        create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
+          name: Fabricator.uniqueId('reverse_')
+          created_at: Fabricator.date
+          updated_at: Fabricator.date
+        }, (err, models) -> MODELS.reverse = models; callback(err))
+        create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+          name: Fabricator.uniqueId('owner_')
+          created_at: Fabricator.date
+          updated_at: Fabricator.date
+        }, (err, models) -> MODELS.owner = models; callback(err))
+
+        create_queue.await callback
+
+      # link and save all
+      queue.defer (callback) ->
+        save_queue = new Queue()
+
+        for owner in MODELS.owner
+          do (owner) -> save_queue.defer (callback) ->
+            owner.set({
+              flat: MODELS.flat.pop()
+              reverses: [MODELS.reverse.pop(), MODELS.reverse.pop()]
+            })
+            owner.save callback
+
+        save_queue.await callback
+
+      queue.await callback
+
+    it 'type for models and id attribute', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        assert.ok(!!test_model.schema().type('id'), 'has type for id')
+        assert.ok(test_model.schema().type('flat') is Flat, 'has type for flat')
+        assert.ok(test_model.schema().type('reverses') is Reverse, 'has type for reverses')
+
+        done()
