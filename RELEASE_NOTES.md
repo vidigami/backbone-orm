@@ -9,6 +9,7 @@ Please refer to the following release notes when upgrading your version of Backb
 * Made patchAdd fail if the record already exists
 * Removed dependency on moment
 * Provided hooks for changing the conventions for table names, attributes, and foreign keys
+* Preserved integers when serialized in JSON: https://github.com/vidigami/backbone-orm/issues/26
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels

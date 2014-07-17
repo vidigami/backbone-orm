@@ -592,7 +592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.parse = function(values) {
-	    var date, key, match, result, value;
+	    var date, key, match, parsed_values, result, value;
 	    if (_.isNull(values) || (values === 'null')) {
 	      return null;
 	    }
@@ -626,11 +626,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (match = /^\"(.*)\"$/.exec(values)) {
 	        return match[0];
 	      }
-	      try {
-	        if (values = JSON.parse(values)) {
-	          return JSONUtils.parse(values);
-	        }
-	      } catch (_error) {}
+	      if (values[0] === '{' || values[0] === '[') {
+	        try {
+	          if (parsed_values = JSON.parse(values)) {
+	            return JSONUtils.parse(parsed_values);
+	          }
+	        } catch (_error) {}
+	      }
 	    }
 	    return values;
 	  };

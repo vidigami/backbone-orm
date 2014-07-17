@@ -49,10 +49,12 @@ module.exports = class JSONUtils
       return true if values is 'true'
       return false if values is 'false'
 
-      return match[0] if match = /^\"(.*)\"$/.exec(values) # "quoted string"
+      # "quoted string"
+      return match[0] if match = /^\"(.*)\"$/.exec(values)
 
       # stringified JSON
-      try return JSONUtils.parse(values) if values = JSON.parse(values)
+      if (values[0] is '{' or values[0] is '[')
+        try return JSONUtils.parse(parsed_values) if parsed_values = JSON.parse(values)
     return values
 
   # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
