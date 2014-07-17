@@ -2406,7 +2406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
 	 */
 	module.exports = {
-	  ModelCache: new (__webpack_require__(27))()
+	  ModelCache: new (__webpack_require__(26))()
 	};
 
 
@@ -2437,7 +2437,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var punycode = { encode : function (s) { return s } };
 	var _ = __webpack_require__(1);
-	var shims = __webpack_require__(26);
+	var shims = __webpack_require__(27);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -6584,46 +6584,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	//
-	// The shims in this file are not fully implemented shims for the ES5
-	// features, but do work for the particular usecases there is in
-	// the other modules.
-	//
-
-	// Array.prototype.forEach is supported in IE9
-	exports.forEach = function forEach(xs, fn, self) {
-	  if (xs.forEach) return xs.forEach(fn, self);
-	  for (var i = 0; i < xs.length; i++) {
-	    fn.call(self, xs[i], i, xs);
-	  }
-	};
-
-	// String.prototype.substr - negative index don't work in IE8
-	if ('ab'.substr(-1) !== 'b') {
-	  exports.substr = function (str, start, length) {
-	    // did we get a negative start, calculate how much it is from the beginning of the string
-	    if (start < 0) start = str.length + start;
-
-	    // call the original function
-	    return str.substr(start, length);
-	  };
-	} else {
-	  exports.substr = function (str, start, length) {
-	    return str.substr(start, length);
-	  };
-	}
-
-	// String.prototype.trim is supported in IE9
-	exports.trim = function (str) {
-	  if (str.trim) return str.trim();
-	  return str.replace(/^\s+|\s+$/g, '');
-	};
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -6737,6 +6697,46 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//
+	// The shims in this file are not fully implemented shims for the ES5
+	// features, but do work for the particular usecases there is in
+	// the other modules.
+	//
+
+	// Array.prototype.forEach is supported in IE9
+	exports.forEach = function forEach(xs, fn, self) {
+	  if (xs.forEach) return xs.forEach(fn, self);
+	  for (var i = 0; i < xs.length; i++) {
+	    fn.call(self, xs[i], i, xs);
+	  }
+	};
+
+	// String.prototype.substr - negative index don't work in IE8
+	if ('ab'.substr(-1) !== 'b') {
+	  exports.substr = function (str, start, length) {
+	    // did we get a negative start, calculate how much it is from the beginning of the string
+	    if (start < 0) start = str.length + start;
+
+	    // call the original function
+	    return str.substr(start, length);
+	  };
+	} else {
+	  exports.substr = function (str, start, length) {
+	    return str.substr(start, length);
+	  };
+	}
+
+	// String.prototype.trim is supported in IE9
+	exports.trim = function (str) {
+	  if (str.trim) return str.trim();
+	  return str.replace(/^\s+|\s+$/g, '');
+	};
+
+
+/***/ },
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -6795,19 +6795,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var type = typeof subject
 
-	  if (encoding === 'base64' && type === 'string') {
-	    subject = base64clean(subject)
-	  }
-
 	  // Find the length
 	  var length
 	  if (type === 'number')
-	    length = coerce(subject)
-	  else if (type === 'string')
+	    length = subject > 0 ? subject >>> 0 : 0
+	  else if (type === 'string') {
+	    if (encoding === 'base64')
+	      subject = base64clean(subject)
 	    length = Buffer.byteLength(subject, encoding)
-	  else if (type === 'object')
-	    length = coerce(subject.length) // assume that object is array-like
-	  else
+	  } else if (type === 'object' && subject !== null) { // assume object is array-like
+	    if (subject.type === 'Buffer' && Array.isArray(subject.data))
+	      subject = subject.data
+	    length = +subject.length > 0 ? Math.floor(+subject.length) : 0
+	  } else
 	    throw new Error('First argument needs to be a number, array or string.')
 
 	  var buf
@@ -6868,7 +6868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	Buffer.isBuffer = function (b) {
-	  return !!(b !== null && b !== undefined && b._isBuffer)
+	  return !!(b != null && b._isBuffer)
 	}
 
 	Buffer.byteLength = function (str, encoding) {
@@ -7215,8 +7215,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Buffer.prototype.slice = function (start, end) {
 	  var len = this.length
-	  start = clamp(start, len, 0)
-	  end = clamp(end, len, len)
+	  start = ~~start
+	  end = end === undefined ? len : ~~end
+
+	  if (start < 0) {
+	    start += len;
+	    if (start < 0)
+	      start = 0
+	  } else if (start > len) {
+	    start = len
+	  }
+
+	  if (end < 0) {
+	    end += len
+	    if (end < 0)
+	      end = 0
+	  } else if (end > len) {
+	    end = len
+	  }
+
+	  if (end < start)
+	    end = start
 
 	  if (Buffer._useTypedArrays) {
 	    return Buffer._augment(this.subarray(start, end))
@@ -7768,25 +7787,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function stringtrim (str) {
 	  if (str.trim) return str.trim()
 	  return str.replace(/^\s+|\s+$/g, '')
-	}
-
-	// slice(start, end)
-	function clamp (index, len, defaultValue) {
-	  if (typeof index !== 'number') return defaultValue
-	  index = ~~index;  // Coerce to integer.
-	  if (index >= len) return len
-	  if (index >= 0) return index
-	  index += len
-	  if (index >= 0) return index
-	  return 0
-	}
-
-	function coerce (length) {
-	  // Coerce length to a number (possibly NaN), round up
-	  // in case it's fractional (e.g. 123.456) then do a
-	  // double negate to coerce a NaN to 0. Easy, right?
-	  length = ~~Math.ceil(+length)
-	  return length < 0 ? 0 : length
 	}
 
 	function isArray (subject) {
