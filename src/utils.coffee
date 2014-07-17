@@ -14,8 +14,6 @@ Queue = require './queue'
 JSONUtils = require './json_utils'
 modelExtensions = null
 
-S4 = -> (((1+Math.random())*0x10000)|0).toString(16).substring(1)
-
 module.exports = class Utils
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
@@ -39,9 +37,6 @@ module.exports = class Utils
   # @nodoc
   @debounceCallback = (callback) ->
     return debounced_callback = -> return if debounced_callback.was_called; debounced_callback.was_called = true; callback.apply(null, Array.prototype.slice.call(arguments, 0))
-
-  # @nodoc
-  @guid: -> return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4())
 
   # @nodoc
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}

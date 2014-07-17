@@ -135,7 +135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
 	 */
-	var Backbone, DatabaseURL, JSONUtils, Queue, S4, URL, Utils, modelExtensions, _,
+	var Backbone, DatabaseURL, JSONUtils, Queue, URL, Utils, modelExtensions, _,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -152,10 +152,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	JSONUtils = __webpack_require__(5);
 
 	modelExtensions = null;
-
-	S4 = function() {
-	  return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-	};
 
 	module.exports = Utils = (function() {
 	  function Utils() {}
@@ -206,10 +202,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      debounced_callback.was_called = true;
 	      return callback.apply(null, Array.prototype.slice.call(arguments, 0));
 	    };
-	  };
-
-	  Utils.guid = function() {
-	    return S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4();
 	  };
 
 	  Utils.bbCallback = function(callback) {
@@ -2135,6 +2127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
 	    this.schema = new Schema(this.model_type);
 	    this.store = (_base = this.model_type).store || (_base.store = {});
+	    this.id = 0;
 	  }
 
 	  MemorySync.prototype.initialize = function() {
@@ -2168,7 +2161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  MemorySync.prototype.create = function(model, options) {
 	    var attributes, model_json;
-	    (attributes = {})[this.model_type.prototype.idAttribute] = Utils.guid();
+	    (attributes = {})[this.model_type.prototype.idAttribute] = ++this.id;
 	    model.set(attributes);
 	    model_json = this.store[model.id] = model.toJSON();
 	    return options.success(JSONUtils.deepClone(model_json));
@@ -3422,7 +3415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _ref2 = _this.store;
 	              for (id in _ref2) {
 	                model_json = _ref2[id];
-	                if (_.contains(_this._cursor.$ids, id) && _.isEqual(_.pick(model_json, keys), find_query)) {
+	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
 	                  json.push(JSONUtils.deepClone(model_json));
 	                }
 	              }
@@ -3488,7 +3481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _ref4 = _this.store;
 	              for (id in _ref4) {
 	                model_json = _ref4[id];
-	                if (_.contains(_this._cursor.$ids, id)) {
+	                if (_.contains(_this._cursor.$ids, model_json.id)) {
 	                  json.push(JSONUtils.deepClone(model_json));
 	                }
 	              }

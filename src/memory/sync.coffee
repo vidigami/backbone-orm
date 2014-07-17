@@ -37,6 +37,7 @@ class MemorySync
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @schema = new Schema(@model_type)
     @store = @model_type.store or= {}
+    @id = 0
 
   # @nodoc
   initialize: ->
@@ -53,7 +54,7 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
-    (attributes = {})[@model_type::idAttribute] = Utils.guid()
+    (attributes = {})[@model_type::idAttribute] = ++@id
     model.set(attributes)
     model_json = @store[model.id] = model.toJSON()
     options.success(JSONUtils.deepClone(model_json))
