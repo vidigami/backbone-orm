@@ -615,7 +615,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (key in values) {
 	        value = values[key];
 	        result[key] = JSONUtils.parse(value);
-	        if (!_.isString(result[key])) {
+	        if (!(_.isString(result[key]) && result[key].length)) {
 	          continue;
 	        }
 	        if (key[0] === '$') {

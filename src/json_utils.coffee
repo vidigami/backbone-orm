@@ -40,7 +40,7 @@ module.exports = class JSONUtils
       result = {}
       for key, value of values
         result[key] = JSONUtils.parse(value)
-        continue unless _.isString(result[key])
+        continue unless _.isString(result[key]) and result[key].length
 
         # convert control directives
         if key[0] is '$'
