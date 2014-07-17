@@ -362,7 +362,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -397,7 +397,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -432,7 +432,7 @@ _.each option_sets, exports = (options) ->
         # TODO: implement embedded find
         return done() if options.embed
 
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -613,7 +613,7 @@ _.each option_sets, exports = (options) ->
                     done()
 
       it "Can manually delete a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -644,7 +644,7 @@ _.each option_sets, exports = (options) ->
                     done()
 
       it "Can manually delete a relationship by related_json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -675,7 +675,7 @@ _.each option_sets, exports = (options) ->
                     done()
 
       it "Can manually delete a relationship by related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -706,7 +706,7 @@ _.each option_sets, exports = (options) ->
                     done()
 
       it "Can manually delete a relationship by array of related_model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
-        Reverse.findOne (err, reverse) ->
+        Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
           assert.ok(!err, "No errors: #{err}")
           assert.ok(reverse, 'found reverse')
 
@@ -941,7 +941,7 @@ _.each option_sets, exports = (options) ->
           done()
 
     it 'Can query on related (one-way hasMany) models with included relations', (done) ->
-      Reverse.findOne (err, reverse) ->
+      Reverse.findOne {owner_id: {$ne: null}}, (err, reverse) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(reverse, 'found model')
 
