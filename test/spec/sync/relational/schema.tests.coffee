@@ -16,7 +16,7 @@ _.each option_sets, exports = (options) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 5
+  BASE_COUNT = 1
 
   describe "Schema #{options.$parameter_tags or ''}#{options.$tags}", ->
 
@@ -109,4 +109,16 @@ _.each option_sets, exports = (options) ->
         assert.ok(test_model.schema().type('flat') is Flat, 'has type for flat')
         assert.ok(test_model.schema().type('reverses') is Reverse, 'has type for reverses')
 
+        done()
+
+    it 'JSONUtils.toQuery converts types correctly for nested models', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ok(!err, "No errors: #{err}")
+        assert.ok(test_model, 'found model')
+
+        query = {id: "#{test_model.id}", flat_id: "#{test_model.get('flat_id')}"}
+        assert.ok(query.id); assert.ok(query.flat_id)
+
+        assert.deepEqual(JSONUtils.parse(query), {id: "#{test_model.id}", flat_id: "#{test_model.get('flat_id')}"}, 'no model for lookup')
+        assert.deepEqual(JSONUtils.parse(query, Owner), {id: test_model.id, flat_id: test_model.get('flat_id')}, 'with model for lookup')
         done()

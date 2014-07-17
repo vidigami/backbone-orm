@@ -591,8 +591,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	  };
 
-	  JSONUtils.parse = function(values) {
-	    var date, key, match, parsed_values, result, value;
+	  JSONUtils.parse = function(values, model_type) {
+	    var date, key, match, parsed_values, result, type, value;
 	    if (_.isNull(values) || (values === 'null')) {
 	      return null;
 	    }
@@ -607,6 +607,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (key in values) {
 	        value = values[key];
 	        result[key] = JSONUtils.parse(value);
+	        if (model_type && _.isString(result[key]) && (type = model_type.schema().type(key))) {
+	          if (type === 'Integer' || (typeof type.schema === "function" ? type.schema().type('id') : void 0) === 'Integer') {
+	            result[key] = +result[key];
+	          }
+	        }
 	      }
 	      return result;
 	    } else if (_.isString(values)) {
@@ -1821,8 +1826,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.type = function(key) {
-	    var _ref, _ref1;
-	    return ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0);
+	    var _ref, _ref1, _ref2;
+	    return ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0) || ((_ref2 = this.virtual_accessors[key]) != null ? _ref2.reverse_model_type : void 0);
 	  };
 
 	  Schema.prototype.relation = function(key) {

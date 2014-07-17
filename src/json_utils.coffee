@@ -32,13 +32,19 @@ module.exports = class JSONUtils
   #   method: (req, res) ->
   #     query = JSONUtils.parse(req.query)
   #
-  @parse: (values) ->
+  @parse: (values, model_type) ->
     return null if _.isNull(values) or (values is 'null')
     return values if _.isDate(values)
     return _.map(values, JSONUtils.parse) if _.isArray(values)
     if _.isObject(values)
       result = {}
-      result[key] = JSONUtils.parse(value) for key, value of values
+      for key, value of values
+        result[key] = JSONUtils.parse(value)
+
+        # convert id attributes
+        if model_type and _.isString(result[key]) and (type = model_type.schema().type(key))
+          result[key] = +result[key] if type is 'Integer' or type.schema?().type('id') is 'Integer'
+
       return result
     else if _.isString(values)
       # Date
@@ -55,6 +61,7 @@ module.exports = class JSONUtils
       # stringified JSON
       if (values[0] is '{' or values[0] is '[')
         try return JSONUtils.parse(parsed_values) if parsed_values = JSON.parse(values)
+
     return values
 
   # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
