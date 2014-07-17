@@ -5475,13 +5475,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  One.prototype.initialize = function() {
+	    var _ref;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
 	    }
 	    if (this.embed) {
-	      return this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
+	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
+	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, this.model_type) : void 0;
 	  };
 
 	  One.prototype.initializeModel = function(model) {
@@ -5979,7 +5981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  Many.prototype.initialize = function() {
-	    var _ref;
+	    var _ref, _ref1;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
@@ -5989,6 +5991,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (this.embed) {
 	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
+	    }
+	    if ((_ref1 = this.reverse_model_type) != null) {
+	      _ref1.schema().type(this.foreign_key, this.model_type);
 	    }
 	    if (this.reverse_relation.type === 'hasMany') {
 	      return this.join_table = this.findOrGenerateJoinTable(this);
