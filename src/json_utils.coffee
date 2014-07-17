@@ -35,7 +35,7 @@ module.exports = class JSONUtils
   @parse: (values, model_type) ->
     return null if _.isNull(values) or (values is 'null')
     return values if _.isDate(values)
-    return _.map(values, JSONUtils.parse) if _.isArray(values)
+    return (JSONUtils.parse(value) for value in values) if _.isArray(values)
     if _.isObject(values)
       result = {}
       for key, value of values

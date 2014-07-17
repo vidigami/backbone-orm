@@ -600,7 +600,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return values;
 	    }
 	    if (_.isArray(values)) {
-	      return _.map(values, JSONUtils.parse);
+	      return (function() {
+	        var _i, _len, _results;
+	        _results = [];
+	        for (_i = 0, _len = values.length; _i < _len; _i++) {
+	          value = values[_i];
+	          _results.push(JSONUtils.parse(value));
+	        }
+	        return _results;
+	      })();
 	    }
 	    if (_.isObject(values)) {
 	      result = {};
