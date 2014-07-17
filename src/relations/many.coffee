@@ -32,6 +32,7 @@ module.exports = class Many extends require('./relation')
     @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
+    @model_type.schema().type('id', @reverse_model_type.schema().type('id')) if @embed # inherit id type
 
     # check for join table
     @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'

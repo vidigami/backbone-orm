@@ -1818,6 +1818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.model_type = model_type;
 	    this.fields = fields != null ? fields : {};
 	    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
+	    this.type_overrides = {};
 	    this.relations = {};
 	    this.virtual_accessors = {};
 	  }
@@ -1840,9 +1841,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  Schema.prototype.type = function(key) {
+	  Schema.prototype.type = function(key, type) {
 	    var _ref, _ref1, _ref2;
-	    return ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0) || ((_ref2 = this.virtual_accessors[key]) != null ? _ref2.reverse_model_type : void 0);
+	    if (arguments.length === 2) {
+	      return this.type_overrides[key] = type;
+	    } else {
+	      return this.type_overrides[key] || ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0) || ((_ref2 = this.virtual_accessors[key]) != null ? _ref2.reverse_model_type : void 0);
+	    }
 	  };
 
 	  Schema.prototype.relation = function(key) {
@@ -1949,15 +1954,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.generateJoinTable = function(relation) {
-	    var JoinTable, name, schema, url;
+	    var JoinTable, name, schema, type, url, _ref;
 	    schema = {};
 	    schema[relation.join_key] = [
-	      'Integer', {
+	      type = relation.model_type.schema().type('id'), {
 	        indexed: true
 	      }
 	    ];
 	    schema[relation.reverse_relation.join_key] = [
-	      'Integer', {
+	      ((_ref = relation.reverse_model_type) != null ? _ref.schema().type('id') : void 0) || type, {
 	        indexed: true
 	      }
 	    ];
@@ -5474,6 +5479,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
 	    }
+	    if (this.embed) {
+	      return this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
+	    }
 	  };
 
 	  One.prototype.initializeModel = function(model) {
@@ -5978,6 +5986,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (((_ref = this.reverse_relation) != null ? _ref.type : void 0) === 'hasOne') {
 	      throw new Error("The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + ").");
+	    }
+	    if (this.embed) {
+	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
 	    if (this.reverse_relation.type === 'hasMany') {
 	      return this.join_table = this.findOrGenerateJoinTable(this);

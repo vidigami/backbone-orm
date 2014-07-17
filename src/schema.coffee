@@ -33,7 +33,7 @@ module.exports = class Schema
   # @nodoc
   constructor: (@model_type, @fields={}) ->
     @raw = _.clone(_.result(new @model_type(), 'schema') or {})
-    @relations = {}; @virtual_accessors = {}
+    @type_overrides = {}; @relations = {}; @virtual_accessors = {}
 
   # @nodoc
   initialize: ->
@@ -44,7 +44,11 @@ module.exports = class Schema
     relation.initialize() for key, relation of @relations
     return
 
-  type: (key) -> return @fields[key]?.type or @relations[key]?.reverse_model_type or @virtual_accessors[key]?.reverse_model_type
+  type: (key, type) ->
+    if arguments.length is 2
+      @type_overrides[key] = type
+    else
+      return @type_overrides[key] or @fields[key]?.type or @relations[key]?.reverse_model_type or @virtual_accessors[key]?.reverse_model_type
   relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
@@ -94,8 +98,8 @@ module.exports = class Schema
   # @nodoc
   generateJoinTable: (relation) ->
     schema = {}
-    schema[relation.join_key] = ['Integer', indexed: true]
-    schema[relation.reverse_relation.join_key] = ['Integer', indexed: true]
+    schema[relation.join_key] = [type = relation.model_type.schema().type('id'), indexed: true]
+    schema[relation.reverse_relation.join_key] = [relation.reverse_model_type?.schema().type('id') or type, indexed: true]
     url = Schema.joinTableURL(relation)
     name = ConventionUtils.conventions.modelName(url, true)
 

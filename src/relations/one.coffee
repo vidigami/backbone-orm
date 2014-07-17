@@ -23,6 +23,7 @@ module.exports = class One extends require('./relation')
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
+    @model_type.schema().type('id', @reverse_model_type.schema().type('id')) if @embed # inherit id type
 
   initializeModel: (model) ->
     model.setLoaded(@key, @isEmbedded()) unless model.isLoadedExists(@key) # it may have been set before initialize is called
