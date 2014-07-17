@@ -1814,11 +1814,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = Schema = (function() {
-	  function Schema(model_type, fields) {
+	  function Schema(model_type, type_overrides) {
 	    this.model_type = model_type;
-	    this.fields = fields != null ? fields : {};
+	    this.type_overrides = type_overrides != null ? type_overrides : {};
 	    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
-	    this.type_overrides = {};
+	    this.fields = {};
 	    this.relations = {};
 	    this.virtual_accessors = {};
 	  }
@@ -1842,11 +1842,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.type = function(key, type) {
-	    var _ref, _ref1, _ref2;
+	    var _base, _ref, _ref1, _ref2, _ref3;
 	    if (arguments.length === 2) {
-	      return this.type_overrides[key] = type;
+	      return ((_base = this.type_overrides)[key] || (_base[key] = {}))['type'] = type;
 	    } else {
-	      return this.type_overrides[key] || ((_ref = this.fields[key]) != null ? _ref.type : void 0) || ((_ref1 = this.relations[key]) != null ? _ref1.reverse_model_type : void 0) || ((_ref2 = this.virtual_accessors[key]) != null ? _ref2.reverse_model_type : void 0);
+	      return ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relations[key]) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = this.reverseRelation(key)) != null ? _ref3.model_type : void 0);
 	    }
 	  };
 

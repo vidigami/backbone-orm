@@ -31,9 +31,9 @@ RELATION_VARIANTS =
 # @private
 module.exports = class Schema
   # @nodoc
-  constructor: (@model_type, @fields={}) ->
+  constructor: (@model_type, @type_overrides={}) ->
     @raw = _.clone(_.result(new @model_type(), 'schema') or {})
-    @type_overrides = {}; @relations = {}; @virtual_accessors = {}
+    @fields = {}; @relations = {}; @virtual_accessors = {}
 
   # @nodoc
   initialize: ->
@@ -46,9 +46,9 @@ module.exports = class Schema
 
   type: (key, type) ->
     if arguments.length is 2
-      @type_overrides[key] = type
+      (@type_overrides[key] or= {})['type'] = type
     else
-      return @type_overrides[key] or @fields[key]?.type or @relations[key]?.reverse_model_type or @virtual_accessors[key]?.reverse_model_type
+      return @type_overrides[key]?.type or @fields[key]?.type or @relations[key]?.reverse_model_type or @reverseRelation(key)?.model_type
   relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)
