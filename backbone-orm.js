@@ -615,8 +615,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (key in values) {
 	        value = values[key];
 	        result[key] = JSONUtils.parse(value);
-	        if (model_type && _.isString(result[key]) && (type = model_type.schema().type(key))) {
-	          if (type === 'Integer' || (typeof type.schema === "function" ? type.schema().type('id') : void 0) === 'Integer') {
+	        if (!_.isString(result[key])) {
+	          continue;
+	        }
+	        if (key[0] === '$') {
+	          if (!_.isNaN(value = +result[key])) {
+	            result[key] = value;
+	          }
+	        } else if (type = model_type != null ? model_type.schema().type(key) : void 0) {
+	          if ((type === 'Integer') || ((typeof type.schema === "function" ? type.schema().type('id') : void 0) === 'Integer')) {
 	            result[key] = +result[key];
 	          }
 	        }

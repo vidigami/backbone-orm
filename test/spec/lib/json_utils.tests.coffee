@@ -29,6 +29,14 @@ describe 'JSONUtils', ->
     query = JSONUtils.toQuery(VALUES)
     assert.deepEqual(query, _.extend({}, VALUES_JSON, {object: JSON.stringify(VALUES.object), array: JSON.stringify(VALUES.array)}))
 
-    assert.deepEqual(JSONUtils.parse(query), VALUES)
-    assert.deepEqual(JSONUtils.parse(JSON.parse(JSON.stringify(query))), VALUES)
+    assert.deepEqual(JSONUtils.parse(JSONUtils.toQuery(query)), VALUES)
+    assert.deepEqual(JSONUtils.parse(JSON.parse(JSON.stringify(JSONUtils.toQuery(query)))), VALUES)
+    done()
+
+  it 'toQuery handles control directives', (done) ->
+    query = {$limit: '1', $one: 'true', $hello: 'abc', $sort: ['name'], $id: {$in: [1, '2']}}
+    parsed_query = {$limit: 1, $one: true, $hello: 'abc', $sort: ['name'], $id: {$in: [1, '2']}}
+
+    assert.deepEqual(JSONUtils.parse(JSONUtils.toQuery(query)), parsed_query)
+    assert.deepEqual(JSONUtils.parse(JSON.parse(JSON.stringify(JSONUtils.toQuery(query)))), parsed_query)
     done()

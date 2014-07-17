@@ -120,5 +120,6 @@ _.each option_sets, exports = (options) ->
         assert.ok(query.id); assert.ok(query.flat_id)
 
         assert.deepEqual(JSONUtils.parse(query), {id: "#{test_model.id}", flat_id: "#{test_model.get('flat_id')}"}, 'no model for lookup')
-        assert.deepEqual(JSONUtils.parse(query, Owner), {id: test_model.id, flat_id: test_model.get('flat_id')}, 'with model for lookup')
+        if test_model.schema().type('id') isnt '_raw'
+          assert.deepEqual(JSONUtils.parse(query, Owner), {id: test_model.id, flat_id: test_model.get('flat_id')}, 'with model for lookup')
         done()

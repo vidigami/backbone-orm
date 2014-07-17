@@ -40,10 +40,15 @@ module.exports = class JSONUtils
       result = {}
       for key, value of values
         result[key] = JSONUtils.parse(value)
+        continue unless _.isString(result[key])
+
+        # convert control directives
+        if key[0] is '$'
+          result[key] = value unless _.isNaN(value = +result[key])
 
         # convert id attributes
-        if model_type and _.isString(result[key]) and (type = model_type.schema().type(key))
-          result[key] = +result[key] if type is 'Integer' or type.schema?().type('id') is 'Integer'
+        else if type = model_type?.schema().type(key)
+          result[key] = +result[key] if (type is 'Integer') or (type.schema?().type('id') is 'Integer')
 
       return result
     else if _.isString(values)
