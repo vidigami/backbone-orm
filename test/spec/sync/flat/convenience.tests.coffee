@@ -125,6 +125,20 @@ _.each option_sets, exports = (options) ->
           assert.equal(models.length, BASE_COUNT, 'counted expected number of albums')
           done()
 
+    describe 'destroy', ->
+      it 'Has a short hand for id', (done) ->
+        Flat.findOne (err, model) ->
+          assert.ifError(err)
+          assert.ok(model, 'found a model')
+
+          Flat.destroy id = model.id, (err) ->
+            assert.ifError(err)
+
+            Flat.findOne id, (err, model) ->
+              assert.ifError(err)
+              assert.ok(!model, 'model was destroyed')
+              done()
+
     describe 'exists', ->
       it 'Handles an exist with no query', (done) ->
         Flat.exists (err, exists) ->
