@@ -13,7 +13,7 @@ module.exports = TEST_GROUPS = {}
 ###############################
 LIBRARIES =
   backbone_underscore: (resolveModule(module_name) for module_name in ['underscore', 'backbone']).concat(['./backbone-orm.js'])
-  backbone_underscore_min: (resolveModule(module_name) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.min.js'])
+  backbone_underscore_min: (resolveModule(module_name) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./stream.js', './backbone-orm.min.js'])
   backbone_lodash: (resolveModule(module_name) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.js'])
   backbone_lodash_min: (resolveModule(module_name) for module_name in ['lodash', 'backbone']).concat(['./backbone-orm.min.js'])
 
