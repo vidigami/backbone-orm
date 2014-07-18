@@ -97,7 +97,7 @@ _.each option_sets, exports = (options) ->
 
       # link and save all
       queue.defer (callback) ->
-        save_queue = new Queue(1)
+        save_queue = new Queue()
 
         link_tasks = []
         for owner in MODELS.owner
