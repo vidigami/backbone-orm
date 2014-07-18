@@ -51,7 +51,7 @@ _.each option_sets, exports = (options) ->
       assert.equal(bob.get('name'), 'Bob', 'name before save is Bob')
       assert.ok(!bob.id, 'id before save doesn\'t exist')
 
-      bob.save callback (err) ->
+      bob.save (err) ->
         assert.ifError(err)
 
         assert.equal(bob.get('name'), 'Bob', 'name after save is Bob')
