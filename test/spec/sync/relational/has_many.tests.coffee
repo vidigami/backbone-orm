@@ -119,7 +119,7 @@ _.each option_sets, exports = (options) ->
 
       queue.await callback
 
-    it.skip 'Can fetch and serialize a custom foreign key', (done) ->
+    it 'Can fetch and serialize a custom foreign key', (done) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
@@ -133,6 +133,7 @@ _.each option_sets, exports = (options) ->
             assert.equal(test_model.id, related_json.ownerish_id, "Serialized the foreign id. Expected: #{test_model.id}. Actual: #{related_json.ownerish_id}")
           done()
 
+    # TODO: should related models be loaded to save?
     it.skip 'Can create a model and load a related model by id (hasMany)', (done) ->
       Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
         assert.ok(!err, "No errors: #{err}")
@@ -148,6 +149,7 @@ _.each option_sets, exports = (options) ->
             assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
             done()
 
+    # TODO: should related models be loaded to save?
     it.skip 'Can create a model and load a related model by id (hasMany)', (done) ->
       Reverse.cursor({$values: 'id'}).limit(4).toJSON (err, reverse_ids) ->
         assert.ok(!err, "No errors: #{err}")
@@ -163,6 +165,7 @@ _.each option_sets, exports = (options) ->
             assert.equal(_.difference(reverse_ids, (test.id for test in reverses)).length, 0, "expected owners: #{_.difference(reverse_ids, (test.id for test in reverses))}")
             done()
 
+    # TODO: should related models be loaded to save?
     it.skip 'Can create a model and load a related model by id (belongsTo)', (done) ->
       Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
         assert.ok(!err, "No errors: #{err}")
@@ -178,6 +181,7 @@ _.each option_sets, exports = (options) ->
             assert.equal(owner_ids[0], owner.id, "loaded correct model. Expected: #{owner_ids[0]}. Actual: #{owner.id}")
             done()
 
+    # TODO: should related models be loaded to save?
     it.skip 'Can create a model and load a related model by id (belongsTo)', (done) ->
       Owner.cursor({$values: 'id'}).limit(4).toJSON (err, owner_ids) ->
         assert.ok(!err, "No errors: #{err}")

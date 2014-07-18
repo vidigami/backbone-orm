@@ -734,6 +734,7 @@ _.each option_sets, exports = (options) ->
 
         queue.await done
 
+    # TODO: should the related model be loaded to save?
     it.skip 'Can create a related model by id (hasOne)', (done) ->
       Reverse.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
@@ -744,11 +745,14 @@ _.each option_sets, exports = (options) ->
         new_model.save (err) ->
           assert.ok(!err, "No errors: #{err}")
           new_model.set({reverse_id: reverse_id})
-          new_model.get 'reverse', (err, reverse) ->
+          new_model.save (err) ->
             assert.ok(!err, "No errors: #{err}")
-            assert.ok(reverse, 'found related model')
-            assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
-            done()
+
+            new_model.get 'reverse', (err, reverse) ->
+              assert.ok(!err, "No errors: #{err}")
+              assert.ok(reverse, 'found related model')
+              assert.equal(reverse_id, reverse.id, 'Loaded model is correct')
+              done()
 
     it 'Handles a get query for a belongsTo relation', (done) ->
       Owner.findOne (err, test_model) ->

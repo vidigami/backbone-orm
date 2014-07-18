@@ -18,7 +18,7 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  describe "One #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "One casing #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     Flat = Reverse = Owner = null
     before ->

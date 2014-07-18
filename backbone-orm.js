@@ -2112,24 +2112,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils, _;
+	var ConventionUtils, _;
 
 	_ = __webpack_require__(1);
 
-	module.exports = Utils = (function() {
-	  function Utils() {}
+	module.exports = ConventionUtils = (function() {
+	  function ConventionUtils() {}
 
-	  Utils.conventions = _.clone(__webpack_require__(25));
+	  ConventionUtils.conventions = _.clone(__webpack_require__(25));
 
-	  Utils.set = function(_conventions) {
-	    return Utils.conventions = _conventions;
+	  ConventionUtils.set = function(_conventions) {
+	    return ConventionUtils.conventions = _conventions;
 	  };
 
-	  Utils.get = function() {
-	    return Utils.conventions;
+	  ConventionUtils.get = function() {
+	    return ConventionUtils.conventions;
 	  };
 
-	  return Utils;
+	  return ConventionUtils;
 
 	})();
 

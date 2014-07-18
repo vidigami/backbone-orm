@@ -14,14 +14,14 @@ module.exports = (callback) ->
     gutil.log 'Running Node.js tests'
     global.test_parameters = require '../test/parameters' # ensure that globals for the target backend are loaded
     gulp.src('test/spec/**/*.tests.coffee')
-      .pipe(mocha({}))
+      .pipe(mocha({reporter: 'spec'}))
       .pipe es.writeArray (err, array) ->
         delete global.test_parameters # cleanup globals
         callback(err)
 
-  # run browser tests
-  queue.defer (callback) ->
-    gutil.log 'Running Browser tests'
-    karma(callback)
+  # # run browser tests
+  # queue.defer (callback) ->
+  #   gutil.log 'Running Browser tests'
+  #   karma(callback)
 
   queue.await callback
