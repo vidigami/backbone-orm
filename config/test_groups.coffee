@@ -4,16 +4,18 @@ _ = require 'underscore'
 gutil = require 'gulp-util'
 FILES = require './files'
 
+resolveModule = (module_name) -> path.relative('.', require.resolve(module_name))
+
 module.exports = TEST_GROUPS = {}
 
 ###############################
 # Browser Globals
 ###############################
 LIBRARIES =
-  # backbone_underscore: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.js'])
-  backbone_underscore_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.min.js'])
-  backbone_lodash: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.js'])
-  backbone_lodash_min: (path.relative('.', require.resolve(module_name)) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.min.js'])
+  backbone_underscore: (resolveModule(module_name) for module_name in ['underscore', 'backbone']).concat(['./backbone-orm.js'])
+  backbone_underscore_min: (resolveModule(module_name) for module_name in ['jquery', 'underscore', 'backbone']).concat(['./backbone-orm.min.js'])
+  backbone_lodash: (resolveModule(module_name) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.js'])
+  backbone_lodash_min: (resolveModule(module_name) for module_name in ['lodash', 'backbone']).concat(['./backbone-orm.min.js'])
 
 TEST_CONFIG = ['./test/parameters.coffee', './test/option_sets.coffee']
 TEST_CONFIG_JS = ['./_temp/parameters.js', './_temp/option_sets.js']
@@ -30,11 +32,13 @@ AMD_LIBRARIES = {}
 for library_name, library_files of LIBRARIES when not (/^legacy_|^parse_|_min$/).test(library_name)
   AMD_LIBRARIES[library_name] = ['./stream.js'].concat(library_files)
   AMD_LIBRARIES["#{library_name}_no_stream"] = library_files
+
 AMD_OPTIONS = require './amd/gulp-options'
 TEST_GROUPS.amd = []
 for library_name, library_files of AMD_LIBRARIES
   test_files = ['./node_modules/chai/chai.js'].concat(library_files, TEST_CONFIG_JS, TEST_SOURCES); files = []; test_patterns = []; path_files = ['parameters']
   files.push({pattern: './test/lib/requirejs-2.1.14.js'})
+  test_files.unshift(resolveModule('jquery')) unless resolveModule('jquery') in test_files # jquery is mandatory for amd
   for file in test_files
     (test_patterns.push(file); continue) if file.indexOf('.tests.') >= 0
     files.push({pattern: file, included: false})

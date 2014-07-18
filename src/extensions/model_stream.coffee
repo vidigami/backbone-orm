@@ -6,8 +6,7 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-# stream is large so it is optional on the browser
-try stream = require 'stream'
+try stream = require 'stream' # stream is large so it is optional on the browser
 if stream?.Readable
   # @nodoc
   module.exports = class ModelStream extends stream.Readable
