@@ -50,7 +50,7 @@ module.exports = class Schema
     else
       return @type_overrides[key]?.type or @fields[key]?.type or @relation(key)?.reverse_model_type or @reverseRelation(key)?.model_type
   idType: (key) ->
-    (other = key.substr(index+1); key = key.substr(0, index)) if (index = key.indexOf()) >= 0 # queries like 'flat.id'
+    (other = key.substr(index+1); key = key.substr(0, index)) if (index = key.indexOf('.')) >= 0 # queries like 'flat.id'
     return unless type = @type(key)
     type.schema?().type(other or 'id') or type
 

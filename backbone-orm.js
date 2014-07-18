@@ -1854,7 +1854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  Schema.prototype.idType = function(key) {
 	    var index, other, type;
-	    if ((index = key.indexOf()) >= 0) {
+	    if ((index = key.indexOf('.')) >= 0) {
 	      other = key.substr(index + 1);
 	      key = key.substr(0, index);
 	    }
