@@ -54,6 +54,7 @@ module.exports = class JSONUtils
       return result
     else if _.isString(values)
       # Date
+      # A trailing 'Z' means that the date will _always_ be parsed as UTC
       if (values.length >= 20) and values[values.length-1] is 'Z'
         return if _.isNaN((date = new Date(values)).getTime()) then values else date
 

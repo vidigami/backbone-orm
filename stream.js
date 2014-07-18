@@ -3528,7 +3528,7 @@ function Buffer(subject, encoding, offset) {
   if (encoding == "base64" && typeof subject == "string") {
     subject = stringtrim(subject);
     while (subject.length % 4 != 0) {
-      subject = subject + "="; 
+      subject = subject + "=";
     }
   }
 
@@ -4636,7 +4636,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 
 	function b64ToByteArray(b64) {
 		var i, j, l, tmp, placeHolders, arr;
-	
+
 		if (b64.length % 4 > 0) {
 			throw 'Invalid string. Length must be a multiple of 4';
 		}
@@ -4773,10 +4773,13 @@ process.chdir = function (dir) {
 
 if (typeof exports == 'object') {
   module.exports = require('stream');
-} else if (typeof define == 'function' && define.amd) {
-  define('stream', function(){ return require('stream'); });
 } else {
-  window.stream = require('stream');
+  if (typeof define == 'function' && define.amd) {
+    define('stream', function(){ return require('stream'); });
+  }
+  if (typeof window != 'undefined') {
+    window.stream = require('stream');
+  }
 }
 
 }).call(this);

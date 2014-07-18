@@ -1795,9 +1795,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	ConventionUtils = __webpack_require__(13);
 
-	One = __webpack_require__(24);
+	One = __webpack_require__(23);
 
-	Many = __webpack_require__(25);
+	Many = __webpack_require__(24);
 
 	DatabaseURL = __webpack_require__(8);
 
@@ -2119,7 +2119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Utils = (function() {
 	  function Utils() {}
 
-	  Utils.conventions = _.clone(__webpack_require__(23));
+	  Utils.conventions = _.clone(__webpack_require__(25));
 
 	  Utils.set = function(_conventions) {
 	    return Utils.conventions = _conventions;
@@ -5446,34 +5446,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var inflection;
-
-	inflection = __webpack_require__(21);
-
-	module.exports = {
-	  modelName: function(table_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
-	  },
-	  tableName: function(model_name) {
-	    return inflection.pluralize(inflection.underscore(model_name));
-	  },
-	  attribute: function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  },
-	  foreignKey: function(model_name, plural) {
-	    if (plural) {
-	      return inflection.underscore(inflection.singularize(model_name)) + '_ids';
-	    } else {
-	      return inflection.underscore(model_name) + '_id';
-	    }
-	  }
-	};
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -5960,7 +5932,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6585,6 +6557,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Many;
 
 	})(__webpack_require__(33));
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inflection;
+
+	inflection = __webpack_require__(21);
+
+	module.exports = {
+	  modelName: function(table_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
+	  },
+	  tableName: function(model_name) {
+	    return inflection.pluralize(inflection.underscore(model_name));
+	  },
+	  attribute: function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  },
+	  foreignKey: function(model_name, plural) {
+	    if (plural) {
+	      return inflection.underscore(inflection.singularize(model_name)) + '_ids';
+	    } else {
+	      return inflection.underscore(model_name) + '_id';
+	    }
+	  }
+	};
 
 
 /***/ },
