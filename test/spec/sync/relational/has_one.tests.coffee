@@ -3,7 +3,6 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
-ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
@@ -61,7 +60,7 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.await callback
     after -> Flat = Reverse = ForeignReverse = Owner = null
@@ -72,7 +71,7 @@ _.each option_sets, exports = (options) ->
       MODELS = {}
       queue = new Queue(1)
 
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
+      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.defer (callback) ->
         create_queue = new Queue()
@@ -164,7 +163,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(reverse.id isnt another_reverse_json.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -197,7 +196,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(reverse.id isnt another_reverse_json.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -230,7 +229,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(reverse.id isnt another_reverse.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 owner = new Owner({id: owner.id})
               owner.patchAdd 'reverse', another_reverse, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -263,7 +262,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner_json.id, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -296,7 +295,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(owner.id isnt another_owner_json.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner_json, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -329,7 +328,7 @@ _.each option_sets, exports = (options) ->
               assert.ok(owner.id isnt another_owner.id, "loaded a model with a different id.")
 
               if unload
-                ModelCache.reset(->) # TODO: make async # reset cache
+                BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
                 reverse = new Reverse({id: reverse.id})
               reverse.patchAdd 'owner', another_owner, (err) ->
                 assert.ok(!err, "No errors: #{err}")
@@ -362,7 +361,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = reverse
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model.id, (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -396,7 +395,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = reverse
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model.toJSON(), (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -429,7 +428,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = reverse
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', destroyed_model, (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -462,7 +461,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = reverse
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               owner = new Owner({id: owner.id})
             owner.patchRemove 'reverse', [destroyed_model], (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -495,7 +494,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = owner
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               reverse = new Reverse({id: reverse.id})
             reverse.patchRemove 'owner', destroyed_model.id, (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -529,7 +528,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = owner
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               reverse = new Reverse({id: reverse.id})
             reverse.patchRemove 'owner', destroyed_model.toJSON(), (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -563,7 +562,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = owner
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               reverse = new Reverse({id: reverse.id})
             reverse.patchRemove 'owner', destroyed_model, (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -597,7 +596,7 @@ _.each option_sets, exports = (options) ->
 
             destroyed_model = owner
             if unload
-              ModelCache.reset(->) # TODO: make async # reset cache
+              BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
               reverse = new Reverse({id: reverse.id})
             reverse.patchRemove 'owner', [destroyed_model], (err) ->
               assert.ok(!err, "No errors: #{err}")
@@ -1060,7 +1059,7 @@ _.each option_sets, exports = (options) ->
           queue.defer (callback) -> owner0.save callback
           queue.defer (callback) -> owner1.save callback
           queue.defer (callback) ->
-            ModelCache.reset(->) # TODO: make async # reset cache
+            BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
             Owner.cursor({$ids: [owner0.id, owner1.id]}).limit(2).include('reverse').toModels (err, owners) ->
               assert.ok(!err, "No errors: #{err}")
               assert.equal(2, owners.length, "Found owners post-save. Expected: 2. Actual: #{owners.length}")
@@ -1127,7 +1126,7 @@ _.each option_sets, exports = (options) ->
         # owner.save {flat: null}, (err) ->
         #   assert.ok(!err, "No errors: #{err}")
 
-        #   ModelCache.reset(->) # TODO: make async # reset cache
+        #   BackboneORM.model_cache.reset(->) # TODO: make async # reset cache
         #   Owner.find owner.id, (err, loaded_owner) ->
         #     assert.ok(!err, "No errors: #{err}")
         #     assert.equal(loaded_owner.get('flat').id, flat_id, 'Virtual flat is not saved')

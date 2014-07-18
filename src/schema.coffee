@@ -8,8 +8,8 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-ConventionUtils = require './conventions/utils'
 
+BackboneORM = require './core'
 One = require './relations/one'
 Many = require './relations/many'
 DatabaseURL = require './database_url'
@@ -82,7 +82,7 @@ module.exports = class Schema
 
   # @nodoc
   generateBelongsTo: (reverse_model_type) ->
-    key = ConventionUtils.conventions.attribute(reverse_model_type.model_name)
+    key = BackboneORM.naming_conventions.attribute(reverse_model_type.model_name)
     return relation if relation = @relations[key] # already exists
 
     if @raw[key] # not intitialized yet, intialize now
@@ -96,8 +96,8 @@ module.exports = class Schema
     return relation
 
   @joinTableURL: (relation) ->
-    table_name1 = ConventionUtils.conventions.tableName(relation.model_type.model_name)
-    table_name2 = ConventionUtils.conventions.tableName(relation.reverse_relation.model_type.model_name)
+    table_name1 = BackboneORM.naming_conventions.tableName(relation.model_type.model_name)
+    table_name2 = BackboneORM.naming_conventions.tableName(relation.reverse_relation.model_type.model_name)
     return if table_name1.localeCompare(table_name2) < 0 then "#{table_name1}_#{table_name2}" else "#{table_name2}_#{table_name1}"
 
   # @nodoc
@@ -106,7 +106,7 @@ module.exports = class Schema
     schema[relation.join_key] = [type = relation.model_type.schema().type('id'), indexed: true]
     schema[relation.reverse_relation.join_key] = [relation.reverse_model_type?.schema().type('id') or type, indexed: true]
     url = Schema.joinTableURL(relation)
-    name = ConventionUtils.conventions.modelName(url, true)
+    name = BackboneORM.naming_conventions.modelName(url, true)
 
     try
       # @nodoc

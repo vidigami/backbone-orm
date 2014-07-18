@@ -11,6 +11,9 @@ Please refer to the following release notes when upgrading your version of Backb
 * Provided hooks for changing the conventions for table names, attributes, and foreign keys
 * Preserved integers when serialized in JSON: https://github.com/vidigami/backbone-orm/issues/26
 * Added type to Schema to check types of attributes
+* Added named naming_conventions: 'underscore', 'camelize', 'classify'. Configure using BackboneORM.configure({naming_conventions: 'camelize'})
+* Added base conventions for easing overrides: BackboneORM.BaseConvention. Monkey patch it, derive from it, refer to it from your own conventions.
+* Moved model cache to set configured using BackboneORM.configure({model_cache: options})
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels

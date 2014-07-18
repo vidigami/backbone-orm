@@ -10,12 +10,11 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 Queue = require '../queue'
 
+BackboneORM = require '../core'
 MemoryCursor = require './cursor'
 Schema = require '../schema'
 Utils = require '../utils'
 JSONUtils = require '../json_utils'
-
-ModelCache = require('../cache/singletons').ModelCache
 
 DESTROY_BATCH_LIMIT = 1000
 
@@ -107,7 +106,7 @@ module.exports = (type) ->
     return if sync[method] then sync[method].apply(sync, Array::slice.call(arguments, 1)) else undefined
 
   Utils.configureModelType(type)
-  return ModelCache.configureSync(type, sync_fn)
+  return BackboneORM.model_cache.configureSync(type, sync_fn)
 
 module.exports.Sync = MemorySync
 module.exports.Cursor = MemoryCursor

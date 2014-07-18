@@ -8,9 +8,10 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
+
+BackboneORM = require '../core'
 Queue = require '../queue'
 Utils = require '../utils'
-ConventionUtils = require '../conventions/utils'
 
 # @nodoc
 module.exports = class Relation
@@ -30,8 +31,8 @@ module.exports = class Relation
     reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # convert to relational
 
     reverse_relation = reverse_model_type.relation(@as)
-    reverse_relation = reverse_model_type.relation(ConventionUtils.conventions.attribute(model_type.model_name, false)) unless reverse_relation # singular
-    reverse_relation = reverse_model_type.relation(ConventionUtils.conventions.attribute(model_type.model_name, true)) unless reverse_relation # plural
+    reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, false)) unless reverse_relation # singular
+    reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, true)) unless reverse_relation # plural
 
     if not reverse_relation and (@type isnt 'belongsTo')
       reverse_relation = reverse_model_type.schema().generateBelongsTo(model_type)

@@ -6,7 +6,6 @@ NodeUtils = require '../../../lib/node_utils'
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
-ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
@@ -44,7 +43,7 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
       queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
       queue.await callback
 
@@ -54,7 +53,7 @@ _.each option_sets, exports = (options) ->
       MODELS = {}
 
       queue = new Queue(1)
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
+      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
       queue.defer (callback) ->
         create_queue = new Queue()

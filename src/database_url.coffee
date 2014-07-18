@@ -8,7 +8,8 @@
 
 _ = require 'underscore'
 URL = require 'url'
-ConventionUtils = require './conventions/utils'
+
+BackboneORM = require './core'
 
 SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href']
 
@@ -69,4 +70,4 @@ module.exports = class DatabaseURL
     return result
 
   modelName: ->
-    return if @table then ConventionUtils.conventions.modelName(@table, false) else null
+    return if @table then BackboneORM.naming_conventions.modelName(@table, false) else null

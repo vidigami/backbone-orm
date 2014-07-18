@@ -8,17 +8,18 @@
 
 Backbone = require 'backbone'
 _ = require 'underscore'
+
+BackboneORM = require '../core'
 Queue = require '../queue'
 Utils = require '../utils'
-ConventionUtils = require '../conventions/utils'
 
 # @nodoc
 module.exports = class Many extends require('./relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @virtual_id_accessor or= ConventionUtils.conventions.foreignKey(@key, true)
-    @join_key = @foreign_key or ConventionUtils.conventions.foreignKey(@model_type.model_name) unless @join_key
-    @foreign_key = ConventionUtils.conventions.foreignKey(@as or @model_type.model_name) unless @foreign_key
+    @virtual_id_accessor or= BackboneORM.naming_conventions.foreignKey(@key, true)
+    @join_key = @foreign_key or BackboneORM.naming_conventions.foreignKey(@model_type.model_name) unless @join_key
+    @foreign_key = BackboneORM.naming_conventions.foreignKey(@as or @model_type.model_name) unless @foreign_key
     @_adding_ids = {}
     unless @collection_type
       reverse_model_type = @reverse_model_type

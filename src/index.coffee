@@ -6,8 +6,9 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-module.exports =
-  ConventionUtils: require './conventions/utils'
+module.exports = BackboneORM = require './core' # avoid circular dependencies
+publish =
+  configure: require './configure'
   sync: require './memory/sync'
 
   Utils: require './utils'
@@ -21,19 +22,18 @@ module.exports =
   Cursor: require './cursor'
   Schema: require './schema'
   ConnectionPool: require './connection_pool'
-  CacheSingletons: require './cache/singletons'
+  BaseConvention: require './conventions/base'
 
   _: require 'underscore'
   Backbone: require 'backbone'
-
-  # re-expose modules
-  modules:
-    url: require 'url'
-    querystring: require 'querystring'
-    'lru-cache': require 'lru-cache'
-    inflection: require 'inflection'
-    underscore: require 'underscore'
-    backbone: require 'backbone'
+publish._.extend(BackboneORM, publish)
 
 # re-expose modules
-try module.exports.modules.stream = require('stream') catch e
+BackboneORM.modules =
+  underscore: require 'underscore'
+  backbone: require 'backbone'
+  url: require 'url'
+  querystring: require 'querystring'
+  'lru-cache': require 'lru-cache'
+  inflection: require 'inflection'
+try BackboneORM.modules.stream = require('stream')

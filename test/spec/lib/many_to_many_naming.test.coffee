@@ -3,12 +3,10 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
 _ = BackboneORM._; Backbone = BackboneORM.Backbone
 Queue = BackboneORM.Queue
-ModelCache = BackboneORM.CacheSingletons.ModelCache
 Utils = BackboneORM.Utils
 JSONUtils = BackboneORM.JSONUtils
 Fabricator = BackboneORM.Fabricator
 
-ConventionUtils = BackboneORM.ConventionUtils
 inflection = BackboneORM.modules.inflection
 
 option_sets = window?.__test__option_sets or require?('../../option_sets')
@@ -23,14 +21,14 @@ _.each option_sets, exports = (options) ->
 
   describe "Many naming #{options.$parameter_tags or ''}#{options.$tags}", ->
 
-    conventions = Reverse = Owner = null
+    Reverse = Owner = null
     before ->
-      new_conventions = _.clone(conventions = ConventionUtils.get())
-      new_conventions.attribute = (model_name, plural) ->
-        inflection[if plural then 'pluralize' else 'singularize'](model_name).toUpperCase()
-      new_conventions.foreignKey = (model_name, plural) ->
-        conventions.foreignKey.call(@, model_name.toLowerCase(), plural)
-      ConventionUtils.set(new_conventions)
+      class UpperCaseConventions extends BackboneORM.BaseConvention
+        @attribute: (model_name, plural) ->
+          inflection[if plural then 'pluralize' else 'singularize'](model_name).toUpperCase()
+        @foreignKey: (model_name, plural) ->
+          BackboneORM.BaseConvention.foreignKey(model_name.toLowerCase(), plural)
+      BackboneORM.configure({naming_conventions: UpperCaseConventions})
 
       class Reverse extends Backbone.Model
         model_name: 'Reverse'
@@ -49,10 +47,10 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(Owner)
 
     after (callback) ->
-      ConventionUtils.set(conventions); conventions = null
+      BackboneORM.configure({naming_conventions: 'default'})
 
       queue = new Queue()
-      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.await callback
     after -> Reverse = Owner = null
@@ -61,7 +59,7 @@ _.each option_sets, exports = (options) ->
       MODELS = {}
 
       queue = new Queue(1)
-      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
+      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.defer (callback) ->
         create_queue = new Queue()
