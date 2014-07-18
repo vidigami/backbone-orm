@@ -49,6 +49,11 @@ module.exports = class Schema
       (@type_overrides[key] or= {})['type'] = type
     else
       return @type_overrides[key]?.type or @fields[key]?.type or @relation(key)?.reverse_model_type or @reverseRelation(key)?.model_type
+  idType: (key) ->
+    (other = key.substr(index+1); key = key.substr(0, index)) if (index = key.indexOf()) >= 0 # queries like 'flat.id'
+    return unless type = @type(key)
+    type.schema?().type(other or 'id') or type
+
   relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)

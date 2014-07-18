@@ -592,7 +592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.parse = function(values, model_type) {
-	    var date, key, key_parts, match, parsed_values, result, type, value;
+	    var date, key, match, parsed_values, result, value;
 	    if (_.isNull(values) || (values === 'null')) {
 	      return null;
 	    }
@@ -622,17 +622,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (!_.isNaN(value = +result[key])) {
 	            result[key] = value;
 	          }
-	        } else if (model_type) {
-	          key_parts = key.split('.');
-	          if (type = model_type != null ? model_type.schema().type(key_parts[0]) : void 0) {
-	            if ((type === 'Integer') || ((typeof type.schema === "function" ? type.schema().type(key_parts[1] || 'id') : void 0) === 'Integer')) {
-	              if (_.isNaN(value = +result[key])) {
-	                console.log("Warning: failed to convert '" + (key_parts[1] || 'id') + "' to integer. Model: " + model_type.model_name + " value: " + result[key]);
-	                continue;
-	              }
-	              result[key] = value;
-	            }
+	        } else if ((model_type != null ? model_type.schema().idType(key) : void 0) === 'Integer') {
+	          if (_.isNaN(value = +result[key])) {
+	            console.log("Warning: failed to convert '" + key + "' type to integer. Model: " + model_type.model_name + " value: " + result[key]);
+	            continue;
 	          }
+	          result[key] = value;
 	        }
 	      }
 	      return result;
@@ -1800,9 +1795,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	ConventionUtils = __webpack_require__(13);
 
-	One = __webpack_require__(23);
+	One = __webpack_require__(24);
 
-	Many = __webpack_require__(24);
+	Many = __webpack_require__(25);
 
 	DatabaseURL = __webpack_require__(8);
 
@@ -1855,6 +1850,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      return ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = this.reverseRelation(key)) != null ? _ref3.model_type : void 0);
 	    }
+	  };
+
+	  Schema.prototype.idType = function(key) {
+	    var index, other, type;
+	    if ((index = key.indexOf()) >= 0) {
+	      other = key.substr(index + 1);
+	      key = key.substr(0, index);
+	    }
+	    if (!(type = this.type(key))) {
+	      return;
+	    }
+	    return (typeof type.schema === "function" ? type.schema().type(other || 'id') : void 0) || type;
 	  };
 
 	  Schema.prototype.relation = function(key) {
@@ -2112,7 +2119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Utils = (function() {
 	  function Utils() {}
 
-	  Utils.conventions = _.clone(__webpack_require__(25));
+	  Utils.conventions = _.clone(__webpack_require__(23));
 
 	  Utils.set = function(_conventions) {
 	    return Utils.conventions = _conventions;
@@ -5439,6 +5446,34 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var inflection;
+
+	inflection = __webpack_require__(21);
+
+	module.exports = {
+	  modelName: function(table_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
+	  },
+	  tableName: function(model_name) {
+	    return inflection.pluralize(inflection.underscore(model_name));
+	  },
+	  attribute: function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  },
+	  foreignKey: function(model_name, plural) {
+	    if (plural) {
+	      return inflection.underscore(inflection.singularize(model_name)) + '_ids';
+	    } else {
+	      return inflection.underscore(model_name) + '_id';
+	    }
+	  }
+	};
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -5925,7 +5960,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6550,34 +6585,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Many;
 
 	})(__webpack_require__(33));
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inflection;
-
-	inflection = __webpack_require__(21);
-
-	module.exports = {
-	  modelName: function(table_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
-	  },
-	  tableName: function(model_name) {
-	    return inflection.pluralize(inflection.underscore(model_name));
-	  },
-	  attribute: function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  },
-	  foreignKey: function(model_name, plural) {
-	    if (plural) {
-	      return inflection.underscore(inflection.singularize(model_name)) + '_ids';
-	    } else {
-	      return inflection.underscore(model_name) + '_id';
-	    }
-	  }
-	};
 
 
 /***/ },
