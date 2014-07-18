@@ -1,0 +1,121 @@
+assert = assert or require?('chai').assert
+
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
+_ = BackboneORM._; Backbone = BackboneORM.Backbone
+Queue = BackboneORM.Queue
+ModelCache = BackboneORM.CacheSingletons.ModelCache
+Utils = BackboneORM.Utils
+JSONUtils = BackboneORM.JSONUtils
+Fabricator = BackboneORM.Fabricator
+
+ConventionUtils = BackboneORM.ConventionUtils
+inflection = BackboneORM.modules.inflection
+
+option_sets = window?.__test__option_sets or require?('../../option_sets')
+parameters = __test__parameters if __test__parameters?
+_.each option_sets, exports = (options) ->
+  options = _.extend({}, options, parameters) if parameters
+
+  DATABASE_URL = options.database_url or ''
+  BASE_SCHEMA = options.schema or {}
+  SYNC = options.sync
+  BASE_COUNT = 5
+
+  describe "Many naming #{options.$parameter_tags or ''}#{options.$tags}", ->
+
+    conventions = Reverse = Owner = null
+    before ->
+      new_conventions = _.clone(conventions = ConventionUtils.get())
+      new_conventions.attribute = (model_name, plural) ->
+        inflection[if plural then 'pluralize' else 'singularize'](model_name).toUpperCase()
+      new_conventions.foreignKey = (model_name, plural) ->
+        conventions.foreignKey.call(@, model_name.toLowerCase(), plural)
+      ConventionUtils.set(new_conventions)
+
+      class Reverse extends Backbone.Model
+        model_name: 'Reverse'
+        urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
+        schema: _.defaults({
+          OWNERS: -> ['HasMany', Owner]
+        }, BASE_SCHEMA)
+        sync: SYNC(Reverse)
+
+      class Owner extends Backbone.Model
+        model_name: 'Owner'
+        urlRoot: "#{DATABASE_URL}/many_to_many_owners"
+        schema: _.defaults({
+          REVERSES: -> ['has_many', Reverse]
+        }, BASE_SCHEMA)
+        sync: SYNC(Owner)
+
+    after (callback) ->
+      ConventionUtils.set(conventions); conventions = null
+
+      queue = new Queue()
+      queue.defer (callback) -> ModelCache.reset(callback)
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.await callback
+    after -> Reverse = Owner = null
+
+    beforeEach (callback) ->
+      MODELS = {}
+
+      queue = new Queue(1)
+      queue.defer (callback) -> ModelCache.configure({enabled: !!options.cache, max: 100}, callback)
+      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) ->
+        create_queue = new Queue()
+
+        create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
+          name: Fabricator.uniqueId('reverses_')
+          created_at: Fabricator.date
+        }, (err, models) -> MODELS.reverse = models; callback(err))
+        create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+          name: Fabricator.uniqueId('owners_')
+          created_at: Fabricator.date
+        }, (err, models) -> MODELS.owner = models; callback(err))
+
+        create_queue.await callback
+
+      # link and save all
+      queue.defer (callback) ->
+        save_queue = new Queue()
+
+        for owner in MODELS.owner
+          do (owner) -> save_queue.defer (callback) ->
+            owner.save {REVERSES: [MODELS.reverse.pop(), MODELS.reverse.pop()]}, callback
+
+        save_queue.await callback
+
+      queue.await callback
+
+    it 'Handles a get query for a hasMany and hasMany two sided relation', (done) ->
+      Owner.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_model.get 'REVERSES', (err, reverses) ->
+          assert.ifError(err)
+          assert.ok(reverses.length, 'found related reverses')
+          if test_model.relationIsEmbedded('REVERSES')
+            assert.deepEqual(test_model.toJSON().REVERSES[0], reverses[0].toJSON(), "Serialized embedded. Expected: #{test_model.toJSON().reverses}. Actual: #{reverses[0].toJSON()}")
+          else
+            assert.deepEqual(test_model.get('reverse_ids')[0], reverses[0].id, "Serialized id only. Expected: #{test_model.get('reverse_ids')[0]}. Actual: #{reverses[0].id}")
+          reverse = reverses[0]
+
+          reverse.get 'OWNERS', (err, owners) ->
+            assert.ifError(err)
+            assert.ok(owners.length, 'found related models')
+
+            owner = _.find(owners, (test) -> test_model.id is test.id)
+            owner_index = _.indexOf(owners, owner)
+            if reverse.relationIsEmbedded('OWNERS')
+              assert.deepEqual(reverse.toJSON().owner_ids[owner_index], owner.id, "Serialized embedded. Expected: #{reverse.toJSON().owner_ids[owner_index]}. Actual: #{owner.id}")
+            else
+              assert.deepEqual(reverse.get('owner_ids')[owner_index], owner.id, "Serialized id only. Expected: #{reverse.get('owner_ids')[owner_index]}. Actual: #{owner.id}")
+            assert.ok(!!owner, 'found owner')
+
+            if Owner.cache
+              assert.deepEqual(test_model.toJSON(), owner.toJSON(), "\nExpected: #{JSONUtils.stringify(test_model.toJSON())}\nActual: #{JSONUtils.stringify(test_model.toJSON())}")
+            else
+              assert.equal(test_model.id, owner.id, "\nExpected: #{test_model.id}\nActual: #{owner.id}")
+            done()
