@@ -48,7 +48,7 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       BackboneORM.configure({naming_conventions: 'default'})
-      Utils.resetSchemas [Flat, Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
+      Utils.resetSchemas [Flat, Reverse, Owner], callback
 
     beforeEach (done) ->
       MODELS = {}

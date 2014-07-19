@@ -34,7 +34,7 @@ _.each option_sets, exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(SecondModel)
 
-    after (callback) -> Utils.resetSchemas [FirstModel, SecondModel], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
 
     beforeEach (callback) ->
       queue = new Queue(1)

@@ -28,7 +28,7 @@ _.each option_sets, exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(SelfReference)
 
-    after (callback) -> Utils.resetSchemas [SelfReference], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [SelfReference], callback
 
     beforeEach (callback) ->
       MODELS = {}

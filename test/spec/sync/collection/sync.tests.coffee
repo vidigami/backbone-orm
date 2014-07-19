@@ -38,7 +38,7 @@ _.each option_sets, exports = (options) ->
           callback()
 
       queue.defer (callback) ->
-        Utils.resetSchemas [model_type], (err) -> BackboneORM.model_cache.reset(); callback(err)
+        Utils.resetSchemas [model_type], callback
 
       queue.await (err) ->
         assert.ifError(err)

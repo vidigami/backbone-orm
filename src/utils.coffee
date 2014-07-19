@@ -7,9 +7,11 @@
 ###
 
 URL = require 'url'
-DatabaseURL = require './database_url'
 Backbone = require 'backbone'
 _ = require 'underscore'
+
+BackboneORM = require './core'
+DatabaseURL = require './database_url'
 Queue = require './queue'
 JSONUtils = require './json_utils'
 modelExtensions = null
@@ -31,6 +33,8 @@ module.exports = class Utils
         callback()
     queue.await (err) ->
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
+
+      BackboneORM.model_cache.reset()
       return callback(new Error("Failed to migrate schemas: #{failed_schemas.join(', ')}")) if failed_schemas.length
       callback()
 

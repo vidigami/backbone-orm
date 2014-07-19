@@ -41,7 +41,7 @@ _.each option_sets, exports = (options) ->
       Owner::sync = SYNC(Owner)
 
     after (callback) ->
-      NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), (err) -> BackboneORM.model_cache.reset(); callback(err)
+      NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
 
     beforeEach (callback) ->
       relation = Owner.relation('reverses')

@@ -45,7 +45,7 @@ _.each option_sets, exports = (options) ->
         cat: (field, meow, callback) -> callback(null, @get(field) + meow)
         sync: SYNC(Owner)
 
-    after (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], callback
 
     beforeEach (callback) ->
       MODELS = {}

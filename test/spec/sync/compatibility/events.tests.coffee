@@ -40,10 +40,8 @@ _.each option_sets, exports = (options) ->
           @on 'change:reverses', -> attribute_change_count++
           @get('reverses').on 'reset', -> reset_change_count++
 
-    after (callback) -> Utils.resetSchemas [Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-
-    beforeEach (callback) ->
-      Utils.resetSchemas [Reverse, Owner], callback
+    after (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+    beforeEach (callback) -> Utils.resetSchemas [Reverse, Owner], callback
 
     afterEach ->
       @main?.off()

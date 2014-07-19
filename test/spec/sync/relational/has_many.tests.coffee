@@ -50,7 +50,7 @@ _.each option_sets, exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(Owner)
 
-    after (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
 
     beforeEach (callback) ->
       relation = Owner.relation('reverses')

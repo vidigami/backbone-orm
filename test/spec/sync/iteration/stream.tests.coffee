@@ -44,7 +44,7 @@ _.each option_sets, exports = (options) ->
         .on('finish', -> assert.equal(counter.count, expected); done())
         .on('error', done)
 
-    after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [Flat], callback
 
     beforeEach (callback) ->
       Utils.resetSchemas [Flat], (err) ->

@@ -29,7 +29,7 @@ _.each option_sets, exports = (options) ->
         model: Flat
         sync: SYNC(Flats)
 
-    after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
+    after (callback) -> Utils.resetSchemas [Flat], callback
 
     beforeEach (callback) ->
       Utils.resetSchemas [Flat], (err) ->
