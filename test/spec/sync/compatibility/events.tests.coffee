@@ -15,11 +15,12 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Backbone Events #{options.$parameter_tags or ''}#{options.$tags}", ->
-
-    Reverse = Owner = null
     attribute_change_count = 0
     reset_change_count = 0
+    Reverse = Owner = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Reverse extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/reverses"
         schema: _.defaults({
@@ -40,10 +41,8 @@ _.each option_sets, exports = (options) ->
           @get('reverses').on 'reset', -> reset_change_count++
 
     after (callback) -> Utils.resetSchemas [Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Reverse = Owner = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
       Utils.resetSchemas [Reverse, Owner], callback
 
     afterEach ->

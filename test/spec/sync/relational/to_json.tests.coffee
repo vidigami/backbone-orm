@@ -16,6 +16,8 @@ _.each option_sets, exports = (options) ->
   describe "JSONUtils.toJSON #{options.$parameter_tags or ''}#{options.$tags}", ->
     Flat = Reverse = Owner = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Flat extends Backbone.Model
         model_name: 'Flat'
         urlRoot: "#{DATABASE_URL}/one_flats"
@@ -44,11 +46,8 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(Owner)
 
     after (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = Reverse = Owner = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       MODELS = {}
 
       queue = new Queue(1)

@@ -11,11 +11,8 @@ LRU = require 'lru-cache'
 
 module.exports = class MemoryStore
   constructor: (options={}) ->
-    normalized_options = {}
-    for key, value of options
-      if key is 'destroy' then (key = 'dispose') else if key is 'max_age' then (key = 'maxAge')
-      normalized_options[key] = value
-    @cache = new LRU(normalized_options)
+    (options = _.omit(options, 'max_age'))['maxAge'] = max_age if max_age = options.max_age
+    @cache = new LRU(options)
 
   set: (key, value, callback) =>
     return callback?(null, value) or @ if value._orm_never_cache # skip cache

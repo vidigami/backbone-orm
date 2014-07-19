@@ -18,6 +18,8 @@ _.each option_sets, exports = (options) ->
   describe "Join Table Functionality #{options.$parameter_tags or ''}#{options.$tags}", ->
     FirstModel = SecondModel = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class FirstModel extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/firsts"
         schema: _.defaults({
@@ -33,11 +35,8 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(SecondModel)
 
     after (callback) -> Utils.resetSchemas [FirstModel, SecondModel], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> FirstModel = SecondModel = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       queue = new Queue(1)
       queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.defer (callback) ->

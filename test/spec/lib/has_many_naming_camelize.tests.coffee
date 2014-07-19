@@ -18,8 +18,8 @@ _.each option_sets, exports = (options) ->
 
   describe "hasMany #{options.$parameter_tags or ''}#{options.$tags}", ->
     Flat = Reverse = ForeignReverse = Owner = null
-
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
       BackboneORM.configure {naming_conventions: 'camelize'}
 
       class Flat extends Backbone.Model
@@ -55,11 +55,8 @@ _.each option_sets, exports = (options) ->
     after (callback) ->
       BackboneORM.configure({naming_conventions: 'default'})
       Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = Reverse = ForeignReverse = Owner = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}

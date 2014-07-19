@@ -9,7 +9,8 @@ option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 
 _.each option_sets, exports = (options) ->
-  return if options.embed
+  return if options.embed or not WritableStream # no streams
+
   options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
@@ -18,10 +19,10 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Stream #{options.$parameter_tags or ''}#{options.$tags}", ->
-    return unless WritableStream # no streams
-
     Flat = Counter = Filter = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"
         schema: BASE_SCHEMA
@@ -44,11 +45,8 @@ _.each option_sets, exports = (options) ->
         .on('error', done)
 
     after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = Counter = Filter = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 

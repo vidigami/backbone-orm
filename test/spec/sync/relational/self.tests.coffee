@@ -18,6 +18,8 @@ _.each option_sets, exports = (options) ->
   describe "self model relations #{options.$parameter_tags or ''}#{options.$tags}", ->
     SelfReference = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class SelfReference extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/self_references"
         schema: _.defaults({
@@ -27,11 +29,8 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(SelfReference)
 
     after (callback) -> Utils.resetSchemas [SelfReference], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> SelfReference = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       MODELS = {}
 
       queue = new Queue(1)

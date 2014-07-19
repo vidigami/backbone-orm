@@ -16,20 +16,18 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Model.each #{options.$parameter_tags or ''}#{options.$tags}", ->
-
     Flat = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"
         schema: BASE_SCHEMA
         sync: SYNC(Flat)
 
     after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 

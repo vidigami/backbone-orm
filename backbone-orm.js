@@ -2367,7 +2367,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = MemoryStore = (function() {
 	  function MemoryStore(options) {
-	    var key, normalized_options, value;
+	    var max_age;
 	    if (options == null) {
 	      options = {};
 	    }
@@ -2376,17 +2376,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.destroy = __bind(this.destroy, this);
 	    this.get = __bind(this.get, this);
 	    this.set = __bind(this.set, this);
-	    normalized_options = {};
-	    for (key in options) {
-	      value = options[key];
-	      if (key === 'destroy') {
-	        key = 'dispose';
-	      } else if (key === 'max_age') {
-	        key = 'maxAge';
-	      }
-	      normalized_options[key] = value;
+	    if (max_age = options.max_age) {
+	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
 	    }
-	    this.cache = new LRU(normalized_options);
+	    this.cache = new LRU(options);
 	  }
 
 	  MemoryStore.prototype.set = function(key, value, callback) {
@@ -3559,9 +3552,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ModelCache.prototype.createCache = function(model_type) {
 	    var cache_info, model_name, options;
-	    if (!this.enabled) {
-	      return null;
-	    }
 	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
 	      throw new Error("Missing model name for cache");
 	    }
@@ -3569,6 +3559,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      delete this.caches[model_name];
 	      cache_info.cache.reset();
 	      cache_info.model_type.cache = null;
+	    }
+	    if (!this.enabled) {
+	      return null;
 	    }
 	    if (!(options = this.options.modelTypes[model_name])) {
 	      if (!(this.options.store || this.options.max || this.options.max_age)) {

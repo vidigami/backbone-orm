@@ -15,9 +15,10 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Many naming #{options.$parameter_tags or ''}#{options.$tags}", ->
-
     Reverse = Owner = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class UpperCaseConventions extends BackboneORM.BaseConvention
         @attribute: (model_name, plural) ->
           inflection[if plural then 'pluralize' else 'singularize'](model_name).toUpperCase()
@@ -44,11 +45,8 @@ _.each option_sets, exports = (options) ->
     after (callback) ->
       BackboneORM.configure({naming_conventions: 'default'})
       Utils.resetSchemas [Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Reverse = Owner = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       MODELS = {}
 
       queue = new Queue(1)

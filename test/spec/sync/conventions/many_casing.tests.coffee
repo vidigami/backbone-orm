@@ -14,9 +14,10 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "Many casing #{options.$parameter_tags or ''}#{options.$tags}", ->
-
     Reverse = Owner = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Reverse extends Backbone.Model
         model_name: 'Reverse'
         urlRoot: "#{DATABASE_URL}/many_to_many_reverses"
@@ -34,11 +35,8 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(Owner)
 
     after (callback) -> Utils.resetSchemas [Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Reverse = Owner = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       MODELS = {}
 
       queue = new Queue(1)

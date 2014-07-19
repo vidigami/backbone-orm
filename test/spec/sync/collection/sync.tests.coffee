@@ -45,7 +45,7 @@ _.each option_sets, exports = (options) ->
         done()
 
     it 'fetch models using pre-configured model', (done) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
       class Model extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/models"
@@ -61,7 +61,7 @@ _.each option_sets, exports = (options) ->
       runTest Collection, done
 
     it 'fetch models using default model', (done) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
@@ -71,7 +71,7 @@ _.each option_sets, exports = (options) ->
       runTest Collection, done
 
     it 'fetch models using upgraded model', (done) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
       class SomeModel extends Backbone.Model
 

@@ -15,23 +15,22 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 50
 
-  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
-    DATE_START = new Date('2013-06-09T08:00:00.000Z')
-    DATE_STEP_MS = 1000
+  DATE_START = new Date('2013-06-09T08:00:00.000Z')
+  DATE_STEP_MS = 1000
 
+  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
     Flat = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"
         schema: BASE_SCHEMA
         sync: SYNC(Flat)
 
     after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = null
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 

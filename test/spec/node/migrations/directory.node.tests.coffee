@@ -16,33 +16,34 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  # manually clear the cache so the model can be rebootstrapped
-  delete require.cache[require.resolve('./directory/folder/reverse')]
-  delete require.cache[require.resolve('./directory/owner')]
-  Reverse = require './directory/folder/reverse'
-  Owner = require './directory/owner'
-
-  # pre-configure
-  Reverse::urlRoot = "#{DATABASE_URL}/reverses"
-  Reverse::schema = _.defaults({
-    owners: -> ['hasMany', Owner]
-  }, BASE_SCHEMA)
-  Reverse::sync = SYNC(Reverse)
-
-  Owner::urlRoot = "#{DATABASE_URL}/owners"
-  Owner::schema = _.defaults({
-    reverses: -> ['hasMany', Reverse]
-  }, BASE_SCHEMA)
-  Owner::sync = SYNC(Owner)
-
   describe "Node: Many to Many with resetSchemasByDirectory #{options.$parameter_tags or ''}#{options.$tags}", ->
+    Owner = Reverse = null
+    before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
+      # manually clear the cache so the model can be rebootstrapped
+      delete require.cache[require.resolve('./directory/folder/reverse')]
+      delete require.cache[require.resolve('./directory/owner')]
+      Reverse = require './directory/folder/reverse'
+      Owner = require './directory/owner'
+
+      # pre-configure
+      Reverse::urlRoot = "#{DATABASE_URL}/reverses"
+      Reverse::schema = _.defaults({
+        owners: -> ['hasMany', Owner]
+      }, BASE_SCHEMA)
+      Reverse::sync = SYNC(Reverse)
+
+      Owner::urlRoot = "#{DATABASE_URL}/owners"
+      Owner::schema = _.defaults({
+        reverses: -> ['hasMany', Reverse]
+      }, BASE_SCHEMA)
+      Owner::sync = SYNC(Owner)
 
     after (callback) ->
       NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), (err) -> BackboneORM.model_cache.reset(); callback(err)
 
     beforeEach (callback) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}

@@ -14,9 +14,10 @@ _.each option_sets, exports = (options) ->
   BASE_COUNT = 5
 
   describe "One casing #{options.$parameter_tags or ''}#{options.$tags}", ->
-
     Flat = Reverse = Owner = null
     before ->
+      BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
+
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"
         schema: BASE_SCHEMA
@@ -38,11 +39,8 @@ _.each option_sets, exports = (options) ->
         sync: SYNC(Owner)
 
     after (callback) -> Utils.resetSchemas [Flat, Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
-    after -> Flat = Reverse = Owner = null
 
     beforeEach (done) ->
-      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
-
       MODELS = {}
 
       queue = new Queue(1)

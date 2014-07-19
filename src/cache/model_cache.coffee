@@ -47,12 +47,12 @@ module.exports = class ModelCache
 
   # @nodoc
   createCache: (model_type) ->
-    return null unless @enabled
     throw new Error "Missing model name for cache" unless model_name = model_type?.model_name
 
     # delete old cache
     if cache_info = @caches[model_name]
       delete @caches[model_name]; cache_info.cache.reset(); cache_info.model_type.cache = null
+    return null unless @enabled
 
     # there are options meaning a cache should be created
     unless options = @options.modelTypes[model_name]
