@@ -42,9 +42,7 @@ gulp.task 'minify', ['build'], (callback) ->
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node', ['minify'], testNode = (options, callback) ->
-  [options, callback] = [{}, options] if arguments.length is 1
-
+gulp.task 'test-node', ['minify'], testNode = (callback) ->
   gutil.log 'Running Node.js tests'
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
   gulp.src('test/spec/**/*.tests.coffee')
@@ -54,20 +52,18 @@ gulp.task 'test-node', ['minify'], testNode = (options, callback) ->
       callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-browsers', ['minify'], testBrowsers = (options, callback) ->
-  [options, callback] = [{}, options] if arguments.length is 1
-
+gulp.task 'test-browsers', ['minify'], testBrowsers = (callback) ->
   gutil.log 'Running Browser tests'
-  (require './config/karma/run')(options, callback)
+  (require './config/karma/run')(callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'test', ['minify'], (callback) ->
   Async.series [testNode, testBrowsers], (err) -> process.exit(if err then 1 else 0)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-quick', ['build'], (callback) -> testNode({quick: true}, callback); return # promises workaround: https://github.com/gulpjs/gulp/issues/455
-gulp.task 'test-node-quick', ['build'], (callback) -> testNode({quick: true}, callback); return # promises workaround: https://github.com/gulpjs/gulp/issues/455
-gulp.task 'test-browsers-quick', ['build'], (callback) -> testBrowsers({quick: true}, callback); return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+gulp.task 'test-quick', ['build'], testNode
+gulp.task 'test-node-quick', ['build'], testNode
+gulp.task 'test-browsers-quick', ['build'], testBrowsers
 
 gulp.task 'zip', ['minify'], (callback) ->
   gulp.src(['*.js'])

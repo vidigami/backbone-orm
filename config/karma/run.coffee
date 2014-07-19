@@ -8,13 +8,13 @@ generate = require './generate'
 
 BASE_CONFIG = require './base-config'
 
-module.exports = (options, callback) ->
+module.exports = (callback) ->
   queue = new Queue(1)
 
-  queue.defer (callback) -> Wrench.rmdirSyncRecursive('./_temp', true); generate(options, callback)
+  queue.defer (callback) -> Wrench.rmdirSyncRecursive('./_temp', true); generate(callback)
 
   TEST_GROUPS = require '../test_groups'
-  TEST_GROUPS = {browser_globals: TEST_GROUPS.browser_globals.slice(0, 1)} if options.quick
+  TEST_GROUPS = {browser_globals: TEST_GROUPS.browser_globals.slice(0, 1)} if process.argv[2].indexOf('quick') >= 0 # quick
   for name, tests of TEST_GROUPS
     for test in tests
       do (test) -> queue.defer (callback) ->

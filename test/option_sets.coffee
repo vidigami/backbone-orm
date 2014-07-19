@@ -17,10 +17,10 @@ OPTION_KEYS = _.without(_.keys(ARG_OPTIONS), 'all', 'none')
 
 options = {}
 if process?
-  args = process.argv.slice(2)
-  if args.length is 1 and args[0].indexOf('quick') >= 0
+  if process.argv[2].indexOf('quick') >= 0 # quick
     options.none = true
   else
+    args = process.argv.slice(2)
     options[key] = value in args for key, value of ARG_OPTIONS
 
 arrayToOptions = (keys) -> results = {}; results[key] = (key in keys) for key in OPTION_KEYS; return results

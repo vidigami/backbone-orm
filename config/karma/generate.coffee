@@ -18,7 +18,7 @@ browserify = require 'gulp-browserify'
 FILES = require '../files'
 TEST_GROUPS = require('../test_groups')
 
-module.exports = (options, callback) ->
+module.exports = (callback) ->
   queue = new Queue(1)
 
   # compile coffeescript config
@@ -28,7 +28,7 @@ module.exports = (options, callback) ->
       .pipe(gulp.dest('_temp'))
       .on('end', callback)
 
-  unless options.quick
+  unless process.argv[2].indexOf('quick') < 0 # not quick
     # install backbone-orm
     queue.defer (callback) ->
       gulp.src(['./backbone-orm.js', './package.json'])
