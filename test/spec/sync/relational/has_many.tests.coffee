@@ -14,7 +14,7 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at', 'is_base']
+  PICK_KEYS = ['id', 'name']
 
   describe "hasMany #{options.$parameter_tags or ''}#{options.$tags}", ->
     Flat = Reverse = ForeignReverse = Owner = null
@@ -241,7 +241,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
                     updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS), _.omit(moved_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(moved_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS), _.pick(moved_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(moved_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -295,7 +295,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
                     updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS), _.omit(moved_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(moved_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS), _.pick(moved_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(moved_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -349,7 +349,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, moved_reverse_id), "Moved the reverse_id")
                     updated_moved_reverse = updated_reverses[_.indexOf(updated_reverse_ids, moved_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS), _.omit(moved_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_moved_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(moved_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS), _.pick(moved_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_moved_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(moved_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -384,7 +384,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -419,7 +419,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -455,7 +455,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(updated_owner, "loaded another model.")
 
                     assert.ok(_.contains(updated_owner.get('reverse_ids'), reverse.id), "reverse_id is correct.")
-                    assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                     done()
 
     patchAddTests(false)

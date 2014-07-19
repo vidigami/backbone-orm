@@ -14,7 +14,7 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at', 'is_base']
+  PICK_KEYS = ['id', 'name']
 
   describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
     Reverse = Owner = null
@@ -186,7 +186,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -240,7 +240,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -296,7 +296,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS), _.omit(shared_reverse_json, OMIT_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, OMIT_KEYS))}")
+                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
                     done()
 
     patchAddTests(false)

@@ -14,7 +14,7 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at', 'is_base']
+  PICK_KEYS = ['id', 'name']
 
   describe "hasOne #{options.$parameter_tags or ''}#{options.$tags}", ->
     Flat = Reverse = ForeignReverse = Owner = null
@@ -168,7 +168,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_reverse.toJSON(), PICK_KEYS), _.pick(another_reverse_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_reverse_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_reverse.toJSON(), PICK_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -201,7 +201,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_reverse.toJSON(), PICK_KEYS), _.pick(another_reverse_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_reverse_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_reverse.toJSON(), PICK_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (hasOne)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -234,7 +234,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_reverse, "loaded another model.")
                   assert.equal(updated_reverse.get('owner_id'), owner.id, "owner_id is correct.")
 
-                  assert.ok(_.isEqual(_.omit(updated_reverse.toJSON(), OMIT_KEYS), _.omit(another_reverse.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_reverse.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_reverse.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_reverse.toJSON(), PICK_KEYS), _.pick(another_reverse.toJSON(), PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_reverse.toJSON(), PICK_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related_id (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -267,7 +267,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related json (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -300,7 +300,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner_json, OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner_json, OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner_json, PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner_json, PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                   done()
 
       it "Can manually add a relationship by related model (belongsTo)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -333,7 +333,7 @@ _.each option_sets, exports = (options) ->
                   assert.ok(updated_owner, "loaded another model.")
 
                   assert.equal(updated_owner.get('reverse_id'), reverse.id, "reverse_id is correct.")
-                  assert.ok(_.isEqual(_.omit(updated_owner.toJSON(), OMIT_KEYS), _.omit(another_owner.toJSON(), OMIT_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.omit(another_owner.toJSON(), OMIT_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(updated_owner.toJSON(), OMIT_KEYS))}")
+                  assert.ok(_.isEqual(_.pick(updated_owner.toJSON(), PICK_KEYS), _.pick(another_owner.toJSON(), PICK_KEYS)), "Set the id. Expected: #{JSONUtils.stringify(_.pick(another_owner.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(updated_owner.toJSON(), PICK_KEYS))}")
                   done()
 
     patchAddTests(false)
@@ -1080,7 +1080,7 @@ _.each option_sets, exports = (options) ->
 
                 # TODO: determine reason on SQL for updated_at missing
                 # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(reverse1.toJSON())}.\nActual: #{JSONUtils.stringify(reverse0b.toJSON())}")
-                assert.deepEqual(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'), _.omit(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.omit(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.omit(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
+                assert.deepEqual(_.pick(reverse1.toJSON(), 'updated_at', 'created_at'), _.pick(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.pick(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.pick(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
 
                 assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
               callback()
