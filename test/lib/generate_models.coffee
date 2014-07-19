@@ -35,6 +35,7 @@ module.exports = (options) ->
       schema: _.defaults({
         owner: -> ['belongsTo', Owner]
         another_owner: -> ['belongsTo', Owner, as: 'more_reverses']
+        foo: 'String'
       }, BASE_SCHEMA)
       sync: SYNC(Reverse)
 

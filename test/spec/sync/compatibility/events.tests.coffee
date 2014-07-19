@@ -25,6 +25,7 @@ _.each option_sets, exports = (options) ->
         urlRoot: "#{DATABASE_URL}/reverses"
         schema: _.defaults({
           owners: -> ['hasMany', Owner]
+          foo: 'String'
         }, BASE_SCHEMA)
         sync: SYNC(Reverse)
 
