@@ -12,10 +12,11 @@ BackboneORM.naming_conventions = ALL_CONVENTIONS.default
 BackboneORM.model_cache = new (require('./cache/model_cache'))()
 
 module.exports = configure = (options={}, callback) ->
-  throw "BackboneORM configure: missing callback for model_cache" if options.model_cache and not callback
-
-  for key, value of options when key isnt 'model_cache'
+  for key, value of options
     switch key
+      when 'model_cache'
+        BackboneORM.model_cache.configure(options.model_cache, callback)
+
       when 'naming_conventions'
         # set by name
         if _.isString(value)
@@ -29,4 +30,3 @@ module.exports = configure = (options={}, callback) ->
       else
         BackboneORM[key] = value
 
-  BackboneORM.model_cache.configure(options.model_cache, callback) if options.model_cache

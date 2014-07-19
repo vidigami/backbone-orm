@@ -36,8 +36,8 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
       queue.await callback
     after -> Reverse = Owner = null
 

@@ -155,36 +155,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	BackboneORM.model_cache = new (__webpack_require__(23))();
 
 	module.exports = configure = function(options, callback) {
-	  var convention, key, value;
+	  var convention, key, value, _results;
 	  if (options == null) {
 	    options = {};
 	  }
-	  if (options.model_cache && !callback) {
-	    throw "BackboneORM configure: missing callback for model_cache";
-	  }
+	  _results = [];
 	  for (key in options) {
 	    value = options[key];
-	    if (key !== 'model_cache') {
-	      switch (key) {
-	        case 'naming_conventions':
-	          if (_.isString(value)) {
-	            if (convention = ALL_CONVENTIONS[value]) {
-	              BackboneORM.naming_conventions = convention;
-	              continue;
-	            }
-	            console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', ')));
-	          } else {
-	            BackboneORM.naming_conventions = value;
+	    switch (key) {
+	      case 'model_cache':
+	        _results.push(BackboneORM.model_cache.configure(options.model_cache, callback));
+	        break;
+	      case 'naming_conventions':
+	        if (_.isString(value)) {
+	          if (convention = ALL_CONVENTIONS[value]) {
+	            BackboneORM.naming_conventions = convention;
+	            continue;
 	          }
-	          break;
-	        default:
-	          BackboneORM[key] = value;
-	      }
+	          _results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
+	        } else {
+	          _results.push(BackboneORM.naming_conventions = value);
+	        }
+	        break;
+	      default:
+	        _results.push(BackboneORM[key] = value);
 	    }
 	  }
-	  if (options.model_cache) {
-	    return BackboneORM.model_cache.configure(options.model_cache, callback);
-	  }
+	  return _results;
 	};
 
 
@@ -3521,80 +3518,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  ModelCache.prototype.configure = function(options, callback) {
+	    var key, value, value_key, value_value, values, _base;
 	    if (options == null) {
 	      options = {};
 	    }
 	    this.enabled = options.enabled;
-	    this.reset((function(_this) {
-	      return function(err) {
-	        var key, value, value_key, value_value, values, _base;
-	        if (err) {
-	          return callback(err);
+	    for (key in options) {
+	      value = options[key];
+	      if (_.isObject(value)) {
+	        (_base = this.options)[key] || (_base[key] = {});
+	        values = this.options[key];
+	        for (value_key in value) {
+	          value_value = value[value_key];
+	          values[value_key] = value_value;
 	        }
-	        for (key in options) {
-	          value = options[key];
-	          if (_.isObject(value)) {
-	            (_base = _this.options)[key] || (_base[key] = {});
-	            values = _this.options[key];
-	            for (value_key in value) {
-	              value_value = value[value_key];
-	              values[value_key] = value_value;
-	            }
-	          } else {
-	            _this.options[key] = value;
-	          }
-	        }
-	        return callback();
-	      };
-	    })(this));
-	    return this;
+	      } else {
+	        this.options[key] = value;
+	      }
+	    }
+	    return this.reset(callback);
 	  };
 
 	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-	    var cache;
-	    if (model_type.prototype._orm_never_cache || !(cache = this.getOrCreateCache(model_type.model_name))) {
+	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
 	      return sync_fn;
 	    }
-	    model_type.cache = cache;
 	    return __webpack_require__(31)(model_type, sync_fn);
 	  };
 
 	  ModelCache.prototype.reset = function(callback) {
-	    var key, queue, value, _fn, _ref;
-	    queue = new Queue();
+	    var key, value, _ref;
 	    _ref = this.caches;
-	    _fn = (function(_this) {
-	      return function(value) {
-	        delete _this.caches[key];
-	        return queue.defer(function(callback) {
-	          return value.reset(callback);
-	        });
-	      };
-	    })(this);
 	    for (key in _ref) {
 	      value = _ref[key];
-	      _fn(value);
+	      this.createCache(value.model_type);
 	    }
-	    return queue.await(callback);
+	    return typeof callback === "function" ? callback() : void 0;
 	  };
 
-	  ModelCache.prototype.getOrCreateCache = function(model_name) {
-	    var model_cache, options, _base;
+	  ModelCache.prototype.createCache = function(model_type) {
+	    var cache_info, model_name, options;
 	    if (!this.enabled) {
 	      return null;
 	    }
-	    if (!model_name) {
+	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
 	      throw new Error("Missing model name for cache");
 	    }
-	    if (model_cache = this.caches[model_name]) {
-	      return model_cache;
+	    if (cache_info = this.caches[model_name]) {
+	      delete this.caches[model_name];
+	      cache_info.cache.reset();
+	      cache_info.model_type.cache = null;
 	    }
-	    if (options = this.options.modelTypes[model_name]) {
-	      return this.caches[model_name] = (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(_.pick(options, MEMORY_STORE_KEYS));
-	    } else if (this.options.store || this.options.max || this.options.max_age) {
-	      return this.caches[model_name] = (typeof (_base = this.options).store === "function" ? _base.store() : void 0) || new MemoryStore(_.pick(this.options, MEMORY_STORE_KEYS));
+	    if (!(options = this.options.modelTypes[model_name])) {
+	      if (!(this.options.store || this.options.max || this.options.max_age)) {
+	        return null;
+	      }
+	      options = this.options;
 	    }
-	    return null;
+	    cache_info = this.caches[model_name] = {
+	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
+	      model_type: model_type
+	    };
+	    return model_type.cache = cache_info.cache;
 	  };
 
 	  return ModelCache;

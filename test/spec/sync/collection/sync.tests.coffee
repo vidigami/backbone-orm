@@ -28,44 +28,41 @@ _.each option_sets, exports = (options) ->
         created_at: Fabricator.date
         updated_at: Fabricator.date
       }, callback)
-      queue.await (err) ->
-        assert.ifError(err)
+
+      queue.defer (callback) ->
         collection = new collection_type()
         collection.fetch (err, fetched_collection) ->
           assert.ifError(err)
           assert.equal(BASE_COUNT, collection.models.length, "collection_type Expected: #{BASE_COUNT}\nActual: #{collection.models.length}")
           assert.equal(BASE_COUNT, fetched_collection.models.length, "Fetched collection_type Expected: #{BASE_COUNT}\nActual: #{fetched_collection.models.length}")
-          done()
+          callback()
 
-    Model = null
-    before ->
+      queue.defer (callback) ->
+        Utils.resetSchemas [model_type], (err) -> BackboneORM.model_cache.reset(); callback(err)
+
+      queue.await (err) ->
+        assert.ifError(err)
+        done()
+
+    it 'fetch models using pre-configured model', (done) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       class Model extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/models"
         schema: BASE_SCHEMA
         sync: SYNC(Model)
 
-    after (callback) ->
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Model], callback
-      queue.await callback
-    after -> Model = null
-
-    beforeEach (callback) ->
-      queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
-      queue.defer (callback) -> Utils.resetSchemas [Model], callback
-      queue.await callback
-
-    it 'fetch models using pre-configured model', (done) ->
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
-        schema: BASE_SCHEMA
         model: Model
+        schema: BASE_SCHEMA
         sync: SYNC(Collection)
+
       runTest Collection, done
 
     it 'fetch models using default model', (done) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
         schema: BASE_SCHEMA
@@ -74,20 +71,13 @@ _.each option_sets, exports = (options) ->
       runTest Collection, done
 
     it 'fetch models using upgraded model', (done) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       class SomeModel extends Backbone.Model
 
       class Collection extends Backbone.Collection
         url: "#{DATABASE_URL}/models"
         model: SomeModel
-        schema: BASE_SCHEMA
-        sync: SYNC(Collection)
-
-      runTest Collection, done
-
-    it 'fetch models using upgraded model', (done) ->
-      class Collection extends Backbone.Collection
-        url: "#{DATABASE_URL}/models"
-        model: Model
         schema: BASE_SCHEMA
         sync: SYNC(Collection)
 

@@ -1,19 +1,18 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
 ### 0.6.0
-* Removed QueryCache
-* Moved to webpack for industrial packaging across Node.js and browser
-* Redesigned test so they can be run from the command line and handle TDD correctly
-* Deprecated Utils.inspect and moved to JSONUtils.stringify
-* Removed ModelCache.hardReset or ModelCache.reset instead
+* BREAKING: Removed QueryCache
+* BREAKING: Moved model cache to set configured using BackboneORM.configure({model_cache: options})
+* BREAKING: Deprecated Utils.inspect and moved to JSONUtils.stringify
+* BREAKING: Removed ModelCache.hardReset or ModelCache.reset instead
+* BREAKING (server): Moved to webpack for industrial packaging across Node.js and browser. You must use the browser api; for example, replace require('backbone-orm/json_utils') with require('backbone-orm').JSONUtils
+* Redesigned tests so they can be run from the command line and handle TDD correctly
 * Made patchAdd fail if the record already exists
 * Removed dependency on moment
-* Provided hooks for changing the conventions for table names, attributes, and foreign keys
 * Preserved integers when serialized in JSON: https://github.com/vidigami/backbone-orm/issues/26
-* Added type to Schema to check types of attributes
-* Added named naming_conventions: 'underscore', 'camelize', 'classify'. Configure using BackboneORM.configure({naming_conventions: 'camelize'})
-* Added base conventions for easing overrides: BackboneORM.BaseConvention. Monkey patch it, derive from it, refer to it from your own conventions.
-* Moved model cache to set configured using BackboneORM.configure({model_cache: options})
+* Added type() and idType() to Schema API to check types of attributes
+* Added configurable naming_conventions: 'underscore', 'camelize', 'classify'. Configure using BackboneORM.configure({naming_conventions: 'camelize'})
+* Added base conventions for easing overrides: BackboneORM.BaseConvention. To roll your own: monkey patch it, derive from it, refer to it from your own conventions, etc.
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels
