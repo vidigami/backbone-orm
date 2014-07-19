@@ -6,6 +6,7 @@ BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
+  return if options.embed and not options.sync.capabilities.embed
   options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
@@ -79,7 +80,7 @@ _.each option_sets, exports = (options) ->
       queue.await callback
 
     it 'Can create a model and update the relationship (self reference, belongsTo)', (done) ->
-      return done() if (new SelfReference).sync('sync').no_self_reference # TODO: fix on sql
+      return done() unless SYNC.self_reference # TODO: fix on sql
 
       related_key = 'self_references'
       related_id_accessor = 'self_reference_ids'

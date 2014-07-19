@@ -6,6 +6,7 @@ Please refer to the following release notes when upgrading your version of Backb
 * BREAKING: Deprecated Utils.inspect and moved to JSONUtils.stringify
 * BREAKING: Removed ModelCache.hardReset or ModelCache.reset instead
 * BREAKING (server): Moved to webpack for industrial packaging across Node.js and browser. You must use the browser api; for example, replace require('backbone-orm/json_utils') with require('backbone-orm').JSONUtils
+* BREAKING: the model cache will generate unique id (cuid) for each model to identify it in the cache
 * Redesigned tests so they can be run from the command line and handle TDD correctly
 * Made patchAdd fail if the record already exists
 * Removed dependency on moment

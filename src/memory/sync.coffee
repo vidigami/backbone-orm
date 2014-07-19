@@ -18,6 +18,8 @@ JSONUtils = require '../json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
 
+CAPABILITIES = {self_reference: true, embed: true}
+
 # Backbone Sync for in-memory models.
 #
 # @example How to configure using a model name
@@ -35,6 +37,7 @@ class MemorySync
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @schema = new Schema(@model_type, {id: {type: 'Integer'}})
+
     @store = @model_type.store or= {}
     @id = 0
 
@@ -42,6 +45,10 @@ class MemorySync
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @schema.initialize()
+
+  ###################################
+  # Classic Backbone Sync
+  ###################################
 
   # @nodoc
   read: (model, options) ->
@@ -72,6 +79,9 @@ class MemorySync
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
+
+  # @no_doc
+  capabilities: -> CAPABILITIES
 
   # @nodoc
   resetSchema: (options, callback) -> @destroy({}, callback)
@@ -110,3 +120,4 @@ module.exports = (type) ->
 
 module.exports.Sync = MemorySync
 module.exports.Cursor = MemoryCursor
+module.exports.capabilities = CAPABILITIES
