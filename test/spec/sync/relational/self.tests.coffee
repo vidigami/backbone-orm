@@ -38,19 +38,19 @@ _.each option_sets, exports = (options) ->
       queue.defer (callback) ->
         create_queue = new Queue()
 
-        create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
+        create_queue.defer (callback) -> Fabricator.create SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_')
           created_at: Fabricator.date
           is_base: true
-        }, (err, models) -> MODELS.self_references = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
+        }, (err, models) -> MODELS.self_references = models; callback(err)
+        create_queue.defer (callback) -> Fabricator.create SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_target_')
           created_at: Fabricator.date
-        }, (err, models) -> MODELS.self_reference_targets = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(SelfReference, BASE_COUNT, {
+        }, (err, models) -> MODELS.self_reference_targets = models; callback(err)
+        create_queue.defer (callback) -> Fabricator.create SelfReference, BASE_COUNT, {
           name: Fabricator.uniqueId('self_reference_inverse_')
           created_at: Fabricator.date
-        }, (err, models) -> MODELS.self_reference_inverses = models; callback(err))
+        }, (err, models) -> MODELS.self_reference_inverses = models; callback(err)
 
         create_queue.await callback
 

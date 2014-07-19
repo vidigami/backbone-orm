@@ -34,13 +34,13 @@ _.each option_sets, exports = (options) ->
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 
-        Fabricator.create(Flat, BASE_COUNT, {
+        Fabricator.create Flat, BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
           json_data: {foo: {bar: 'baz'}, fizz: 'buzz'}
           created_at: Fabricator.date
           updated_at: Fabricator.date
           boolean: true
-        }, callback)
+        }, callback
 
     it 'Handles a count query to json', (done) ->
       Flat.cursor({$count: true}).toJSON (err, count) ->

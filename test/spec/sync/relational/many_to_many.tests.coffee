@@ -48,14 +48,14 @@ _.each option_sets, exports = (options) ->
       queue.defer (callback) ->
         create_queue = new Queue()
 
-        create_queue.defer (callback) -> Fabricator.create(Reverse, 2*BASE_COUNT, {
+        create_queue.defer (callback) -> Fabricator.create Reverse, 2*BASE_COUNT, {
           name: Fabricator.uniqueId('reverses_')
           created_at: Fabricator.date
-        }, (err, models) -> MODELS.reverse = models; callback(err))
-        create_queue.defer (callback) -> Fabricator.create(Owner, BASE_COUNT, {
+        }, (err, models) -> MODELS.reverse = models; callback(err)
+        create_queue.defer (callback) -> Fabricator.create Owner, BASE_COUNT, {
           name: Fabricator.uniqueId('owners_')
           created_at: Fabricator.date
-        }, (err, models) -> MODELS.owner = models; callback(err))
+        }, (err, models) -> MODELS.owner = models; callback(err)
 
         create_queue.await callback
 

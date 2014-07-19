@@ -36,12 +36,12 @@ _.each option_sets, exports = (options) ->
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 
-        Fabricator.create(Flat, BASE_COUNT, {
+        Fabricator.create Flat, BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
           created_at: Fabricator.date(START_DATE, DATE_INTERVAL_MS)
           updated_at: Fabricator.date
           boolean: true
-        }, callback)
+        }, callback
 
     it 'Handles a limit query', (done) ->
       Flat.find {$limit: 3}, (err, models) ->

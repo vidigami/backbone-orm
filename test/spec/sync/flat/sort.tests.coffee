@@ -30,11 +30,11 @@ _.each option_sets, exports = (options) ->
       Utils.resetSchemas [Flat], (err) ->
         return callback(err) if err
 
-        Fabricator.create(Flat, BASE_COUNT, {
+        Fabricator.create Flat, BASE_COUNT, {
           name: Fabricator.uniqueId('flat_')
           created_at: Fabricator.date
           updated_at: Fabricator.date
-        }, callback)
+        }, callback
 
     it 'Handles a sort by one field query', (done) ->
       SORT_FIELD = 'name'

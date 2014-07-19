@@ -23,11 +23,11 @@ _.each option_sets, exports = (options) ->
 
       queue = new Queue(1)
       queue.defer (callback) -> model_type.resetSchema(callback)
-      queue.defer (callback) -> Fabricator.create(model_type, BASE_COUNT, {
+      queue.defer (callback) -> Fabricator.create model_type, BASE_COUNT, {
         name: Fabricator.uniqueId('model_')
         created_at: Fabricator.date
         updated_at: Fabricator.date
-      }, callback)
+      }, callback
 
       queue.defer (callback) ->
         collection = new collection_type()
