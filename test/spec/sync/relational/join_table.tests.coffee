@@ -35,7 +35,7 @@ _.each option_sets, exports = (options) ->
     after (callback) -> Utils.resetSchemas [FirstModel, SecondModel], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> FirstModel = SecondModel = null
 
-    beforeEach (done) ->
+    beforeEach (callback) ->
       BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
 
       queue = new Queue(1)
@@ -57,7 +57,7 @@ _.each option_sets, exports = (options) ->
           second_ids.push(models[i].id) for i in [2..3]
           callback()
 
-      queue.await done
+      queue.await callback
 
     ######################################
     # Join Table

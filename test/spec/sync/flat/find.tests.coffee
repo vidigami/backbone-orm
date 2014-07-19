@@ -35,15 +35,15 @@ _.each option_sets, exports = (options) ->
     beforeEach (callback) ->
       BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
 
-      queue = new Queue(1)
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
-      queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
-        name: Fabricator.uniqueId('flat_')
-        created_at: Fabricator.date(START_DATE, DATE_INTERVAL_MS)
-        updated_at: Fabricator.date
-        boolean: true
-      }, callback)
-      queue.await callback
+      Utils.resetSchemas [Flat], (err) ->
+        return callback(err) if err
+
+        Fabricator.create(Flat, BASE_COUNT, {
+          name: Fabricator.uniqueId('flat_')
+          created_at: Fabricator.date(START_DATE, DATE_INTERVAL_MS)
+          updated_at: Fabricator.date
+          boolean: true
+        }, callback)
 
     it 'Handles a limit query', (done) ->
       Flat.find {$limit: 3}, (err, models) ->

@@ -33,16 +33,16 @@ _.each option_sets, exports = (options) ->
     beforeEach (callback) ->
       BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
 
-      queue = new Queue(1)
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
-      queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
-        name: Fabricator.uniqueId('flat_')
-        json_data: {foo: {bar: 'baz'}, fizz: 'buzz'}
-        created_at: Fabricator.date
-        updated_at: Fabricator.date
-        boolean: true
-      }, callback)
-      queue.await callback
+      Utils.resetSchemas [Flat], (err) ->
+        return callback(err) if err
+
+        Fabricator.create(Flat, BASE_COUNT, {
+          name: Fabricator.uniqueId('flat_')
+          json_data: {foo: {bar: 'baz'}, fizz: 'buzz'}
+          created_at: Fabricator.date
+          updated_at: Fabricator.date
+          boolean: true
+        }, callback)
 
     it 'Handles a count query to json', (done) ->
       Flat.cursor({$count: true}).toJSON (err, count) ->

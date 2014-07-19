@@ -29,14 +29,14 @@ _.each option_sets, exports = (options) ->
     beforeEach (callback) ->
       BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
 
-      queue = new Queue(1)
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
-      queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
-        name: Fabricator.uniqueId('flat_')
-        created_at: Fabricator.date
-        updated_at: Fabricator.date
-      }, callback)
-      queue.await callback
+      Utils.resetSchemas [Flat], (err) ->
+        return callback(err) if err
+
+        Fabricator.create(Flat, BASE_COUNT, {
+          name: Fabricator.uniqueId('flat_')
+          created_at: Fabricator.date
+          updated_at: Fabricator.date
+        }, callback)
 
     describe 'count', ->
       it 'Handles a count query', (done) ->
