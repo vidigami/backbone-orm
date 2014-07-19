@@ -16,7 +16,7 @@ webpack = require 'gulp-webpack-config'
 browserify = require 'gulp-browserify'
 
 FILES = require '../files'
-TEST_GROUPS = require '../test_groups')
+TEST_GROUPS = require '../test_groups'
 
 module.exports = (callback) ->
   queue = new Queue(1)
