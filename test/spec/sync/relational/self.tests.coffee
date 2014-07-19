@@ -26,6 +26,7 @@ _.each option_sets, exports = (options) ->
         schema: _.defaults({
           owner: -> ['belongsTo', SelfReference, foreign_key: 'owner_id', as: 'self_references']
           self_references: -> ['hasMany', SelfReference, as: 'owner']
+          is_base: 'Boolean'
         }, BASE_SCHEMA)
         sync: SYNC(SelfReference)
 
