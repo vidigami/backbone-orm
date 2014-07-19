@@ -18,7 +18,10 @@ OPTION_KEYS = _.without(_.keys(ARG_OPTIONS), 'all', 'none')
 options = {}
 if process?
   args = process.argv.slice(2)
-  options[key] = value in args for key, value of ARG_OPTIONS
+  if args.length is 1 and args[0].indexOf('quick') >= 0
+    options.none = true
+  else
+    options[key] = value in args for key, value of ARG_OPTIONS
 
 arrayToOptions = (keys) -> results = {}; results[key] = (key in keys) for key in OPTION_KEYS; return results
 
@@ -28,7 +31,5 @@ getTags = (options) -> tags = []; tags.push("@#{if options[option_key] then '' e
 options.all or= _.every(['none'].concat(OPTION_KEYS), (key) -> not options[key])
 exports = if options.all then _.map(powerset(OPTION_KEYS), arrayToOptions) else [options]
 option_set.$tags = getTags(option_set) for option_set in exports
-
-exports = [exports[0]] # run one set of options -- useful only when doing full browser tests, otherwise just use `--grep @no_options`
 
 window?.__test__option_sets = exports; module?.exports = exports
