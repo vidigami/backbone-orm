@@ -99,7 +99,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  url: __webpack_require__(18),
 	  querystring: __webpack_require__(19),
 	  'lru-cache': __webpack_require__(25),
-	  inflection: __webpack_require__(26)
+	  inflection: __webpack_require__(29)
 	};
 
 	try {
@@ -382,7 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  Utils.configureModelType = function(type) {
 	    if (!modelExtensions) {
-	      modelExtensions = __webpack_require__(27);
+	      modelExtensions = __webpack_require__(26);
 	    }
 	    return modelExtensions(type);
 	  };
@@ -1857,9 +1857,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(4);
 
-	One = __webpack_require__(28);
+	One = __webpack_require__(27);
 
-	Many = __webpack_require__(29);
+	Many = __webpack_require__(28);
 
 	DatabaseURL = __webpack_require__(10);
 
@@ -2435,7 +2435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var BaseConvention, inflection;
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(29);
 
 	module.exports = BaseConvention = (function() {
 	  function BaseConvention() {}
@@ -3400,7 +3400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(29);
 
 	BaseConvention = __webpack_require__(17);
 
@@ -3428,7 +3428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(29);
 
 	BaseConvention = __webpack_require__(17);
 
@@ -3456,7 +3456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(29);
 
 	BaseConvention = __webpack_require__(17);
 
@@ -4321,650 +4321,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	 * inflection
-	 * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
-	 * MIT Licensed
-	 *
-	 * @fileoverview
-	 * A port of inflection-js to node.js module.
-	 */
-
-	( function ( root, factory ){
-	  if( true ){
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (factory.apply(null, __WEBPACK_AMD_DEFINE_ARRAY__)), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  }else if( typeof exports === 'object' ){
-	    module.exports = factory();
-	  }else{
-	    root.inflection = factory();
-	  }
-	}( this, function (){
-
-	  /**
-	   * @description This is a list of nouns that use the same form for both singular and plural.
-	   *              This list should remain entirely in lower case to correctly match Strings.
-	   * @private
-	   */
-	  var uncountable_words = [
-	    'equipment', 'information', 'rice', 'money', 'species',
-	    'series', 'fish', 'sheep', 'moose', 'deer', 'news'
-	  ];
-
-	  /**
-	   * @description These rules translate from the singular form of a noun to its plural form.
-	   * @private
-	   */
-	  var plural_rules = [
-
-	    // do not replace if its already a plural word
-	    [ new RegExp( '(m)en$',      'gi' )],
-	    [ new RegExp( '(pe)ople$',   'gi' )],
-	    [ new RegExp( '(child)ren$', 'gi' )],
-	    [ new RegExp( '([ti])a$',    'gi' )],
-	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' )],
-	    [ new RegExp( '(hive)s$',           'gi' )],
-	    [ new RegExp( '(tive)s$',           'gi' )],
-	    [ new RegExp( '(curve)s$',          'gi' )],
-	    [ new RegExp( '([lr])ves$',         'gi' )],
-	    [ new RegExp( '([^fo])ves$',        'gi' )],
-	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' )],
-	    [ new RegExp( '(s)eries$',          'gi' )],
-	    [ new RegExp( '(m)ovies$',          'gi' )],
-	    [ new RegExp( '(x|ch|ss|sh)es$',    'gi' )],
-	    [ new RegExp( '([m|l])ice$',        'gi' )],
-	    [ new RegExp( '(bus)es$',           'gi' )],
-	    [ new RegExp( '(o)es$',             'gi' )],
-	    [ new RegExp( '(shoe)s$',           'gi' )],
-	    [ new RegExp( '(cris|ax|test)es$',  'gi' )],
-	    [ new RegExp( '(octop|vir)i$',      'gi' )],
-	    [ new RegExp( '(alias|status)es$',  'gi' )],
-	    [ new RegExp( '^(ox)en',            'gi' )],
-	    [ new RegExp( '(vert|ind)ices$',    'gi' )],
-	    [ new RegExp( '(matr)ices$',        'gi' )],
-	    [ new RegExp( '(quiz)zes$',         'gi' )],
-
-	    // original rule
-	    [ new RegExp( '(m)an$', 'gi' ),                 '$1en' ],
-	    [ new RegExp( '(pe)rson$', 'gi' ),              '$1ople' ],
-	    [ new RegExp( '(child)$', 'gi' ),               '$1ren' ],
-	    [ new RegExp( '^(ox)$', 'gi' ),                 '$1en' ],
-	    [ new RegExp( '(ax|test)is$', 'gi' ),           '$1es' ],
-	    [ new RegExp( '(octop|vir)us$', 'gi' ),         '$1i' ],
-	    [ new RegExp( '(alias|status)$', 'gi' ),        '$1es' ],
-	    [ new RegExp( '(bu)s$', 'gi' ),                 '$1ses' ],
-	    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' ), '$1oes' ],
-	    [ new RegExp( '([ti])um$', 'gi' ),              '$1a' ],
-	    [ new RegExp( 'sis$', 'gi' ),                   'ses' ],
-	    [ new RegExp( '(?:([^f])fe|([lr])f)$', 'gi' ),  '$1$2ves' ],
-	    [ new RegExp( '(hive)$', 'gi' ),                '$1s' ],
-	    [ new RegExp( '([^aeiouy]|qu)y$', 'gi' ),       '$1ies' ],
-	    [ new RegExp( '(x|ch|ss|sh)$', 'gi' ),          '$1es' ],
-	    [ new RegExp( '(matr|vert|ind)ix|ex$', 'gi' ),  '$1ices' ],
-	    [ new RegExp( '([m|l])ouse$', 'gi' ),           '$1ice' ],
-	    [ new RegExp( '(quiz)$', 'gi' ),                '$1zes' ],
-
-	    [ new RegExp( 's$', 'gi' ), 's' ],
-	    [ new RegExp( '$', 'gi' ),  's' ]
-	  ];
-
-	  /**
-	   * @description These rules translate from the plural form of a noun to its singular form.
-	   * @private
-	   */
-	  var singular_rules = [
-
-	    // do not replace if its already a singular word
-	    [ new RegExp( '(m)an$',                 'gi' )],
-	    [ new RegExp( '(pe)rson$',              'gi' )],
-	    [ new RegExp( '(child)$',               'gi' )],
-	    [ new RegExp( '^(ox)$',                 'gi' )],
-	    [ new RegExp( '(ax|test)is$',           'gi' )],
-	    [ new RegExp( '(octop|vir)us$',         'gi' )],
-	    [ new RegExp( '(alias|status)$',        'gi' )],
-	    [ new RegExp( '(bu)s$',                 'gi' )],
-	    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' )],
-	    [ new RegExp( '([ti])um$',              'gi' )],
-	    [ new RegExp( 'sis$',                   'gi' )],
-	    [ new RegExp( '(?:([^f])fe|([lr])f)$',  'gi' )],
-	    [ new RegExp( '(hive)$',                'gi' )],
-	    [ new RegExp( '([^aeiouy]|qu)y$',       'gi' )],
-	    [ new RegExp( '(x|ch|ss|sh)$',          'gi' )],
-	    [ new RegExp( '(matr|vert|ind)ix|ex$',  'gi' )],
-	    [ new RegExp( '([m|l])ouse$',           'gi' )],
-	    [ new RegExp( '(quiz)$',                'gi' )],
-
-	    // original rule
-	    [ new RegExp( '(m)en$', 'gi' ),                                                       '$1an' ],
-	    [ new RegExp( '(pe)ople$', 'gi' ),                                                    '$1rson' ],
-	    [ new RegExp( '(child)ren$', 'gi' ),                                                  '$1' ],
-	    [ new RegExp( '([ti])a$', 'gi' ),                                                     '$1um' ],
-	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ), '$1$2sis' ],
-	    [ new RegExp( '(hive)s$', 'gi' ),                                                     '$1' ],
-	    [ new RegExp( '(tive)s$', 'gi' ),                                                     '$1' ],
-	    [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
-	    [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
-	    [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
-	    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
-	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
-	    [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
-	    [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
-	    [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
-	    [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
-	    [ new RegExp( '(o)es$', 'gi' ),                                                       '$1' ],
-	    [ new RegExp( '(shoe)s$', 'gi' ),                                                     '$1' ],
-	    [ new RegExp( '(cris|ax|test)es$', 'gi' ),                                            '$1is' ],
-	    [ new RegExp( '(octop|vir)i$', 'gi' ),                                                '$1us' ],
-	    [ new RegExp( '(alias|status)es$', 'gi' ),                                            '$1' ],
-	    [ new RegExp( '^(ox)en', 'gi' ),                                                      '$1' ],
-	    [ new RegExp( '(vert|ind)ices$', 'gi' ),                                              '$1ex' ],
-	    [ new RegExp( '(matr)ices$', 'gi' ),                                                  '$1ix' ],
-	    [ new RegExp( '(quiz)zes$', 'gi' ),                                                   '$1' ],
-	    [ new RegExp( 'ss$', 'gi' ),                                                          'ss' ],
-	    [ new RegExp( 's$', 'gi' ),                                                           '' ]
-	  ];
-
-	  /**
-	   * @description This is a list of words that should not be capitalized for title case.
-	   * @private
-	   */
-	  var non_titlecased_words = [
-	    'and', 'or', 'nor', 'a', 'an', 'the', 'so', 'but', 'to', 'of', 'at','by',
-	    'from', 'into', 'on', 'onto', 'off', 'out', 'in', 'over', 'with', 'for'
-	  ];
-
-	  /**
-	   * @description These are regular expressions used for converting between String formats.
-	   * @private
-	   */
-	  var id_suffix         = new RegExp( '(_ids|_id)$', 'g' );
-	  var underbar          = new RegExp( '_', 'g' );
-	  var space_or_underbar = new RegExp( '[\ _]', 'g' );
-	  var uppercase         = new RegExp( '([A-Z])', 'g' );
-	  var underbar_prefix   = new RegExp( '^_' );
-
-	  var inflector = {
-
-	  /**
-	   * A helper method that applies rules based replacement to a String.
-	   * @private
-	   * @function
-	   * @param {String} str String to modify and return based on the passed rules.
-	   * @param {Array: [RegExp, String]} rules Regexp to match paired with String to use for replacement
-	   * @param {Array: [String]} skip Strings to skip if they match
-	   * @param {String} override String to return as though this method succeeded (used to conform to APIs)
-	   * @returns {String} Return passed String modified by passed rules.
-	   * @example
-	   *
-	   *     this._apply_rules( 'cows', singular_rules ); // === 'cow'
-	   */
-	    _apply_rules : function ( str, rules, skip, override ){
-	      if( override ){
-	        str = override;
-	      }else{
-	        var ignore = ( inflector.indexOf( skip, str.toLowerCase()) > -1 );
-
-	        if( !ignore ){
-	          var i = 0;
-	          var j = rules.length;
-
-	          for( ; i < j; i++ ){
-	            if( str.match( rules[ i ][ 0 ])){
-	              if( rules[ i ][ 1 ] !== undefined ){
-	                str = str.replace( rules[ i ][ 0 ], rules[ i ][ 1 ]);
-	              }
-	              break;
-	            }
-	          }
-	        }
-	      }
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This lets us detect if an Array contains a given element.
-	   * @public
-	   * @function
-	   * @param {Array} arr The subject array.
-	   * @param {Object} item Object to locate in the Array.
-	   * @param {Number} from_index Starts checking from this position in the Array.(optional)
-	   * @param {Function} compare_func Function used to compare Array item vs passed item.(optional)
-	   * @returns {Number} Return index position in the Array of the passed item.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.indexOf([ 'hi','there' ], 'guys' ); // === -1
-	   *     inflection.indexOf([ 'hi','there' ], 'hi' ); // === 0
-	   */
-	    indexOf : function ( arr, item, from_index, compare_func ){
-	      if( !from_index ){
-	        from_index = -1;
-	      }
-
-	      var index = -1;
-	      var i     = from_index;
-	      var j     = arr.length;
-
-	      for( ; i < j; i++ ){
-	        if( arr[ i ]  === item || compare_func && compare_func( arr[ i ], item )){
-	          index = i;
-	          break;
-	        }
-	      }
-
-	      return index;
-	    },
-
-
-
-	  /**
-	   * This function adds pluralization support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {String} plural Overrides normal output with said String.(optional)
-	   * @returns {String} Singular English language nouns are returned in plural form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.pluralize( 'person' ); // === 'people'
-	   *     inflection.pluralize( 'octopus' ); // === 'octopi'
-	   *     inflection.pluralize( 'Hat' ); // === 'Hats'
-	   *     inflection.pluralize( 'person', 'guys' ); // === 'guys'
-	   */
-	    pluralize : function ( str, plural ){
-	      return inflector._apply_rules( str, plural_rules, uncountable_words, plural );
-	    },
-
-
-
-	  /**
-	   * This function adds singularization support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {String} singular Overrides normal output with said String.(optional)
-	   * @returns {String} Plural English language nouns are returned in singular form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.singularize( 'people' ); // === 'person'
-	   *     inflection.singularize( 'octopi' ); // === 'octopus'
-	   *     inflection.singularize( 'Hats' ); // === 'Hat'
-	   *     inflection.singularize( 'guys', 'person' ); // === 'person'
-	   */
-	    singularize : function ( str, singular ){
-	      return inflector._apply_rules( str, singular_rules, uncountable_words, singular );
-	    },
-
-
-
-	  /**
-	   * This function adds camelization support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
-	   *                                 Passing true will lowercase it.
-	   * @returns {String} Lower case underscored words will be returned in camel case.
-	   *                  additionally '/' is translated to '::'
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.camelize( 'message_properties' ); // === 'MessageProperties'
-	   *     inflection.camelize( 'message_properties', true ); // === 'messageProperties'
-	   */
-	    camelize : function ( str, low_first_letter ){
-	      var str_path = str.split( '/' );
-	      var i        = 0;
-	      var j        = str_path.length;
-	      var str_arr, init_x, k, l, first;
-
-	      for( ; i < j; i++ ){
-	        str_arr = str_path[ i ].split( '_' );
-	        k       = 0;
-	        l       = str_arr.length;
-
-	        for( ; k < l; k++ ){
-	          if( k !== 0 ){
-	            str_arr[ k ] = str_arr[ k ].toLowerCase();
-	          }
-
-	          first = str_arr[ k ].charAt( 0 );
-	          first = low_first_letter && i === 0 && k === 0
-	            ? first.toLowerCase() : first.toUpperCase();
-	          str_arr[ k ] = first + str_arr[ k ].substring( 1 );
-	        }
-
-	        str_path[ i ] = str_arr.join( '' );
-	      }
-
-	      return str_path.join( '::' );
-	    },
-
-
-
-	  /**
-	   * This function adds underscore support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {Boolean} all_upper_case Default is to lowercase and add underscore prefix.(optional)
-	   *                  Passing true will return as entered.
-	   * @returns {String} Camel cased words are returned as lower cased and underscored.
-	   *                  additionally '::' is translated to '/'.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.underscore( 'MessageProperties' ); // === 'message_properties'
-	   *     inflection.underscore( 'messageProperties' ); // === 'message_properties'
-	   *     inflection.underscore( 'MP', true ); // === 'MP'
-	   */
-	    underscore : function ( str, all_upper_case ){
-	      if( all_upper_case && str === str.toUpperCase()) return str;
-
-	      var str_path = str.split( '::' );
-	      var i        = 0;
-	      var j        = str_path.length;
-
-	      for( ; i < j; i++ ){
-	        str_path[ i ] = str_path[ i ].replace( uppercase, '_$1' );
-	        str_path[ i ] = str_path[ i ].replace( underbar_prefix, '' );
-	      }
-
-	      return str_path.join( '/' ).toLowerCase();
-	    },
-
-
-
-	  /**
-	   * This function adds humanize support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
-	   *                                 Passing true will lowercase it.
-	   * @returns {String} Lower case underscored words will be returned in humanized form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.humanize( 'message_properties' ); // === 'Message properties'
-	   *     inflection.humanize( 'message_properties', true ); // === 'message properties'
-	   */
-	    humanize : function ( str, low_first_letter ){
-	      str = str.toLowerCase();
-	      str = str.replace( id_suffix, '' );
-	      str = str.replace( underbar, ' ' );
-
-	      if( !low_first_letter ){
-	        str = inflector.capitalize( str );
-	      }
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This function adds capitalization support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} All characters will be lower case and the first will be upper.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.capitalize( 'message_properties' ); // === 'Message_properties'
-	   *     inflection.capitalize( 'message properties', true ); // === 'Message properties'
-	   */
-	    capitalize : function ( str ){
-	      str = str.toLowerCase();
-
-	      return str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
-	    },
-
-
-
-	  /**
-	   * This function adds dasherization support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Replaces all spaces or underbars with dashes.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.dasherize( 'message_properties' ); // === 'message-properties'
-	   *     inflection.dasherize( 'Message Properties' ); // === 'Message-Properties'
-	   */
-	    dasherize : function ( str ){
-	      return str.replace( space_or_underbar, '-' );
-	    },
-
-
-
-	  /**
-	   * This function adds titleize support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Capitalizes words as you would for a book title.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.titleize( 'message_properties' ); // === 'Message Properties'
-	   *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
-	   */
-	    titleize : function ( str ){
-	      str         = str.toLowerCase().replace( underbar, ' ' );
-	      var str_arr = str.split( ' ' );
-	      var i       = 0;
-	      var j       = str_arr.length;
-	      var d, k, l;
-
-	      for( ; i < j; i++ ){
-	        d = str_arr[ i ].split( '-' );
-	        k = 0;
-	        l = d.length;
-
-	        for( ; k < l; k++){
-	          if( inflector.indexOf( non_titlecased_words, d[ k ].toLowerCase()) < 0 ){
-	            d[ k ] = inflector.capitalize( d[ k ]);
-	          }
-	        }
-
-	        str_arr[ i ] = d.join( '-' );
-	      }
-
-	      str = str_arr.join( ' ' );
-	      str = str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This function adds demodulize support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Removes module names leaving only class names.(Ruby style)
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.demodulize( 'Message::Bus::Properties' ); // === 'Properties'
-	   */
-	    demodulize : function ( str ){
-	      var str_arr = str.split( '::' );
-
-	      return str_arr[ str_arr.length - 1 ];
-	    },
-
-
-
-	  /**
-	   * This function adds tableize support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Return camel cased words into their underscored plural form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.tableize( 'MessageBusProperty' ); // === 'message_bus_properties'
-	   */
-	    tableize : function ( str ){
-	      str = inflector.underscore( str );
-	      str = inflector.pluralize( str );
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This function adds classification support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Underscored plural nouns become the camel cased singular form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.classify( 'message_bus_properties' ); // === 'MessageBusProperty'
-	   */
-	    classify : function ( str ){
-	      str = inflector.camelize( str );
-	      str = inflector.singularize( str );
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This function adds foreign key support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {Boolean} drop_id_ubar Default is to seperate id with an underbar at the end of the class name,
-	                                 you can pass true to skip it.(optional)
-	   * @returns {String} Underscored plural nouns become the camel cased singular form.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.foreign_key( 'MessageBusProperty' ); // === 'message_bus_property_id'
-	   *     inflection.foreign_key( 'MessageBusProperty', true ); // === 'message_bus_propertyid'
-	   */
-	    foreign_key : function ( str, drop_id_ubar ){
-	      str = inflector.demodulize( str );
-	      str = inflector.underscore( str ) + (( drop_id_ubar ) ? ( '' ) : ( '_' )) + 'id';
-
-	      return str;
-	    },
-
-
-
-	  /**
-	   * This function adds ordinalize support to every String object.
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @returns {String} Return all found numbers their sequence like '22nd'.
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
-	   */
-	    ordinalize : function ( str ){
-	      var str_arr = str.split( ' ' );
-	      var i       = 0;
-	      var j       = str_arr.length;
-
-	      for( ; i < j; i++ ){
-	        var k = parseInt( str_arr[ i ], 10 );
-
-	        if( !isNaN( k )){
-	          var ltd = str_arr[ i ].substring( str_arr[ i ].length - 2 );
-	          var ld  = str_arr[ i ].substring( str_arr[ i ].length - 1 );
-	          var suf = 'th';
-
-	          if( ltd != '11' && ltd != '12' && ltd != '13' ){
-	            if( ld === '1' ){
-	              suf = 'st';
-	            }else if( ld === '2' ){
-	              suf = 'nd';
-	            }else if( ld === '3' ){
-	              suf = 'rd';
-	            }
-	          }
-
-	          str_arr[ i ] += suf;
-	        }
-	      }
-
-	      return str_arr.join( ' ' );
-	    },
-
-	  /**
-	   * This function performs multiple inflection methods on a string
-	   * @public
-	   * @function
-	   * @param {String} str The subject string.
-	   * @param {Array} arr An array of inflection methods.
-	   * @returns {String}
-	   * @example
-	   *
-	   *     var inflection = require( 'inflection' );
-	   *
-	   *     inflection.transform( 'all job', [ 'pluralize', 'capitalize', 'dasherize' ]); // === 'All-jobs'
-	   */
-	    transform : function ( str, arr ){
-	      var i = 0;
-	      var j = arr.length;
-
-	      for( ;i < j; i++ ){
-	        var method = arr[ i ];
-
-	        if( this.hasOwnProperty( method )){
-	          str = this[ method ]( str );
-	        }
-	      }
-
-	      return str;
-	    }
-	  };
-
-	/**
-	 * @public
-	 */
-	  inflector.version = '1.3.8';
-
-	  return inflector;
-	}));
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -4983,15 +4339,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Utils = __webpack_require__(6);
 
-	ModelStream = __webpack_require__(33);
+	ModelStream = __webpack_require__(34);
 
-	modelEach = __webpack_require__(34);
+	modelEach = __webpack_require__(35);
 
-	modelInterval = __webpack_require__(35);
+	modelInterval = __webpack_require__(36);
 
 	DatabaseURL = __webpack_require__(10);
 
-	__webpack_require__(36);
+	__webpack_require__(37);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, fn, key, overrides, _findOrClone, _results;
@@ -5680,7 +5036,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6165,11 +5521,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(37));
+	})(__webpack_require__(33));
 
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6793,7 +6149,651 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(37));
+	})(__webpack_require__(33));
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	 * inflection
+	 * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
+	 * MIT Licensed
+	 *
+	 * @fileoverview
+	 * A port of inflection-js to node.js module.
+	 */
+
+	( function ( root, factory ){
+	  if( true ){
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (factory.apply(null, __WEBPACK_AMD_DEFINE_ARRAY__)), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  }else if( typeof exports === 'object' ){
+	    module.exports = factory();
+	  }else{
+	    root.inflection = factory();
+	  }
+	}( this, function (){
+
+	  /**
+	   * @description This is a list of nouns that use the same form for both singular and plural.
+	   *              This list should remain entirely in lower case to correctly match Strings.
+	   * @private
+	   */
+	  var uncountable_words = [
+	    'equipment', 'information', 'rice', 'money', 'species',
+	    'series', 'fish', 'sheep', 'moose', 'deer', 'news'
+	  ];
+
+	  /**
+	   * @description These rules translate from the singular form of a noun to its plural form.
+	   * @private
+	   */
+	  var plural_rules = [
+
+	    // do not replace if its already a plural word
+	    [ new RegExp( '(m)en$',      'gi' )],
+	    [ new RegExp( '(pe)ople$',   'gi' )],
+	    [ new RegExp( '(child)ren$', 'gi' )],
+	    [ new RegExp( '([ti])a$',    'gi' )],
+	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' )],
+	    [ new RegExp( '(hive)s$',           'gi' )],
+	    [ new RegExp( '(tive)s$',           'gi' )],
+	    [ new RegExp( '(curve)s$',          'gi' )],
+	    [ new RegExp( '([lr])ves$',         'gi' )],
+	    [ new RegExp( '([^fo])ves$',        'gi' )],
+	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' )],
+	    [ new RegExp( '(s)eries$',          'gi' )],
+	    [ new RegExp( '(m)ovies$',          'gi' )],
+	    [ new RegExp( '(x|ch|ss|sh)es$',    'gi' )],
+	    [ new RegExp( '([m|l])ice$',        'gi' )],
+	    [ new RegExp( '(bus)es$',           'gi' )],
+	    [ new RegExp( '(o)es$',             'gi' )],
+	    [ new RegExp( '(shoe)s$',           'gi' )],
+	    [ new RegExp( '(cris|ax|test)es$',  'gi' )],
+	    [ new RegExp( '(octop|vir)i$',      'gi' )],
+	    [ new RegExp( '(alias|status)es$',  'gi' )],
+	    [ new RegExp( '^(ox)en',            'gi' )],
+	    [ new RegExp( '(vert|ind)ices$',    'gi' )],
+	    [ new RegExp( '(matr)ices$',        'gi' )],
+	    [ new RegExp( '(quiz)zes$',         'gi' )],
+
+	    // original rule
+	    [ new RegExp( '(m)an$', 'gi' ),                 '$1en' ],
+	    [ new RegExp( '(pe)rson$', 'gi' ),              '$1ople' ],
+	    [ new RegExp( '(child)$', 'gi' ),               '$1ren' ],
+	    [ new RegExp( '^(ox)$', 'gi' ),                 '$1en' ],
+	    [ new RegExp( '(ax|test)is$', 'gi' ),           '$1es' ],
+	    [ new RegExp( '(octop|vir)us$', 'gi' ),         '$1i' ],
+	    [ new RegExp( '(alias|status)$', 'gi' ),        '$1es' ],
+	    [ new RegExp( '(bu)s$', 'gi' ),                 '$1ses' ],
+	    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' ), '$1oes' ],
+	    [ new RegExp( '([ti])um$', 'gi' ),              '$1a' ],
+	    [ new RegExp( 'sis$', 'gi' ),                   'ses' ],
+	    [ new RegExp( '(?:([^f])fe|([lr])f)$', 'gi' ),  '$1$2ves' ],
+	    [ new RegExp( '(hive)$', 'gi' ),                '$1s' ],
+	    [ new RegExp( '([^aeiouy]|qu)y$', 'gi' ),       '$1ies' ],
+	    [ new RegExp( '(x|ch|ss|sh)$', 'gi' ),          '$1es' ],
+	    [ new RegExp( '(matr|vert|ind)ix|ex$', 'gi' ),  '$1ices' ],
+	    [ new RegExp( '([m|l])ouse$', 'gi' ),           '$1ice' ],
+	    [ new RegExp( '(quiz)$', 'gi' ),                '$1zes' ],
+
+	    [ new RegExp( 's$', 'gi' ), 's' ],
+	    [ new RegExp( '$', 'gi' ),  's' ]
+	  ];
+
+	  /**
+	   * @description These rules translate from the plural form of a noun to its singular form.
+	   * @private
+	   */
+	  var singular_rules = [
+
+	    // do not replace if its already a singular word
+	    [ new RegExp( '(m)an$',                 'gi' )],
+	    [ new RegExp( '(pe)rson$',              'gi' )],
+	    [ new RegExp( '(child)$',               'gi' )],
+	    [ new RegExp( '^(ox)$',                 'gi' )],
+	    [ new RegExp( '(ax|test)is$',           'gi' )],
+	    [ new RegExp( '(octop|vir)us$',         'gi' )],
+	    [ new RegExp( '(alias|status)$',        'gi' )],
+	    [ new RegExp( '(bu)s$',                 'gi' )],
+	    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' )],
+	    [ new RegExp( '([ti])um$',              'gi' )],
+	    [ new RegExp( 'sis$',                   'gi' )],
+	    [ new RegExp( '(?:([^f])fe|([lr])f)$',  'gi' )],
+	    [ new RegExp( '(hive)$',                'gi' )],
+	    [ new RegExp( '([^aeiouy]|qu)y$',       'gi' )],
+	    [ new RegExp( '(x|ch|ss|sh)$',          'gi' )],
+	    [ new RegExp( '(matr|vert|ind)ix|ex$',  'gi' )],
+	    [ new RegExp( '([m|l])ouse$',           'gi' )],
+	    [ new RegExp( '(quiz)$',                'gi' )],
+
+	    // original rule
+	    [ new RegExp( '(m)en$', 'gi' ),                                                       '$1an' ],
+	    [ new RegExp( '(pe)ople$', 'gi' ),                                                    '$1rson' ],
+	    [ new RegExp( '(child)ren$', 'gi' ),                                                  '$1' ],
+	    [ new RegExp( '([ti])a$', 'gi' ),                                                     '$1um' ],
+	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ), '$1$2sis' ],
+	    [ new RegExp( '(hive)s$', 'gi' ),                                                     '$1' ],
+	    [ new RegExp( '(tive)s$', 'gi' ),                                                     '$1' ],
+	    [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
+	    [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
+	    [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
+	    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
+	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
+	    [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
+	    [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
+	    [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
+	    [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
+	    [ new RegExp( '(o)es$', 'gi' ),                                                       '$1' ],
+	    [ new RegExp( '(shoe)s$', 'gi' ),                                                     '$1' ],
+	    [ new RegExp( '(cris|ax|test)es$', 'gi' ),                                            '$1is' ],
+	    [ new RegExp( '(octop|vir)i$', 'gi' ),                                                '$1us' ],
+	    [ new RegExp( '(alias|status)es$', 'gi' ),                                            '$1' ],
+	    [ new RegExp( '^(ox)en', 'gi' ),                                                      '$1' ],
+	    [ new RegExp( '(vert|ind)ices$', 'gi' ),                                              '$1ex' ],
+	    [ new RegExp( '(matr)ices$', 'gi' ),                                                  '$1ix' ],
+	    [ new RegExp( '(quiz)zes$', 'gi' ),                                                   '$1' ],
+	    [ new RegExp( 'ss$', 'gi' ),                                                          'ss' ],
+	    [ new RegExp( 's$', 'gi' ),                                                           '' ]
+	  ];
+
+	  /**
+	   * @description This is a list of words that should not be capitalized for title case.
+	   * @private
+	   */
+	  var non_titlecased_words = [
+	    'and', 'or', 'nor', 'a', 'an', 'the', 'so', 'but', 'to', 'of', 'at','by',
+	    'from', 'into', 'on', 'onto', 'off', 'out', 'in', 'over', 'with', 'for'
+	  ];
+
+	  /**
+	   * @description These are regular expressions used for converting between String formats.
+	   * @private
+	   */
+	  var id_suffix         = new RegExp( '(_ids|_id)$', 'g' );
+	  var underbar          = new RegExp( '_', 'g' );
+	  var space_or_underbar = new RegExp( '[\ _]', 'g' );
+	  var uppercase         = new RegExp( '([A-Z])', 'g' );
+	  var underbar_prefix   = new RegExp( '^_' );
+
+	  var inflector = {
+
+	  /**
+	   * A helper method that applies rules based replacement to a String.
+	   * @private
+	   * @function
+	   * @param {String} str String to modify and return based on the passed rules.
+	   * @param {Array: [RegExp, String]} rules Regexp to match paired with String to use for replacement
+	   * @param {Array: [String]} skip Strings to skip if they match
+	   * @param {String} override String to return as though this method succeeded (used to conform to APIs)
+	   * @returns {String} Return passed String modified by passed rules.
+	   * @example
+	   *
+	   *     this._apply_rules( 'cows', singular_rules ); // === 'cow'
+	   */
+	    _apply_rules : function ( str, rules, skip, override ){
+	      if( override ){
+	        str = override;
+	      }else{
+	        var ignore = ( inflector.indexOf( skip, str.toLowerCase()) > -1 );
+
+	        if( !ignore ){
+	          var i = 0;
+	          var j = rules.length;
+
+	          for( ; i < j; i++ ){
+	            if( str.match( rules[ i ][ 0 ])){
+	              if( rules[ i ][ 1 ] !== undefined ){
+	                str = str.replace( rules[ i ][ 0 ], rules[ i ][ 1 ]);
+	              }
+	              break;
+	            }
+	          }
+	        }
+	      }
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This lets us detect if an Array contains a given element.
+	   * @public
+	   * @function
+	   * @param {Array} arr The subject array.
+	   * @param {Object} item Object to locate in the Array.
+	   * @param {Number} from_index Starts checking from this position in the Array.(optional)
+	   * @param {Function} compare_func Function used to compare Array item vs passed item.(optional)
+	   * @returns {Number} Return index position in the Array of the passed item.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.indexOf([ 'hi','there' ], 'guys' ); // === -1
+	   *     inflection.indexOf([ 'hi','there' ], 'hi' ); // === 0
+	   */
+	    indexOf : function ( arr, item, from_index, compare_func ){
+	      if( !from_index ){
+	        from_index = -1;
+	      }
+
+	      var index = -1;
+	      var i     = from_index;
+	      var j     = arr.length;
+
+	      for( ; i < j; i++ ){
+	        if( arr[ i ]  === item || compare_func && compare_func( arr[ i ], item )){
+	          index = i;
+	          break;
+	        }
+	      }
+
+	      return index;
+	    },
+
+
+
+	  /**
+	   * This function adds pluralization support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {String} plural Overrides normal output with said String.(optional)
+	   * @returns {String} Singular English language nouns are returned in plural form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.pluralize( 'person' ); // === 'people'
+	   *     inflection.pluralize( 'octopus' ); // === 'octopi'
+	   *     inflection.pluralize( 'Hat' ); // === 'Hats'
+	   *     inflection.pluralize( 'person', 'guys' ); // === 'guys'
+	   */
+	    pluralize : function ( str, plural ){
+	      return inflector._apply_rules( str, plural_rules, uncountable_words, plural );
+	    },
+
+
+
+	  /**
+	   * This function adds singularization support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {String} singular Overrides normal output with said String.(optional)
+	   * @returns {String} Plural English language nouns are returned in singular form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.singularize( 'people' ); // === 'person'
+	   *     inflection.singularize( 'octopi' ); // === 'octopus'
+	   *     inflection.singularize( 'Hats' ); // === 'Hat'
+	   *     inflection.singularize( 'guys', 'person' ); // === 'person'
+	   */
+	    singularize : function ( str, singular ){
+	      return inflector._apply_rules( str, singular_rules, uncountable_words, singular );
+	    },
+
+
+
+	  /**
+	   * This function adds camelization support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
+	   *                                 Passing true will lowercase it.
+	   * @returns {String} Lower case underscored words will be returned in camel case.
+	   *                  additionally '/' is translated to '::'
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.camelize( 'message_properties' ); // === 'MessageProperties'
+	   *     inflection.camelize( 'message_properties', true ); // === 'messageProperties'
+	   */
+	    camelize : function ( str, low_first_letter ){
+	      var str_path = str.split( '/' );
+	      var i        = 0;
+	      var j        = str_path.length;
+	      var str_arr, init_x, k, l, first;
+
+	      for( ; i < j; i++ ){
+	        str_arr = str_path[ i ].split( '_' );
+	        k       = 0;
+	        l       = str_arr.length;
+
+	        for( ; k < l; k++ ){
+	          if( k !== 0 ){
+	            str_arr[ k ] = str_arr[ k ].toLowerCase();
+	          }
+
+	          first = str_arr[ k ].charAt( 0 );
+	          first = low_first_letter && i === 0 && k === 0
+	            ? first.toLowerCase() : first.toUpperCase();
+	          str_arr[ k ] = first + str_arr[ k ].substring( 1 );
+	        }
+
+	        str_path[ i ] = str_arr.join( '' );
+	      }
+
+	      return str_path.join( '::' );
+	    },
+
+
+
+	  /**
+	   * This function adds underscore support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Boolean} all_upper_case Default is to lowercase and add underscore prefix.(optional)
+	   *                  Passing true will return as entered.
+	   * @returns {String} Camel cased words are returned as lower cased and underscored.
+	   *                  additionally '::' is translated to '/'.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.underscore( 'MessageProperties' ); // === 'message_properties'
+	   *     inflection.underscore( 'messageProperties' ); // === 'message_properties'
+	   *     inflection.underscore( 'MP', true ); // === 'MP'
+	   */
+	    underscore : function ( str, all_upper_case ){
+	      if( all_upper_case && str === str.toUpperCase()) return str;
+
+	      var str_path = str.split( '::' );
+	      var i        = 0;
+	      var j        = str_path.length;
+
+	      for( ; i < j; i++ ){
+	        str_path[ i ] = str_path[ i ].replace( uppercase, '_$1' );
+	        str_path[ i ] = str_path[ i ].replace( underbar_prefix, '' );
+	      }
+
+	      return str_path.join( '/' ).toLowerCase();
+	    },
+
+
+
+	  /**
+	   * This function adds humanize support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
+	   *                                 Passing true will lowercase it.
+	   * @returns {String} Lower case underscored words will be returned in humanized form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.humanize( 'message_properties' ); // === 'Message properties'
+	   *     inflection.humanize( 'message_properties', true ); // === 'message properties'
+	   */
+	    humanize : function ( str, low_first_letter ){
+	      str = str.toLowerCase();
+	      str = str.replace( id_suffix, '' );
+	      str = str.replace( underbar, ' ' );
+
+	      if( !low_first_letter ){
+	        str = inflector.capitalize( str );
+	      }
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This function adds capitalization support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} All characters will be lower case and the first will be upper.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.capitalize( 'message_properties' ); // === 'Message_properties'
+	   *     inflection.capitalize( 'message properties', true ); // === 'Message properties'
+	   */
+	    capitalize : function ( str ){
+	      str = str.toLowerCase();
+
+	      return str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
+	    },
+
+
+
+	  /**
+	   * This function adds dasherization support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Replaces all spaces or underbars with dashes.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.dasherize( 'message_properties' ); // === 'message-properties'
+	   *     inflection.dasherize( 'Message Properties' ); // === 'Message-Properties'
+	   */
+	    dasherize : function ( str ){
+	      return str.replace( space_or_underbar, '-' );
+	    },
+
+
+
+	  /**
+	   * This function adds titleize support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Capitalizes words as you would for a book title.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.titleize( 'message_properties' ); // === 'Message Properties'
+	   *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
+	   */
+	    titleize : function ( str ){
+	      str         = str.toLowerCase().replace( underbar, ' ' );
+	      var str_arr = str.split( ' ' );
+	      var i       = 0;
+	      var j       = str_arr.length;
+	      var d, k, l;
+
+	      for( ; i < j; i++ ){
+	        d = str_arr[ i ].split( '-' );
+	        k = 0;
+	        l = d.length;
+
+	        for( ; k < l; k++){
+	          if( inflector.indexOf( non_titlecased_words, d[ k ].toLowerCase()) < 0 ){
+	            d[ k ] = inflector.capitalize( d[ k ]);
+	          }
+	        }
+
+	        str_arr[ i ] = d.join( '-' );
+	      }
+
+	      str = str_arr.join( ' ' );
+	      str = str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This function adds demodulize support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Removes module names leaving only class names.(Ruby style)
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.demodulize( 'Message::Bus::Properties' ); // === 'Properties'
+	   */
+	    demodulize : function ( str ){
+	      var str_arr = str.split( '::' );
+
+	      return str_arr[ str_arr.length - 1 ];
+	    },
+
+
+
+	  /**
+	   * This function adds tableize support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Return camel cased words into their underscored plural form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.tableize( 'MessageBusProperty' ); // === 'message_bus_properties'
+	   */
+	    tableize : function ( str ){
+	      str = inflector.underscore( str );
+	      str = inflector.pluralize( str );
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This function adds classification support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Underscored plural nouns become the camel cased singular form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.classify( 'message_bus_properties' ); // === 'MessageBusProperty'
+	   */
+	    classify : function ( str ){
+	      str = inflector.camelize( str );
+	      str = inflector.singularize( str );
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This function adds foreign key support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Boolean} drop_id_ubar Default is to seperate id with an underbar at the end of the class name,
+	                                 you can pass true to skip it.(optional)
+	   * @returns {String} Underscored plural nouns become the camel cased singular form.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.foreign_key( 'MessageBusProperty' ); // === 'message_bus_property_id'
+	   *     inflection.foreign_key( 'MessageBusProperty', true ); // === 'message_bus_propertyid'
+	   */
+	    foreign_key : function ( str, drop_id_ubar ){
+	      str = inflector.demodulize( str );
+	      str = inflector.underscore( str ) + (( drop_id_ubar ) ? ( '' ) : ( '_' )) + 'id';
+
+	      return str;
+	    },
+
+
+
+	  /**
+	   * This function adds ordinalize support to every String object.
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @returns {String} Return all found numbers their sequence like '22nd'.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
+	   */
+	    ordinalize : function ( str ){
+	      var str_arr = str.split( ' ' );
+	      var i       = 0;
+	      var j       = str_arr.length;
+
+	      for( ; i < j; i++ ){
+	        var k = parseInt( str_arr[ i ], 10 );
+
+	        if( !isNaN( k )){
+	          var ltd = str_arr[ i ].substring( str_arr[ i ].length - 2 );
+	          var ld  = str_arr[ i ].substring( str_arr[ i ].length - 1 );
+	          var suf = 'th';
+
+	          if( ltd != '11' && ltd != '12' && ltd != '13' ){
+	            if( ld === '1' ){
+	              suf = 'st';
+	            }else if( ld === '2' ){
+	              suf = 'nd';
+	            }else if( ld === '3' ){
+	              suf = 'rd';
+	            }
+	          }
+
+	          str_arr[ i ] += suf;
+	        }
+	      }
+
+	      return str_arr.join( ' ' );
+	    },
+
+	  /**
+	   * This function performs multiple inflection methods on a string
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Array} arr An array of inflection methods.
+	   * @returns {String}
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.transform( 'all job', [ 'pluralize', 'capitalize', 'dasherize' ]); // === 'All-jobs'
+	   */
+	    transform : function ( str, arr ){
+	      var i = 0;
+	      var j = arr.length;
+
+	      for( ;i < j; i++ ){
+	        var method = arr[ i ];
+
+	        if( this.hasOwnProperty( method )){
+	          str = this[ method ]( str );
+	        }
+	      }
+
+	      return str;
+	    }
+	  };
+
+	/**
+	 * @public
+	 */
+	  inflector.version = '1.3.8';
+
+	  return inflector;
+	}));
 
 
 /***/ },
@@ -8179,379 +8179,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
 	 */
-	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	try {
-	  stream = __webpack_require__(3);
-	} catch (_error) {}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
-	 */
-	var Cursor, Queue, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(9);
-
-	Cursor = null;
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var method, model_limit, options, parsed_query, processed_count, runBatch;
-	  if (!Cursor) {
-	    Cursor = __webpack_require__(12);
-	  }
-	  options = query.$each || {};
-	  method = options.json ? 'toJSON' : 'toModels';
-	  processed_count = 0;
-	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
-	  _.defaults(parsed_query.cursor, {
-	    $offset: 0,
-	    $sort: 'id'
-	  });
-	  model_limit = parsed_query.cursor.$limit || Infinity;
-	  if (options.fetch) {
-	    parsed_query.cursor.$limit = options.fetch;
-	  }
-	  runBatch = function() {
-	    var cursor;
-	    cursor = model_type.cursor(parsed_query);
-	    return cursor[method].call(cursor, function(err, models) {
-	      var model, queue, _fn, _i, _len;
-	      if (err || !models) {
-	        return callback(new Error("Failed to get models. Error: " + err));
-	      }
-	      if (!models.length) {
-	        return callback(null, processed_count);
-	      }
-	      queue = new Queue(options.threads);
-	      _fn = function(model) {
-	        return queue.defer(function(callback) {
-	          return iterator(model, callback);
-	        });
-	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
-	        if (processed_count++ >= model_limit) {
-	          break;
-	        }
-	        _fn(model);
-	      }
-	      return queue.await(function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
-	          return callback(null, processed_count);
-	        }
-	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
-	        return runBatch();
-	      });
-	    });
-	  };
-	  return runBatch();
-	};
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
-	 */
-	var DateUtils, INTERVAL_TYPES, Queue, Utils, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(9);
-
-	Utils = __webpack_require__(6);
-
-	DateUtils = __webpack_require__(8);
-
-	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var iteration_info, key, no_models, options, queue, range;
-	  options = query.$interval || {};
-	  if (!(key = options.key)) {
-	    throw new Error('missing option: key');
-	  }
-	  if (!options.type) {
-	    throw new Error('missing option: type');
-	  }
-	  if (!_.contains(INTERVAL_TYPES, options.type)) {
-	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
-	  }
-	  iteration_info = _.clone(options);
-	  if (!iteration_info.range) {
-	    iteration_info.range = {};
-	  }
-	  range = iteration_info.range;
-	  no_models = false;
-	  queue = new Queue(1);
-	  queue.defer(function(callback) {
-	    var start;
-	    if (!(start = range.$gte || range.$gt)) {
-	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.start = iteration_info.first = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.start = start;
-	      return model_type.findOneNearestDate(start, {
-	        key: key,
-	        reverse: true
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.first = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  queue.defer(function(callback) {
-	    var end;
-	    if (no_models) {
-	      return callback();
-	    }
-	    if (!(end = range.$lte || range.$lt)) {
-	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.end = iteration_info.last = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.end = end;
-	      return model_type.findOneNearestDate(end, {
-	        key: key
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.last = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  return queue.await(function(err) {
-	    var length_ms, processed_count, runInterval, start_ms;
-	    if (err) {
-	      return callback(err);
-	    }
-	    if (no_models) {
-	      return callback();
-	    }
-	    start_ms = range.start.getTime();
-	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
-	    if (!length_ms) {
-	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
-	    }
-	    query = _.omit(query, '$interval');
-	    query.$sort = [key];
-	    processed_count = 0;
-	    iteration_info.index = 0;
-	    runInterval = function(current) {
-	      if (DateUtils.isAfter(current, range.end)) {
-	        return callback();
-	      }
-	      query[key] = {
-	        $gte: current,
-	        $lte: iteration_info.last
-	      };
-	      return model_type.findOne(query, function(err, model) {
-	        var next;
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          return callback();
-	        }
-	        next = model.get(key);
-	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
-	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
-	        iteration_info.start = current;
-	        next = new Date(current.getTime() + length_ms);
-	        iteration_info.end = next;
-	        query[key] = {
-	          $gte: current,
-	          $lt: next
-	        };
-	        return iterator(query, iteration_info, function(err) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          return runInterval(next);
-	        });
-	      });
-	    };
-	    return runInterval(range.start);
-	  });
-	};
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
-	 */
-	var Backbone, Utils, collection_type, fn, key, overrides, _;
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	Utils = __webpack_require__(6);
-
-	collection_type = Backbone.Collection;
-
-	overrides = {
-	  fetch: function(options) {
-	    var callback;
-	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
-	      switch (arguments.length) {
-	        case 1:
-	          options = Utils.wrapOptions({}, callback);
-	          break;
-	        case 2:
-	          options = Utils.wrapOptions(options, callback);
-	      }
-	    }
-	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
-	      return function(err, model, resp, options) {
-	        if (err) {
-	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
-	        }
-	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
-	      };
-	    })(this)));
-	  },
-	  _prepareModel: function(attrs, options) {
-	    var id, is_new, model;
-	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
-	      if (this.model.cache) {
-	        is_new = !!this.model.cache.get(id);
-	      }
-	      model = Utils.updateOrNew(attrs, this.model);
-	      if (is_new && !model._validate(attrs, options)) {
-	        this.trigger('invalid', this, attrs, options);
-	        return false;
-	      }
-	      return model;
-	    }
-	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
-	  }
-	};
-
-	if (!collection_type.prototype._orm_original_fns) {
-	  collection_type.prototype._orm_original_fns = {};
-	  for (key in overrides) {
-	    fn = overrides[key];
-	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
-	    collection_type.prototype[key] = fn;
-	  }
-	}
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
-	 */
 	var Backbone, BackboneORM, Queue, Relation, Utils, _;
 
 	_ = __webpack_require__(1);
@@ -8722,6 +8349,379 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Relation;
 
 	})();
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	 */
+	var ModelStream, stream,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	try {
+	  stream = __webpack_require__(3);
+	} catch (_error) {}
+
+	if (stream != null ? stream.Readable : void 0) {
+	  module.exports = ModelStream = (function(_super) {
+	    __extends(ModelStream, _super);
+
+	    function ModelStream(model_type, query) {
+	      this.model_type = model_type;
+	      this.query = query != null ? query : {};
+	      ModelStream.__super__.constructor.call(this, {
+	        objectMode: true
+	      });
+	    }
+
+	    ModelStream.prototype._read = function() {
+	      var done;
+	      if (this.ended || this.started) {
+	        return;
+	      }
+	      this.started = true;
+	      done = (function(_this) {
+	        return function(err) {
+	          _this.ended = true;
+	          if (err) {
+	            _this.emit('error', err);
+	          }
+	          return _this.push(null);
+	        };
+	      })(this);
+	      return this.model_type.each(this.query, ((function(_this) {
+	        return function(model, callback) {
+	          _this.push(model);
+	          return callback();
+	        };
+	      })(this)), done);
+	    };
+
+	    return ModelStream;
+
+	  })(stream.Readable);
+	}
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	 */
+	var Cursor, Queue, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(9);
+
+	Cursor = null;
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var method, model_limit, options, parsed_query, processed_count, runBatch;
+	  if (!Cursor) {
+	    Cursor = __webpack_require__(12);
+	  }
+	  options = query.$each || {};
+	  method = options.json ? 'toJSON' : 'toModels';
+	  processed_count = 0;
+	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
+	  _.defaults(parsed_query.cursor, {
+	    $offset: 0,
+	    $sort: 'id'
+	  });
+	  model_limit = parsed_query.cursor.$limit || Infinity;
+	  if (options.fetch) {
+	    parsed_query.cursor.$limit = options.fetch;
+	  }
+	  runBatch = function() {
+	    var cursor;
+	    cursor = model_type.cursor(parsed_query);
+	    return cursor[method].call(cursor, function(err, models) {
+	      var model, queue, _fn, _i, _len;
+	      if (err || !models) {
+	        return callback(new Error("Failed to get models. Error: " + err));
+	      }
+	      if (!models.length) {
+	        return callback(null, processed_count);
+	      }
+	      queue = new Queue(options.threads);
+	      _fn = function(model) {
+	        return queue.defer(function(callback) {
+	          return iterator(model, callback);
+	        });
+	      };
+	      for (_i = 0, _len = models.length; _i < _len; _i++) {
+	        model = models[_i];
+	        if (processed_count++ >= model_limit) {
+	          break;
+	        }
+	        _fn(model);
+	      }
+	      return queue.await(function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
+	          return callback(null, processed_count);
+	        }
+	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
+	        return runBatch();
+	      });
+	    });
+	  };
+	  return runBatch();
+	};
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	 */
+	var DateUtils, INTERVAL_TYPES, Queue, Utils, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(9);
+
+	Utils = __webpack_require__(6);
+
+	DateUtils = __webpack_require__(8);
+
+	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var iteration_info, key, no_models, options, queue, range;
+	  options = query.$interval || {};
+	  if (!(key = options.key)) {
+	    throw new Error('missing option: key');
+	  }
+	  if (!options.type) {
+	    throw new Error('missing option: type');
+	  }
+	  if (!_.contains(INTERVAL_TYPES, options.type)) {
+	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
+	  }
+	  iteration_info = _.clone(options);
+	  if (!iteration_info.range) {
+	    iteration_info.range = {};
+	  }
+	  range = iteration_info.range;
+	  no_models = false;
+	  queue = new Queue(1);
+	  queue.defer(function(callback) {
+	    var start;
+	    if (!(start = range.$gte || range.$gt)) {
+	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.start = iteration_info.first = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.start = start;
+	      return model_type.findOneNearestDate(start, {
+	        key: key,
+	        reverse: true
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.first = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  queue.defer(function(callback) {
+	    var end;
+	    if (no_models) {
+	      return callback();
+	    }
+	    if (!(end = range.$lte || range.$lt)) {
+	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.end = iteration_info.last = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.end = end;
+	      return model_type.findOneNearestDate(end, {
+	        key: key
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.last = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  return queue.await(function(err) {
+	    var length_ms, processed_count, runInterval, start_ms;
+	    if (err) {
+	      return callback(err);
+	    }
+	    if (no_models) {
+	      return callback();
+	    }
+	    start_ms = range.start.getTime();
+	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
+	    if (!length_ms) {
+	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
+	    }
+	    query = _.omit(query, '$interval');
+	    query.$sort = [key];
+	    processed_count = 0;
+	    iteration_info.index = 0;
+	    runInterval = function(current) {
+	      if (DateUtils.isAfter(current, range.end)) {
+	        return callback();
+	      }
+	      query[key] = {
+	        $gte: current,
+	        $lte: iteration_info.last
+	      };
+	      return model_type.findOne(query, function(err, model) {
+	        var next;
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          return callback();
+	        }
+	        next = model.get(key);
+	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
+	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
+	        iteration_info.start = current;
+	        next = new Date(current.getTime() + length_ms);
+	        iteration_info.end = next;
+	        query[key] = {
+	          $gte: current,
+	          $lt: next
+	        };
+	        return iterator(query, iteration_info, function(err) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          return runInterval(next);
+	        });
+	      });
+	    };
+	    return runInterval(range.start);
+	  });
+	};
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	 */
+	var Backbone, Utils, collection_type, fn, key, overrides, _;
+
+	_ = __webpack_require__(1);
+
+	Backbone = __webpack_require__(2);
+
+	Utils = __webpack_require__(6);
+
+	collection_type = Backbone.Collection;
+
+	overrides = {
+	  fetch: function(options) {
+	    var callback;
+	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
+	      switch (arguments.length) {
+	        case 1:
+	          options = Utils.wrapOptions({}, callback);
+	          break;
+	        case 2:
+	          options = Utils.wrapOptions(options, callback);
+	      }
+	    }
+	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
+	      return function(err, model, resp, options) {
+	        if (err) {
+	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
+	        }
+	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
+	      };
+	    })(this)));
+	  },
+	  _prepareModel: function(attrs, options) {
+	    var id, is_new, model;
+	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
+	      if (this.model.cache) {
+	        is_new = !!this.model.cache.get(id);
+	      }
+	      model = Utils.updateOrNew(attrs, this.model);
+	      if (is_new && !model._validate(attrs, options)) {
+	        this.trigger('invalid', this, attrs, options);
+	        return false;
+	      }
+	      return model;
+	    }
+	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
+	  }
+	};
+
+	if (!collection_type.prototype._orm_original_fns) {
+	  collection_type.prototype._orm_original_fns = {};
+	  for (key in overrides) {
+	    fn = overrides[key];
+	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
+	    collection_type.prototype[key] = fn;
+	  }
+	}
 
 
 /***/ },
