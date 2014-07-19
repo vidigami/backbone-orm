@@ -20,7 +20,7 @@ _.each option_sets, exports = (options) ->
     Flat = Reverse = ForeignReverse = Owner = null
 
     before ->
-      BackboneORM.configure {naming_convention: 'camelize'}
+      BackboneORM.configure {naming_conventions: 'camelize'}
 
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"
