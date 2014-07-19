@@ -48,15 +48,16 @@ module.exports = class ModelCache
   # @nodoc
   createCache: (model_type) ->
     throw new Error "Missing model name for cache" unless model_name = model_type?.model_name
+    cuid = model_type.cuid or= _.uniqueId('cuid')
 
     # delete old cache
-    if cache_info = @caches[model_name]
-      delete @caches[model_name]; cache_info.cache.reset(); cache_info.model_type.cache = null
+    if cache_info = @caches[cuid]
+      delete @caches[cuid]; cache_info.cache.reset(); cache_info.model_type.cache = null
     return null unless @enabled
 
     # there are options meaning a cache should be created
     unless options = @options.modelTypes[model_name]
       return null unless (@options.store or @options.max or @options.max_age) # no options so no cache
       options = @options
-    cache_info = @caches[model_name] = {cache: options.store?() or new MemoryStore(options), model_type: model_type}
+    cache_info = @caches[cuid] = {cache: options.store?() or new MemoryStore(options), model_type: model_type}
     return model_type.cache = cache_info.cache
