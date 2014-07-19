@@ -14,7 +14,7 @@ _.each option_sets, exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at']
+  OMIT_KEYS = ['owner_id', '_rev', 'created_at', 'updated_at', 'is_base']
 
   describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
     Reverse = Owner = null
