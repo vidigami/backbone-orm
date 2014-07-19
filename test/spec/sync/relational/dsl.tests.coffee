@@ -6,8 +6,8 @@ BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') 
 option_sets = window?.__test__option_sets or require?('../../../option_sets')
 parameters = __test__parameters if __test__parameters?
 _.each option_sets, exports = (options) ->
-  return if options.embed and not options.sync.capabilities.embed
   options = _.extend({}, options, parameters) if parameters
+  return if options.embed and not options.sync.capabilities.embed
 
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
