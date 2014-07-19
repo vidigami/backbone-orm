@@ -28,7 +28,7 @@ module.exports = (callback) ->
       .pipe(gulp.dest('_temp'))
       .on('end', callback)
 
-  unless process.argv[2].indexOf('quick') >= 0 # not quick
+  unless process.argv[2].indexOf?('quick') >= 0 # not quick
 
     # install backbone-orm
     queue.defer (callback) ->
