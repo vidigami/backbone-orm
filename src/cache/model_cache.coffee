@@ -28,7 +28,7 @@ module.exports = class ModelCache
   #   max_age/maxAge: default maximum number of items or max size of the cache
   #   model_types/modelTypes: {'ModelName': options}
   #
-  configure: (options={}, callback) ->
+  configure: (options={}) ->
     @enabled = options.enabled
     for key, value of options
       if _.isObject(value)
@@ -37,15 +37,13 @@ module.exports = class ModelCache
         values[value_key] = value_value for value_key, value_value of value
       else
         @options[key] = value
-    @reset callback
+    @reset()
 
   configureSync: (model_type, sync_fn) ->
     return sync_fn if model_type::_orm_never_cache or not @createCache(model_type)
     return require('./sync')(model_type, sync_fn)
 
-  reset: (callback) ->
-    @createCache(value.model_type) for key, value of @caches
-    callback?()
+  reset: -> @createCache(value.model_type) for key, value of @caches
 
   # @nodoc
   createCache: (model_type) ->

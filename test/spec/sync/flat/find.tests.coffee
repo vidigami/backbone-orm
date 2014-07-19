@@ -29,16 +29,13 @@ _.each option_sets, exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(Flat)
 
-    after (callback) ->
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
-      queue.await callback
+    after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> Flat = null
 
     beforeEach (callback) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')

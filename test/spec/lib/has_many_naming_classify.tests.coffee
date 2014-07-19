@@ -54,20 +54,17 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       BackboneORM.configure({naming_conventions: 'default'})
-
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
-      queue.await callback
+      Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> Flat = Reverse = ForeignReverse = Owner = null
 
     beforeEach (callback) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       relation = Owner.relation('Reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat, Reverse, ForeignReverse, Owner], callback
       queue.defer (callback) ->
         create_queue = new Queue()

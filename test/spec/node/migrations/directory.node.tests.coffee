@@ -38,18 +38,16 @@ _.each option_sets, exports = (options) ->
   describe "Node: Many to Many with resetSchemasByDirectory #{options.$parameter_tags or ''}#{options.$tags}", ->
 
     after (callback) ->
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
-      queue.await callback
+      NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), (err) -> BackboneORM.model_cache.reset(); callback(err)
 
     beforeEach (callback) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       relation = Owner.relation('reverses')
       delete relation.virtual
       MODELS = {}
 
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> NodeUtils.resetSchemasByDirectory path.join(__dirname, 'directory'), callback
       queue.defer (callback) ->
         create_queue = new Queue()

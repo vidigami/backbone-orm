@@ -32,16 +32,13 @@ _.each option_sets, exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(SecondModel)
 
-    after (callback) ->
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
-      queue.await callback
+    after (callback) -> Utils.resetSchemas [FirstModel, SecondModel], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> FirstModel = SecondModel = null
 
     beforeEach (done) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [FirstModel, SecondModel], callback
       queue.defer (callback) ->
         models = []

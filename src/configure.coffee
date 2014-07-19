@@ -11,11 +11,11 @@ ALL_CONVENTIONS =
 BackboneORM.naming_conventions = ALL_CONVENTIONS.default
 BackboneORM.model_cache = new (require('./cache/model_cache'))()
 
-module.exports = configure = (options={}, callback) ->
+module.exports = configure = (options={}) ->
   for key, value of options
     switch key
       when 'model_cache'
-        BackboneORM.model_cache.configure(options.model_cache, callback)
+        BackboneORM.model_cache.configure(options.model_cache)
 
       when 'naming_conventions'
         # set by name

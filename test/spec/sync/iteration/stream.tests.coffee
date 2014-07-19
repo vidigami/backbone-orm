@@ -43,17 +43,13 @@ _.each option_sets, exports = (options) ->
         .on('finish', -> assert.equal(counter.count, expected); done())
         .on('error', done)
 
-    after (callback) ->
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Flat], callback
-      queue.defer (callback) -> Flat = Counter = Filter = null; callback()
-      queue.await callback
+    after (callback) -> Utils.resetSchemas [Flat], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> Flat = Counter = Filter = null
 
     beforeEach (callback) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Flat], callback
       queue.defer (callback) -> Fabricator.create(Flat, BASE_COUNT, {
         name: Fabricator.uniqueId('flat_')

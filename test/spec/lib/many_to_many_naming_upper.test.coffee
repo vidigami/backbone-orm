@@ -43,18 +43,15 @@ _.each option_sets, exports = (options) ->
 
     after (callback) ->
       BackboneORM.configure({naming_conventions: 'default'})
-
-      queue = new Queue()
-      queue.defer (callback) -> BackboneORM.model_cache.reset(callback)
-      queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
-      queue.await callback
+      Utils.resetSchemas [Reverse, Owner], (err) -> BackboneORM.model_cache.reset(); callback(err)
     after -> Reverse = Owner = null
 
     beforeEach (callback) ->
+      BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}})
+
       MODELS = {}
 
       queue = new Queue(1)
-      queue.defer (callback) -> BackboneORM.configure({model_cache: {enabled: !!options.cache, max: 100}}, callback)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
       queue.defer (callback) ->
         create_queue = new Queue()
