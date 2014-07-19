@@ -10,11 +10,11 @@ Backbone = require 'backbone'
 _ = require 'underscore'
 
 BackboneORM = require '../core'
-Queue = require '../queue'
-Utils = require '../utils'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
 
 # @nodoc
-module.exports = class Many extends require('./relation')
+module.exports = class Many extends (require './relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
     @virtual_id_accessor or= BackboneORM.naming_conventions.foreignKey(@key, true)

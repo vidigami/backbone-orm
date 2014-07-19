@@ -6,6 +6,6 @@
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-MemoryStore = require './cache/memory_store'
+MemoryStore = require '../cache/memory_store'
 
 module.exports = new MemoryStore({destroy: (url, connection) -> connection.destroy()})

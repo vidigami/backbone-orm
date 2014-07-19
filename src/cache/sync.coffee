@@ -9,8 +9,8 @@
 _ = require 'underscore'
 
 CacheCursor = require './cursor'
-Schema = require '../schema'
-Utils = require '../utils'
+Schema = require '../lib/schema'
+Utils = require '../lib/utils'
 bbCallback = Utils.bbCallback
 
 DESTROY_BATCH_LIMIT = 1000

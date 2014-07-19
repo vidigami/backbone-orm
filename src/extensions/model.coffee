@@ -8,14 +8,14 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../queue'
 
-Utils = require '../utils'
-ModelStream = require('./model_stream')
-modelEach = require('./model_each')
-modelInterval = require('./model_interval')
-DatabaseURL = require('../database_url')
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
+DatabaseURL = require '../lib/database_url'
 
+ModelStream = require './model_stream'
+modelEach = require './model_each'
+modelInterval = require './model_interval'
 require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->

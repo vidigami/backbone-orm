@@ -24,7 +24,7 @@ HEADER = """
 gulp.task 'build', buildLibraries = (callback) ->
   gulp.src('config/builds/library/**/*.webpack.config.coffee', {read: false, buffer: false})
     .pipe(webpack())
-    .pipe(header(HEADER, {pkg: require('./package.json')}))
+    .pipe(header(HEADER, {pkg: require './package.json'}))
     .pipe(gulp.dest((file) -> file.base))
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
@@ -37,7 +37,7 @@ gulp.task 'minify', ['build'], (callback) ->
   gulp.src(['*.js', '!*.min.js', '!_temp/**/*.js', '!node_modules/'])
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
-    .pipe(header(HEADER, {pkg: require('./package.json')}))
+    .pipe(header(HEADER, {pkg: require './package.json'}))
     .pipe(gulp.dest((file) -> file.base))
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455

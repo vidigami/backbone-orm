@@ -9,7 +9,7 @@
 _ = require 'underscore'
 URL = require 'url'
 
-BackboneORM = require './core'
+BackboneORM = require '../core'
 
 SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href']
 

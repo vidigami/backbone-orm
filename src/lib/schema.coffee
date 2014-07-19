@@ -9,9 +9,9 @@
 _ = require 'underscore'
 Backbone = require 'backbone'
 
-BackboneORM = require './core'
-One = require './relations/one'
-Many = require './relations/many'
+BackboneORM = require '../core'
+One = require '../relations/one'
+Many = require '../relations/many'
 DatabaseURL = require './database_url'
 Utils = require './utils'
 

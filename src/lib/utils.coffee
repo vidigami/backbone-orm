@@ -10,7 +10,7 @@ URL = require 'url'
 Backbone = require 'backbone'
 _ = require 'underscore'
 
-BackboneORM = require './core'
+BackboneORM = require '../core'
 DatabaseURL = require './database_url'
 Queue = require './queue'
 JSONUtils = require './json_utils'
@@ -118,7 +118,7 @@ module.exports = class Utils
 
   # @nodoc
   @configureModelType: (type) ->
-    modelExtensions = require('./extensions/model') unless modelExtensions # break dependency cycle
+    modelExtensions or= require '../extensions/model' # break dependency cycle
     modelExtensions(type)
 
   # @nodoc

@@ -7,7 +7,7 @@
 ###
 
 _ = require 'underscore'
-Queue = require '../queue'
+Queue = require '../lib/queue'
 Cursor = null
 
 module.exports = (model_type, query, iterator, callback) ->

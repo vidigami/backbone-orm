@@ -8,10 +8,9 @@
 
 Backbone = require 'backbone'
 _ = require 'underscore'
-Queue = require '../queue'
+Queue = require '../lib/queue'
 
 MemoryStore = require './memory_store'
-MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy']
 
 module.exports = class ModelCache
   constructor: ->
@@ -41,7 +40,7 @@ module.exports = class ModelCache
 
   configureSync: (model_type, sync_fn) ->
     return sync_fn if model_type::_orm_never_cache or not @createCache(model_type)
-    return require('./sync')(model_type, sync_fn)
+    return (require './sync')(model_type, sync_fn)
 
   reset: -> @createCache(value.model_type) for key, value of @caches
 

@@ -8,7 +8,7 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-Utils = require '../utils'
+Utils = require '../lib/utils'
 
 collection_type = Backbone.Collection
 

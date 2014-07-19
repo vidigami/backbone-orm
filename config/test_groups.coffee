@@ -64,5 +64,5 @@ for file in FILES.tests_webpack
 # Browserify
 ###############################
 TEST_GROUPS.browserify = []
-for test_name, test_info of require('./browserify/tests')
+for test_name, test_info of require './browserify/tests')
   TEST_GROUPS.browserify.push({name: "browserify_#{test_name}", files: [test_info.output], build: {destination: test_info.output, options: test_info.options, files: test_info.files}})

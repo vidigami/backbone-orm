@@ -8,20 +8,20 @@
 
 module.exports = BackboneORM = require './core' # avoid circular dependencies
 publish =
-  configure: require './configure'
-  sync: require './memory/sync'
+  configure: require './lib/configure'
+  sync: require './sync'
 
-  Utils: require './utils'
-  JSONUtils: require './json_utils'
-  DateUtils: require './date_utils'
-  Queue: require './queue'
-  DatabaseURL: require './database_url'
-  Fabricator: require './fabricator'
+  Utils: require './lib/utils'
+  JSONUtils: require './lib/json_utils'
+  DateUtils: require './lib/date_utils'
+  Queue: require './lib/queue'
+  DatabaseURL: require './lib/database_url'
+  Fabricator: require './lib/fabricator'
   MemoryStore: require './cache/memory_store'
 
-  Cursor: require './cursor'
-  Schema: require './schema'
-  ConnectionPool: require './connection_pool'
+  Cursor: require './lib/cursor'
+  Schema: require './lib/schema'
+  ConnectionPool: require './lib/connection_pool'
   BaseConvention: require './conventions/base'
 
   _: require 'underscore'

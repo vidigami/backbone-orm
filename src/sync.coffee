@@ -8,17 +8,17 @@
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-Queue = require '../queue'
 
-BackboneORM = require '../core'
+BackboneORM = require './core'
+Queue = require './lib/queue'
 MemoryCursor = require './cursor'
-Schema = require '../schema'
-Utils = require '../utils'
-JSONUtils = require '../json_utils'
+Schema = require './lib/schema'
+Utils = require './lib/utils'
+JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
 
-CAPABILITIES = {self_reference: true, embed: true}
+CAPABILITIES = {embed: true, json: true, self_reference: true}
 
 # Backbone Sync for in-memory models.
 #
@@ -80,9 +80,6 @@ class MemorySync
   # Backbone ORM - Class Extensions
   ###################################
 
-  # @no_doc
-  capabilities: -> CAPABILITIES
-
   # @nodoc
   resetSchema: (options, callback) -> @destroy({}, callback)
 
@@ -120,4 +117,4 @@ module.exports = (type) ->
 
 module.exports.Sync = MemorySync
 module.exports.Cursor = MemoryCursor
-module.exports.capabilities = CAPABILITIES
+module.exports.capabilities = (url) -> CAPABILITIES

@@ -2,7 +2,7 @@ path = require 'path'
 _ = require 'underscore'
 Queue = require 'queue-async'
 Wrench = require 'wrench'
-karma = require('karma').server
+karma = require 'karma').server
 gutil = require 'gulp-util'
 generate = require './generate'
 

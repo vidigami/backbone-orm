@@ -10,8 +10,8 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 
 BackboneORM = require '../core'
-Queue = require '../queue'
-Utils = require '../utils'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
 
 # @nodoc
 module.exports = class Relation

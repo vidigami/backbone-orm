@@ -8,9 +8,9 @@
 
 _ = require 'underscore'
 
-Queue = require '../queue'
-Utils = require '../utils'
-DateUtils = require '../date_utils'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
+DateUtils = require '../lib/date_utils'
 
 INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
 
