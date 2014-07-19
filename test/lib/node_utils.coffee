@@ -12,8 +12,7 @@ _ = require 'underscore'
 Backbone = require 'backbone'
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../backbone-orm')
-Queue = BackboneORM.Queue
-Utils = BackboneORM.Utils
+{Queue, Utils} = BackboneORM
 
 # @private
 module.exports = class NodeUtils

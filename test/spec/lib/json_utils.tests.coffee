@@ -1,8 +1,7 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
-_ = BackboneORM._
-JSONUtils = BackboneORM.JSONUtils
+{_, JSONUtils} = BackboneORM
 
 VALUES =
   date: new Date()

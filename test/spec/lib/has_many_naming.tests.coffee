@@ -1,11 +1,7 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
-_ = BackboneORM._; Backbone = BackboneORM.Backbone
-Queue = BackboneORM.Queue
-Utils = BackboneORM.Utils
-JSONUtils = BackboneORM.JSONUtils
-Fabricator = BackboneORM.Fabricator
+{_, Backbone, Queue, Utils, JSONUtils, Fabricator} = BackboneORM
 
 option_sets = window?.__test__option_sets or require?('../../option_sets')
 parameters = __test__parameters if __test__parameters?

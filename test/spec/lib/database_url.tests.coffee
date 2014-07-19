@@ -1,8 +1,7 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
-_ = BackboneORM._
-DatabaseURL = BackboneORM.DatabaseURL
+{_, DatabaseURL} = BackboneORM
 
 describe 'DatabaseURL', ->
   it 'parses url (unparsed query)', (done) ->

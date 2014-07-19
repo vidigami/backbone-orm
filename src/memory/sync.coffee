@@ -23,12 +23,12 @@ DESTROY_BATCH_LIMIT = 1000
 # @example How to configure using a model name
 #   class Thing extends Backbone.Model
 #     model_name: 'Thing'
-#     sync: require('backbone-orm').sync(Thing)
+#     sync: require 'backbone-orm'.sync(Thing)
 #
 # @example How to configure using a url
 #   class Thing extends Backbone.Model
 #     url: '/things'
-#     sync: require('backbone-orm').sync(Thing)
+#     sync: require 'backbone-orm'.sync(Thing)
 #
 class MemorySync
   # @nodoc

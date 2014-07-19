@@ -1,10 +1,7 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
-_ = BackboneORM._; Backbone = BackboneORM.Backbone
-Queue = BackboneORM.Queue
-Utils = BackboneORM.Utils
-Fabricator = BackboneORM.Fabricator
+{_, Backbone, Queue, Utils, Fabricator} = BackboneORM
 
 try WritableStream = require('stream').Writable; TransformStream = require('stream').Transform
 

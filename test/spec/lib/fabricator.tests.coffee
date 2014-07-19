@@ -1,10 +1,7 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
-_ = BackboneORM._; Backbone = BackboneORM.Backbone
-Utils = BackboneORM.Utils
-JSONUtils = BackboneORM.JSONUtils
-Fabricator = BackboneORM.Fabricator
+{_, Backbone, Queue, Utils, JSONUtils, Fabricator} = BackboneORM
 
 describe 'Fabricator', ->
   describe 'value', ->

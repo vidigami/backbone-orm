@@ -24,8 +24,9 @@
 assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
-_ = BackboneORM._
-url = BackboneORM.modules.url
+{_} = BackboneORM
+{url} = BackboneORM.modules
+
 NORMALIZE = (url_parts) => return _.omit(url_parts, 'parse', 'format', 'resolve', 'resolveObject', 'parseHost')
 
 # URLs to parse, and expected data
