@@ -17,7 +17,7 @@ OPTION_KEYS = _.without(_.keys(ARG_OPTIONS), 'all', 'none')
 
 options = {}
 if process?
-  if process.argv[2].indexOf?('quick') >= 0 # quick
+  if process.argv[2]?.indexOf?('quick') >= 0 # quick
     options.none = true
   else
     args = process.argv.slice(2)
