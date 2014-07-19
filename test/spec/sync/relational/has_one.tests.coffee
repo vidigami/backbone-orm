@@ -1080,7 +1080,7 @@ _.each option_sets, exports = (options) ->
 
                 # TODO: determine reason on SQL for updated_at missing
                 # assert.deepEqual(reverse1.toJSON(), reverse0b.toJSON(), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(reverse1.toJSON())}.\nActual: #{JSONUtils.stringify(reverse0b.toJSON())}")
-                assert.deepEqual(_.pick(reverse1.toJSON(), 'updated_at', 'created_at'), _.pick(reverse0b.toJSON(), 'updated_at', 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.pick(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.pick(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
+                assert.deepEqual(_.pick(reverse1.toJSON(), 'created_at'), _.pick(reverse0b.toJSON(), 'created_at'), "Reverse is cleared.\nExpected: #{JSONUtils.stringify(_.pick(reverse1.toJSON(), 'updated_at', 'created_at'))}.\nActual: #{JSONUtils.stringify(_.pick(reverse0b.toJSON(), 'updated_at', 'created_at'))}")
 
                 assert.equal(null, owner1.get('reverse'), "Owner's reverse is cleared.\nExpected: #{null}.\nActual: #{JSONUtils.stringify(owner1.get('reverse'))}")
               callback()

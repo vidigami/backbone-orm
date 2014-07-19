@@ -186,7 +186,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS), _.pick(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(shared_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related json (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -240,7 +240,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS), _.pick(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(shared_reverse_json, PICK_KEYS))}")
                     done()
 
       it "Can manually add a relationship by related model (hasMany)#{if unload then ' with unloaded model' else ''}", (done) ->
@@ -296,7 +296,7 @@ _.each option_sets, exports = (options) ->
                     assert.ok(_.contains(updated_reverse_ids, shared_reverse_id), "Moved the reverse_id")
                     updated_shared_reverse = updated_reverses[_.indexOf(updated_reverse_ids, shared_reverse_id)]
 
-                    assert.ok(_.isEqual(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS), _.omit(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.omit(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.omit(shared_reverse_json, PICK_KEYS))}")
+                    assert.ok(_.isEqual(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS), _.pick(shared_reverse_json, PICK_KEYS)), "Set the id:. Expected: #{JSONUtils.stringify(_.pick(updated_shared_reverse.toJSON(), PICK_KEYS))}. Actual: #{JSONUtils.stringify(_.pick(shared_reverse_json, PICK_KEYS))}")
                     done()
 
     patchAddTests(false)
