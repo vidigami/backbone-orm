@@ -22,3 +22,13 @@ var JSONUtils = require('backbone-orm').JSONUtils;
 # or (CoffeeScript)
 {JSONUtils} = require 'backbone-orm'
 ```
+
+3. JSONUtils.parse no longer coerces all values to integers. Pass a specific model to infer correctly the field type.
+
+```
+# change
+var parsed_query = JSONUtils.parse(req.query);
+
+# to
+var parsed_query = JSONUtils.parse(req.query, model_type);
+```
