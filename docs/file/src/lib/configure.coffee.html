@@ -3,9 +3,9 @@
   <head>
   <meta charset='UTF-8'>
   <title>CoffeeScript API Documentation</title>
-  <script src='../../javascript/application.js'></script>
-  <script src='../../javascript/search.js'></script>
-  <link rel='stylesheet' href='../../stylesheets/application.css' type='text/css'>
+  <script src='../../../javascript/application.js'></script>
+  <script src='../../../javascript/search.js'></script>
+  <link rel='stylesheet' href='../../../stylesheets/application.css' type='text/css'>
   <script>
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'undefined']);
@@ -19,57 +19,92 @@
   </script>
 </head>
   <body>
-    <div id='base' data-path='../../'></div>
+    <div id='base' data-path='../../../'></div>
 <div id='header'>
   <div id='menu'>
-    <a href='../../extra/README.md.html' title='BackboneORM'>
+    <a href='../../../extra/README.md.html' title='BackboneORM'>
       BackboneORM
     </a>
     &raquo;
-    <a href='../../alphabetical_index.html' title='Index'>
+    <a href='../../../alphabetical_index.html' title='Index'>
       Index
     </a>
     &raquo;
     <span class='title'>src</span>
     &raquo;
-    <span class='title'>database_url.coffee</span>
+    <span class='title'>lib</span>
+    &raquo;
+    <span class='title'>configure.coffee</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         File:
-        database_url.coffee
+        configure.coffee
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src</td>
-        </tr>
-        <tr>
-          <td>
-            Classes:
-          </td>
-          <td>
-            <a href='../../class/DatabaseURL.html'>
-              DatabaseURL
-            </a>
-          </td>
+          <td>src&#47;lib</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='SUPPORTED_KEYS-variable'>
-    SUPPORTED_KEYS
+  <dt id='ALL_CONVENTIONS-variable'>
+    ALL_CONVENTIONS
     =
   </dt>
   <dd>
-    <pre><code class='coffeescript'>[&#39;protocol&#39;, &#39;slashes&#39;, &#39;auth&#39;, &#39;host&#39;, &#39;hostname&#39;, &#39;port&#39;, &#39;search&#39;, &#39;query&#39;, &#39;hash&#39;, &#39;href&#39;]</code></pre>
+    <pre><code class='coffeescript'>{
+  &quot;default&quot;: require(&#39;..&#47;conventions&#47;underscore&#39;),
+  underscore: require(&#39;..&#47;conventions&#47;underscore&#39;),
+  camelize: require(&#39;..&#47;conventions&#47;camelize&#39;),
+  classify: require(&#39;..&#47;conventions&#47;classify&#39;)
+}</code></pre>
     
   </dd>
+  <dt id='BackboneORM.naming_conventions-variable'>
+    BackboneORM.naming_conventions
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>ALL_CONVENTIONS</code></pre>
+    <div class='docstring'>
+  <p>set up defaults</p>
+</div>
+<div class='tags'>
+</div>
+  </dd>
 </dl>
+      <h2>Method Summary</h2>
+      <ul class='summary'>
+  <li>
+    <span class='signature'>
+      <a href='#configure-'>
+        ~
+(void)
+<b>configure</b><span>(options = {})</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+</ul>
+      <h2>Method Details</h2>
+      <div class='methods'>
+  <div class='method_details'>
+    <p class='signature' id='configure-'>
+      ~
+(void)
+<b>configure</b><span>(options = {})</span>
+      <br>
+    </p>
+    
+  </div>
+</div>
     </div>
     <div id='footer'>
-  May 31, 14 18:48:47 by
+  July 19, 14 22:44:54 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>

@@ -50,34 +50,88 @@
             Classes:
           </td>
           <td>
-            <a href='../../class/Cursor.html'>
-              Cursor
+            <a href='../../class/MemoryCursor.html'>
+              MemoryCursor
             </a>
           </td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='QueryCache-variable'>
-    QueryCache
+  <dt id='IS_MATCH_FNS-variable'>
+    IS_MATCH_FNS
     =
   </dt>
   <dd>
-    <pre><code class='coffeescript'>require(&#39;.&#47;cache&#47;singletons&#39;)</code></pre>
-    
-  </dd>
-  <dt id='CURSOR_KEYS-variable'>
-    CURSOR_KEYS
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[&#39;$count&#39;, &#39;$exists&#39;, &#39;$zero&#39;, &#39;$one&#39;, &#39;$offset&#39;, &#39;$limit&#39;, &#39;$page&#39;, &#39;$sort&#39;, &#39;$white_list&#39;, &#39;$select&#39;, &#39;$include&#39;, &#39;$values&#39;, &#39;$ids&#39;, &#39;$or&#39;]</code></pre>
+    <pre><code class='coffeescript'>{
+  $ne: function(mv, tv) {
+    return !_.isEqual(mv, tv);
+  },
+  $lt: function(mv, tv) {
+    if (_.isNull(tv)) {
+      throw Error(&#39;Cannot compare to null&#39;);
+    }
+    return (_.isDate(tv) ? DateUtils.isBefore(mv, tv) : mv &lt; tv);
+  },
+  $lte: function(mv, tv) {
+    if (_.isNull(tv)) {
+      throw Error(&#39;Cannot compare to null&#39;);
+    }
+    if (_.isDate(tv)) {
+      return !DateUtils.isAfter(mv, tv);
+    } else {
+      return mv &lt;= tv;
+    }
+  },
+  $gt: function(mv, tv) {
+    if (_.isNull(tv)) {
+      throw Error(&#39;Cannot compare to null&#39;);
+    }
+    return (_.isDate(tv) ? DateUtils.isAfter(mv, tv) : mv &gt; tv);
+  },
+  $gte: function(mv, tv) {
+    if (_.isNull(tv)) {
+      throw Error(&#39;Cannot compare to null&#39;);
+    }
+    if (_.isDate(tv)) {
+      return !DateUtils.isBefore(mv, tv);
+    } else {
+      return mv &gt;= tv;
+    }
+  }
+}</code></pre>
     
   </dd>
 </dl>
+      <h2>Method Summary</h2>
+      <ul class='summary'>
+  <li>
+    <span class='signature'>
+      <a href='#mergeQuery-'>
+        ~
+(void)
+<b>mergeQuery</b><span>(query, key, value)</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+</ul>
+      <h2>Method Details</h2>
+      <div class='methods'>
+  <div class='method_details'>
+    <p class='signature' id='mergeQuery-'>
+      ~
+(void)
+<b>mergeQuery</b><span>(query, key, value)</span>
+      <br>
+    </p>
+    
+  </div>
+</div>
     </div>
     <div id='footer'>
-  May 31, 14 18:48:47 by
+  July 19, 14 22:44:54 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>

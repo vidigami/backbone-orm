@@ -8,12 +8,11 @@
     <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
     <div class="row example coffeescript">
       <pre><code class="language-coffeescript"># configure replicaset globally
-_.extend(require('backbone-mongo').connection_options, {
+require('backbone-mongo').configure {
   retryMiliSeconds: 1000
   numberOfRetries: 2*60
   autoReconnect: true
-  readPreference: require('mongodb').ReadPreference.NEAREST
-})
+}
 
 # set journalling for a specific model
 class Task extends Backbone.Model

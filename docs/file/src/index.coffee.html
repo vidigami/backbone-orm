@@ -48,41 +48,53 @@
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='module.exports-variable'>
-    module.exports
+  <dt id='publish-variable'>
+    publish
     =
   </dt>
   <dd>
     <pre><code class='coffeescript'>{
-  sync: require(&#39;.&#47;memory&#47;sync&#39;),
-  Utils: require(&#39;.&#47;utils&#39;),
-  JSONUtils: require(&#39;.&#47;json_utils&#39;),
-  Queue: require(&#39;.&#47;queue&#39;),
-  DatabaseURL: require(&#39;.&#47;database_url&#39;),
-
-  &#47;*
-  re-expose modules
-   *&#47;
-  modules: {
-    url: require(&#39;url&#39;),
-    querystring: require(&#39;querystring&#39;),
-    &#39;lru-cache&#39;: require(&#39;lru-cache&#39;),
-    underscore: require(&#39;underscore&#39;),
-    backbone: require(&#39;backbone&#39;),
-    moment: require(&#39;moment&#39;),
-    inflection: require(&#39;inflection&#39;)
-  },
-  Cursor: require(&#39;.&#47;cursor&#39;),
-  Schema: require(&#39;.&#47;schema&#39;),
-  ConnectionPool: require(&#39;.&#47;connection_pool&#39;),
-  CacheSingletons: require(&#39;.&#47;cache&#47;singletons&#39;)
+  configure: require(&#39;.&#47;lib&#47;configure&#39;),
+  sync: require(&#39;.&#47;sync&#39;),
+  Utils: require(&#39;.&#47;lib&#47;utils&#39;),
+  JSONUtils: require(&#39;.&#47;lib&#47;json_utils&#39;),
+  DateUtils: require(&#39;.&#47;lib&#47;date_utils&#39;),
+  Queue: require(&#39;.&#47;lib&#47;queue&#39;),
+  DatabaseURL: require(&#39;.&#47;lib&#47;database_url&#39;),
+  Fabricator: require(&#39;.&#47;lib&#47;fabricator&#39;),
+  MemoryStore: require(&#39;.&#47;cache&#47;memory_store&#39;),
+  Cursor: require(&#39;.&#47;lib&#47;cursor&#39;),
+  Schema: require(&#39;.&#47;lib&#47;schema&#39;),
+  ConnectionPool: require(&#39;.&#47;lib&#47;connection_pool&#39;),
+  BaseConvention: require(&#39;.&#47;conventions&#47;base&#39;),
+  _: require(&#39;underscore&#39;),
+  Backbone: require(&#39;backbone&#39;)
 }</code></pre>
     
+  </dd>
+  <dt id='BackboneORM.modules-variable'>
+    BackboneORM.modules
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>{
+  underscore: require(&#39;underscore&#39;),
+  backbone: require(&#39;backbone&#39;),
+  url: require(&#39;url&#39;),
+  querystring: require(&#39;querystring&#39;),
+  &#39;lru-cache&#39;: require(&#39;lru-cache&#39;),
+  inflection: require(&#39;inflection&#39;)
+}</code></pre>
+    <div class='docstring'>
+  <p>re-expose modules</p>
+</div>
+<div class='tags'>
+</div>
   </dd>
 </dl>
     </div>
     <div id='footer'>
-  May 31, 14 18:48:47 by
+  July 19, 14 22:44:54 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
