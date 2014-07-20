@@ -21,12 +21,12 @@
     "node": "*"
   },
   "scripts": {
-    "test": "gulp test --require coffee-script/register",
-    "test-quick": "gulp test-node-quick --require coffee-script/register",
+    "test": "gulp test",
+    "test-quick": "gulp test-node-quick",
     "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
-    "build": "gulp build --require coffee-script/register",
-    "watch": "gulp watch --require coffee-script/register",
-    "release": "gulp release --require coffee-script/register"
+    "build": "gulp build",
+    "watch": "gulp watch",
+    "release": "gulp release"
   },
   "devDependencies": {
     "async": "*",
