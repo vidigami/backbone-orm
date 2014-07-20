@@ -1,14 +1,7 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
-<<<<<<< HEAD
-### 0.5.18
-* Fixed exists bug
-
-### 0.5.17
-* Fixed module system problems
-=======
 ### 0.6.0
-* See [upgrade notes](https://github.com/vidigami/backbone-orm/blob/master/UPGRADING.md) for upgrading pointers from 0.5.0.
+* See [upgrade notes](https://github.com/vidigami/backbone-orm/blob/master/UPGRADING.md) for upgrading pointers from 0.5.x
 * BREAKING: Removed QueryCache
 * BREAKING: Moved model cache to set configured using BackboneORM.configure({model_cache: options})
 * BREAKING: Deprecated Utils.inspect and moved to JSONUtils.stringify
@@ -22,7 +15,12 @@ Please refer to the following release notes when upgrading your version of Backb
 * Added type() and idType() to Schema API to check types of attributes
 * Added configurable naming_conventions: 'underscore', 'camelize', 'classify'. Configure using BackboneORM.configure({naming_conventions: 'camelize'})
 * Added base conventions for easing overrides: BackboneORM.BaseConvention. To roll your own: monkey patch it, derive from it, refer to it from your own conventions, etc.
->>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
+
+### 0.5.18
+* Fixed exists bug
+
+### 0.5.17
+* Fixed module system problems
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels
