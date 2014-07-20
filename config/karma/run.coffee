@@ -19,6 +19,7 @@ module.exports = (callback) ->
     for test in tests
       do (test) -> queue.defer (callback) ->
         gutil.log "RUNNING TESTS: #{test.name}"
+        gutil.log "#{JSON.stringify test.files}"
         # karma.start _.defaults({client: {mocha: {grep: '@no_cache'}}, files: test.files}, BASE_CONFIG), (return_value) -> callback(new Error "Tests failed: #{return_value}" if return_value)
         karma.start _.defaults({client: {mocha: {grep: ''}}, files: test.files}, BASE_CONFIG), (return_value) -> callback(new Error "Tests failed: #{return_value}" if return_value)
 
