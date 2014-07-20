@@ -29,6 +29,8 @@ module.exports = class MemoryStore
     @cache.del(key)
     callback?()
     return @
+
+  # @nodoc
   del: @::destroy
 
   reset: (callback) =>
