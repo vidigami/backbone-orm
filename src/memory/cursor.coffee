@@ -1,43 +1,45 @@
 ###
-<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-=======
-  backbone-orm.js 0.6.0
-  Copyright (c) 2013-2014 Vidigami
->>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
-  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 _ = require 'underscore'
+moment = require 'moment'
+inflection = require 'inflection'
 
-Queue = require './lib/queue'
-Utils = require './lib/utils'
-JSONUtils = require './lib/json_utils'
-DateUtils = require './lib/date_utils'
-Cursor = require './lib/cursor'
+Queue = require '../queue'
+Utils = require '../utils'
+JSONUtils = require '../json_utils'
+Cursor = require '../cursor'
 
 IS_MATCH_FNS =
   $ne: (mv, tv) -> return not _.isEqual(mv, tv)
 
   $lt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return (if _.isDate(tv) then DateUtils.isBefore(mv, tv) else mv < tv)
+    return (if _.isDate(tv) then moment(mv).isBefore(tv) else mv < tv)
 
   $lte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return if _.isDate(tv) then !DateUtils.isAfter(mv, tv) else (mv <= tv)
+    if _.isDate(tv)
+      mvm = moment(mv)
+      return mvm.isBefore(tv) or mvm.isSame(tv)
+    else
+      return (mv < tv) or _.isEqual(mv, tv)
 
   $gt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return (if _.isDate(tv) then DateUtils.isAfter(mv, tv) else mv > tv)
+    return (if _.isDate(tv) then moment(mv).isAfter(tv) else mv > tv)
 
   $gte: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
-    return if _.isDate(tv) then !DateUtils.isBefore(mv, tv) else (mv >= tv)
-
+    if _.isDate(tv)
+      mvm = moment(mv)
+      return mvm.isAfter(tv) or mvm.isSame(tv)
+    else
+      return (mv > tv) or _.isEqual(mv, tv)
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @nodoc
@@ -72,12 +74,12 @@ module.exports = class MemoryCursor extends Cursor
         if keys.length or ins_size or nins_size
           if @_cursor.$ids
             for id, model_json of @store
-              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
             find_queue = new Queue()
-            # console.log "\nmodel: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} @store: #{JSONUtils.stringify(@store)}"
+            # console.log "\nmodel: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)} @store: #{Utils.inspect(@store)}"
 
             for id, model_json of @store
               do (model_json) => find_queue.defer (callback) =>
@@ -104,7 +106,7 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, id)
           else
             json = (JSONUtils.deepClone(model_json) for id, model_json of @store)
           callback()
@@ -113,7 +115,7 @@ module.exports = class MemoryCursor extends Cursor
         queue.defer (callback) =>
           if @_cursor.$sort
             $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-            json.sort (model, next_model) => Utils.jsonFieldCompare(model, next_model, $sort_fields)
+            json.sort (model, next_model) => return Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
           if @_cursor.$offset
             number = json.length - @_cursor.$offset
@@ -159,7 +161,7 @@ module.exports = class MemoryCursor extends Cursor
           if reverse_relation.embed
 
             # TODO: should a cursor be returned instead of a find_query?
-            throw Error "Embedded find is not yet supported. @_find: #{JSONUtils.stringify(@_find)}"
+            throw Error "Embedded find is not yet supported. @_find: #{Utils.inspect(@_find)}"
 
             (related_query = {}).id = value
             reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
@@ -213,7 +215,7 @@ module.exports = class MemoryCursor extends Cursor
             callback()
 
     queue.await (err) =>
-      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} find: #{JSONUtils.stringify(@_find)}"
+      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{Utils.inspect(find_query)} find: #{Utils.inspect(@_find)}"
       callback(err, find_query)
 
   fetchIncludes: (json, callback) ->
@@ -233,7 +235,7 @@ module.exports = class MemoryCursor extends Cursor
         do (key, model_json) => load_queue.defer (callback) =>
           relation.cursor(model_json, key).toJSON (err, related_json) ->
             return calback(err) if err
-            # console.log "\nkey: #{key}, model_json: #{JSONUtils.stringify(model_json)}\nrelated_json: #{JSONUtils.stringify(related_json)}"
+            # console.log "\nkey: #{key}, model_json: #{Utils.inspect(model_json)}\nrelated_json: #{Utils.inspect(related_json)}"
             delete model_json[relation.foriegn_key]
             model_json[key] = related_json
             callback()
@@ -258,12 +260,12 @@ module.exports = class MemoryCursor extends Cursor
         models_json = [models_json] unless _.isArray(models_json)
         for model_json in models_json
           model_value = model_json[key]
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{JSONUtils.stringify(find_value)}, model_value: #{JSONUtils.stringify(model_value)}\nmodel_json: #{JSONUtils.stringify(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{Utils.inspect(find_value)}, model_value: #{Utils.inspect(model_value)}\nmodel_json: #{Utils.inspect(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
 
           # an object might specify $lt, $lte, $gt, $gte, $ne
           if _.isObject(find_value)
             for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
-              # console.log "Testing operator: #{operator}, model_value: #{JSONUtils.stringify(model_value)}, test_value: #{JSONUtils.stringify(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+              # console.log "Testing operator: #{operator}, model_value: #{Utils.inspect(model_value)}, test_value: #{Utils.inspect(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
               was_handled = true
               break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
 
@@ -275,7 +277,7 @@ module.exports = class MemoryCursor extends Cursor
         # checked all models and none were a match
         return callback(null, false)
 
-      # console.log "\nNext model (#{key_path}): #{key} model_json: #{JSONUtils.stringify(model_json)}"
+      # console.log "\nNext model (#{key_path}): #{key} model_json: #{Utils.inspect(model_json)}"
 
       # fetch relation
       return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
