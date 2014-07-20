@@ -65,6 +65,10 @@ gulp.task 'test-quick', ['build'], testNode
 gulp.task 'test-node-quick', ['build'], testNode
 gulp.task 'test-browsers-quick', ['build'], testBrowsers
 
+gulp.task 'benchmark', ['build'], (callback) ->
+  (require './test/lib/run_benchmarks')(callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
 gulp.task 'zip', ['minify'], (callback) ->
   gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))

@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 _ = require 'underscore'
 
-module.exports = _.extend  _.clone(require '../../webpack/base-config.coffee'), {
+module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   entry: './src/index.coffee'
   output:
     path: '.'
