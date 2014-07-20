@@ -3,7 +3,7 @@
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
-  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+  Dependencies: Backbone.js and Underscore.js.
 */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -63,16 +63,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var BackboneORM, publish;
 
@@ -144,16 +139,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/memory/sync.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/sync.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _;
 
@@ -387,16 +377,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/utils.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/utils.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Queue, URL, Utils, modelExtensions, _,
 	  __hasProp = {}.hasOwnProperty,
@@ -818,16 +803,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/json_utils.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/json_utils.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var JSONUtils, Queue, Utils, _;
 
@@ -1258,7 +1238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var DateUtils, UNITS_TO_MS, _;
 
@@ -1332,16 +1312,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/queue.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/queue.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Queue,
 	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -1412,16 +1387,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/database_url.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/database_url.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var BackboneORM, DatabaseURL, SUPPORTED_KEYS, URL, _;
 
@@ -1634,7 +1604,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var CURSOR_KEYS, Cursor, Utils, _,
 	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -2058,16 +2028,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/schema.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/schema.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, DatabaseURL, Many, One, RELATION_VARIANTS, Schema, Utils, _,
 	  __hasProp = {}.hasOwnProperty,
@@ -2375,16 +2340,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD:src/connection_pool.coffee
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3:src/lib/connection_pool.coffee
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var MemoryStore;
 
@@ -2403,16 +2363,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var LRU, MemoryStore, _,
 	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -3454,16 +3409,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
 	  __hasProp = {}.hasOwnProperty,
@@ -4021,16 +3971,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, MemoryStore, ModelCache, Queue, _;
 
@@ -5032,16 +4977,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, DatabaseURL, ModelStream, Queue, Utils, modelEach, modelInterval, _;
 
@@ -5755,16 +5695,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, One, Queue, Utils, _,
 	  __hasProp = {}.hasOwnProperty,
@@ -6249,16 +6184,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, Many, Queue, Utils, _,
 	  __hasProp = {}.hasOwnProperty,
@@ -6922,16 +6852,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
 
@@ -8262,7 +8187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var ModelStream, stream,
 	  __hasProp = {}.hasOwnProperty,
@@ -8323,7 +8248,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Cursor, Queue, _;
 
@@ -8400,7 +8325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var DateUtils, INTERVAL_TYPES, Queue, Utils, _;
 
@@ -8561,16 +8486,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, Utils, collection_type, fn, key, overrides, _;
 
@@ -8636,16 +8556,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, Queue, Relation, Utils, _;
 
@@ -8825,16 +8740,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	<<<<<<< HEAD
-	  backbone-orm.js 0.5.18
-	  Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
-	=======
 	  backbone-orm.js 0.6.0
 	  Copyright (c) 2013-2014 Vidigami
-	>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var CacheCursor, _,
 	  __hasProp = {}.hasOwnProperty,
