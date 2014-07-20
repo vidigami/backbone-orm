@@ -1,8 +1,16 @@
-_ = require 'underscore'
-moment = require 'moment'
+###
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+###
 
-Queue = require '../queue'
-Utils = require '../utils'
+_ = require 'underscore'
+
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
+DateUtils = require '../lib/date_utils'
 
 INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
 
@@ -66,8 +74,8 @@ module.exports = (model_type, query, iterator, callback) ->
 
     # interval length
     start_ms = range.start.getTime()
-    length_ms = moment.duration((if _.isUndefined(options.length) then 1 else options.length), options.type).asMilliseconds()
-    throw Error("length_ms is invalid: #{length_ms} for range: #{Utils.inspect(range)}") unless length_ms
+    length_ms = DateUtils.durationAsMilliseconds((if _.isUndefined(options.length) then 1 else options.length), options.type)
+    throw Error("length_ms is invalid: #{length_ms} for range: #{JSONUtils.stringify(range)}") unless length_ms
 
     query = _.omit(query, '$interval')
     query.$sort = [key]
@@ -75,10 +83,10 @@ module.exports = (model_type, query, iterator, callback) ->
     iteration_info.index = 0
 
     runInterval = (current) ->
-      return callback() if current.isAfter(range.end) # done
+      return callback() if DateUtils.isAfter(current, range.end) # done
 
       # find the next entry
-      query[key] = {$gte: current.toDate(), $lte: iteration_info.last}
+      query[key] = {$gte: current, $lte: iteration_info.last}
       model_type.findOne query, (err, model) ->
         return callback(err) if err
         return callback() unless model # done
@@ -87,14 +95,14 @@ module.exports = (model_type, query, iterator, callback) ->
         next = model.get(key)
         iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms)
 
-        current = moment.utc(range.start).add({milliseconds: iteration_info.index * length_ms})
-        iteration_info.start = current.toDate()
-        next = current.clone().add({milliseconds: length_ms})
-        iteration_info.end = next.toDate()
+        current = new Date(range.start.getTime() + iteration_info.index * length_ms)
+        iteration_info.start = current
+        next = new Date(current.getTime() + length_ms)
+        iteration_info.end = next
 
-        query[key] = {$gte: current.toDate(), $lt: next.toDate()}
+        query[key] = {$gte: current, $lt: next}
         iterator query, iteration_info, (err) ->
           return callback(err) if err
           runInterval(next)
 
-    runInterval(moment(range.start))
+    runInterval(range.start)

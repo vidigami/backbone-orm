@@ -1,16 +1,21 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 Backbone = require 'backbone'
 _ = require 'underscore'
-Queue = require '../queue'
+Queue = require '../lib/queue'
 
 MemoryStore = require './memory_store'
-MEMORY_STORE_KEYS = ['max', 'max_age', 'destroy']
 
 module.exports = class ModelCache
   constructor: ->
@@ -29,7 +34,6 @@ module.exports = class ModelCache
   #
   configure: (options={}) ->
     @enabled = options.enabled
-    @reset(->)
     for key, value of options
       if _.isObject(value)
         @options[key] or= {}
@@ -37,36 +41,27 @@ module.exports = class ModelCache
         values[value_key] = value_value for value_key, value_value of value
       else
         @options[key] = value
-    return @
+    @reset()
 
   configureSync: (model_type, sync_fn) ->
-    return sync_fn if model_type::_orm_never_cache or not (cache = @getOrCreateCache(model_type.model_name))
-    model_type.cache = cache
-    return require('./sync')(model_type, sync_fn)
+    return sync_fn if model_type::_orm_never_cache or not @createCache(model_type)
+    return (require './sync')(model_type, sync_fn)
 
-  reset: (callback) ->
-    queue = new Queue()
-    for key, value of @caches
-      do (value) -> queue.defer (callback) -> value.reset(callback)
-    queue.await callback
-
-  hardReset: ->
-    @reset(->)
-    delete @caches[key] for key, value of @caches
-    return @
+  reset: -> @createCache(value.model_type) for key, value of @caches
 
   # @nodoc
-  getOrCreateCache: (model_name) ->
+  createCache: (model_type) ->
+    throw new Error "Missing model name for cache" unless model_name = model_type?.model_name
+    cuid = model_type.cuid or= _.uniqueId('cuid')
+
+    # delete old cache
+    if cache_info = @caches[cuid]
+      delete @caches[cuid]; cache_info.cache.reset(); cache_info.model_type.cache = null
     return null unless @enabled
-    throw new Error "Missing model name for cache" unless model_name
-    return model_cache if model_cache = @caches[model_name]
 
-    # there are options
-    if options = @options.modelTypes[model_name]
-      return @caches[model_name] = options.store?() or new MemoryStore(_.pick(options, MEMORY_STORE_KEYS))
-
-    # there are global options
-    else if @options.store or @options.max or @options.max_age
-      return @caches[model_name] = @options.store?() or new MemoryStore(_.pick(@options, MEMORY_STORE_KEYS))
-
-    return null
+    # there are options meaning a cache should be created
+    unless options = @options.modelTypes[model_name]
+      return null unless (@options.store or @options.max or @options.max_age) # no options so no cache
+      options = @options
+    cache_info = @caches[cuid] = {cache: options.store?() or new MemoryStore(options), model_type: model_type}
+    return model_type.cache = cache_info.cache

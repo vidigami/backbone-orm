@@ -1,251 +1,284 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 _ = require 'underscore'
 
-QueryCache = require('./cache/singletons').QueryCache
-Utils = require './utils'
+Queue = require './lib/queue'
+Utils = require './lib/utils'
+JSONUtils = require './lib/json_utils'
+DateUtils = require './lib/date_utils'
+Cursor = require './lib/cursor'
 
-CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or']
+IS_MATCH_FNS =
+  $ne: (mv, tv) -> return not _.isEqual(mv, tv)
 
-module.exports = class Cursor
-  # @nodoc
-  constructor: (query, options) ->
-    @[key] = value for key, value of options
-    parsed_query = Cursor.parseQuery(query, @model_type)
-    @_find = parsed_query.find; @_cursor = parsed_query.cursor
+  $lt: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return (if _.isDate(tv) then DateUtils.isBefore(mv, tv) else mv < tv)
 
-    # ensure arrays
-    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
+  $lte: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return if _.isDate(tv) then !DateUtils.isAfter(mv, tv) else (mv <= tv)
 
-  # @nodoc
-  @validateQuery = (query, memo, model_type) =>
-    for key, value of query
-      continue unless _.isUndefined(value) or _.isObject(value)
-      full_key = if memo then "#{memo}.#{key}" else key
-      throw new Error "Unexpected undefined for query key '#{full_key}' on #{model_type?.model_name}" if _.isUndefined(value)
-      @validateQuery(value, full_key, model_type) if _.isObject(value)
+  $gt: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return (if _.isDate(tv) then DateUtils.isAfter(mv, tv) else mv > tv)
 
-  # @nodoc
-  @parseQuery: (query, model_type) =>
-    if not query
-      return {find: {}, cursor: {}}
-    else if not _.isObject(query)
-      return {find: {id: query}, cursor: {$one: true}}
-    else if query.find or query.cursor
-      return {find: query.find or {}, cursor: query.cursor or {}}
-    else
-      try
-        @validateQuery(query, null, model_type)
-      catch e
-        throw new Error "Error: #{e}. Query: ", query
-      parsed_query = {find: {}, cursor: {}}
-      for key, value of query
-        if key[0] isnt '$' then (parsed_query.find[key] = value) else (parsed_query.cursor[key] = value)
-      return parsed_query
+  $gte: (mv, tv) ->
+    throw Error 'Cannot compare to null' if _.isNull(tv)
+    return if _.isDate(tv) then !DateUtils.isBefore(mv, tv) else (mv >= tv)
 
-  offset: (offset) -> @_cursor.$offset = offset; return @
-  limit: (limit) -> @_cursor.$limit = limit; return @
-  sort: (sort) -> @_cursor.$sort = sort; return @
+IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
-  whiteList: (args) ->
-    keys = _.flatten(arguments)
-    @_cursor.$white_list = if @_cursor.$white_list then _.intersection(@_cursor.$white_list, keys) else keys
-    return @
+# @nodoc
+# TODO: handle merging of non-array types (eg. $lt, $ne)
+valueToArray = (value) -> return (if _.isArray(value) then value else (if _.isNull(value) then [] else (if value.$in then value.$in else [value])))
+mergeQuery = (query, key, value) ->
+  query[key] = if query.hasOwnProperty(key) then {$in: _.intersection(valueToArray(query[key]), valueToArray(value))} else value
 
-  select: (args) ->
-    keys = _.flatten(arguments)
-    @_cursor.$select = if @_cursor.$select then _.intersection(@_cursor.$select, keys) else keys
-    return @
-
-  include: (args) ->
-    keys = _.flatten(arguments)
-    @_cursor.$include = if @_cursor.$include then _.intersection(@_cursor.$include, keys) else keys
-    return @
-
-  values: (args) ->
-    keys = _.flatten(arguments)
-    @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
-    return @
-
-  # @nodoc
-  ids: -> @_cursor.$values = ['id']; return @
-
-  ##############################################
-  # Execution of the Query
-
-  count: (callback) -> @execWithCursorQuery('$count', 'toJSON', callback)
-  exists: (callback) -> @execWithCursorQuery('$exists', 'toJSON', callback)
-  toModel: (callback) -> @execWithCursorQuery('$one', 'toModels', callback)
-  toModels: (callback) ->
-    return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{Utils.inspect(@_cursor.$values)}") if @_cursor.$values
-
-    # a cache candidate
-    # if not (@_cursor.$offset or @_cursor.$limit or @_cursor.$include) and cache = @model_type.cache
-    #   find_size = _.size(@_find)
-    #   if find_size is 0
-    #     return callback(null, model) if not (ids = @_cursor.$ids) and @_cursor.$one and (model = cache.get())
-
-    #   else if find_size is 1 and @_find.id
-    #     if not (ids = @_find.id.$in) and (model = cache.get(@_find.id))
-    #       return callback(null, if @_cursor.$one then model else [model])
-
-    #   if ids
-    #     missing_ids = [] # TODO: fetch delta ids, need to handle sorting, etc
-    #     models = []
-    #     for id in ids
-    #       (missing_ids.push(id); continue) unless model = cache.get(id)
-    #       models.push(model)
-    #       break if @_cursor.$one
-
-    #     if @_cursor.$one
-    #       return callback(null, models[0]) if models.length
-    #     else
-    #       if not missing_ids.length # found everything
-    #         if @_cursor.$sort
-    #           $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-    #           models.sort (model, next_model) => return Utils.jsonFieldCompare(model.attributes, next_model.attributes, $sort_fields)
-    #         return callback(null, models)
-
-    @toJSON (err, json) =>
-      return callback(err) if err
-      return callback(null, null) if @_cursor.$one and not json
-      json = [json] unless _.isArray(json)
-
-      @prepareIncludes json, (err, json) =>
-        if can_cache = !(@_cursor.$select or @_cursor.$whitelist) # don't cache if we may not have fetched the full model
-          models = (Utils.updateOrNew(item, @model_type) for item in json)
-        else
-          models = ((model = new @model_type(@model_type::parse(item)); model.setPartial(true); model) for item in json)
-        return callback(null, if @_cursor.$one then models[0] else models)
-
-  toJSON: (callback) ->
-    parsed_query = _.extend({}, _.pick(@_cursor, CURSOR_KEYS), @_find)
-    # Check query cache
-    QueryCache.get @model_type, parsed_query, (err, cached_result) =>
-      return callback(err) if err
-      return callback(null, cached_result) unless _.isUndefined(cached_result)
-
-      model_types = @relatedModelTypesInQuery()
-      @queryToJSON (err, json) =>
-        return callback(err) if err
-        unless _.isNull(json)
-          QueryCache.set @model_type, parsed_query, model_types, json, (err) ->
-            console.log "Error setting query cache: #{err}" if err # TODO: Update query cache, ignore errors
-            callback(null, json)
-        else
-          callback(null, json)
-
-  # @nodoc
-  # Provided by a concrete cursor for a Backbone Sync type
+# @private
+module.exports = class MemoryCursor extends Cursor
   queryToJSON: (callback) ->
-    throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
+    return callback(null, if @hasCursorQuery('$one') then null else []) if @hasCursorQuery('$zero')
 
-  ##############################################
-  # Helpers
-  ##############################################
+    exists = @hasCursorQuery('$exists')
 
-  # @nodoc
-  hasCursorQuery: (key) -> return @_cursor[key] or (@_cursor[key] is '')
+    @buildFindQuery (err, find_query) =>
+      return callback(err) if err
 
-  # @nodoc
-  execWithCursorQuery: (key, method, callback) ->
-    value = @_cursor[key]
-    @_cursor[key] = true
-    @[method] (err, json) =>
-      if _.isUndefined(value) then delete @_cursor[key] else (@_cursor[key] = value)
-      callback(err, json)
+      json = []
+      keys = _.keys(find_query)
+      queue = new Queue(1)
 
-  # @nodoc
-  relatedModelTypesInQuery: =>
-    related_fields = []
-    related_model_types = []
+      queue.defer (callback) =>
+        [ins, nins] = [{}, {}]
+        for key, value of find_query
+          (delete find_query[key]; ins[key] = value.$in) if value?.$in
+          (delete find_query[key]; nins[key] = value.$nin) if value?.$nin
+        [ins_size, nins_size] = [_.size(ins), _.size(nins)]
+        # NOTE: we clone the data out of the store since the caller could modify it
 
-    for key, value of @_find
+        # use find
+        if keys.length or ins_size or nins_size
+          if @_cursor.$ids
+            for id, model_json of @store
+              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+            callback()
 
-      # A dot indicates a condition on a related model
-      if key.indexOf('.') > 0
-        [relation_key, key] = key.split('.')
-        related_fields.push(relation_key)
+          else
+            find_queue = new Queue()
+            # console.log "\nmodel: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} @store: #{JSONUtils.stringify(@store)}"
 
-      # Many to Many relationships may be queried on the foreign key of the join table
-      else if (reverse_relation = @model_type.reverseRelation(key)) and reverse_relation.join_table
-        related_model_types.push(reverse_relation.model_type)
-        related_model_types.push(reverse_relation.join_table)
+            for id, model_json of @store
+              do (model_json) => find_queue.defer (callback) =>
+                return callback() if exists and json.length # exists only needs one result
 
-    related_fields = related_fields.concat(@_cursor.$include) if @_cursor?.$include
-    for relation_key in related_fields
-      if relation = @model_type.relation(relation_key)
-        related_model_types.push(relation.reverse_model_type)
-        related_model_types.push(relation.join_table) if relation.join_table
+                find_keys = _.keys(find_query)
+                next = (err, is_match) =>
+                  return callback(err) if err or not is_match # done conditions
+                  (json.push(JSONUtils.deepClone(model_json)); return callback()) unless find_keys.length
 
-    return related_model_types
+                  # check next key
+                  @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
 
-  # @nodoc
-  selectResults: (json) ->
-    json = json.slice(0, 1) if @_cursor.$one
+                next(null, true) # start checking
 
-    # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
-    if @_cursor.$values
-      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
-      if @_cursor.$values.length is 1
-        key = @_cursor.$values[0]
-        json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
-      else
-        json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
+            find_queue.await (err) =>
+              return callback(err) if err
+              if ins_size
+                json = _.filter json, (model_json) => return true for key, values of ins when model_json[key] in values
+              if nins_size
+                json = _.filter json, (model_json) => return true for key, values of nins when model_json[key] not in values
+              callback()
 
-    else if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      json = (_.pick(item, $select) for item in json)
-
-    else if @_cursor.$white_list
-      json = (_.pick(item, @_cursor.$white_list) for item in json)
-
-    return json if @hasCursorQuery('$page') # paging expects an array
-    return if @_cursor.$one then (json[0] or null) else json
-
-  # @nodoc
-  selectFromModels: (models, callback) ->
-    if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
-      models = (model = new @model_type(_.pick(model.attributes, $select)); model.setPartial(true); model for item in models)
-
-    else if @_cursor.$white_list
-      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setPartial(true); model for item in models)
-
-    return models
-
-  # @nodoc
-  prepareIncludes: (json, callback) ->
-    return callback(null, json) if not _.isArray(@_cursor.$include) or _.isEmpty(@_cursor.$include)
-    schema = @model_type.schema()
-    shared_related_models = {}
-
-    findOrNew = (related_json, reverse_model_type) =>
-      related_id = related_json[reverse_model_type::idAttribute]
-      unless shared_related_models[related_id]
-        if reverse_model_type.cache
-          unless shared_related_models[related_id] = reverse_model_type.cache.get(related_id)
-            reverse_model_type.cache.set(related_id, shared_related_models[related_id] = new reverse_model_type(related_json))
         else
-          shared_related_models[related_id] = new reverse_model_type(related_json)
-      return shared_related_models[related_id]
+          # filter by ids
+          if @_cursor.$ids
+            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+          else
+            json = (JSONUtils.deepClone(model_json) for id, model_json of @store)
+          callback()
 
-    for include in @_cursor.$include
-      relation = schema.relation(include)
-      shared_related_models = {} # reset
+      if not exists
+        queue.defer (callback) =>
+          if @_cursor.$sort
+            $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
+            json.sort (model, next_model) => Utils.jsonFieldCompare(model, next_model, $sort_fields)
 
+          if @_cursor.$offset
+            number = json.length - @_cursor.$offset
+            number = 0 if number < 0
+            json = if number then json.slice(@_cursor.$offset, @_cursor.$offset+number) else []
+
+          if @_cursor.$one
+            json = json.slice(0, 1)
+
+          else if @_cursor.$limit
+            json = json.splice(0, Math.min(json.length, @_cursor.$limit))
+          callback()
+
+        queue.defer (callback) => @fetchIncludes(json, callback)
+
+      queue.await =>
+        return callback(null, (if _.isArray(json) then json.length else (if json then 1 else 0))) if @hasCursorQuery('$count')
+        return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
+
+        if @hasCursorQuery('$page')
+          count_cursor = new MemoryCursor(@_find, _.extend(_.pick(@, ['model_type', 'store'])))
+          count_cursor.count (err, count) =>
+            return callback(err) if err
+            callback(null, {
+              offset: @_cursor.$offset or 0
+              total_rows: count
+              rows: @selectResults(json)
+            })
+        else
+          callback(null, @selectResults(json))
+
+      return # terminating
+
+  buildFindQuery: (callback) ->
+    queue = new Queue()
+
+    find_query = {}
+    for key, value of @_find
+      if (key.indexOf('.') < 0)
+        (mergeQuery(find_query, key, value); continue) unless reverse_relation = @model_type.reverseRelation(key)
+        (mergeQuery(find_query, key, value); continue) if not reverse_relation.embed and not reverse_relation.join_table
+        do (key, value, reverse_relation) => queue.defer (callback) =>
+          if reverse_relation.embed
+
+            # TODO: should a cursor be returned instead of a find_query?
+            throw Error "Embedded find is not yet supported. @_find: #{JSONUtils.stringify(@_find)}"
+
+            (related_query = {}).id = value
+            reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
+              return callback(err) if err
+              mergeQuery(find_query, '_json', _.map(models_json, (test) -> test[reverse_relation.key]))
+              callback()
+          else
+            (related_query = {})[key] = value
+            related_query.$values = reverse_relation.reverse_relation.join_key
+            reverse_relation.join_table.cursor(related_query).toJSON (err, model_ids) =>
+              return callback(err) if err
+              mergeQuery(find_query, 'id', {$in: model_ids})
+              callback()
+        continue
+
+      [relation_key, value_key] = key.split('.')
+      (mergeQuery(find_query, key, value); continue) if @model_type.relationIsEmbedded(relation_key) # embedded so a nested query is possible in mongo
+
+      # do a join or lookup
+      do (relation_key, value_key, value) => queue.defer (callback) =>
+        (mergeQuery(find_query, key, value); return callback()) unless relation = @model_type.relation(relation_key) # assume embedded
+
+        if not relation.join_table and (value_key is 'id')
+          mergeQuery(find_query, relation.foreign_key, value)
+          return callback()
+
+        # TODO: optimize with a one-step join?
+        else if relation.join_table or (relation.type is 'belongsTo')
+          (related_query = {$values: 'id'})[value_key] = value
+          relation.reverse_relation.model_type.cursor(related_query).toJSON (err, related_ids) =>
+            return callback(err) if err
+
+            if relation.join_table
+              (join_query = {})[relation.reverse_relation.join_key] = {$in: related_ids}
+              join_query.$values = relation.foreign_key
+              relation.join_table.cursor(join_query).toJSON (err, model_ids) =>
+                return callback(err) if err
+                mergeQuery(find_query, 'id', {$in: model_ids})
+                callback()
+            else
+              mergeQuery(find_query, relation.foreign_key, {$in: related_ids})
+              callback()
+
+        # foreign key is on this model
+        else
+          (related_query = {})[value_key] = value
+          related_query.$values = relation.foreign_key
+          relation.reverse_model_type.cursor(related_query).toJSON (err, model_ids) =>
+            return callback(err) if err
+            mergeQuery(find_query, 'id', {$in: model_ids})
+            callback()
+
+    queue.await (err) =>
+      # console.log "\nmodel_name: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} find: #{JSONUtils.stringify(@_find)}"
+      callback(err, find_query)
+
+  fetchIncludes: (json, callback) ->
+    # TODO: $select/$values = 'relation.field'
+    return callback() unless @_cursor.$include
+
+    load_queue = new Queue(1)
+
+    include_keys = if _.isArray(@_cursor.$include) then @_cursor.$include else [@_cursor.$include]
+    for key in include_keys
+      continue if @model_type.relationIsEmbedded(key)
+      return callback(new Error "Included relation '#{key}' is not a relation") unless relation = @model_type.relation(key)
+
+      # TODO: optimize by grouping included keys, fetching once, and then updating all relationships
+      # Load the included models
       for model_json in json
-        # many
-        if _.isArray(related_json = model_json[include])
-          model_json[include] = (findOrNew(item, relation.reverse_model_type) for item in related_json)
+        do (key, model_json) => load_queue.defer (callback) =>
+          relation.cursor(model_json, key).toJSON (err, related_json) ->
+            return calback(err) if err
+            # console.log "\nkey: #{key}, model_json: #{JSONUtils.stringify(model_json)}\nrelated_json: #{JSONUtils.stringify(related_json)}"
+            delete model_json[relation.foriegn_key]
+            model_json[key] = related_json
+            callback()
 
-        # one
-        else if related_json
-          model_json[include] = findOrNew(related_json, relation.reverse_model_type)
+    load_queue.await callback
 
-    callback(null, json)
+  # @nodoc
+  _valueIsMatch: (find_query, key_path, model_json, callback) ->
+    key_components = key_path.split('.')
+    model_type = @model_type
+
+    next = (err, models_json) =>
+      return callback(err) if err
+      key = key_components.shift()
+      key = model_type::idAttribute if key is 'id' # allow for id key override
+
+      # done conditions
+      unless key_components.length
+        was_handled = false
+        find_value = find_query[key_path]
+
+        models_json = [models_json] unless _.isArray(models_json)
+        for model_json in models_json
+          model_value = model_json[key]
+          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{JSONUtils.stringify(find_value)}, model_value: #{JSONUtils.stringify(model_value)}\nmodel_json: #{JSONUtils.stringify(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
+
+          # an object might specify $lt, $lte, $gt, $gte, $ne
+          if _.isObject(find_value)
+            for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
+              # console.log "Testing operator: #{operator}, model_value: #{JSONUtils.stringify(model_value)}, test_value: #{JSONUtils.stringify(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
+              was_handled = true
+              break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
+
+          if was_handled
+            return callback(null, is_match) if is_match
+          else if is_match = _.isEqual(model_value, find_value)
+            return callback(null, is_match)
+
+        # checked all models and none were a match
+        return callback(null, false)
+
+      # console.log "\nNext model (#{key_path}): #{key} model_json: #{JSONUtils.stringify(model_json)}"
+
+      # fetch relation
+      return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
+      next(null, model_json[key])
+
+    next(null, model_json) # start checking

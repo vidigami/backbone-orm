@@ -1,16 +1,22 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-inflection = require 'inflection'
 
-Queue = require '../queue'
-Utils = require '../utils'
+BackboneORM = require '../core'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
 
 # @nodoc
 module.exports = class Relation
@@ -29,10 +35,9 @@ module.exports = class Relation
     reverse_model_type = @reverse_model_type
     reverse_model_type.sync = model_type.createSync(reverse_model_type) unless _.isFunction(reverse_model_type.schema) # convert to relational
 
-    key_root = @as or inflection.underscore(model_type.model_name)
-    reverse_relation = reverse_model_type.relation(key_root) # as
-    reverse_relation = reverse_model_type.relation(inflection.singularize(key_root)) unless reverse_relation # singular
-    reverse_relation = reverse_model_type.relation(inflection.pluralize(key_root)) unless reverse_relation # plural
+    reverse_relation = reverse_model_type.relation(@as)
+    reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, false)) unless reverse_relation # singular
+    reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, true)) unless reverse_relation # plural
 
     if not reverse_relation and (@type isnt 'belongsTo')
       reverse_relation = reverse_model_type.schema().generateBelongsTo(model_type)
@@ -77,7 +82,7 @@ module.exports = class Relation
               attributes = {}
               attributes[@foreign_key] = model.id
               attributes[@reverse_relation.foreign_key] = related_id
-              # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.inspect(attributes)}"
+              # console.log "Creating join for: #{@model_type.model_name} join: #{JSONUtils.stringify(attributes)}"
               join = new @join_table(attributes)
               join.save callback
 

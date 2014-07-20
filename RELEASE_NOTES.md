@@ -1,10 +1,27 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+<<<<<<< HEAD
 ### 0.5.18
 * Fixed exists bug
 
 ### 0.5.17
 * Fixed module system problems
+=======
+### 0.6.0
+* BREAKING: Removed QueryCache
+* BREAKING: Moved model cache to set configured using BackboneORM.configure({model_cache: options})
+* BREAKING: Deprecated Utils.inspect and moved to JSONUtils.stringify
+* BREAKING: Removed ModelCache.hardReset or ModelCache.reset instead
+* BREAKING (server): Moved to webpack for industrial packaging across Node.js and browser. You must use the browser api; for example, replace require('backbone-orm/json_utils') with require('backbone-orm').JSONUtils
+* BREAKING: the model cache will generate unique id (cuid) for each model to identify it in the cache
+* Redesigned tests so they can be run from the command line and handle TDD correctly
+* Made patchAdd fail if the record already exists
+* Removed dependency on moment
+* Preserved integers when serialized in JSON: https://github.com/vidigami/backbone-orm/issues/26
+* Added type() and idType() to Schema API to check types of attributes
+* Added configurable naming_conventions: 'underscore', 'camelize', 'classify'. Configure using BackboneORM.configure({naming_conventions: 'camelize'})
+* Added base conventions for easing overrides: BackboneORM.BaseConvention. To roll your own: monkey patch it, derive from it, refer to it from your own conventions, etc.
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
 
 ### 0.5.16
 * Added schema helpers: columns, joinTables, relatedModels

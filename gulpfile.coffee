@@ -1,41 +1,79 @@
 path = require 'path'
+Async = require 'async'
 es = require 'event-stream'
 
 gulp = require 'gulp'
 gutil = require 'gulp-util'
-coffee = require 'gulp-coffee'
-compile = require 'gulp-compile-js'
-modules = require 'gulp-module-system'
+webpack = require 'gulp-webpack-config'
 rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
+header = require 'gulp-header'
 zip = require 'gulp-zip'
+mocha = require 'gulp-mocha'
 
-LIBRARY_WRAPPERS = require './client/config_library_wrap'
+HEADER = """
+/*
+  <%= file.path.split('/').splice(-1)[0].replace('.min', '') %> <%= pkg.version %>
+  Copyright (c) 2013-#{(new Date()).getFullYear()} Vidigami
+  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
+  Dependencies: Backbone.js, Underscore.js, and Moment.js.
+*/\n
+"""
 
-gulp.task 'build', ->
-  gulp.src('src/**/*.coffee').pipe(coffee({bare: true}).on('error', gutil.log))
-    .pipe(gulp.dest('lib/'))
+gulp.task 'build', buildLibraries = (callback) ->
+  gulp.src('config/builds/library/**/*.webpack.config.coffee', {read: false, buffer: false})
+    .pipe(webpack())
+    .pipe(header(HEADER, {pkg: require './package.json'}))
+    .pipe(gulp.dest((file) -> file.base))
+    .on('end', callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'watch', ['build'], ->
-  gulp.watch './src/**/*.coffee', -> gulp.run 'build'
+gulp.task 'watch', ['build'], (callback) ->
+  gulp.watch './src/**/*.coffee', -> buildLibraries(->)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'build_client', ->
-  gulp.src(['src/**/*.coffee', '!src/node/*.coffee', 'client/node-dependencies/**/*.js'])
-    .pipe(es.map (file, callback) -> file.path = file.path.replace("#{path.resolve(dir)}/", '') for dir in ['./src', './client/node-dependencies']; callback(null, file))
-    .pipe(compile({coffee: {bare: true}}))
-    .pipe(modules({type: 'local-shim', file_name: 'backbone-orm.js', umd: {symbol: 'BackboneORM', dependencies: ['underscore', 'backbone', 'moment']}}))
-    .pipe(gulp.dest('./'))
-
-gulp.task 'minify_client', ['build_client'], ->
-  gulp.src('backbone-orm.js')
+gulp.task 'minify', ['build'], (callback) ->
+  gulp.src(['*.js', '!*.min.js', '!_temp/**/*.js', '!node_modules/'])
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest('./'))
+    .pipe(header(HEADER, {pkg: require './package.json'}))
+    .pipe(gulp.dest((file) -> file.base))
+    .on('end', callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'zip', ['minify_client'], ->
+gulp.task 'test-node', ['minify'], testNode = (callback) ->
+  gutil.log 'Running Node.js tests'
+  global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
+  gulp.src('test/spec/**/*.tests.coffee')
+    .pipe(mocha({}))
+    .pipe es.writeArray (err, array) ->
+      delete global.test_parameters # cleanup globals
+      callback(err)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
+gulp.task 'test-browsers', ['minify'], testBrowsers = (callback) ->
+  gutil.log 'Running Browser tests'
+  (require './config/karma/run')(callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
+gulp.task 'test', ['minify'], (callback) ->
+  Async.series [testNode, testBrowsers], (err) -> process.exit(if err then 1 else 0)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
+gulp.task 'test-quick', ['build'], testNode
+gulp.task 'test-node-quick', ['build'], testNode
+gulp.task 'test-browsers-quick', ['build'], testBrowsers
+
+gulp.task 'benchmark', ['build'], (callback) ->
+  (require './test/lib/run_benchmarks')(callback)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
+
+gulp.task 'zip', ['minify'], (callback) ->
   gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))
-    .pipe(gulp.dest('client/'))
+    .pipe(gulp.dest('./'))
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'release', ['build', 'zip'], ->

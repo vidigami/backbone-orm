@@ -1,21 +1,26 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-moment = require 'moment'
-Queue = require '../queue'
 
-Utils = require '../utils'
-ModelStream = require('./model_stream')
-modelEach = require('./model_each')
-modelInterval = require('./model_interval')
-DatabaseURL = require('../database_url')
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
+DatabaseURL = require '../lib/database_url'
 
+ModelStream = require './model_stream'
+modelEach = require './model_each'
+modelInterval = require './model_interval'
 require './collection' # ensure collection extensions are loaded
 
 module.exports = (model_type) ->
@@ -132,7 +137,7 @@ module.exports = (model_type) ->
     if arguments.length is 2
       [query, callback] = [{}, query]
     else if arguments.length is 3
-      [options, query, callback] = [moment.utc().toDate(), {}, query]
+      [options, query, callback] = [new Date(), {}, query]
     else
       query = _.clone(query)
     query.$one = true
@@ -161,7 +166,7 @@ module.exports = (model_type) ->
     modelEach(model_type, query, iterator, callback)
 
   model_type.stream = (query={}) ->
-    throw new Error 'Stream is a large dependency so you need to manually include "stream.js" in the browser.' unless ModelStream
+    throw new Error 'Stream is a large dependency so you need to manually include "stream.js" in the browser.' unless _.isFunction(ModelStream)
     return new ModelStream(model_type, query)
 
   model_type.interval = (query, iterator, callback) -> modelInterval(model_type, query, iterator, callback)

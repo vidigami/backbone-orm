@@ -6,3 +6,4 @@ _build/
 *.map
 docs/
 components/
+_temp/

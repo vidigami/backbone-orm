@@ -1,42 +1,44 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
-# ensure the client symbols are resolved
-if window? and require.shim
-  require.shim([
-    {symbol: '_', path: 'lodash', alias: 'underscore', optional: true}, {symbol: '_', path: 'underscore'}
-    {symbol: 'Backbone', path: 'backbone'}
-    {symbol: 'moment', path: 'moment'}
-    # {symbol: 'inflection', path: 'inflection'} # burned in
-    {symbol: 'stream', path: 'stream', optional: true} # stream is large so it is optional on the client
-  ])
+module.exports = BackboneORM = require './core' # avoid circular dependencies
+publish =
+  configure: require './lib/configure'
+  sync: require './sync'
 
-module.exports =
-  sync: require './memory/sync'
+  Utils: require './lib/utils'
+  JSONUtils: require './lib/json_utils'
+  DateUtils: require './lib/date_utils'
+  Queue: require './lib/queue'
+  DatabaseURL: require './lib/database_url'
+  Fabricator: require './lib/fabricator'
+  MemoryStore: require './cache/memory_store'
 
-  Utils: require './utils'
-  JSONUtils: require './json_utils'
-  Queue: require './queue'
-  DatabaseURL: require './database_url'
+  Cursor: require './lib/cursor'
+  Schema: require './lib/schema'
+  ConnectionPool: require './lib/connection_pool'
+  BaseConvention: require './conventions/base'
 
-  # re-expose modules
-  modules:
-    url: require 'url'
-    querystring: require 'querystring'
-    'lru-cache': require 'lru-cache'
-    underscore: require 'underscore'
-    backbone: require 'backbone'
-    moment: require 'moment'
-    inflection: require 'inflection'
-
-  Cursor: require './cursor'
-  Schema: require './schema'
-  ConnectionPool: require './connection_pool'
-  CacheSingletons: require './cache/singletons'
+  _: require 'underscore'
+  Backbone: require 'backbone'
+publish._.extend(BackboneORM, publish)
 
 # re-expose modules
-try module.exports.modules.stream = require('stream') catch e
+BackboneORM.modules =
+  underscore: require 'underscore'
+  backbone: require 'backbone'
+  url: require 'url'
+  querystring: require 'querystring'
+  'lru-cache': require 'lru-cache'
+  inflection: require 'inflection'
+try BackboneORM.modules.stream = require('stream')

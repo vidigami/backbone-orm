@@ -1,28 +1,36 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 _ = require 'underscore'
 Backbone = require 'backbone'
-inflection = require 'inflection'
-Queue = require '../queue'
 
-Utils = require '../utils'
+BackboneORM = require '../core'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
 
 # @nodoc
-module.exports = class One extends require('./relation')
+module.exports = class One extends (require './relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @virtual_id_accessor or= "#{@key}_id"
-    @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
-    @foreign_key = inflection.foreign_key(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
+    @virtual_id_accessor or= BackboneORM.naming_conventions.foreignKey(@key)
+    @join_key = @foreign_key or BackboneORM.naming_conventions.foreignKey(@model_type.model_name) unless @join_key
+    @foreign_key = BackboneORM.naming_conventions.foreignKey(if @type is 'belongsTo' then @key else (@as or @model_type.model_name)) unless @foreign_key
 
   initialize: ->
     @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
+    @model_type.schema().type('id', @reverse_model_type.schema().type('id')) if @embed # inherit id type
+    @reverse_model_type?.schema().type(@foreign_key, @model_type);
 
   initializeModel: (model) ->
     model.setLoaded(@key, @isEmbedded()) unless model.isLoadedExists(@key) # it may have been set before initialize is called

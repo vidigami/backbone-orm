@@ -1,24 +1,31 @@
 ###
+<<<<<<< HEAD
   backbone-orm.js 0.5.18
   Copyright (c) 2013 Vidigami - https://github.com/vidigami/backbone-orm
+=======
+  backbone-orm.js 0.6.0
+  Copyright (c) 2013-2014 Vidigami
+>>>>>>> 40bc5032387d4231b69d247c29e721b4dfccc8d3
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
+  Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js, Underscore.js, and Moment.js.
 ###
 
 Backbone = require 'backbone'
 _ = require 'underscore'
-inflection = require 'inflection'
 
-Queue = require '../queue'
-Utils = require '../utils'
+BackboneORM = require '../core'
+Queue = require '../lib/queue'
+Utils = require '../lib/utils'
 
 # @nodoc
-module.exports = class Many extends require('./relation')
+module.exports = class Many extends (require './relation')
   constructor: (@model_type, @key, options) ->
     @[key] = value for key, value of options
-    @virtual_id_accessor or= "#{inflection.singularize(@key)}_ids"
-    @join_key = @foreign_key or inflection.foreign_key(@model_type.model_name) unless @join_key
-    @foreign_key = inflection.foreign_key(@as or @model_type.model_name) unless @foreign_key
+    @virtual_id_accessor or= BackboneORM.naming_conventions.foreignKey(@key, true)
+    @join_key = @foreign_key or BackboneORM.naming_conventions.foreignKey(@model_type.model_name) unless @join_key
+    @foreign_key = BackboneORM.naming_conventions.foreignKey(@as or @model_type.model_name) unless @foreign_key
+    @_adding_ids = {}
     unless @collection_type
       reverse_model_type = @reverse_model_type
 
@@ -31,6 +38,8 @@ module.exports = class Many extends require('./relation')
     @reverse_relation = @_findOrGenerateReverseRelation(@)
     throw new Error "Both relationship directions cannot embed (#{@model_type.model_name} and #{@reverse_model_type.model_name}). Choose one or the other." if @embed and @reverse_relation and @reverse_relation.embed
     throw new Error "The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (#{@model_type.model_name} and #{@reverse_model_type.model_name})." if @reverse_relation?.type is 'hasOne'
+    @model_type.schema().type('id', @reverse_model_type.schema().type('id')) if @embed # inherit id type
+    @reverse_model_type?.schema().type(@foreign_key, @model_type);
 
     # check for join table
     @join_table = @findOrGenerateJoinTable(@) if @reverse_relation.type is 'hasMany'
@@ -49,7 +58,7 @@ module.exports = class Many extends require('./relation')
 
     value = value.models if Utils.isCollection(value)
     value = [] if _.isUndefined(value) # Backbone clear or reset
-    throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{Utils.inspect(value)}" unless _.isArray(value)
+    throw new Error "HasMany.set: Unexpected type to set #{key}. Expecting array: #{JSONUtils.stringify(value)}" unless _.isArray(value)
 
     Utils.orSet(model, 'rel_dirty', {})[@key] = true
     model.setLoaded(@key, _.all(value, (item) -> Utils.dataId(item) isnt item))
@@ -111,15 +120,22 @@ module.exports = class Many extends require('./relation')
     return json[json_key] = collection.toJSON() if @embed
 
   add: (model, related_model) ->
+    # Fixes 'Uncaught Maximum call stack size exceeded' in backbone-mongo tests
+    if related_model.id
+      adding_count = @_adding_ids[related_model.id] = (@_adding_ids[related_model.id] or 0) + 1
+
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
 
     # TODO: this is needed for model lifecycle - not knowing when a model is actually disposed and not wanting to remove a model from a relationship
-    # throw new Error "\nModel added twice: #{Utils.inspect(current_related_model)}\nand\n#{Utils.inspect(related_model)}" if current_related_model
+    # throw new Error "\nModel added twice: #{JSONUtils.stringify(current_related_model)}\nand\n#{JSONUtils.stringify(related_model)}" if current_related_model
     collection.remove(current_related_model) if current_related_model
     @reverse_model_type.cache.set(related_model.id, related_model) if @reverse_model_type.cache and related_model.id # make sure the latest model is in the cache
-    collection.add(related_model)
+
+    return_value = collection.add(related_model, silent: adding_count > 1)
+    @_adding_ids[related_model.id]-- if related_model.id
+    return return_value
 
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
@@ -147,12 +163,12 @@ module.exports = class Many extends require('./relation')
           return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
 
           add = (callback) =>
-            attributes = {}
-            attributes[@foreign_key] = model.id
+            (attributes = {})[@foreign_key] = model.id
             attributes[@reverse_relation.foreign_key] = related_id
-            # console.log "Creating join for: #{@model_type.model_name} join: #{Utils.inspect(attributes)}"
-            join = new @join_table(attributes)
-            join.save callback
+            @join_table.exists attributes, (err, exists) =>
+              return callback(err) if err
+              return callback(new Error "Join already exists: #{JSON.stringify(attributes)}") if exists
+              new @join_table(attributes).save callback
 
           # just create another entry
           return add(callback) if @reverse_relation.type is 'hasMany'
