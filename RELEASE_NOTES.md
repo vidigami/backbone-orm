@@ -1,6 +1,7 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
 ### 0.6.0
+* See [upgrade notes](https://github.com/vidigami/backbone-orm/blob/master/UPGRADING.md) for upgrading pointers from 0.5.0.
 * BREAKING: Removed QueryCache
 * BREAKING: Moved model cache to set configured using BackboneORM.configure({model_cache: options})
 * BREAKING: Deprecated Utils.inspect and moved to JSONUtils.stringify
