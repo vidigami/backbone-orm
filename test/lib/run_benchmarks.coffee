@@ -25,7 +25,7 @@ module.exports = (callback) ->
   queue.defer (callback) ->
     gulp.src('_temp/performance/**/*.benchmark.js')
       .pipe(benchmark())
-      .pipe es.writeArray (err, array) -> callback(err)
+      .on('end', callback)
 
   queue.await (err) ->
     Wrench.rmdirSyncRecursive('./_temp', true) unless err
