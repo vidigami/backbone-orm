@@ -4,7 +4,7 @@ module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   entry: './backbone-orm.js'
   output:
     library: 'BackboneORM'
-    libraryTarget: 'umd'
+    libraryTarget: 'umd2'
 
   externals: [
     {stream: 'stream'}
