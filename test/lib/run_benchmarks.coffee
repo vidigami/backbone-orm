@@ -13,7 +13,8 @@ module.exports = (callback) ->
   queue.defer (callback) ->
     gulp.src('config/builds/performance/**/*.webpack.config.coffee', {read: false, buffer: false})
       .pipe(webpack())
-      .pipe(gulp.dest('./_temp/performance/build'))
+      .pipe(gulp.dest('./_temp/performance/builds'))
+      .on('end', callback)
 
   queue.defer (callback) ->
     gulp.src('test/performance/**/*.coffee')
