@@ -55,10 +55,8 @@ for library_name, library_files of AMD_LIBRARIES
 ###############################
 TEST_GROUPS.webpack = []
 for file in FILES.tests_webpack
-  try webpack_config = require "../#{file}"
-  if webpack_config
-    test_file = webpack_config.output.filename
-    TEST_GROUPS.webpack.push({name: "webpack_#{path.basename(test_file, '.js')}", files: [test_file]})
+  test_file = path.basename(file, '.js').replace('.webpack.config', '')
+  TEST_GROUPS.webpack.push({name: "webpack_#{test_file.replace('tests.coffee', '')}", files: [test_file.replace('.coffee', '.js')]})
 
 ###############################
 # Browserify

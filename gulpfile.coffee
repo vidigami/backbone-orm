@@ -25,7 +25,7 @@ gulp.task 'build', buildLibraries = (callback) ->
   gulp.src('config/builds/library/**/*.webpack.config.coffee', {read: false, buffer: false})
     .pipe(webpack())
     .pipe(header(HEADER, {pkg: require './package.json'}))
-    .pipe(gulp.dest((file) -> file.base))
+    .pipe(gulp.dest('.'))
     .on('end', callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
@@ -57,11 +57,11 @@ gulp.task 'test-browsers', ['minify'], testBrowsers = (callback) ->
   (require './config/karma/run')(callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test', ['minify'], (callback) ->
+gulp.task 'test', ['minify'], testAll = (callback) ->
   Async.series [testNode, testBrowsers], (err) -> process.exit(if err then 1 else 0)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-quick', ['build'], testNode
+gulp.task 'test-quick', ['build'], testAll
 gulp.task 'test-node-quick', ['build'], testNode
 gulp.task 'test-browsers-quick', ['build'], testBrowsers
 

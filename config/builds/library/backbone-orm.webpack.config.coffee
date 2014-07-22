@@ -5,8 +5,6 @@ _ = require 'underscore'
 module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   entry: './src/index.coffee'
   output:
-    path: '.'
-    filename: 'backbone-orm.js'
     library: 'BackboneORM'
     libraryTarget: 'umd'
 
