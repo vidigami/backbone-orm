@@ -41,8 +41,9 @@ gulp.task 'minify', ['build'], (callback) ->
 testNodeFn = (options={}) -> (callback) ->
   gutil.log 'Running Node.js tests'
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
+  mocha_options = if options.quick then {grep: '@no_options'} else {}
   gulp.src('test/spec/**/*.tests.coffee')
-    .pipe(mocha(options))
+    .pipe(mocha(mocha_options))
     .pipe es.writeArray (err, array) ->
       delete global.test_parameters # cleanup globals
       callback(err)
@@ -50,19 +51,20 @@ testNodeFn = (options={}) -> (callback) ->
 
 testBrowsersFn = (options={}) -> (callback) ->
   gutil.log 'Running Browser tests'
-  (require './config/karma/run')(options, callback)
+  karma_options = if options.quick then {client: {args: ['--grep', '@no_options']}} else {}
+  (require './config/karma/run')(karma_options, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node', ['minify'], testNode = testNodeFn()
-gulp.task 'test-browsers', ['minify'], testBrowsers = testBrowsersFn()
+gulp.task 'test-node', ['minify'], testNodeFn()
+gulp.task 'test-browsers', ['minify'], testBrowsersFn()
 gulp.task 'test', ['minify'], (callback) ->
-  Async.series [testNode, testBrowsers], (err) -> if err then process.exit(1) else callback(err)
+  Async.series [testNodeFn(), testBrowsersFn()], (err) -> if err then process.exit(1) else callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node-quick', ['build'], testNodeQuick = testNodeFn({grep: '@no_options'})
-gulp.task 'test-browsers-quick', ['build'], testBrowsersQuick = testBrowsersFn({client: {args: ['--grep', '@no_options']}})
+gulp.task 'test-node-quick', ['build'], testNodeFn({quick: true})
+gulp.task 'test-browsers-quick', ['build'], testBrowsersFn({quick: true})
 gulp.task 'test-quick', ['build'], (callback) ->
-  Async.series [testNodeQuick, testBrowsersQuick], (err) -> if err then process.exit(1) else callback(err)
+  Async.series [testNodeFn({quick: true}), testBrowsersFn({quick: true})], (err) -> if err then process.exit(1) else callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'benchmark', ['build'], (callback) ->

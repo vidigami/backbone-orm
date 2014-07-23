@@ -21,9 +21,11 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# TODO: should this be wrapped in a mocha describe/it ?
+
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm'); try BackboneORM or= require?('../../../../backbone-orm')
 {_} = BackboneORM
 {url} = BackboneORM.modules
 

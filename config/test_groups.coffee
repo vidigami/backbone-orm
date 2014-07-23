@@ -17,8 +17,8 @@ LIBRARIES =
   backbone_lodash: (resolveModule(module_name) for module_name in ['jquery', 'lodash', 'backbone']).concat(['./backbone-orm.js'])
   backbone_lodash_min: (resolveModule(module_name) for module_name in ['lodash', 'backbone']).concat(['./backbone-orm.min.js'])
 
-TEST_CONFIG = ['./test/parameters.coffee', './test/option_sets.coffee']
-TEST_CONFIG_JS = ['./_temp/parameters.js', './_temp/option_sets.js']
+TEST_CONFIG = ['./test/parameters.coffee']
+TEST_CONFIG_JS = ['./_temp/parameters.js']
 TEST_SOURCES = ['./test/spec/lib/**/*.tests.coffee', './test/spec/sync/**/*.tests.coffee']
 
 TEST_GROUPS.browser_globals = []

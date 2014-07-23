@@ -1,11 +1,11 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm'); try BackboneORM or= require?('../../../../backbone-orm')
 {_, Backbone, Queue, Utils, Fabricator} = BackboneORM
 
 try WritableStream = require('stream').Writable; TransformStream = require('stream').Transform
 
-option_sets = window?.__test__option_sets or require?('../../../option_sets')
+option_sets = BackboneORM.Utils._getTestOptionSets()
 parameters = __test__parameters if __test__parameters?
 
 _.each option_sets, exports = (options) ->
