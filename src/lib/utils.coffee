@@ -95,7 +95,7 @@ module.exports = class Utils
   # @nodoc
   @configureCollectionModelType: (type, sync) ->
     modelURL = ->
-      url = _.result(@collection or type::, 'url')
+      url = _.result((@collection or type.prototype), 'url')
       unless @isNew()
         url_parts = URL.parse(url)
         url_parts.pathname = "#{url_parts.pathname}/encodeURIComponent(@id)"
@@ -247,3 +247,16 @@ module.exports = class Utils
       return if JSONUtils.stringify(model[field]) < JSONUtils.stringify(other_model[field]) then 1 else -1
     else
       return if JSONUtils.stringify(model[field]) > JSONUtils.stringify(other_model[field]) then 1 else -1
+
+
+  ##############################
+  # Test Helper
+  ##############################
+
+  @_getTestOptionSets: ->
+    option_sets = [
+      {'cache': false, 'embed': false, '$tags': '@no_cache @no_embed @no_options'},
+      {'cache': true, 'embed': false, '$tags': '@cache @no_embed'},
+      {'cache': false, 'embed': true, '$tags': '@no_cache @embed'},
+      {'cache': true, 'embed': true, '$tags': '@cache @embed'}
+    ]
