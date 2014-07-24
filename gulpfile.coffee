@@ -1,4 +1,5 @@
 path = require 'path'
+_ = require 'underscore'
 Async = require 'async'
 es = require 'event-stream'
 
@@ -28,8 +29,9 @@ gulp.task 'build', buildLibraries = ->
 
 gulp.task 'watch', ['build'], (callback) ->
   return gulp.watch './src/**/*.coffee', -> buildLibraries()
+  return gulp.watch './src/**/*.coffee', -> buildLibraries()
 
-gulp.task 'minify', ['build'], (callback) ->
+gulp.task 'minify', ['build'], ->
   return gulp.src(['*.js', '!*.min.js', '!_temp/**/*.js', '!node_modules/'])
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
@@ -37,17 +39,18 @@ gulp.task 'minify', ['build'], (callback) ->
     .pipe(gulp.dest((file) -> file.base))
 
 testNodeFn = (options={}) -> (callback) ->
-  gutil.log 'Running Node.js tests'
+  gutil.log "Running Node.js tests #{if options.quick then '(quick)' else ''}"
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
   mocha_options = if options.quick then {grep: '@no_options'} else {}
-  return gulp.src('test/spec/**/*.tests.coffee')
-    .pipe(mocha(mocha_options))
+  gulp.src('test/spec/**/*.tests.coffee')
+    .pipe(mocha(_.extend({reporter: 'dot'}, mocha_options)))
     .pipe es.writeArray (err, array) ->
       delete global.test_parameters # cleanup globals
       callback(err)
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 testBrowsersFn = (options={}) -> (callback) ->
-  gutil.log 'Running Browser tests'
+  gutil.log "Running Browser tests #{if options.quick then '(quick)' else ''}"
   karma_options = if options.quick then {client: {args: ['--grep', '@no_options']}} else {}
   (require './config/karma/run')(karma_options, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
