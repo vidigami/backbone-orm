@@ -8,7 +8,6 @@ webpack = require 'gulp-webpack-config'
 rename = require 'gulp-rename'
 uglify = require 'gulp-uglify'
 header = require 'gulp-header'
-zip = require 'gulp-zip'
 mocha = require 'gulp-mocha'
 
 HEADER = """
@@ -70,12 +69,3 @@ gulp.task 'test-quick', ['build'], (callback) ->
 gulp.task 'benchmark', ['build'], (callback) ->
   (require './test/lib/run_benchmarks')(callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
-
-gulp.task 'zip', ['minify'], (callback) ->
-  gulp.src(['*.js'])
-    .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
-    .pipe(zip('backbone-orm.zip'))
-    .pipe(gulp.dest('./'))
-  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
-
-gulp.task 'release', ['build', 'zip'], ->

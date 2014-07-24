@@ -22,11 +22,9 @@
   },
   "scripts": {
     "test": "gulp test",
-    "test-quick": "gulp test-node-quick",
-    "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/.",
     "build": "gulp build",
     "watch": "gulp watch",
-    "release": "gulp release"
+    "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/."
   },
   "devDependencies": {
     "async": "*",
@@ -51,7 +49,6 @@
     "gulp-util": "*",
     "gulp-webpack-config": "*",
     "gulp-wrap-amd-infer": "*",
-    "gulp-zip": "*",
     "inflection": "*",
     "jquery": "*",
     "karma": "*",
