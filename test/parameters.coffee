@@ -6,4 +6,3 @@ exports =
   # $parameter_tags: '@memory_sync '
 
 (root = if window? then window else global).__test__parameters = exports; module?.exports = exports
-return exports

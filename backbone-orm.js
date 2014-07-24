@@ -1317,8 +1317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function TestUtils() {}
 
 	  TestUtils.optionSets = function() {
-	    var option_sets;
-	    return option_sets = [
+	    return [
 	      {
 	        'cache': false,
 	        'embed': false,
