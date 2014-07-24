@@ -25,7 +25,6 @@ gulp.task 'build', buildLibraries = ->
     .pipe(webpack())
     .pipe(header(HEADER, {pkg: require './package.json'}))
     .pipe(gulp.dest('.'))
-  # return stream instead of explicit callback https://github.com/gulpjs/gulp/blob/master/docs/API.md
 
 gulp.task 'watch', ['build'], (callback) ->
   return gulp.watch './src/**/*.coffee', -> buildLibraries()
@@ -41,12 +40,11 @@ testNodeFn = (options={}) -> (callback) ->
   gutil.log 'Running Node.js tests'
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
   mocha_options = if options.quick then {grep: '@no_options'} else {}
-  gulp.src('test/spec/**/*.tests.coffee')
+  return gulp.src('test/spec/**/*.tests.coffee')
     .pipe(mocha(mocha_options))
     .pipe es.writeArray (err, array) ->
       delete global.test_parameters # cleanup globals
       callback(err)
-  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 testBrowsersFn = (options={}) -> (callback) ->
   gutil.log 'Running Browser tests'
