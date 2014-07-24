@@ -72,9 +72,10 @@ gulp.task 'benchmark', ['build'], (callback) ->
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'zip', ['minify'], (callback) ->
-  return gulp.src(['*.js'])
+  gulp.src(['*.js'])
     .pipe(es.map (file, callback) -> file.path = file.path.replace('stream', 'optional/stream'); callback(null, file))
     .pipe(zip('backbone-orm.zip'))
     .pipe(gulp.dest('./'))
+  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'release', ['build', 'zip'], ->
