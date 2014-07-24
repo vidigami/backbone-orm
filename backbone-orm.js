@@ -79,14 +79,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Utils: __webpack_require__(7),
 	  JSONUtils: __webpack_require__(8),
 	  DateUtils: __webpack_require__(9),
-	  Queue: __webpack_require__(10),
-	  DatabaseURL: __webpack_require__(11),
-	  Fabricator: __webpack_require__(12),
-	  MemoryStore: __webpack_require__(16),
-	  Cursor: __webpack_require__(13),
-	  Schema: __webpack_require__(14),
-	  ConnectionPool: __webpack_require__(15),
-	  BaseConvention: __webpack_require__(17),
+	  TestUtils: __webpack_require__(10),
+	  Queue: __webpack_require__(11),
+	  DatabaseURL: __webpack_require__(12),
+	  Fabricator: __webpack_require__(13),
+	  MemoryStore: __webpack_require__(17),
+	  Cursor: __webpack_require__(14),
+	  Schema: __webpack_require__(15),
+	  ConnectionPool: __webpack_require__(16),
+	  BaseConvention: __webpack_require__(18),
 	  _: __webpack_require__(1),
 	  Backbone: __webpack_require__(2)
 	};
@@ -96,10 +97,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	BackboneORM.modules = {
 	  underscore: __webpack_require__(1),
 	  backbone: __webpack_require__(2),
-	  url: __webpack_require__(18),
-	  querystring: __webpack_require__(19),
-	  'lru-cache': __webpack_require__(25),
-	  inflection: __webpack_require__(26)
+	  url: __webpack_require__(19),
+	  querystring: __webpack_require__(20),
+	  'lru-cache': __webpack_require__(26),
+	  inflection: __webpack_require__(27)
 	};
 
 	try {
@@ -153,11 +154,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(4);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
-	MemoryCursor = __webpack_require__(20);
+	MemoryCursor = __webpack_require__(21);
 
-	Schema = __webpack_require__(14);
+	Schema = __webpack_require__(15);
 
 	Utils = __webpack_require__(7);
 
@@ -330,15 +331,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	BackboneORM = __webpack_require__(4);
 
 	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(21),
-	  underscore: __webpack_require__(21),
-	  camelize: __webpack_require__(22),
-	  classify: __webpack_require__(23)
+	  "default": __webpack_require__(22),
+	  underscore: __webpack_require__(22),
+	  camelize: __webpack_require__(23),
+	  classify: __webpack_require__(24)
 	};
 
 	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
 
-	BackboneORM.model_cache = new (__webpack_require__(24))();
+	BackboneORM.model_cache = new (__webpack_require__(25))();
 
 	module.exports = configure = function(options) {
 	  var convention, key, value, _results;
@@ -387,7 +388,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	URL = __webpack_require__(18);
+	URL = __webpack_require__(19);
 
 	Backbone = __webpack_require__(2);
 
@@ -395,9 +396,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(4);
 
-	DatabaseURL = __webpack_require__(11);
+	DatabaseURL = __webpack_require__(12);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	JSONUtils = __webpack_require__(8);
 
@@ -570,7 +571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.configureModelType = function(type) {
-	    modelExtensions || (modelExtensions = __webpack_require__(29));
+	    modelExtensions || (modelExtensions = __webpack_require__(28));
 	    return modelExtensions(type);
 	  };
 
@@ -792,29 +793,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  Utils._getTestOptionSets = function() {
-	    var option_sets;
-	    return option_sets = [
-	      {
-	        'cache': false,
-	        'embed': false,
-	        '$tags': '@no_cache @no_embed @no_options'
-	      }, {
-	        'cache': true,
-	        'embed': false,
-	        '$tags': '@cache @no_embed'
-	      }, {
-	        'cache': false,
-	        'embed': true,
-	        '$tags': '@no_cache @embed'
-	      }, {
-	        'cache': true,
-	        'embed': true,
-	        '$tags': '@cache @embed'
-	      }
-	    ];
-	  };
-
 	  return Utils;
 
 	})();
@@ -836,7 +814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
 
@@ -1333,6 +1311,43 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var TestUtils;
+
+	module.exports = TestUtils = (function() {
+	  function TestUtils() {}
+
+	  TestUtils.optionSets = function() {
+	    var option_sets;
+	    return option_sets = [
+	      {
+	        'cache': false,
+	        'embed': false,
+	        '$tags': '@no_cache @no_embed @no_options'
+	      }, {
+	        'cache': true,
+	        'embed': false,
+	        '$tags': '@cache @no_embed'
+	      }, {
+	        'cache': false,
+	        'embed': true,
+	        '$tags': '@no_cache @embed'
+	      }, {
+	        'cache': true,
+	        'embed': true,
+	        '$tags': '@cache @embed'
+	      }
+	    ];
+	  };
+
+	  return TestUtils;
+
+	})();
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -1405,7 +1420,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -1420,7 +1435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	URL = __webpack_require__(18);
+	URL = __webpack_require__(19);
 
 	BackboneORM = __webpack_require__(4);
 
@@ -1530,14 +1545,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Fabricator, Queue, _;
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	module.exports = Fabricator = (function() {
 	  function Fabricator() {}
@@ -1618,7 +1633,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2046,7 +2061,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2067,11 +2082,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(4);
 
-	One = __webpack_require__(27);
+	One = __webpack_require__(29);
 
-	Many = __webpack_require__(28);
+	Many = __webpack_require__(30);
 
-	DatabaseURL = __webpack_require__(11);
+	DatabaseURL = __webpack_require__(12);
 
 	Utils = __webpack_require__(7);
 
@@ -2358,7 +2373,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2371,7 +2386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var MemoryStore;
 
-	MemoryStore = __webpack_require__(16);
+	MemoryStore = __webpack_require__(17);
 
 	module.exports = new MemoryStore({
 	  destroy: function(url, connection) {
@@ -2381,7 +2396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2397,7 +2412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	LRU = __webpack_require__(25);
+	LRU = __webpack_require__(26);
 
 	module.exports = MemoryStore = (function() {
 	  function MemoryStore(options) {
@@ -2464,12 +2479,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseConvention, inflection;
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(27);
 
 	module.exports = BaseConvention = (function() {
 	  function BaseConvention() {}
@@ -2500,7 +2515,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -2526,7 +2541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var punycode = { encode : function (s) { return s } };
 	var _ = __webpack_require__(1);
-	var shims = __webpack_require__(30);
+	var shims = __webpack_require__(31);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -2598,7 +2613,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      'gopher:': true,
 	      'file:': true
 	    },
-	    querystring = __webpack_require__(19);
+	    querystring = __webpack_require__(20);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
 	  if (url && _.isObject(url) && url instanceof Url) return url;
@@ -3206,7 +3221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
@@ -3424,10 +3439,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return obj;
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3445,7 +3460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
 
@@ -3453,7 +3468,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DateUtils = __webpack_require__(9);
 
-	Cursor = __webpack_require__(13);
+	Cursor = __webpack_require__(14);
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
@@ -3905,16 +3920,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseConvention, UnderscoreConvention, inflection,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(27);
 
-	BaseConvention = __webpack_require__(17);
+	BaseConvention = __webpack_require__(18);
 
 	module.exports = UnderscoreConvention = (function(_super) {
 	  __extends(UnderscoreConvention, _super);
@@ -3933,16 +3948,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseConvention, CamelizeConvention, inflection,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(27);
 
-	BaseConvention = __webpack_require__(17);
+	BaseConvention = __webpack_require__(18);
 
 	module.exports = CamelizeConvention = (function(_super) {
 	  __extends(CamelizeConvention, _super);
@@ -3961,16 +3976,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseConvention, ClassifyConvention, inflection,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-	inflection = __webpack_require__(26);
+	inflection = __webpack_require__(27);
 
-	BaseConvention = __webpack_require__(17);
+	BaseConvention = __webpack_require__(18);
 
 	module.exports = ClassifyConvention = (function(_super) {
 	  __extends(ClassifyConvention, _super);
@@ -3989,7 +4004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -4006,9 +4021,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
-	MemoryStore = __webpack_require__(16);
+	MemoryStore = __webpack_require__(17);
 
 	module.exports = ModelCache = (function() {
 	  function ModelCache() {
@@ -4093,7 +4108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	;(function () { // closure for web browsers
@@ -4351,7 +4366,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -4995,1124 +5010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, BackboneORM, One, Queue, Utils, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	BackboneORM = __webpack_require__(4);
-
-	Queue = __webpack_require__(10);
-
-	Utils = __webpack_require__(7);
-
-	module.exports = One = (function(_super) {
-	  __extends(One, _super);
-
-	  function One(model_type, key, options) {
-	    var value;
-	    this.model_type = model_type;
-	    this.key = key;
-	    for (key in options) {
-	      value = options[key];
-	      this[key] = value;
-	    }
-	    this.virtual_id_accessor || (this.virtual_id_accessor = BackboneORM.naming_conventions.foreignKey(this.key));
-	    if (!this.join_key) {
-	      this.join_key = this.foreign_key || BackboneORM.naming_conventions.foreignKey(this.model_type.model_name);
-	    }
-	    if (!this.foreign_key) {
-	      this.foreign_key = BackboneORM.naming_conventions.foreignKey(this.type === 'belongsTo' ? this.key : this.as || this.model_type.model_name);
-	    }
-	  }
-
-	  One.prototype.initialize = function() {
-	    var _ref;
-	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
-	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
-	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
-	    }
-	    if (this.embed) {
-	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
-	    }
-	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, this.model_type) : void 0;
-	  };
-
-	  One.prototype.initializeModel = function(model) {
-	    if (!model.isLoadedExists(this.key)) {
-	      model.setLoaded(this.key, this.isEmbedded());
-	    }
-	    return this._bindBacklinks(model);
-	  };
-
-	  One.prototype.releaseModel = function(model) {
-	    this._unbindBacklinks(model);
-	    return delete model._orm;
-	  };
-
-	  One.prototype.set = function(model, key, value, options) {
-	    var is_model, merge_into_existing, new_related_id, previous_related_id, previous_related_model;
-	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
-	      throw new Error("One.set: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
-	    }
-	    if (_.isArray(value)) {
-	      throw new Error("One.set: cannot set an array for attribute " + this.key + " on " + this.model_type.model_name);
-	    }
-	    if (_.isUndefined(value)) {
-	      value = null;
-	    }
-	    if (value === (previous_related_model = model.get(this.key))) {
-	      return this;
-	    }
-	    is_model = Utils.isModel(value);
-	    new_related_id = Utils.dataId(value);
-	    previous_related_id = Utils.dataId(previous_related_model);
-	    Utils.orSet(model, 'rel_dirty', {})[this.key] = true;
-	    if ((previous_related_id !== new_related_id) || !model.isLoaded(this.key)) {
-	      if ((is_model && (value.isLoaded())) && (new_related_id !== value)) {
-	        model.setLoaded(this.key, true);
-	      } else {
-	        model.setLoaded(this.key, _.isNull(value));
-	      }
-	    }
-	    if (value && !is_model) {
-	      if (!(merge_into_existing = previous_related_id === new_related_id)) {
-	        value = Utils.updateOrNew(value, this.reverse_model_type);
-	      }
-	    }
-	    if (!merge_into_existing) {
-	      Backbone.Model.prototype.set.call(model, this.key, value, options);
-	    }
-	    if (merge_into_existing) {
-	      Utils.updateModel(previous_related_model, value);
-	    } else if ((value === null) && this.reverse_relation && (this.reverse_relation.type === 'hasOne' || this.reverse_relation.type === 'belongsTo')) {
-	      if (!(this.embed || this.reverse_relation.embed)) {
-	        if (model.isLoaded(this.key) && previous_related_model && (previous_related_model.get(this.reverse_relation.key) === model)) {
-	          previous_related_model.set(this.reverse_relation.key, null);
-	        }
-	      }
-	    }
-	    return this;
-	  };
-
-	  One.prototype.get = function(model, key, callback) {
-	    var is_loaded, result, returnValue;
-	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
-	      throw new Error("One.get: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
-	    }
-	    returnValue = (function(_this) {
-	      return function() {
-	        var related_model;
-	        if (!(related_model = model.attributes[_this.key])) {
-	          return null;
-	        }
-	        if (key === _this.virtual_id_accessor) {
-	          return related_model.id;
-	        } else {
-	          return related_model;
-	        }
-	      };
-	    })(this);
-	    if (callback && !this.isVirtual() && !this.manual_fetch && !(is_loaded = model.isLoaded(this.key))) {
-	      this.cursor(model, key).toJSON((function(_this) {
-	        return function(err, json) {
-	          var previous_related_model, related_model;
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (key !== _this.virtual_id_accessor) {
-	            model.setLoaded(_this.key, true);
-	          }
-	          previous_related_model = model.get(_this.key);
-	          if (previous_related_model && (previous_related_model.id === (json != null ? json.id : void 0))) {
-	            Utils.updateModel(previous_related_model, json);
-	          } else {
-	            related_model = json ? Utils.updateOrNew(json, _this.reverse_model_type) : null;
-	            model.set(_this.key, related_model);
-	          }
-	          return callback(null, returnValue());
-	        };
-	      })(this));
-	    }
-	    result = returnValue();
-	    if (callback && (is_loaded || this.manual_fetch)) {
-	      callback(null, result);
-	    }
-	    return result;
-	  };
-
-	  One.prototype.save = function(model, callback) {
-	    var related_model;
-	    if (!this._hasChanged(model)) {
-	      return callback();
-	    }
-	    delete Utils.orSet(model, 'rel_dirty', {})[this.key];
-	    if (!(related_model = model.attributes[this.key])) {
-	      return callback();
-	    }
-	    return this._saveRelated(model, [related_model], callback);
-	  };
-
-	  One.prototype.patchAdd = function(model, related, callback) {
-	    var found_related, related_id;
-	    if (!model.id) {
-	      return callback(new Error("One.patchAdd: model has null id for: " + this.key));
-	    }
-	    if (!related) {
-	      return callback(new Error("One.patchAdd: missing model for: " + this.key));
-	    }
-	    if (_.isArray(related)) {
-	      return callback(new Error("One.patchAdd: should be provided with one model only for key: " + this.key));
-	    }
-	    if (!(related_id = Utils.dataId(related))) {
-	      return callback(new Error("One.patchAdd: cannot add a new model. Please save first."));
-	    }
-	    if (this.reverse_model_type.cache && !Utils.isModel(related)) {
-	      if (found_related = this.reverse_model_type.cache.get(related_id)) {
-	        Utils.updateModel(found_related, related);
-	        related = found_related;
-	      }
-	    }
-	    model.set(this.key, related);
-	    if (this.type === 'belongsTo') {
-	      return this.model_type.cursor({
-	        id: model.id,
-	        $one: true
-	      }).toJSON((function(_this) {
-	        return function(err, model_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!model_json) {
-	            return callback(new Error("Failed to fetch model with id: " + model.id));
-	          }
-	          model_json[_this.foreign_key] = related_id;
-	          return model.save(model_json, callback);
-	        };
-	      })(this));
-	    } else {
-	      return this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, current_related_json) {
-	          var queue;
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (current_related_json && (related_id === current_related_json[_this.reverse_model_type.prototype.idAttribute])) {
-	            return callback();
-	          }
-	          queue = new Queue(1);
-	          if (current_related_json) {
-	            queue.defer(function(callback) {
-	              return _this.patchRemove(model, current_related_json, callback);
-	            });
-	          }
-	          queue.defer(function(callback) {
-	            var query, related_json;
-	            if (Utils.isModel(related)) {
-	              if (related.isLoaded()) {
-	                related_json = related.toJSON();
-	              }
-	            } else if (related_id !== related) {
-	              related_json = related;
-	            }
-	            if (related_json) {
-	              related_json[_this.reverse_relation.foreign_key] = model.id;
-	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	            } else {
-	              query = {
-	                $one: true
-	              };
-	              query.id = related_id;
-	              return _this.reverse_model_type.cursor(query).toJSON(function(err, related_json) {
-	                if (err) {
-	                  return callback(err);
-	                }
-	                if (!related_json) {
-	                  return callback();
-	                }
-	                related_json[_this.reverse_relation.foreign_key] = model.id;
-	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	              });
-	            }
-	          });
-	          return queue.await(callback);
-	        };
-	      })(this));
-	    }
-	  };
-
-	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var current_related_model, related, related_ids, _i, _len;
-	    if (arguments.length === 2) {
-	      callback = relateds;
-	      relateds = void 0;
-	    }
-	    if (!model.id) {
-	      return callback(new Error("One.patchRemove: model has null id for: " + this.key));
-	    }
-	    if (arguments.length === 2) {
-	      if (!this.reverse_relation) {
-	        return callback();
-	      }
-	      if (Utils.isModel(model)) {
-	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
-	      }
-	      this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, related_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!related_json) {
-	            return callback();
-	          }
-	          related_json[_this.reverse_relation.foreign_key] = null;
-	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	        };
-	      })(this));
-	      return;
-	    }
-	    if (this.isEmbedded()) {
-	      return callback(new Error('One.patchRemove: embedded relationships are not supported'));
-	    }
-	    if (!relateds) {
-	      return callback(new Error('One.patchRemove: missing model for remove'));
-	    }
-	    if (!_.isArray(relateds)) {
-	      relateds = [relateds];
-	    }
-	    if (current_related_model = model.get(this.key)) {
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
-	          model.set(this.key, null);
-	          break;
-	        }
-	      }
-	    }
-	    related_ids = (function() {
-	      var _j, _len1, _results;
-	      _results = [];
-	      for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
-	        related = relateds[_j];
-	        _results.push(Utils.dataId(related));
-	      }
-	      return _results;
-	    })();
-	    if (this.type === 'belongsTo') {
-	      return this.model_type.cursor({
-	        id: model.id,
-	        $one: true
-	      }).toJSON((function(_this) {
-	        return function(err, model_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!model_json) {
-	            return callback();
-	          }
-	          if (!_.contains(related_ids, model_json[_this.foreign_key])) {
-	            return callback();
-	          }
-	          model_json[_this.foreign_key] = null;
-	          return Utils.modelJSONSave(model_json, _this.model_type, callback);
-	        };
-	      })(this));
-	    } else {
-	      return this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, related_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!related_json) {
-	            return callback();
-	          }
-	          if (!_.contains(related_ids, related_json[_this.reverse_model_type.prototype.idAttribute])) {
-	            return callback();
-	          }
-	          related_json[_this.reverse_relation.foreign_key] = null;
-	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	        };
-	      })(this));
-	    }
-	  };
-
-	  One.prototype.appendJSON = function(json, model) {
-	    var json_key, related_model;
-	    if (this.isVirtual()) {
-	      return;
-	    }
-	    json_key = this.embed ? this.key : this.foreign_key;
-	    if (!(related_model = model.attributes[this.key])) {
-	      if (this.embed || this.type === 'belongsTo') {
-	        json[json_key] = null;
-	      }
-	      return;
-	    }
-	    if (this.embed) {
-	      return json[json_key] = related_model.toJSON();
-	    }
-	    if (this.type === 'belongsTo') {
-	      return json[json_key] = related_model.id;
-	    }
-	  };
-
-	  One.prototype.cursor = function(model, key, query) {
-	    var _ref;
-	    query = _.extend({
-	      $one: true
-	    }, query || {});
-	    if (Utils.isModel(model)) {
-	      if (this.type === 'belongsTo') {
-	        if (!(query.id = (_ref = model.attributes[this.key]) != null ? _ref.id : void 0)) {
-	          query.$zero = true;
-	          delete query.id;
-	        }
-	      } else {
-	        if (!model.id) {
-	          throw new Error('Cannot create cursor for non-loaded model');
-	        }
-	        query[this.reverse_relation.foreign_key] = model.id;
-	      }
-	    } else {
-	      if (this.type === 'belongsTo') {
-	        if (!(query.id = model[this.foreign_key])) {
-	          query.$zero = true;
-	          delete query.id;
-	        }
-	      } else {
-	        if (!model.id) {
-	          throw new Error('Cannot create cursor for non-loaded model');
-	        }
-	        query[this.reverse_relation.foreign_key] = model.id;
-	      }
-	    }
-	    if (key === this.virtual_id_accessor) {
-	      query.$values = ['id'];
-	    }
-	    return this.reverse_model_type.cursor(query);
-	  };
-
-	  One.prototype._bindBacklinks = function(model) {
-	    var events, related_model, setBacklink;
-	    if (!this.reverse_relation) {
-	      return;
-	    }
-	    events = Utils.set(model, 'events', {});
-	    setBacklink = (function(_this) {
-	      return function(related_model) {
-	        if (_this.reverse_relation.add) {
-	          return _this.reverse_relation.add(related_model, model);
-	        } else {
-	          return related_model.set(_this.reverse_relation.key, model);
-	        }
-	      };
-	    })(this);
-	    events.change = (function(_this) {
-	      return function(model) {
-	        var current_model, previous_related_model, related_model;
-	        related_model = model.get(_this.key);
-	        previous_related_model = model.previous(_this.key);
-	        if (Utils.dataId(related_model) === Utils.dataId(previous_related_model)) {
-	          return;
-	        }
-	        if (previous_related_model && (_this.reverse_relation && _this.reverse_relation.type !== 'belongsTo')) {
-	          if (_this.reverse_relation.remove) {
-	            if (!_this.isVirtual() || !related_model) {
-	              _this.reverse_relation.remove(previous_related_model, model);
-	            }
-	          } else {
-	            current_model = previous_related_model.get(_this.reverse_relation.key);
-	            if (Utils.dataId(current_model) === model.id) {
-	              previous_related_model.set(_this.reverse_relation.key, null);
-	            }
-	          }
-	        }
-	        if (related_model) {
-	          return setBacklink(related_model);
-	        }
-	      };
-	    })(this);
-	    model.on("change:" + this.key, events.change);
-	    if (related_model = model.get(this.key)) {
-	      setBacklink(related_model);
-	    } else {
-	      model.attributes[this.key] = null;
-	    }
-	    return model;
-	  };
-
-	  One.prototype._unbindBacklinks = function(model) {
-	    var events;
-	    if (!(events = Utils.get(model, 'events'))) {
-	      return;
-	    }
-	    Utils.unset(model, 'events');
-	    model.attributes[this.key] = null;
-	    model.off("change:" + this.key, events.change);
-	    events.change = null;
-	  };
-
-	  One.prototype._hasChanged = function(model) {
-	    var related_model;
-	    return !!Utils.orSet(model, 'rel_dirty', {})[this.key] || model.hasChanged(this.key);
-	    if (!this.reverse_relation) {
-	      return false;
-	    }
-	    if (!(related_model = model.attributes[this.key])) {
-	      return false;
-	    }
-	    return related_model.hasChanged(this.reverse_relation.foreign_key);
-	  };
-
-	  return One;
-
-	})(__webpack_require__(33));
-
-
-/***/ },
 /* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, BackboneORM, Many, Queue, Utils, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	Backbone = __webpack_require__(2);
-
-	_ = __webpack_require__(1);
-
-	BackboneORM = __webpack_require__(4);
-
-	Queue = __webpack_require__(10);
-
-	Utils = __webpack_require__(7);
-
-	module.exports = Many = (function(_super) {
-	  __extends(Many, _super);
-
-	  function Many(model_type, key, options) {
-	    var Collection, reverse_model_type, value;
-	    this.model_type = model_type;
-	    this.key = key;
-	    for (key in options) {
-	      value = options[key];
-	      this[key] = value;
-	    }
-	    this.virtual_id_accessor || (this.virtual_id_accessor = BackboneORM.naming_conventions.foreignKey(this.key, true));
-	    if (!this.join_key) {
-	      this.join_key = this.foreign_key || BackboneORM.naming_conventions.foreignKey(this.model_type.model_name);
-	    }
-	    if (!this.foreign_key) {
-	      this.foreign_key = BackboneORM.naming_conventions.foreignKey(this.as || this.model_type.model_name);
-	    }
-	    this._adding_ids = {};
-	    if (!this.collection_type) {
-	      reverse_model_type = this.reverse_model_type;
-	      Collection = (function(_super1) {
-	        __extends(Collection, _super1);
-
-	        function Collection() {
-	          return Collection.__super__.constructor.apply(this, arguments);
-	        }
-
-	        Collection.prototype.model = reverse_model_type;
-
-	        return Collection;
-
-	      })(Backbone.Collection);
-	      this.collection_type = Collection;
-	    }
-	  }
-
-	  Many.prototype.initialize = function() {
-	    var _ref, _ref1;
-	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
-	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
-	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
-	    }
-	    if (((_ref = this.reverse_relation) != null ? _ref.type : void 0) === 'hasOne') {
-	      throw new Error("The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + ").");
-	    }
-	    if (this.embed) {
-	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
-	    }
-	    if ((_ref1 = this.reverse_model_type) != null) {
-	      _ref1.schema().type(this.foreign_key, this.model_type);
-	    }
-	    if (this.reverse_relation.type === 'hasMany') {
-	      return this.join_table = this.findOrGenerateJoinTable(this);
-	    }
-	  };
-
-	  Many.prototype.initializeModel = function(model) {
-	    if (!model.isLoadedExists(this.key)) {
-	      model.setLoaded(this.key, false);
-	    }
-	    return this._bindBacklinks(model);
-	  };
-
-	  Many.prototype.releaseModel = function(model) {
-	    this._unbindBacklinks(model);
-	    return delete model._orm;
-	  };
-
-	  Many.prototype.set = function(model, key, value, options) {
-	    var collection, item, model_ids, models, previous_models, related_model, _i, _len;
-	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
-	      throw new Error("Many.set: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
-	    }
-	    collection = this._bindBacklinks(model);
-	    if (Utils.isCollection(value)) {
-	      value = value.models;
-	    }
-	    if (_.isUndefined(value)) {
-	      value = [];
-	    }
-	    if (!_.isArray(value)) {
-	      throw new Error("HasMany.set: Unexpected type to set " + key + ". Expecting array: " + (JSONUtils.stringify(value)));
-	    }
-	    Utils.orSet(model, 'rel_dirty', {})[this.key] = true;
-	    model.setLoaded(this.key, _.all(value, function(item) {
-	      return Utils.dataId(item) !== item;
-	    }));
-	    models = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = value.length; _i < _len; _i++) {
-	        item = value[_i];
-	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
-	      }
-	      return _results;
-	    }).call(this);
-	    model.setLoaded(this.key, _.all(models, function(model) {
-	      return model.isLoaded();
-	    }));
-	    previous_models = _.clone(collection.models);
-	    collection.reset(models);
-	    if (this.reverse_relation.type === 'belongsTo') {
-	      model_ids = _.pluck(models, 'id');
-	      for (_i = 0, _len = previous_models.length; _i < _len; _i++) {
-	        related_model = previous_models[_i];
-	        if (!_.contains(model_ids, related_model.id)) {
-	          related_model.set(this.foreign_key, null);
-	        }
-	      }
-	    }
-	    return this;
-	  };
-
-	  Many.prototype.get = function(model, key, callback) {
-	    var collection, is_loaded, result, returnValue;
-	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
-	      throw new Error("Many.get: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
-	    }
-	    collection = this._ensureCollection(model);
-	    returnValue = (function(_this) {
-	      return function() {
-	        var related_model, _i, _len, _ref, _results;
-	        if (key === _this.virtual_id_accessor) {
-	          _ref = collection.models;
-	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            related_model = _ref[_i];
-	            _results.push(related_model.id);
-	          }
-	          return _results;
-	        } else {
-	          return collection;
-	        }
-	      };
-	    })(this);
-	    if (callback && !this.isVirtual() && !this.manual_fetch && !(is_loaded = model.isLoaded(this.key))) {
-	      this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, json) {
-	          var cache, model_json, related_model, result, _i, _j, _len, _len1, _ref;
-	          if (err) {
-	            return callback(err);
-	          }
-	          model.setLoaded(_this.key, true);
-	          for (_i = 0, _len = json.length; _i < _len; _i++) {
-	            model_json = json[_i];
-	            if (related_model = collection.get(model_json[_this.reverse_model_type.prototype.idAttribute])) {
-	              related_model.set(model_json);
-	            } else {
-	              collection.add(related_model = Utils.updateOrNew(model_json, _this.reverse_model_type));
-	            }
-	          }
-	          if (cache = _this.reverse_model_type.cache) {
-	            _ref = collection.models;
-	            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-	              related_model = _ref[_j];
-	              cache.set(related_model.id, related_model);
-	            }
-	          }
-	          result = returnValue();
-	          return callback(null, result.models ? result.models : result);
-	        };
-	      })(this));
-	    }
-	    result = returnValue();
-	    if (callback && (is_loaded || this.manual_fetch)) {
-	      callback(null, result.models ? result.models : result);
-	    }
-	    return result;
-	  };
-
-	  Many.prototype.save = function(model, callback) {
-	    var collection;
-	    if (!this._hasChanged(model)) {
-	      return callback();
-	    }
-	    delete Utils.orSet(model, 'rel_dirty', {})[this.key];
-	    collection = this._ensureCollection(model);
-	    return this._saveRelated(model, _.clone(collection.models), callback);
-	  };
-
-	  Many.prototype.appendJSON = function(json, model) {
-	    var collection, json_key;
-	    if (this.isVirtual()) {
-	      return;
-	    }
-	    collection = this._ensureCollection(model);
-	    json_key = this.embed ? this.key : this.virtual_id_accessor;
-	    if (this.embed) {
-	      return json[json_key] = collection.toJSON();
-	    }
-	  };
-
-	  Many.prototype.add = function(model, related_model) {
-	    var adding_count, collection, current_related_model, return_value;
-	    if (related_model.id) {
-	      adding_count = this._adding_ids[related_model.id] = (this._adding_ids[related_model.id] || 0) + 1;
-	    }
-	    collection = this._ensureCollection(model);
-	    current_related_model = collection.get(related_model.id);
-	    if (current_related_model === related_model) {
-	      return;
-	    }
-	    if (current_related_model) {
-	      collection.remove(current_related_model);
-	    }
-	    if (this.reverse_model_type.cache && related_model.id) {
-	      this.reverse_model_type.cache.set(related_model.id, related_model);
-	    }
-	    return_value = collection.add(related_model, {
-	      silent: adding_count > 1
-	    });
-	    if (related_model.id) {
-	      this._adding_ids[related_model.id]--;
-	    }
-	    return return_value;
-	  };
-
-	  Many.prototype.remove = function(model, related_model) {
-	    var collection, current_related_model;
-	    collection = this._ensureCollection(model);
-	    if (!(current_related_model = collection.get(related_model.id))) {
-	      return;
-	    }
-	    return collection.remove(current_related_model);
-	  };
-
-	  Many.prototype.patchAdd = function(model, relateds, callback) {
-	    var collection, item, query, queue, related, related_id, related_ids, related_model, _fn, _i, _j, _len, _len1;
-	    if (!model.id) {
-	      return callback(new Error("Many.patchAdd: model has null id for: " + this.key));
-	    }
-	    if (!relateds) {
-	      return callback(new Error("Many.patchAdd: missing model for: " + this.key));
-	    }
-	    if (!_.isArray(relateds)) {
-	      relateds = [relateds];
-	    }
-	    collection = this._ensureCollection(model);
-	    relateds = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        item = relateds[_i];
-	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
-	      }
-	      return _results;
-	    }).call(this);
-	    related_ids = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
-	        _results.push(Utils.dataId(related));
-	      }
-	      return _results;
-	    })();
-	    collection.add(relateds);
-	    if (model.isLoaded(this.key)) {
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
-	        if (!related.isLoaded()) {
-	          model.setLoaded(this.key, false);
-	          break;
-	        }
-	      }
-	    }
-	    if (this.join_table) {
-	      queue = new Queue(1);
-	      _fn = (function(_this) {
-	        return function(related_id) {
-	          return queue.defer(function(callback) {
-	            var add, query;
-	            if (!related_id) {
-	              return callback(new Error("Many.patchAdd: cannot add an new model. Please save first."));
-	            }
-	            add = function(callback) {
-	              var attributes;
-	              (attributes = {})[_this.foreign_key] = model.id;
-	              attributes[_this.reverse_relation.foreign_key] = related_id;
-	              return _this.join_table.exists(attributes, function(err, exists) {
-	                if (err) {
-	                  return callback(err);
-	                }
-	                if (exists) {
-	                  return callback(new Error("Join already exists: " + (JSON.stringify(attributes))));
-	                }
-	                return new _this.join_table(attributes).save(callback);
-	              });
-	            };
-	            if (_this.reverse_relation.type === 'hasMany') {
-	              return add(callback);
-	            }
-	            (query = {
-	              $one: true
-	            })[_this.reverse_relation.foreign_key] = related_id;
-	            return _this.join_table.cursor(query).toJSON(function(err, join_table_json) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              if (!join_table_json) {
-	                return add(callback);
-	              }
-	              if (join_table_json[_this.foreign_key] === model.id) {
-	                return callback();
-	              }
-	              join_table_json[_this.foreign_key] = model.id;
-	              return Utils.modelJSONSave(join_table_json, _this.join_table, callback);
-	            });
-	          });
-	        };
-	      })(this);
-	      for (_j = 0, _len1 = related_ids.length; _j < _len1; _j++) {
-	        related_id = related_ids[_j];
-	        _fn(related_id);
-	      }
-	      return queue.await(callback);
-	    } else {
-	      query = {
-	        id: {
-	          $in: related_ids
-	        }
-	      };
-	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
-	        return function(err, related_jsons) {
-	          var related_json, _fn1, _k, _len2;
-	          queue = new Queue(1);
-	          _fn1 = function(related_json) {
-	            return queue.defer(function(callback) {
-	              related_json[_this.reverse_relation.foreign_key] = model.id;
-	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	            });
-	          };
-	          for (_k = 0, _len2 = related_jsons.length; _k < _len2; _k++) {
-	            related_json = related_jsons[_k];
-	            _fn1(related_json);
-	          }
-	          return queue.await(callback);
-	        };
-	      })(this));
-	    }
-	  };
-
-	  Many.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref;
-	    if (!model.id) {
-	      return callback(new Error("Many.patchRemove: model has null id for: " + this.key));
-	    }
-	    if (arguments.length === 2) {
-	      callback = relateds;
-	      if (!this.reverse_relation) {
-	        return callback();
-	      }
-	      if (Utils.isModel(model)) {
-	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
-	        collection = this._ensureCollection(model);
-	        related_models = _.clone(collection.models);
-	      } else {
-	        related_models = (function() {
-	          var _i, _len, _ref, _results;
-	          _ref = model[this.key] || [];
-	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            json = _ref[_i];
-	            _results.push(new this.reverse_model_type(json));
-	          }
-	          return _results;
-	        }).call(this);
-	      }
-	      for (_i = 0, _len = related_models.length; _i < _len; _i++) {
-	        related_model = related_models[_i];
-	        related_model.set(this.foreign_key, null);
-	        if (cache = related_model.cache()) {
-	          cache.set(related_model.id, related_model);
-	        }
-	      }
-	      if (this.join_table) {
-	        (query = {})[this.join_key] = model.id;
-	        return this.join_table.destroy(query, callback);
-	      } else {
-	        (query = {})[this.reverse_relation.foreign_key] = model.id;
-	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
-	          return function(err, json) {
-	            var queue, related_json, _fn, _j, _len1;
-	            if (err) {
-	              return callback(err);
-	            }
-	            queue = new Queue(1);
-	            _fn = function(related_json) {
-	              return queue.defer(function(callback) {
-	                related_json[_this.reverse_relation.foreign_key] = null;
-	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	              });
-	            };
-	            for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
-	              related_json = json[_j];
-	              _fn(related_json);
-	            }
-	            return queue.await(callback);
-	          };
-	        })(this));
-	      }
-	      return;
-	    }
-	    if (this.isEmbedded()) {
-	      return callback(new Error('Many.patchRemove: embedded relationships are not supported'));
-	    }
-	    if (!relateds) {
-	      return callback(new Error('One.patchRemove: missing model for remove'));
-	    }
-	    if (!_.isArray(relateds)) {
-	      relateds = [relateds];
-	    }
-	    collection = this._ensureCollection(model);
-	    for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
-	      related = relateds[_j];
-	      _ref = collection.models;
-	      for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-	        current_related_model = _ref[_k];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
-	          collection.remove(current_related_model);
-	          break;
-	        }
-	      }
-	    }
-	    related_ids = (function() {
-	      var _l, _len3, _results;
-	      _results = [];
-	      for (_l = 0, _len3 = relateds.length; _l < _len3; _l++) {
-	        related = relateds[_l];
-	        _results.push(Utils.dataId(related));
-	      }
-	      return _results;
-	    })();
-	    if (this.join_table) {
-	      query = {};
-	      query[this.join_key] = model.id;
-	      query[this.reverse_relation.join_key] = {
-	        $in: related_ids
-	      };
-	      return this.join_table.destroy(query, callback);
-	    } else {
-	      query = {};
-	      query[this.reverse_relation.foreign_key] = model.id;
-	      query.id = {
-	        $in: related_ids
-	      };
-	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
-	        return function(err, json) {
-	          var queue, related_json, _fn, _l, _len3;
-	          if (err) {
-	            return callback(err);
-	          }
-	          queue = new Queue(1);
-	          _fn = function(related_json) {
-	            return queue.defer(function(callback) {
-	              related_json[_this.reverse_relation.foreign_key] = null;
-	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	            });
-	          };
-	          for (_l = 0, _len3 = json.length; _l < _len3; _l++) {
-	            related_json = json[_l];
-	            _fn(related_json);
-	          }
-	          return queue.await(callback);
-	        };
-	      })(this));
-	    }
-	  };
-
-	  Many.prototype.cursor = function(model, key, query) {
-	    var json;
-	    json = Utils.isModel(model) ? model.attributes : model;
-	    (query = _.clone(query || {}))[this.join_table ? this.join_key : this.reverse_relation.foreign_key] = json[this.model_type.prototype.idAttribute];
-	    if (key === this.virtual_id_accessor) {
-	      (query.$values || (query.$values = [])).push('id');
-	    }
-	    return this.reverse_model_type.cursor(query);
-	  };
-
-	  Many.prototype._bindBacklinks = function(model) {
-	    var collection, events, method, _i, _len, _ref;
-	    if ((collection = model.attributes[this.key]) instanceof this.collection_type) {
-	      return collection;
-	    }
-	    collection = model.attributes[this.key] = new this.collection_type();
-	    if (!this.reverse_relation) {
-	      return collection;
-	    }
-	    events = Utils.set(collection, 'events', {});
-	    events.add = (function(_this) {
-	      return function(related_model) {
-	        var current_model, is_current;
-	        if (_this.reverse_relation.add) {
-	          return _this.reverse_relation.add(related_model, model);
-	        } else {
-	          current_model = related_model.get(_this.reverse_relation.key);
-	          is_current = model.id && (Utils.dataId(current_model) === model.id);
-	          if (!is_current || (is_current && !current_model.isLoaded())) {
-	            return related_model.set(_this.reverse_relation.key, model);
-	          }
-	        }
-	      };
-	    })(this);
-	    events.remove = (function(_this) {
-	      return function(related_model) {
-	        var current_model;
-	        if (_this.reverse_relation.remove) {
-	          return _this.reverse_relation.remove(related_model, model);
-	        } else {
-	          current_model = related_model.get(_this.reverse_relation.key);
-	          if (Utils.dataId(current_model) === model.id) {
-	            return related_model.set(_this.reverse_relation.key, null);
-	          }
-	        }
-	      };
-	    })(this);
-	    events.reset = (function(_this) {
-	      return function(collection, options) {
-	        var added, changes, current_models, previous_models, related_model, _i, _j, _len, _len1, _ref, _results;
-	        current_models = collection.models;
-	        previous_models = options.previousModels || [];
-	        changes = _.groupBy(previous_models, function(test) {
-	          if (!!_.find(current_models, function(current_model) {
-	            return current_model.id === test.id;
-	          })) {
-	            return 'kept';
-	          } else {
-	            return 'removed';
-	          }
-	        });
-	        added = changes.kept ? _.select(current_models, function(test) {
-	          return !_.find(changes.kept, function(keep_model) {
-	            return keep_model.id === test.id;
-	          });
-	        }) : current_models;
-	        if (changes.removed) {
-	          _ref = changes.removed;
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            related_model = _ref[_i];
-	            events.remove(related_model);
-	          }
-	        }
-	        _results = [];
-	        for (_j = 0, _len1 = added.length; _j < _len1; _j++) {
-	          related_model = added[_j];
-	          _results.push(events.add(related_model));
-	        }
-	        return _results;
-	      };
-	    })(this);
-	    _ref = ['add', 'remove', 'reset'];
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      method = _ref[_i];
-	      collection.on(method, events[method]);
-	    }
-	    return collection;
-	  };
-
-	  Many.prototype._unbindBacklinks = function(model) {
-	    var collection, events, method, _i, _len, _ref;
-	    if (!(events = Utils.get(model, 'events'))) {
-	      return;
-	    }
-	    Utils.unset(model, 'events');
-	    collection = model.attributes[this.key];
-	    collection.models.splice();
-	    events = _.clone();
-	    _ref = ['add', 'remove', 'reset'];
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      method = _ref[_i];
-	      collection.off(method, events[method]);
-	      events[method] = null;
-	    }
-	  };
-
-	  Many.prototype._ensureCollection = function(model) {
-	    return this._bindBacklinks(model);
-	  };
-
-	  Many.prototype._hasChanged = function(model) {
-	    var collection, _i, _len, _ref;
-	    return !!Utils.orSet(model, 'rel_dirty', {})[this.key] || model.hasChanged(this.key);
-	    if (!this.reverse_relation) {
-	      return false;
-	    }
-	    collection = this._ensureCollection(model);
-	    _ref = model.models;
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      model = _ref[_i];
-	      if (model.hasChanged(this.reverse_relation.foreign_key)) {
-	        return true;
-	      }
-	    }
-	    return false;
-	  };
-
-	  return Many;
-
-	})(__webpack_require__(33));
-
-
-/***/ },
-/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6129,11 +5027,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
 
-	DatabaseURL = __webpack_require__(11);
+	DatabaseURL = __webpack_require__(12);
 
 	ModelStream = __webpack_require__(34);
 
@@ -6830,7 +5728,1124 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, BackboneORM, One, Queue, Utils, _,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	_ = __webpack_require__(1);
+
+	Backbone = __webpack_require__(2);
+
+	BackboneORM = __webpack_require__(4);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	module.exports = One = (function(_super) {
+	  __extends(One, _super);
+
+	  function One(model_type, key, options) {
+	    var value;
+	    this.model_type = model_type;
+	    this.key = key;
+	    for (key in options) {
+	      value = options[key];
+	      this[key] = value;
+	    }
+	    this.virtual_id_accessor || (this.virtual_id_accessor = BackboneORM.naming_conventions.foreignKey(this.key));
+	    if (!this.join_key) {
+	      this.join_key = this.foreign_key || BackboneORM.naming_conventions.foreignKey(this.model_type.model_name);
+	    }
+	    if (!this.foreign_key) {
+	      this.foreign_key = BackboneORM.naming_conventions.foreignKey(this.type === 'belongsTo' ? this.key : this.as || this.model_type.model_name);
+	    }
+	  }
+
+	  One.prototype.initialize = function() {
+	    var _ref;
+	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
+	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
+	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
+	    }
+	    if (this.embed) {
+	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
+	    }
+	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, this.model_type) : void 0;
+	  };
+
+	  One.prototype.initializeModel = function(model) {
+	    if (!model.isLoadedExists(this.key)) {
+	      model.setLoaded(this.key, this.isEmbedded());
+	    }
+	    return this._bindBacklinks(model);
+	  };
+
+	  One.prototype.releaseModel = function(model) {
+	    this._unbindBacklinks(model);
+	    return delete model._orm;
+	  };
+
+	  One.prototype.set = function(model, key, value, options) {
+	    var is_model, merge_into_existing, new_related_id, previous_related_id, previous_related_model;
+	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
+	      throw new Error("One.set: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
+	    }
+	    if (_.isArray(value)) {
+	      throw new Error("One.set: cannot set an array for attribute " + this.key + " on " + this.model_type.model_name);
+	    }
+	    if (_.isUndefined(value)) {
+	      value = null;
+	    }
+	    if (value === (previous_related_model = model.get(this.key))) {
+	      return this;
+	    }
+	    is_model = Utils.isModel(value);
+	    new_related_id = Utils.dataId(value);
+	    previous_related_id = Utils.dataId(previous_related_model);
+	    Utils.orSet(model, 'rel_dirty', {})[this.key] = true;
+	    if ((previous_related_id !== new_related_id) || !model.isLoaded(this.key)) {
+	      if ((is_model && (value.isLoaded())) && (new_related_id !== value)) {
+	        model.setLoaded(this.key, true);
+	      } else {
+	        model.setLoaded(this.key, _.isNull(value));
+	      }
+	    }
+	    if (value && !is_model) {
+	      if (!(merge_into_existing = previous_related_id === new_related_id)) {
+	        value = Utils.updateOrNew(value, this.reverse_model_type);
+	      }
+	    }
+	    if (!merge_into_existing) {
+	      Backbone.Model.prototype.set.call(model, this.key, value, options);
+	    }
+	    if (merge_into_existing) {
+	      Utils.updateModel(previous_related_model, value);
+	    } else if ((value === null) && this.reverse_relation && (this.reverse_relation.type === 'hasOne' || this.reverse_relation.type === 'belongsTo')) {
+	      if (!(this.embed || this.reverse_relation.embed)) {
+	        if (model.isLoaded(this.key) && previous_related_model && (previous_related_model.get(this.reverse_relation.key) === model)) {
+	          previous_related_model.set(this.reverse_relation.key, null);
+	        }
+	      }
+	    }
+	    return this;
+	  };
+
+	  One.prototype.get = function(model, key, callback) {
+	    var is_loaded, result, returnValue;
+	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
+	      throw new Error("One.get: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
+	    }
+	    returnValue = (function(_this) {
+	      return function() {
+	        var related_model;
+	        if (!(related_model = model.attributes[_this.key])) {
+	          return null;
+	        }
+	        if (key === _this.virtual_id_accessor) {
+	          return related_model.id;
+	        } else {
+	          return related_model;
+	        }
+	      };
+	    })(this);
+	    if (callback && !this.isVirtual() && !this.manual_fetch && !(is_loaded = model.isLoaded(this.key))) {
+	      this.cursor(model, key).toJSON((function(_this) {
+	        return function(err, json) {
+	          var previous_related_model, related_model;
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (key !== _this.virtual_id_accessor) {
+	            model.setLoaded(_this.key, true);
+	          }
+	          previous_related_model = model.get(_this.key);
+	          if (previous_related_model && (previous_related_model.id === (json != null ? json.id : void 0))) {
+	            Utils.updateModel(previous_related_model, json);
+	          } else {
+	            related_model = json ? Utils.updateOrNew(json, _this.reverse_model_type) : null;
+	            model.set(_this.key, related_model);
+	          }
+	          return callback(null, returnValue());
+	        };
+	      })(this));
+	    }
+	    result = returnValue();
+	    if (callback && (is_loaded || this.manual_fetch)) {
+	      callback(null, result);
+	    }
+	    return result;
+	  };
+
+	  One.prototype.save = function(model, callback) {
+	    var related_model;
+	    if (!this._hasChanged(model)) {
+	      return callback();
+	    }
+	    delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	    if (!(related_model = model.attributes[this.key])) {
+	      return callback();
+	    }
+	    return this._saveRelated(model, [related_model], callback);
+	  };
+
+	  One.prototype.patchAdd = function(model, related, callback) {
+	    var found_related, related_id;
+	    if (!model.id) {
+	      return callback(new Error("One.patchAdd: model has null id for: " + this.key));
+	    }
+	    if (!related) {
+	      return callback(new Error("One.patchAdd: missing model for: " + this.key));
+	    }
+	    if (_.isArray(related)) {
+	      return callback(new Error("One.patchAdd: should be provided with one model only for key: " + this.key));
+	    }
+	    if (!(related_id = Utils.dataId(related))) {
+	      return callback(new Error("One.patchAdd: cannot add a new model. Please save first."));
+	    }
+	    if (this.reverse_model_type.cache && !Utils.isModel(related)) {
+	      if (found_related = this.reverse_model_type.cache.get(related_id)) {
+	        Utils.updateModel(found_related, related);
+	        related = found_related;
+	      }
+	    }
+	    model.set(this.key, related);
+	    if (this.type === 'belongsTo') {
+	      return this.model_type.cursor({
+	        id: model.id,
+	        $one: true
+	      }).toJSON((function(_this) {
+	        return function(err, model_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!model_json) {
+	            return callback(new Error("Failed to fetch model with id: " + model.id));
+	          }
+	          model_json[_this.foreign_key] = related_id;
+	          return model.save(model_json, callback);
+	        };
+	      })(this));
+	    } else {
+	      return this.cursor(model, this.key).toJSON((function(_this) {
+	        return function(err, current_related_json) {
+	          var queue;
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (current_related_json && (related_id === current_related_json[_this.reverse_model_type.prototype.idAttribute])) {
+	            return callback();
+	          }
+	          queue = new Queue(1);
+	          if (current_related_json) {
+	            queue.defer(function(callback) {
+	              return _this.patchRemove(model, current_related_json, callback);
+	            });
+	          }
+	          queue.defer(function(callback) {
+	            var query, related_json;
+	            if (Utils.isModel(related)) {
+	              if (related.isLoaded()) {
+	                related_json = related.toJSON();
+	              }
+	            } else if (related_id !== related) {
+	              related_json = related;
+	            }
+	            if (related_json) {
+	              related_json[_this.reverse_relation.foreign_key] = model.id;
+	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	            } else {
+	              query = {
+	                $one: true
+	              };
+	              query.id = related_id;
+	              return _this.reverse_model_type.cursor(query).toJSON(function(err, related_json) {
+	                if (err) {
+	                  return callback(err);
+	                }
+	                if (!related_json) {
+	                  return callback();
+	                }
+	                related_json[_this.reverse_relation.foreign_key] = model.id;
+	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	              });
+	            }
+	          });
+	          return queue.await(callback);
+	        };
+	      })(this));
+	    }
+	  };
+
+	  One.prototype.patchRemove = function(model, relateds, callback) {
+	    var current_related_model, related, related_ids, _i, _len;
+	    if (arguments.length === 2) {
+	      callback = relateds;
+	      relateds = void 0;
+	    }
+	    if (!model.id) {
+	      return callback(new Error("One.patchRemove: model has null id for: " + this.key));
+	    }
+	    if (arguments.length === 2) {
+	      if (!this.reverse_relation) {
+	        return callback();
+	      }
+	      if (Utils.isModel(model)) {
+	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	      }
+	      this.cursor(model, this.key).toJSON((function(_this) {
+	        return function(err, related_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!related_json) {
+	            return callback();
+	          }
+	          related_json[_this.reverse_relation.foreign_key] = null;
+	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	        };
+	      })(this));
+	      return;
+	    }
+	    if (this.isEmbedded()) {
+	      return callback(new Error('One.patchRemove: embedded relationships are not supported'));
+	    }
+	    if (!relateds) {
+	      return callback(new Error('One.patchRemove: missing model for remove'));
+	    }
+	    if (!_.isArray(relateds)) {
+	      relateds = [relateds];
+	    }
+	    if (current_related_model = model.get(this.key)) {
+	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
+	        related = relateds[_i];
+	        if (Utils.dataIsSameModel(current_related_model, related)) {
+	          model.set(this.key, null);
+	          break;
+	        }
+	      }
+	    }
+	    related_ids = (function() {
+	      var _j, _len1, _results;
+	      _results = [];
+	      for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
+	        related = relateds[_j];
+	        _results.push(Utils.dataId(related));
+	      }
+	      return _results;
+	    })();
+	    if (this.type === 'belongsTo') {
+	      return this.model_type.cursor({
+	        id: model.id,
+	        $one: true
+	      }).toJSON((function(_this) {
+	        return function(err, model_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!model_json) {
+	            return callback();
+	          }
+	          if (!_.contains(related_ids, model_json[_this.foreign_key])) {
+	            return callback();
+	          }
+	          model_json[_this.foreign_key] = null;
+	          return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	        };
+	      })(this));
+	    } else {
+	      return this.cursor(model, this.key).toJSON((function(_this) {
+	        return function(err, related_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!related_json) {
+	            return callback();
+	          }
+	          if (!_.contains(related_ids, related_json[_this.reverse_model_type.prototype.idAttribute])) {
+	            return callback();
+	          }
+	          related_json[_this.reverse_relation.foreign_key] = null;
+	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	        };
+	      })(this));
+	    }
+	  };
+
+	  One.prototype.appendJSON = function(json, model) {
+	    var json_key, related_model;
+	    if (this.isVirtual()) {
+	      return;
+	    }
+	    json_key = this.embed ? this.key : this.foreign_key;
+	    if (!(related_model = model.attributes[this.key])) {
+	      if (this.embed || this.type === 'belongsTo') {
+	        json[json_key] = null;
+	      }
+	      return;
+	    }
+	    if (this.embed) {
+	      return json[json_key] = related_model.toJSON();
+	    }
+	    if (this.type === 'belongsTo') {
+	      return json[json_key] = related_model.id;
+	    }
+	  };
+
+	  One.prototype.cursor = function(model, key, query) {
+	    var _ref;
+	    query = _.extend({
+	      $one: true
+	    }, query || {});
+	    if (Utils.isModel(model)) {
+	      if (this.type === 'belongsTo') {
+	        if (!(query.id = (_ref = model.attributes[this.key]) != null ? _ref.id : void 0)) {
+	          query.$zero = true;
+	          delete query.id;
+	        }
+	      } else {
+	        if (!model.id) {
+	          throw new Error('Cannot create cursor for non-loaded model');
+	        }
+	        query[this.reverse_relation.foreign_key] = model.id;
+	      }
+	    } else {
+	      if (this.type === 'belongsTo') {
+	        if (!(query.id = model[this.foreign_key])) {
+	          query.$zero = true;
+	          delete query.id;
+	        }
+	      } else {
+	        if (!model.id) {
+	          throw new Error('Cannot create cursor for non-loaded model');
+	        }
+	        query[this.reverse_relation.foreign_key] = model.id;
+	      }
+	    }
+	    if (key === this.virtual_id_accessor) {
+	      query.$values = ['id'];
+	    }
+	    return this.reverse_model_type.cursor(query);
+	  };
+
+	  One.prototype._bindBacklinks = function(model) {
+	    var events, related_model, setBacklink;
+	    if (!this.reverse_relation) {
+	      return;
+	    }
+	    events = Utils.set(model, 'events', {});
+	    setBacklink = (function(_this) {
+	      return function(related_model) {
+	        if (_this.reverse_relation.add) {
+	          return _this.reverse_relation.add(related_model, model);
+	        } else {
+	          return related_model.set(_this.reverse_relation.key, model);
+	        }
+	      };
+	    })(this);
+	    events.change = (function(_this) {
+	      return function(model) {
+	        var current_model, previous_related_model, related_model;
+	        related_model = model.get(_this.key);
+	        previous_related_model = model.previous(_this.key);
+	        if (Utils.dataId(related_model) === Utils.dataId(previous_related_model)) {
+	          return;
+	        }
+	        if (previous_related_model && (_this.reverse_relation && _this.reverse_relation.type !== 'belongsTo')) {
+	          if (_this.reverse_relation.remove) {
+	            if (!_this.isVirtual() || !related_model) {
+	              _this.reverse_relation.remove(previous_related_model, model);
+	            }
+	          } else {
+	            current_model = previous_related_model.get(_this.reverse_relation.key);
+	            if (Utils.dataId(current_model) === model.id) {
+	              previous_related_model.set(_this.reverse_relation.key, null);
+	            }
+	          }
+	        }
+	        if (related_model) {
+	          return setBacklink(related_model);
+	        }
+	      };
+	    })(this);
+	    model.on("change:" + this.key, events.change);
+	    if (related_model = model.get(this.key)) {
+	      setBacklink(related_model);
+	    } else {
+	      model.attributes[this.key] = null;
+	    }
+	    return model;
+	  };
+
+	  One.prototype._unbindBacklinks = function(model) {
+	    var events;
+	    if (!(events = Utils.get(model, 'events'))) {
+	      return;
+	    }
+	    Utils.unset(model, 'events');
+	    model.attributes[this.key] = null;
+	    model.off("change:" + this.key, events.change);
+	    events.change = null;
+	  };
+
+	  One.prototype._hasChanged = function(model) {
+	    var related_model;
+	    return !!Utils.orSet(model, 'rel_dirty', {})[this.key] || model.hasChanged(this.key);
+	    if (!this.reverse_relation) {
+	      return false;
+	    }
+	    if (!(related_model = model.attributes[this.key])) {
+	      return false;
+	    }
+	    return related_model.hasChanged(this.reverse_relation.foreign_key);
+	  };
+
+	  return One;
+
+	})(__webpack_require__(38));
+
+
+/***/ },
 /* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, BackboneORM, Many, Queue, Utils, _,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(1);
+
+	BackboneORM = __webpack_require__(4);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	module.exports = Many = (function(_super) {
+	  __extends(Many, _super);
+
+	  function Many(model_type, key, options) {
+	    var Collection, reverse_model_type, value;
+	    this.model_type = model_type;
+	    this.key = key;
+	    for (key in options) {
+	      value = options[key];
+	      this[key] = value;
+	    }
+	    this.virtual_id_accessor || (this.virtual_id_accessor = BackboneORM.naming_conventions.foreignKey(this.key, true));
+	    if (!this.join_key) {
+	      this.join_key = this.foreign_key || BackboneORM.naming_conventions.foreignKey(this.model_type.model_name);
+	    }
+	    if (!this.foreign_key) {
+	      this.foreign_key = BackboneORM.naming_conventions.foreignKey(this.as || this.model_type.model_name);
+	    }
+	    this._adding_ids = {};
+	    if (!this.collection_type) {
+	      reverse_model_type = this.reverse_model_type;
+	      Collection = (function(_super1) {
+	        __extends(Collection, _super1);
+
+	        function Collection() {
+	          return Collection.__super__.constructor.apply(this, arguments);
+	        }
+
+	        Collection.prototype.model = reverse_model_type;
+
+	        return Collection;
+
+	      })(Backbone.Collection);
+	      this.collection_type = Collection;
+	    }
+	  }
+
+	  Many.prototype.initialize = function() {
+	    var _ref, _ref1;
+	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
+	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
+	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
+	    }
+	    if (((_ref = this.reverse_relation) != null ? _ref.type : void 0) === 'hasOne') {
+	      throw new Error("The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + ").");
+	    }
+	    if (this.embed) {
+	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
+	    }
+	    if ((_ref1 = this.reverse_model_type) != null) {
+	      _ref1.schema().type(this.foreign_key, this.model_type);
+	    }
+	    if (this.reverse_relation.type === 'hasMany') {
+	      return this.join_table = this.findOrGenerateJoinTable(this);
+	    }
+	  };
+
+	  Many.prototype.initializeModel = function(model) {
+	    if (!model.isLoadedExists(this.key)) {
+	      model.setLoaded(this.key, false);
+	    }
+	    return this._bindBacklinks(model);
+	  };
+
+	  Many.prototype.releaseModel = function(model) {
+	    this._unbindBacklinks(model);
+	    return delete model._orm;
+	  };
+
+	  Many.prototype.set = function(model, key, value, options) {
+	    var collection, item, model_ids, models, previous_models, related_model, _i, _len;
+	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
+	      throw new Error("Many.set: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
+	    }
+	    collection = this._bindBacklinks(model);
+	    if (Utils.isCollection(value)) {
+	      value = value.models;
+	    }
+	    if (_.isUndefined(value)) {
+	      value = [];
+	    }
+	    if (!_.isArray(value)) {
+	      throw new Error("HasMany.set: Unexpected type to set " + key + ". Expecting array: " + (JSONUtils.stringify(value)));
+	    }
+	    Utils.orSet(model, 'rel_dirty', {})[this.key] = true;
+	    model.setLoaded(this.key, _.all(value, function(item) {
+	      return Utils.dataId(item) !== item;
+	    }));
+	    models = (function() {
+	      var _i, _len, _results;
+	      _results = [];
+	      for (_i = 0, _len = value.length; _i < _len; _i++) {
+	        item = value[_i];
+	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
+	      }
+	      return _results;
+	    }).call(this);
+	    model.setLoaded(this.key, _.all(models, function(model) {
+	      return model.isLoaded();
+	    }));
+	    previous_models = _.clone(collection.models);
+	    collection.reset(models);
+	    if (this.reverse_relation.type === 'belongsTo') {
+	      model_ids = _.pluck(models, 'id');
+	      for (_i = 0, _len = previous_models.length; _i < _len; _i++) {
+	        related_model = previous_models[_i];
+	        if (!_.contains(model_ids, related_model.id)) {
+	          related_model.set(this.foreign_key, null);
+	        }
+	      }
+	    }
+	    return this;
+	  };
+
+	  Many.prototype.get = function(model, key, callback) {
+	    var collection, is_loaded, result, returnValue;
+	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
+	      throw new Error("Many.get: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
+	    }
+	    collection = this._ensureCollection(model);
+	    returnValue = (function(_this) {
+	      return function() {
+	        var related_model, _i, _len, _ref, _results;
+	        if (key === _this.virtual_id_accessor) {
+	          _ref = collection.models;
+	          _results = [];
+	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	            related_model = _ref[_i];
+	            _results.push(related_model.id);
+	          }
+	          return _results;
+	        } else {
+	          return collection;
+	        }
+	      };
+	    })(this);
+	    if (callback && !this.isVirtual() && !this.manual_fetch && !(is_loaded = model.isLoaded(this.key))) {
+	      this.cursor(model, this.key).toJSON((function(_this) {
+	        return function(err, json) {
+	          var cache, model_json, related_model, result, _i, _j, _len, _len1, _ref;
+	          if (err) {
+	            return callback(err);
+	          }
+	          model.setLoaded(_this.key, true);
+	          for (_i = 0, _len = json.length; _i < _len; _i++) {
+	            model_json = json[_i];
+	            if (related_model = collection.get(model_json[_this.reverse_model_type.prototype.idAttribute])) {
+	              related_model.set(model_json);
+	            } else {
+	              collection.add(related_model = Utils.updateOrNew(model_json, _this.reverse_model_type));
+	            }
+	          }
+	          if (cache = _this.reverse_model_type.cache) {
+	            _ref = collection.models;
+	            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+	              related_model = _ref[_j];
+	              cache.set(related_model.id, related_model);
+	            }
+	          }
+	          result = returnValue();
+	          return callback(null, result.models ? result.models : result);
+	        };
+	      })(this));
+	    }
+	    result = returnValue();
+	    if (callback && (is_loaded || this.manual_fetch)) {
+	      callback(null, result.models ? result.models : result);
+	    }
+	    return result;
+	  };
+
+	  Many.prototype.save = function(model, callback) {
+	    var collection;
+	    if (!this._hasChanged(model)) {
+	      return callback();
+	    }
+	    delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	    collection = this._ensureCollection(model);
+	    return this._saveRelated(model, _.clone(collection.models), callback);
+	  };
+
+	  Many.prototype.appendJSON = function(json, model) {
+	    var collection, json_key;
+	    if (this.isVirtual()) {
+	      return;
+	    }
+	    collection = this._ensureCollection(model);
+	    json_key = this.embed ? this.key : this.virtual_id_accessor;
+	    if (this.embed) {
+	      return json[json_key] = collection.toJSON();
+	    }
+	  };
+
+	  Many.prototype.add = function(model, related_model) {
+	    var adding_count, collection, current_related_model, return_value;
+	    if (related_model.id) {
+	      adding_count = this._adding_ids[related_model.id] = (this._adding_ids[related_model.id] || 0) + 1;
+	    }
+	    collection = this._ensureCollection(model);
+	    current_related_model = collection.get(related_model.id);
+	    if (current_related_model === related_model) {
+	      return;
+	    }
+	    if (current_related_model) {
+	      collection.remove(current_related_model);
+	    }
+	    if (this.reverse_model_type.cache && related_model.id) {
+	      this.reverse_model_type.cache.set(related_model.id, related_model);
+	    }
+	    return_value = collection.add(related_model, {
+	      silent: adding_count > 1
+	    });
+	    if (related_model.id) {
+	      this._adding_ids[related_model.id]--;
+	    }
+	    return return_value;
+	  };
+
+	  Many.prototype.remove = function(model, related_model) {
+	    var collection, current_related_model;
+	    collection = this._ensureCollection(model);
+	    if (!(current_related_model = collection.get(related_model.id))) {
+	      return;
+	    }
+	    return collection.remove(current_related_model);
+	  };
+
+	  Many.prototype.patchAdd = function(model, relateds, callback) {
+	    var collection, item, query, queue, related, related_id, related_ids, related_model, _fn, _i, _j, _len, _len1;
+	    if (!model.id) {
+	      return callback(new Error("Many.patchAdd: model has null id for: " + this.key));
+	    }
+	    if (!relateds) {
+	      return callback(new Error("Many.patchAdd: missing model for: " + this.key));
+	    }
+	    if (!_.isArray(relateds)) {
+	      relateds = [relateds];
+	    }
+	    collection = this._ensureCollection(model);
+	    relateds = (function() {
+	      var _i, _len, _results;
+	      _results = [];
+	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
+	        item = relateds[_i];
+	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
+	      }
+	      return _results;
+	    }).call(this);
+	    related_ids = (function() {
+	      var _i, _len, _results;
+	      _results = [];
+	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
+	        related = relateds[_i];
+	        _results.push(Utils.dataId(related));
+	      }
+	      return _results;
+	    })();
+	    collection.add(relateds);
+	    if (model.isLoaded(this.key)) {
+	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
+	        related = relateds[_i];
+	        if (!related.isLoaded()) {
+	          model.setLoaded(this.key, false);
+	          break;
+	        }
+	      }
+	    }
+	    if (this.join_table) {
+	      queue = new Queue(1);
+	      _fn = (function(_this) {
+	        return function(related_id) {
+	          return queue.defer(function(callback) {
+	            var add, query;
+	            if (!related_id) {
+	              return callback(new Error("Many.patchAdd: cannot add an new model. Please save first."));
+	            }
+	            add = function(callback) {
+	              var attributes;
+	              (attributes = {})[_this.foreign_key] = model.id;
+	              attributes[_this.reverse_relation.foreign_key] = related_id;
+	              return _this.join_table.exists(attributes, function(err, exists) {
+	                if (err) {
+	                  return callback(err);
+	                }
+	                if (exists) {
+	                  return callback(new Error("Join already exists: " + (JSON.stringify(attributes))));
+	                }
+	                return new _this.join_table(attributes).save(callback);
+	              });
+	            };
+	            if (_this.reverse_relation.type === 'hasMany') {
+	              return add(callback);
+	            }
+	            (query = {
+	              $one: true
+	            })[_this.reverse_relation.foreign_key] = related_id;
+	            return _this.join_table.cursor(query).toJSON(function(err, join_table_json) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              if (!join_table_json) {
+	                return add(callback);
+	              }
+	              if (join_table_json[_this.foreign_key] === model.id) {
+	                return callback();
+	              }
+	              join_table_json[_this.foreign_key] = model.id;
+	              return Utils.modelJSONSave(join_table_json, _this.join_table, callback);
+	            });
+	          });
+	        };
+	      })(this);
+	      for (_j = 0, _len1 = related_ids.length; _j < _len1; _j++) {
+	        related_id = related_ids[_j];
+	        _fn(related_id);
+	      }
+	      return queue.await(callback);
+	    } else {
+	      query = {
+	        id: {
+	          $in: related_ids
+	        }
+	      };
+	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
+	        return function(err, related_jsons) {
+	          var related_json, _fn1, _k, _len2;
+	          queue = new Queue(1);
+	          _fn1 = function(related_json) {
+	            return queue.defer(function(callback) {
+	              related_json[_this.reverse_relation.foreign_key] = model.id;
+	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	            });
+	          };
+	          for (_k = 0, _len2 = related_jsons.length; _k < _len2; _k++) {
+	            related_json = related_jsons[_k];
+	            _fn1(related_json);
+	          }
+	          return queue.await(callback);
+	        };
+	      })(this));
+	    }
+	  };
+
+	  Many.prototype.patchRemove = function(model, relateds, callback) {
+	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref;
+	    if (!model.id) {
+	      return callback(new Error("Many.patchRemove: model has null id for: " + this.key));
+	    }
+	    if (arguments.length === 2) {
+	      callback = relateds;
+	      if (!this.reverse_relation) {
+	        return callback();
+	      }
+	      if (Utils.isModel(model)) {
+	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	        collection = this._ensureCollection(model);
+	        related_models = _.clone(collection.models);
+	      } else {
+	        related_models = (function() {
+	          var _i, _len, _ref, _results;
+	          _ref = model[this.key] || [];
+	          _results = [];
+	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	            json = _ref[_i];
+	            _results.push(new this.reverse_model_type(json));
+	          }
+	          return _results;
+	        }).call(this);
+	      }
+	      for (_i = 0, _len = related_models.length; _i < _len; _i++) {
+	        related_model = related_models[_i];
+	        related_model.set(this.foreign_key, null);
+	        if (cache = related_model.cache()) {
+	          cache.set(related_model.id, related_model);
+	        }
+	      }
+	      if (this.join_table) {
+	        (query = {})[this.join_key] = model.id;
+	        return this.join_table.destroy(query, callback);
+	      } else {
+	        (query = {})[this.reverse_relation.foreign_key] = model.id;
+	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
+	          return function(err, json) {
+	            var queue, related_json, _fn, _j, _len1;
+	            if (err) {
+	              return callback(err);
+	            }
+	            queue = new Queue(1);
+	            _fn = function(related_json) {
+	              return queue.defer(function(callback) {
+	                related_json[_this.reverse_relation.foreign_key] = null;
+	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	              });
+	            };
+	            for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
+	              related_json = json[_j];
+	              _fn(related_json);
+	            }
+	            return queue.await(callback);
+	          };
+	        })(this));
+	      }
+	      return;
+	    }
+	    if (this.isEmbedded()) {
+	      return callback(new Error('Many.patchRemove: embedded relationships are not supported'));
+	    }
+	    if (!relateds) {
+	      return callback(new Error('One.patchRemove: missing model for remove'));
+	    }
+	    if (!_.isArray(relateds)) {
+	      relateds = [relateds];
+	    }
+	    collection = this._ensureCollection(model);
+	    for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
+	      related = relateds[_j];
+	      _ref = collection.models;
+	      for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
+	        current_related_model = _ref[_k];
+	        if (Utils.dataIsSameModel(current_related_model, related)) {
+	          collection.remove(current_related_model);
+	          break;
+	        }
+	      }
+	    }
+	    related_ids = (function() {
+	      var _l, _len3, _results;
+	      _results = [];
+	      for (_l = 0, _len3 = relateds.length; _l < _len3; _l++) {
+	        related = relateds[_l];
+	        _results.push(Utils.dataId(related));
+	      }
+	      return _results;
+	    })();
+	    if (this.join_table) {
+	      query = {};
+	      query[this.join_key] = model.id;
+	      query[this.reverse_relation.join_key] = {
+	        $in: related_ids
+	      };
+	      return this.join_table.destroy(query, callback);
+	    } else {
+	      query = {};
+	      query[this.reverse_relation.foreign_key] = model.id;
+	      query.id = {
+	        $in: related_ids
+	      };
+	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
+	        return function(err, json) {
+	          var queue, related_json, _fn, _l, _len3;
+	          if (err) {
+	            return callback(err);
+	          }
+	          queue = new Queue(1);
+	          _fn = function(related_json) {
+	            return queue.defer(function(callback) {
+	              related_json[_this.reverse_relation.foreign_key] = null;
+	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	            });
+	          };
+	          for (_l = 0, _len3 = json.length; _l < _len3; _l++) {
+	            related_json = json[_l];
+	            _fn(related_json);
+	          }
+	          return queue.await(callback);
+	        };
+	      })(this));
+	    }
+	  };
+
+	  Many.prototype.cursor = function(model, key, query) {
+	    var json;
+	    json = Utils.isModel(model) ? model.attributes : model;
+	    (query = _.clone(query || {}))[this.join_table ? this.join_key : this.reverse_relation.foreign_key] = json[this.model_type.prototype.idAttribute];
+	    if (key === this.virtual_id_accessor) {
+	      (query.$values || (query.$values = [])).push('id');
+	    }
+	    return this.reverse_model_type.cursor(query);
+	  };
+
+	  Many.prototype._bindBacklinks = function(model) {
+	    var collection, events, method, _i, _len, _ref;
+	    if ((collection = model.attributes[this.key]) instanceof this.collection_type) {
+	      return collection;
+	    }
+	    collection = model.attributes[this.key] = new this.collection_type();
+	    if (!this.reverse_relation) {
+	      return collection;
+	    }
+	    events = Utils.set(collection, 'events', {});
+	    events.add = (function(_this) {
+	      return function(related_model) {
+	        var current_model, is_current;
+	        if (_this.reverse_relation.add) {
+	          return _this.reverse_relation.add(related_model, model);
+	        } else {
+	          current_model = related_model.get(_this.reverse_relation.key);
+	          is_current = model.id && (Utils.dataId(current_model) === model.id);
+	          if (!is_current || (is_current && !current_model.isLoaded())) {
+	            return related_model.set(_this.reverse_relation.key, model);
+	          }
+	        }
+	      };
+	    })(this);
+	    events.remove = (function(_this) {
+	      return function(related_model) {
+	        var current_model;
+	        if (_this.reverse_relation.remove) {
+	          return _this.reverse_relation.remove(related_model, model);
+	        } else {
+	          current_model = related_model.get(_this.reverse_relation.key);
+	          if (Utils.dataId(current_model) === model.id) {
+	            return related_model.set(_this.reverse_relation.key, null);
+	          }
+	        }
+	      };
+	    })(this);
+	    events.reset = (function(_this) {
+	      return function(collection, options) {
+	        var added, changes, current_models, previous_models, related_model, _i, _j, _len, _len1, _ref, _results;
+	        current_models = collection.models;
+	        previous_models = options.previousModels || [];
+	        changes = _.groupBy(previous_models, function(test) {
+	          if (!!_.find(current_models, function(current_model) {
+	            return current_model.id === test.id;
+	          })) {
+	            return 'kept';
+	          } else {
+	            return 'removed';
+	          }
+	        });
+	        added = changes.kept ? _.select(current_models, function(test) {
+	          return !_.find(changes.kept, function(keep_model) {
+	            return keep_model.id === test.id;
+	          });
+	        }) : current_models;
+	        if (changes.removed) {
+	          _ref = changes.removed;
+	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	            related_model = _ref[_i];
+	            events.remove(related_model);
+	          }
+	        }
+	        _results = [];
+	        for (_j = 0, _len1 = added.length; _j < _len1; _j++) {
+	          related_model = added[_j];
+	          _results.push(events.add(related_model));
+	        }
+	        return _results;
+	      };
+	    })(this);
+	    _ref = ['add', 'remove', 'reset'];
+	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	      method = _ref[_i];
+	      collection.on(method, events[method]);
+	    }
+	    return collection;
+	  };
+
+	  Many.prototype._unbindBacklinks = function(model) {
+	    var collection, events, method, _i, _len, _ref;
+	    if (!(events = Utils.get(model, 'events'))) {
+	      return;
+	    }
+	    Utils.unset(model, 'events');
+	    collection = model.attributes[this.key];
+	    collection.models.splice();
+	    events = _.clone();
+	    _ref = ['add', 'remove', 'reset'];
+	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	      method = _ref[_i];
+	      collection.off(method, events[method]);
+	      events[method] = null;
+	    }
+	  };
+
+	  Many.prototype._ensureCollection = function(model) {
+	    return this._bindBacklinks(model);
+	  };
+
+	  Many.prototype._hasChanged = function(model) {
+	    var collection, _i, _len, _ref;
+	    return !!Utils.orSet(model, 'rel_dirty', {})[this.key] || model.hasChanged(this.key);
+	    if (!this.reverse_relation) {
+	      return false;
+	    }
+	    collection = this._ensureCollection(model);
+	    _ref = model.models;
+	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	      model = _ref[_i];
+	      if (model.hasChanged(this.reverse_relation.foreign_key)) {
+	        return true;
+	      }
+	    }
+	    return false;
+	  };
+
+	  return Many;
+
+	})(__webpack_require__(38));
+
+
+/***/ },
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//
@@ -6870,7 +6885,175 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
+
+	_ = __webpack_require__(1);
+
+	CacheCursor = __webpack_require__(39);
+
+	Schema = __webpack_require__(15);
+
+	Utils = __webpack_require__(7);
+
+	bbCallback = Utils.bbCallback;
+
+	DESTROY_BATCH_LIMIT = 1000;
+
+	DESTROY_THREADS = 100;
+
+	CacheSync = (function() {
+	  function CacheSync(model_type, wrapped_sync_fn) {
+	    this.model_type = model_type;
+	    this.wrapped_sync_fn = wrapped_sync_fn;
+	  }
+
+	  CacheSync.prototype.initialize = function() {
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    this.wrapped_sync_fn('initialize');
+	    if (!this.model_type.model_name) {
+	      throw new Error('Missing model_name for model');
+	    }
+	  };
+
+	  CacheSync.prototype.read = function(model, options) {
+	    var cached_model;
+	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
+	      return options.success(cached_model.toJSON());
+	    }
+	    return this.wrapped_sync_fn('read', model, options);
+	  };
+
+	  CacheSync.prototype.create = function(model, options) {
+	    return this.wrapped_sync_fn('create', model, bbCallback((function(_this) {
+	      return function(err, json) {
+	        var attributes, cache_model;
+	        if (err) {
+	          return options.error(err);
+	        }
+	        (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
+	        model.set(attributes);
+	        if (cache_model = _this.model_type.cache.get(model.id)) {
+	          if (cache_model !== model) {
+	            Utils.updateModel(cache_model, model);
+	          }
+	        } else {
+	          _this.model_type.cache.set(model.id, model);
+	        }
+	        return options.success(json);
+	      };
+	    })(this)));
+	  };
+
+	  CacheSync.prototype.update = function(model, options) {
+	    return this.wrapped_sync_fn('update', model, bbCallback((function(_this) {
+	      return function(err, json) {
+	        var cache_model;
+	        if (err) {
+	          return options.error(err);
+	        }
+	        if (cache_model = _this.model_type.cache.get(model.id)) {
+	          if (cache_model !== model) {
+	            Utils.updateModel(cache_model, model);
+	          }
+	        } else {
+	          _this.model_type.cache.set(model.id, model);
+	        }
+	        return options.success(json);
+	      };
+	    })(this)));
+	  };
+
+	  CacheSync.prototype["delete"] = function(model, options) {
+	    this.model_type.cache.destroy(model.id);
+	    return this.wrapped_sync_fn('delete', model, bbCallback((function(_this) {
+	      return function(err, json) {
+	        if (err) {
+	          return options.error(err);
+	        }
+	        return options.success(json);
+	      };
+	    })(this)));
+	  };
+
+	  CacheSync.prototype.resetSchema = function(options, callback) {
+	    return this.model_type.cache.reset((function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        return _this.wrapped_sync_fn('resetSchema', options, callback);
+	      };
+	    })(this));
+	  };
+
+	  CacheSync.prototype.cursor = function(query) {
+	    if (query == null) {
+	      query = {};
+	    }
+	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
+	  };
+
+	  CacheSync.prototype.destroy = function(query, callback) {
+	    return this.model_type.each(_.extend({
+	      $each: {
+	        limit: DESTROY_BATCH_LIMIT,
+	        threads: DESTROY_THREADS
+	      }
+	    }, query), ((function(_this) {
+	      return function(model, callback) {
+	        return model.destroy(callback);
+	      };
+	    })(this)), callback);
+	  };
+
+	  CacheSync.prototype.connect = function(url) {
+	    this.model_type.cache.reset();
+	    return this.wrapped_sync_fn('connect');
+	  };
+
+	  return CacheSync;
+
+	})();
+
+	module.exports = function(model_type, wrapped_sync_fn) {
+	  var sync, sync_fn;
+	  sync = new CacheSync(model_type, wrapped_sync_fn);
+	  model_type.prototype.sync = sync_fn = function(method, model, options) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    sync.initialize();
+	    if (method === 'createSync') {
+	      return wrapped_sync_fn.apply(null, arguments);
+	    }
+	    if (method === 'sync') {
+	      return sync;
+	    }
+	    if (sync[method]) {
+	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+	    }
+	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
+	  };
+	  return sync_fn;
+	};
+
+
+/***/ },
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {/*!
@@ -6880,8 +7063,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @license  MIT
 	 */
 
-	var base64 = __webpack_require__(40)
-	var ieee754 = __webpack_require__(39)
+	var base64 = __webpack_require__(41)
+	var ieee754 = __webpack_require__(40)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = Buffer
@@ -6889,22 +7072,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	Buffer.poolSize = 8192
 
 	/**
-	 * If `Buffer._useTypedArrays`:
+	 * If `TYPED_ARRAY_SUPPORT`:
 	 *   === true    Use Uint8Array implementation (fastest)
-	 *   === false   Use Object implementation (compatible down to IE6)
+	 *   === false   Use Object implementation (most compatible, even IE6)
+	 *
+	 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+	 * Opera 11.6+, iOS 4.2+.
+	 *
+	 * Note:
+	 *
+	 * - Implementation must support adding new properties to `Uint8Array` instances.
+	 *   Firefox 4-29 lacked support, fixed in Firefox 30+.
+	 *   See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+	 *
+	 *  - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+	 *
+	 *  - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+	 *    incorrect length in some situations.
+	 *
+	 * We detect these buggy browsers and set `TYPED_ARRAY_SUPPORT` to `false` so they will
+	 * get the Object implementation, which is slower but will work correctly.
 	 */
-	Buffer._useTypedArrays = (function () {
-	  // Detect if browser supports Typed Arrays. Supported browsers are IE 10+, Firefox 4+,
-	  // Chrome 7+, Safari 5.1+, Opera 11.6+, iOS 4.2+. If the browser does not support adding
-	  // properties to `Uint8Array` instances, then that's the same as no `Uint8Array` support
-	  // because we need to be able to add all the node Buffer API methods. This is an issue
-	  // in Firefox 4-29. Now fixed: https://bugzilla.mozilla.org/show_bug.cgi?id=695438
+	var TYPED_ARRAY_SUPPORT = (function () {
 	  try {
 	    var buf = new ArrayBuffer(0)
 	    var arr = new Uint8Array(buf)
 	    arr.foo = function () { return 42 }
-	    return 42 === arr.foo() &&
-	        typeof arr.subarray === 'function' // Chrome 9-10 lack `subarray`
+	    return 42 === arr.foo() && // typed array instances can be augmented
+	        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+	        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
 	  } catch (e) {
 	    return false
 	  }
@@ -6937,14 +7133,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      subject = base64clean(subject)
 	    length = Buffer.byteLength(subject, encoding)
 	  } else if (type === 'object' && subject !== null) { // assume object is array-like
-	    if (subject.type === 'Buffer' && Array.isArray(subject.data))
+	    if (subject.type === 'Buffer' && isArray(subject.data))
 	      subject = subject.data
 	    length = +subject.length > 0 ? Math.floor(+subject.length) : 0
 	  } else
 	    throw new Error('First argument needs to be a number, array or string.')
 
 	  var buf
-	  if (Buffer._useTypedArrays) {
+	  if (TYPED_ARRAY_SUPPORT) {
 	    // Preferred: Return an augmented `Uint8Array` instance for best performance
 	    buf = Buffer._augment(new Uint8Array(length))
 	  } else {
@@ -6955,7 +7151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var i
-	  if (Buffer._useTypedArrays && typeof subject.byteLength === 'number') {
+	  if (TYPED_ARRAY_SUPPORT && typeof subject.byteLength === 'number') {
 	    // Speed optimization -- use set if we're copying from a typed array
 	    buf._set(subject)
 	  } else if (isArrayish(subject)) {
@@ -6969,7 +7165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  } else if (type === 'string') {
 	    buf.write(subject, 0, encoding)
-	  } else if (type === 'number' && !Buffer._useTypedArrays && !noZero) {
+	  } else if (type === 'number' && !TYPED_ARRAY_SUPPORT && !noZero) {
 	    for (i = 0; i < length; i++) {
 	      buf[i] = 0
 	    }
@@ -7276,7 +7472,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var len = end - start
 
-	  if (len < 100 || !Buffer._useTypedArrays) {
+	  if (len < 100 || !TYPED_ARRAY_SUPPORT) {
 	    for (var i = 0; i < len; i++) {
 	      target[i + target_start] = this[i + start]
 	    }
@@ -7370,7 +7566,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (end < start)
 	    end = start
 
-	  if (Buffer._useTypedArrays) {
+	  if (TYPED_ARRAY_SUPPORT) {
 	    return Buffer._augment(this.subarray(start, end))
 	  } else {
 	    var sliceLen = end - start
@@ -7829,7 +8025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	Buffer.prototype.toArrayBuffer = function () {
 	  if (typeof Uint8Array !== 'undefined') {
-	    if (Buffer._useTypedArrays) {
+	    if (TYPED_ARRAY_SUPPORT) {
 	      return (new Buffer(this)).buffer
 	    } else {
 	      var buf = new Uint8Array(this.length)
@@ -8030,359 +8226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!test) throw new Error(message || 'Failed assertion')
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31).Buffer))
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
-
-	_ = __webpack_require__(1);
-
-	CacheCursor = __webpack_require__(38);
-
-	Schema = __webpack_require__(14);
-
-	Utils = __webpack_require__(7);
-
-	bbCallback = Utils.bbCallback;
-
-	DESTROY_BATCH_LIMIT = 1000;
-
-	DESTROY_THREADS = 100;
-
-	CacheSync = (function() {
-	  function CacheSync(model_type, wrapped_sync_fn) {
-	    this.model_type = model_type;
-	    this.wrapped_sync_fn = wrapped_sync_fn;
-	  }
-
-	  CacheSync.prototype.initialize = function() {
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    this.wrapped_sync_fn('initialize');
-	    if (!this.model_type.model_name) {
-	      throw new Error('Missing model_name for model');
-	    }
-	  };
-
-	  CacheSync.prototype.read = function(model, options) {
-	    var cached_model;
-	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
-	      return options.success(cached_model.toJSON());
-	    }
-	    return this.wrapped_sync_fn('read', model, options);
-	  };
-
-	  CacheSync.prototype.create = function(model, options) {
-	    return this.wrapped_sync_fn('create', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        var attributes, cache_model;
-	        if (err) {
-	          return options.error(err);
-	        }
-	        (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
-	        model.set(attributes);
-	        if (cache_model = _this.model_type.cache.get(model.id)) {
-	          if (cache_model !== model) {
-	            Utils.updateModel(cache_model, model);
-	          }
-	        } else {
-	          _this.model_type.cache.set(model.id, model);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype.update = function(model, options) {
-	    return this.wrapped_sync_fn('update', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        var cache_model;
-	        if (err) {
-	          return options.error(err);
-	        }
-	        if (cache_model = _this.model_type.cache.get(model.id)) {
-	          if (cache_model !== model) {
-	            Utils.updateModel(cache_model, model);
-	          }
-	        } else {
-	          _this.model_type.cache.set(model.id, model);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype["delete"] = function(model, options) {
-	    this.model_type.cache.destroy(model.id);
-	    return this.wrapped_sync_fn('delete', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        if (err) {
-	          return options.error(err);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype.resetSchema = function(options, callback) {
-	    return this.model_type.cache.reset((function(_this) {
-	      return function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        return _this.wrapped_sync_fn('resetSchema', options, callback);
-	      };
-	    })(this));
-	  };
-
-	  CacheSync.prototype.cursor = function(query) {
-	    if (query == null) {
-	      query = {};
-	    }
-	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
-	  };
-
-	  CacheSync.prototype.destroy = function(query, callback) {
-	    return this.model_type.each(_.extend({
-	      $each: {
-	        limit: DESTROY_BATCH_LIMIT,
-	        threads: DESTROY_THREADS
-	      }
-	    }, query), ((function(_this) {
-	      return function(model, callback) {
-	        return model.destroy(callback);
-	      };
-	    })(this)), callback);
-	  };
-
-	  CacheSync.prototype.connect = function(url) {
-	    this.model_type.cache.reset();
-	    return this.wrapped_sync_fn('connect');
-	  };
-
-	  return CacheSync;
-
-	})();
-
-	module.exports = function(model_type, wrapped_sync_fn) {
-	  var sync, sync_fn;
-	  sync = new CacheSync(model_type, wrapped_sync_fn);
-	  model_type.prototype.sync = sync_fn = function(method, model, options) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    sync.initialize();
-	    if (method === 'createSync') {
-	      return wrapped_sync_fn.apply(null, arguments);
-	    }
-	    if (method === 'sync') {
-	      return sync;
-	    }
-	    if (sync[method]) {
-	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-	    }
-	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
-	  };
-	  return sync_fn;
-	};
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.0
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, BackboneORM, Queue, Relation, Utils, _;
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	BackboneORM = __webpack_require__(4);
-
-	Queue = __webpack_require__(10);
-
-	Utils = __webpack_require__(7);
-
-	module.exports = Relation = (function() {
-	  function Relation() {}
-
-	  Relation.prototype.isEmbedded = function() {
-	    return !!(this.embed || (this.reverse_relation && this.reverse_relation.embed));
-	  };
-
-	  Relation.prototype.isVirtual = function() {
-	    return !!(this.virtual || (this.reverse_relation && this.reverse_relation.virtual));
-	  };
-
-	  Relation.prototype.findOrGenerateJoinTable = function() {
-	    var join_table;
-	    if (join_table = this.join_table || this.reverse_relation.join_table) {
-	      return join_table;
-	    }
-	    return this.model_type.schema().generateJoinTable(this);
-	  };
-
-	  Relation.prototype._findOrGenerateReverseRelation = function() {
-	    var model_type, reverse_model_type, reverse_relation;
-	    model_type = this.model_type;
-	    reverse_model_type = this.reverse_model_type;
-	    if (!_.isFunction(reverse_model_type.schema)) {
-	      reverse_model_type.sync = model_type.createSync(reverse_model_type);
-	    }
-	    reverse_relation = reverse_model_type.relation(this.as);
-	    if (!reverse_relation) {
-	      reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, false));
-	    }
-	    if (!reverse_relation) {
-	      reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, true));
-	    }
-	    if (!reverse_relation && (this.type !== 'belongsTo')) {
-	      reverse_relation = reverse_model_type.schema().generateBelongsTo(model_type);
-	    }
-	    if (reverse_relation && !reverse_relation.reverse_relation) {
-	      reverse_relation.reverse_relation = this;
-	    }
-	    return reverse_relation;
-	  };
-
-	  Relation.prototype._saveRelated = function(model, related_models, callback) {
-	    if (this.embed || !this.reverse_relation || (this.type === 'belongsTo')) {
-	      return callback();
-	    }
-	    if (this.isVirtual()) {
-	      return callback();
-	    }
-	    return this.cursor(model, this.key).toJSON((function(_this) {
-	      return function(err, json) {
-	        var added_id, added_ids, changes, queue, related_id, related_ids, related_json, related_model, test, _fn, _fn1, _fn2, _i, _j, _k, _len, _len1, _len2, _ref;
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!_.isArray(json)) {
-	          json = (json ? [json] : []);
-	        }
-	        queue = new Queue(1);
-	        related_ids = _.pluck(related_models, 'id');
-	        changes = _.groupBy(json, function(test) {
-	          if (_.contains(related_ids, test.id)) {
-	            return 'kept';
-	          } else {
-	            return 'removed';
-	          }
-	        });
-	        added_ids = changes.kept ? _.difference(related_ids, (function() {
-	          var _i, _len, _ref, _results;
-	          _ref = changes.kept;
-	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            test = _ref[_i];
-	            _results.push(test.id);
-	          }
-	          return _results;
-	        })()) : related_ids;
-	        if (changes.removed) {
-	          if (_this.join_table) {
-	            queue.defer(function(callback) {
-	              var query, related_json;
-	              query = {};
-	              query[_this.reverse_relation.join_key] = {
-	                $in: (function() {
-	                  var _i, _len, _ref, _results;
-	                  _ref = changes.removed;
-	                  _results = [];
-	                  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	                    related_json = _ref[_i];
-	                    _results.push(related_json[this.reverse_model_type.prototype.idAttribute]);
-	                  }
-	                  return _results;
-	                }).call(_this)
-	              };
-	              return _this.join_table.destroy(query, callback);
-	            });
-	          } else {
-	            _ref = changes.removed;
-	            _fn = function(related_json) {
-	              return queue.defer(function(callback) {
-	                related_json[_this.reverse_relation.foreign_key] = null;
-	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	              });
-	            };
-	            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	              related_json = _ref[_i];
-	              _fn(related_json);
-	            }
-	          }
-	        }
-	        if (added_ids.length) {
-	          if (_this.join_table) {
-	            _fn1 = function(related_id) {
-	              return queue.defer(function(callback) {
-	                var attributes, join;
-	                attributes = {};
-	                attributes[_this.foreign_key] = model.id;
-	                attributes[_this.reverse_relation.foreign_key] = related_id;
-	                join = new _this.join_table(attributes);
-	                return join.save(callback);
-	              });
-	            };
-	            for (_j = 0, _len1 = added_ids.length; _j < _len1; _j++) {
-	              related_id = added_ids[_j];
-	              _fn1(related_id);
-	            }
-	          } else {
-	            _fn2 = function(related_model) {
-	              return queue.defer(function(callback) {
-	                return related_model.save(function(err, saved_model) {
-	                  var cache;
-	                  if (!err && (cache = _this.reverse_model_type.cache)) {
-	                    cache.set(saved_model.id, saved_model);
-	                  }
-	                  return callback(err);
-	                });
-	              });
-	            };
-	            for (_k = 0, _len2 = added_ids.length; _k < _len2; _k++) {
-	              added_id = added_ids[_k];
-	              related_model = _.find(related_models, function(test) {
-	                return test.id === added_id;
-	              });
-	              if (!_this.reverse_relation._hasChanged(related_model)) {
-	                continue;
-	              }
-	              _fn2(related_model);
-	            }
-	          }
-	        }
-	        return queue.await(callback);
-	      };
-	    })(this));
-	  };
-
-	  return Relation;
-
-	})();
-
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
 /* 34 */
@@ -8461,14 +8305,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	Cursor = null;
 
 	module.exports = function(model_type, query, iterator, callback) {
 	  var method, model_limit, options, parsed_query, processed_count, runBatch;
 	  if (!Cursor) {
-	    Cursor = __webpack_require__(20);
+	    Cursor = __webpack_require__(21);
 	  }
 	  options = query.$each || {};
 	  method = options.json ? 'toJSON' : 'toModels';
@@ -8538,7 +8382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Queue = __webpack_require__(10);
+	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
 
@@ -8769,6 +8613,190 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
+	var Backbone, BackboneORM, Queue, Relation, Utils, _;
+
+	_ = __webpack_require__(1);
+
+	Backbone = __webpack_require__(2);
+
+	BackboneORM = __webpack_require__(4);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	module.exports = Relation = (function() {
+	  function Relation() {}
+
+	  Relation.prototype.isEmbedded = function() {
+	    return !!(this.embed || (this.reverse_relation && this.reverse_relation.embed));
+	  };
+
+	  Relation.prototype.isVirtual = function() {
+	    return !!(this.virtual || (this.reverse_relation && this.reverse_relation.virtual));
+	  };
+
+	  Relation.prototype.findOrGenerateJoinTable = function() {
+	    var join_table;
+	    if (join_table = this.join_table || this.reverse_relation.join_table) {
+	      return join_table;
+	    }
+	    return this.model_type.schema().generateJoinTable(this);
+	  };
+
+	  Relation.prototype._findOrGenerateReverseRelation = function() {
+	    var model_type, reverse_model_type, reverse_relation;
+	    model_type = this.model_type;
+	    reverse_model_type = this.reverse_model_type;
+	    if (!_.isFunction(reverse_model_type.schema)) {
+	      reverse_model_type.sync = model_type.createSync(reverse_model_type);
+	    }
+	    reverse_relation = reverse_model_type.relation(this.as);
+	    if (!reverse_relation) {
+	      reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, false));
+	    }
+	    if (!reverse_relation) {
+	      reverse_relation = reverse_model_type.relation(BackboneORM.naming_conventions.attribute(model_type.model_name, true));
+	    }
+	    if (!reverse_relation && (this.type !== 'belongsTo')) {
+	      reverse_relation = reverse_model_type.schema().generateBelongsTo(model_type);
+	    }
+	    if (reverse_relation && !reverse_relation.reverse_relation) {
+	      reverse_relation.reverse_relation = this;
+	    }
+	    return reverse_relation;
+	  };
+
+	  Relation.prototype._saveRelated = function(model, related_models, callback) {
+	    if (this.embed || !this.reverse_relation || (this.type === 'belongsTo')) {
+	      return callback();
+	    }
+	    if (this.isVirtual()) {
+	      return callback();
+	    }
+	    return this.cursor(model, this.key).toJSON((function(_this) {
+	      return function(err, json) {
+	        var added_id, added_ids, changes, queue, related_id, related_ids, related_json, related_model, test, _fn, _fn1, _fn2, _i, _j, _k, _len, _len1, _len2, _ref;
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!_.isArray(json)) {
+	          json = (json ? [json] : []);
+	        }
+	        queue = new Queue(1);
+	        related_ids = _.pluck(related_models, 'id');
+	        changes = _.groupBy(json, function(test) {
+	          if (_.contains(related_ids, test.id)) {
+	            return 'kept';
+	          } else {
+	            return 'removed';
+	          }
+	        });
+	        added_ids = changes.kept ? _.difference(related_ids, (function() {
+	          var _i, _len, _ref, _results;
+	          _ref = changes.kept;
+	          _results = [];
+	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	            test = _ref[_i];
+	            _results.push(test.id);
+	          }
+	          return _results;
+	        })()) : related_ids;
+	        if (changes.removed) {
+	          if (_this.join_table) {
+	            queue.defer(function(callback) {
+	              var query, related_json;
+	              query = {};
+	              query[_this.reverse_relation.join_key] = {
+	                $in: (function() {
+	                  var _i, _len, _ref, _results;
+	                  _ref = changes.removed;
+	                  _results = [];
+	                  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	                    related_json = _ref[_i];
+	                    _results.push(related_json[this.reverse_model_type.prototype.idAttribute]);
+	                  }
+	                  return _results;
+	                }).call(_this)
+	              };
+	              return _this.join_table.destroy(query, callback);
+	            });
+	          } else {
+	            _ref = changes.removed;
+	            _fn = function(related_json) {
+	              return queue.defer(function(callback) {
+	                related_json[_this.reverse_relation.foreign_key] = null;
+	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	              });
+	            };
+	            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	              related_json = _ref[_i];
+	              _fn(related_json);
+	            }
+	          }
+	        }
+	        if (added_ids.length) {
+	          if (_this.join_table) {
+	            _fn1 = function(related_id) {
+	              return queue.defer(function(callback) {
+	                var attributes, join;
+	                attributes = {};
+	                attributes[_this.foreign_key] = model.id;
+	                attributes[_this.reverse_relation.foreign_key] = related_id;
+	                join = new _this.join_table(attributes);
+	                return join.save(callback);
+	              });
+	            };
+	            for (_j = 0, _len1 = added_ids.length; _j < _len1; _j++) {
+	              related_id = added_ids[_j];
+	              _fn1(related_id);
+	            }
+	          } else {
+	            _fn2 = function(related_model) {
+	              return queue.defer(function(callback) {
+	                return related_model.save(function(err, saved_model) {
+	                  var cache;
+	                  if (!err && (cache = _this.reverse_model_type.cache)) {
+	                    cache.set(saved_model.id, saved_model);
+	                  }
+	                  return callback(err);
+	                });
+	              });
+	            };
+	            for (_k = 0, _len2 = added_ids.length; _k < _len2; _k++) {
+	              added_id = added_ids[_k];
+	              related_model = _.find(related_models, function(test) {
+	                return test.id === added_id;
+	              });
+	              if (!_this.reverse_relation._hasChanged(related_model)) {
+	                continue;
+	              }
+	              _fn2(related_model);
+	            }
+	          }
+	        }
+	        return queue.await(callback);
+	      };
+	    })(this));
+	  };
+
+	  return Relation;
+
+	})();
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.0
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
 	var CacheCursor, _,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -8788,11 +8816,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(20));
+	})(__webpack_require__(21));
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -8882,7 +8910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';

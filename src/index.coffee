@@ -14,6 +14,7 @@ publish =
   Utils: require './lib/utils'
   JSONUtils: require './lib/json_utils'
   DateUtils: require './lib/date_utils'
+  TestUtils: require './lib/test_utils'
   Queue: require './lib/queue'
   DatabaseURL: require './lib/database_url'
   Fabricator: require './lib/fabricator'

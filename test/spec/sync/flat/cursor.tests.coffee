@@ -1,15 +1,11 @@
 assert = assert or require?('chai').assert
 
-BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm'); try BackboneORM or= require?('../../../../backbone-orm')
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 {_, Backbone, Queue, Utils, Fabricator} = BackboneORM
 
-option_sets = BackboneORM.Utils._getTestOptionSets()
-# allow `__test__parameters` to be a global in both node and browser
-parameters = __test__parameters if __test__parameters?
-
-_.each option_sets, exports = (options) ->
+_.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
+  options = _.extend({}, options, __test__parameters) if __test__parameters?
   return if options.embed
-  options = _.extend({}, options, parameters) if parameters
 
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
