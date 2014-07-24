@@ -22,8 +22,6 @@
   },
   "scripts": {
     "test": "gulp test",
-    "build": "gulp build",
-    "watch": "gulp watch",
     "docs": "./node_modules/.bin/codo -n BackboneORM -a UA-36443094-3 -o docs src/."
   },
   "devDependencies": {

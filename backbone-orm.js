@@ -2081,9 +2081,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(4);
 
-	One = __webpack_require__(29);
+	One = __webpack_require__(30);
 
-	Many = __webpack_require__(30);
+	Many = __webpack_require__(31);
 
 	DatabaseURL = __webpack_require__(12);
 
@@ -2540,7 +2540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var punycode = { encode : function (s) { return s } };
 	var _ = __webpack_require__(1);
-	var shims = __webpack_require__(31);
+	var shims = __webpack_require__(29);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -5730,6 +5730,46 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
+	//
+	// The shims in this file are not fully implemented shims for the ES5
+	// features, but do work for the particular usecases there is in
+	// the other modules.
+	//
+
+	// Array.prototype.forEach is supported in IE9
+	exports.forEach = function forEach(xs, fn, self) {
+	  if (xs.forEach) return xs.forEach(fn, self);
+	  for (var i = 0; i < xs.length; i++) {
+	    fn.call(self, xs[i], i, xs);
+	  }
+	};
+
+	// String.prototype.substr - negative index don't work in IE8
+	if ('ab'.substr(-1) !== 'b') {
+	  exports.substr = function (str, start, length) {
+	    // did we get a negative start, calculate how much it is from the beginning of the string
+	    if (start < 0) start = str.length + start;
+
+	    // call the original function
+	    return str.substr(start, length);
+	  };
+	} else {
+	  exports.substr = function (str, start, length) {
+	    return str.substr(start, length);
+	  };
+	}
+
+	// String.prototype.trim is supported in IE9
+	exports.trim = function (str) {
+	  if (str.trim) return str.trim();
+	  return str.replace(/^\s+|\s+$/g, '');
+	};
+
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
 	  backbone-orm.js 0.6.0
@@ -6216,7 +6256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6841,46 +6881,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Many;
 
 	})(__webpack_require__(38));
-
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	//
-	// The shims in this file are not fully implemented shims for the ES5
-	// features, but do work for the particular usecases there is in
-	// the other modules.
-	//
-
-	// Array.prototype.forEach is supported in IE9
-	exports.forEach = function forEach(xs, fn, self) {
-	  if (xs.forEach) return xs.forEach(fn, self);
-	  for (var i = 0; i < xs.length; i++) {
-	    fn.call(self, xs[i], i, xs);
-	  }
-	};
-
-	// String.prototype.substr - negative index don't work in IE8
-	if ('ab'.substr(-1) !== 'b') {
-	  exports.substr = function (str, start, length) {
-	    // did we get a negative start, calculate how much it is from the beginning of the string
-	    if (start < 0) start = str.length + start;
-
-	    // call the original function
-	    return str.substr(start, length);
-	  };
-	} else {
-	  exports.substr = function (str, start, length) {
-	    return str.substr(start, length);
-	  };
-	}
-
-	// String.prototype.trim is supported in IE9
-	exports.trim = function (str) {
-	  if (str.trim) return str.trim();
-	  return str.replace(/^\s+|\s+$/g, '');
-	};
 
 
 /***/ },
