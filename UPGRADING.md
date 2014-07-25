@@ -1,4 +1,4 @@
-### From 0.5.x to 0.6.0
+### From 0.5.x to 0.6.1
 
 1. All references to BackboneORM.CacheSingletons.ModelCache.configure should be replaces with configure.
 
