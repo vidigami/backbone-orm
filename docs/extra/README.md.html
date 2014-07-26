@@ -163,24 +163,14 @@ Task.interval({$interval: {key: &#39;created_at&#39;, type: &#39;days&#39;, leng
   },
   function(err) { return console.log(&#39;Done&#39;); }
 );
-</code></pre><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for installation instructions, examples, documentation, and community!</p><h3 id="for-contributors">For Contributors</h3><p>To build the library for Node.js:</p><pre><code>$ npm run build
-</code></pre><p>To build the library for the browser:</p><pre><code>$ npm run release
-</code></pre><p>Please run tests before submitting a pull request.</p><pre><code>$ npm test
-</code></pre><h1 id="one-time">One Time</h1><p>To run all tests (Node.js only):</p><pre><code>mocha --grep &#39;&#39; test/**/*.tests.coffee
-</code></pre><h1 id="tdd">TDD</h1><p>To run all tests (Node.js only) in multiple terminals run:</p><pre><code>npm run watch
-mocha --grep &#39;&#39; test/**/*.tests.coffee --watch
-</code></pre><h1 id="test-options">Test Options</h1><p>To run specific groups of tests, <a href="https://github.com/visionmedia/mocha/wiki/Tagging">use mocha <code>--grep</code> option on tags stated in the test descriptions</a>; for example:</p><pre><code>mocha --grep @cache test/**/*.tests.coffee
-</code></pre><h1 id="for-sync-writers">For Sync Writers</h1>
-<ol>
-<li>you need to create a file like <code>test/parameters.coffee</code> that sets the global variable
-<code>__test__parameters</code>, which sets the <code>sync</code> function for the tests to use. <em>This is the same approach taken by the
-<a href="https://github.com/promises-aplus/promises-tests">promises-aplus test suite</a>.</em></li>
-</ol>
-
+</code></pre><p>Please <a href="http://vidigami.github.io/backbone-orm/">checkout the website</a> for installation instructions, examples, documentation, and community!</p><h3 id="for-contributors">For Contributors</h3><p>To build the library for Node.js and browsers:</p><pre><code>$ gulp build
+</code></pre><p>Please run tests before submitting a pull request:</p><pre><code>$ gulp test-quick
+</code></pre><p>and eventually all tests:</p><pre><code>$ npm test
+</code></pre>
       </div>
     </div>
     <div id='footer'>
-  July 19, 14 22:44:54 by
+  July 25, 14 19:38:55 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
