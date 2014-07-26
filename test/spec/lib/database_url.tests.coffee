@@ -3,7 +3,7 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 {_, DatabaseURL} = BackboneORM
 
-describe 'DatabaseURL @no_options', ->
+describe 'DatabaseURL @quick', ->
   it 'parses url (unparsed query)', (done) ->
     url = new DatabaseURL('protocol://user:password@host:80/database/model_names?query1=true&query2="bob"')
     assert.equal(url.protocol, 'protocol:')

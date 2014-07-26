@@ -41,7 +41,7 @@ gulp.task 'minify', ['build'], ->
 testNodeFn = (options={}) -> (callback) ->
   gutil.log "Running Node.js tests #{if options.quick then '(quick)' else ''}"
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
-  mocha_options = if options.quick then {grep: '@no_options'} else {}
+  mocha_options = if options.quick then {grep: '@quick'} else {}
   gulp.src('test/spec/**/*.tests.coffee')
     .pipe(mocha(_.extend({reporter: 'dot'}, mocha_options)))
     .pipe es.writeArray (err, array) ->
@@ -51,8 +51,7 @@ testNodeFn = (options={}) -> (callback) ->
 
 testBrowsersFn = (options={}) -> (callback) ->
   gutil.log "Running Browser tests #{if options.quick then '(quick)' else ''}"
-  karma_options = if options.quick then {client: {args: ['--grep', '@no_options']}} else {}
-  (require './config/karma/run')(karma_options, callback)
+  (require './config/karma/run')(options, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'test-node', ['minify'], testNodeFn()

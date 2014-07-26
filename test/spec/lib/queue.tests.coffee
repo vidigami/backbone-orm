@@ -3,7 +3,7 @@ assert = assert or require?('chai').assert
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 {_, Queue} = BackboneORM
 
-describe 'Queue @no_options', ->
+describe 'Queue @quick', ->
   it 'infinite parallelism', (done) ->
     queue = new Queue()
 

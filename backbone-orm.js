@@ -1321,7 +1321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      {
 	        'cache': false,
 	        'embed': false,
-	        '$tags': '@no_cache @no_embed @no_options'
+	        '$tags': '@no_cache @no_embed @quick'
 	      }, {
 	        'cache': true,
 	        'embed': false,

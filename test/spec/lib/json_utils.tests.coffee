@@ -18,7 +18,7 @@ VALUES =
 
 _.extend(VALUES_JSON = {}, VALUES, {date: VALUES.date.toISOString(), object: _.extend({}, VALUES.object, {date: VALUES.object.date.toISOString()})})
 
-describe 'JSONUtils @no_options', ->
+describe 'JSONUtils @quick', ->
   it 'parse maintains types correctly', (done) ->
     parsed_json = JSONUtils.parse(VALUES_JSON)
     assert.deepEqual(parsed_json, VALUES)
