@@ -7,7 +7,7 @@ module.exports =
     options: {bare: true, sourceMap: false}
     transformPath: (path) -> path.replace(/\.coffee$/, '.js')
 
-  reporters: ['dot']
+  reporters: ['dots']
   port: 9876
   colors: true
   logLevel: 'INFO'
