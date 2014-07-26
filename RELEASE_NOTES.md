@@ -4,7 +4,7 @@ Please refer to the following release notes when upgrading your version of Backb
 * removed lib folder from release
 * simplified build and test
 
-### 0.6.1
+### 0.6.0
 * See [upgrade notes](https://github.com/vidigami/backbone-orm/blob/master/UPGRADING.md) for upgrading pointers from 0.5.x
 * BREAKING: Removed QueryCache
 * BREAKING: Moved model cache to set configured using BackboneORM.configure({model_cache: options})
