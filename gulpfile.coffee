@@ -38,32 +38,29 @@ gulp.task 'minify', ['build'], ->
     .pipe(header(HEADER, {pkg: require './package.json'}))
     .pipe(gulp.dest((file) -> file.base))
 
-testNodeFn = (options={}) -> (callback) ->
-  gutil.log "Running Node.js tests #{if options.quick then '(quick)' else ''}"
+testNode = (callback) ->
+  tags = ("@#{tag.replace(/^[-]+/, '')}" for tag in process.argv.slice(3)).join(' ')
+  gutil.log "Running Node.js tests #{tags}"
+
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
-  mocha_options = if options.quick then {grep: '@quick'} else {}
   gulp.src('test/spec/**/*.tests.coffee')
-    .pipe(mocha(_.extend({reporter: 'dot'}, mocha_options)))
+    .pipe(mocha({reporter: 'dot', grep: tags}))
     .pipe es.writeArray (err, array) ->
       delete global.test_parameters # cleanup globals
       callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-testBrowsersFn = (options={}) -> (callback) ->
-  gutil.log "Running Browser tests #{if options.quick then '(quick)' else ''}"
-  (require './config/karma/run')(options, callback)
+testBrowsers = (callback) ->
+  tags = ("@#{tag.replace(/^[-]+/, '')}" for tag in process.argv.slice(3)).join(' ')
+
+  gutil.log "Running Browser tests #{tags}"
+  (require './config/karma/run')({tags: tags}, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node', ['minify'], testNodeFn()
-gulp.task 'test-browsers', ['minify'], testBrowsersFn()
+gulp.task 'test-node', ['minify'], testNode
+gulp.task 'test-browsers', ['minify'], testBrowsers
 gulp.task 'test', ['minify'], (callback) ->
-  Async.series [testNodeFn(), testBrowsersFn()], (err) -> if err then process.exit(1) else callback(err)
-  return # promises workaround: https://github.com/gulpjs/gulp/issues/455
-
-gulp.task 'test-node-quick', ['build'], testNodeFn({quick: true})
-gulp.task 'test-browsers-quick', ['build'], testBrowsersFn({quick: true})
-gulp.task 'test-quick', ['build'], (callback) ->
-  Async.series [testNodeFn({quick: true}), testBrowsersFn({quick: true})], (err) -> if err then process.exit(1) else callback(err)
+  Async.series [testNode, testBrowsers], (err) -> if err then process.exit(1) else callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
 gulp.task 'benchmark', ['build'], (callback) ->
