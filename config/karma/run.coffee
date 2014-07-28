@@ -10,6 +10,7 @@ BASE_CONFIG = require './base-config'
 
 module.exports = (options={}, callback) ->
   Wrench.rmdirSyncRecursive('./_temp', true)
+  Wrench.rmdirSyncRecursive('node_modules/backbone-orm', true)
   queue = new Queue(1)
   queue.defer (callback) -> generate(options, callback)
 
