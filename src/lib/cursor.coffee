@@ -183,10 +183,6 @@ module.exports = class Cursor
   selectResults: (json) ->
     json = json.slice(0, 1) if @_cursor.$one
 
-    if @_cursor.$unique
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$unique, @_cursor.$white_list) else @_cursor.$unique
-      json = (_.pick(item, $select) for item in json)
-
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
       $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
