@@ -12,7 +12,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  describe "Convenience Methods #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Convenience Methods #{options.$parameter_tags or ''}#{options.$tags} @convenience", ->
     Flat = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}

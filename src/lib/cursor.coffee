@@ -10,7 +10,7 @@ _ = require 'underscore'
 
 Utils = require './utils'
 
-CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$white_list', '$select', '$include', '$values', '$ids', '$or']
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or']
 
 module.exports = class Cursor
   # @nodoc
@@ -20,7 +20,7 @@ module.exports = class Cursor
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
     # ensure arrays
-    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values'] when @_cursor[key] and not _.isArray(@_cursor[key])
+    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values', '$unique'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
   # @nodoc
   @validateQuery = (query, memo, model_type) =>
@@ -70,6 +70,11 @@ module.exports = class Cursor
   values: (args) ->
     keys = _.flatten(arguments)
     @_cursor.$values = if @_cursor.$values then _.intersection(@_cursor.$values, keys) else keys
+    return @
+
+  unique: (args) ->
+    keys = _.flatten(arguments)
+    @_cursor.$unique = if @_cursor.$unique then _.intersection(@_cursor.$unique, keys) else keys
     return @
 
   # @nodoc
@@ -177,6 +182,10 @@ module.exports = class Cursor
   # @nodoc
   selectResults: (json) ->
     json = json.slice(0, 1) if @_cursor.$one
+
+    if @_cursor.$unique
+      $select = if @_cursor.$white_list then _.intersection(@_cursor.$unique, @_cursor.$white_list) else @_cursor.$unique
+      json = (_.pick(item, $select) for item in json)
 
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values

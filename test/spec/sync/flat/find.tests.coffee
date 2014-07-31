@@ -16,7 +16,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   START_DATE = new Date()
   END_DATE = new Date(START_DATE.getTime() + (BASE_COUNT - 1) * DATE_INTERVAL_MS)
 
-  describe "Model.find #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Model.find #{options.$parameter_tags or ''}#{options.$tags} @find", ->
     Flat = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
@@ -452,4 +452,102 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
             assert.equal(models.length, BASE_COUNT-1, 'Finds other models')
             for model in models
               assert.notEqual(test_model.get('name'), model.get('name'), "Names don't match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
+            done()
+
+    it 'Handles a find unique query on one field', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: 'name'}).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            done()
+
+    it 'Handles a find unique query on one field and gives the correct result with sort', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        new_updated_at = new Date(test_model.get('updated_at').getTime() + 60*1000)
+        test_clone = new Flat({name: test_model.get('name'), updated_at: new_updated_at})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: 'name'}).sort('-updated_at').limit(1).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, 1, "finds no extra results")
+            retrieved_clone = results[0]
+            assert.equal(retrieved_clone.created_at, null, "loaded model has no created_at")
+            assert.equal(retrieved_clone.updated_at.getTime(), new_updated_at.getTime(), "finds the correct model")
+            done()
+
+    it 'Handles a find unique query on name with $select', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: ['name'], $select: ['id']}).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            for result in results
+              assert.equal(_.keys(result).length, 1, "finds only the $selected field")
+              assert.equal(_.keys(result)[0], 'id', "finds only the $selected field")
+            done()
+
+    it 'Handles a find unique query on name with $select name', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: ['name'], $select: ['name']}).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            for result in results
+              assert.equal(_.keys(result).length, 1, "finds only the $selected field")
+              assert.equal(_.keys(result)[0], 'name', "finds only the $selected field")
+            done()
+
+    it 'Handles a find unique query on name with $values', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: ['name'], $values: ['id']}).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            for result in results
+              assert.ok(!_.isObject(result), "finds only the $selected field")
+            done()
+
+    it 'Handles a find unique query on name with $values name', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor({$unique: ['name'], $values: ['name']}).toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            for result in results
+              assert.ok(!_.isObject(result), "finds only the $selected field")
+            done()
+
+    it 'Handles a find unique query with count', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.count {$unique: 'name'}, (err, result) ->
+            assert.ifError(err)
+            assert.equal(result, BASE_COUNT, "finds no extra results")
             done()
