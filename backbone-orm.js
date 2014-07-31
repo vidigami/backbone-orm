@@ -1914,18 +1914,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._cursor.$one) {
 	      json = json.slice(0, 1);
 	    }
-	    if (this._cursor.$unique) {
-	      $select = this._cursor.$white_list ? _.intersection(this._cursor.$unique, this._cursor.$white_list) : this._cursor.$unique;
-	      json = (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = json.length; _i < _len; _i++) {
-	          item = json[_i];
-	          _results.push(_.pick(item, $select));
-	        }
-	        return _results;
-	      })();
-	    }
 	    if (this._cursor.$values) {
 	      $values = this._cursor.$white_list ? _.intersection(this._cursor.$values, this._cursor.$white_list) : this._cursor.$values;
 	      if (this._cursor.$values.length === 1) {
