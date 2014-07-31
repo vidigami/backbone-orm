@@ -6,6 +6,9 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
+_ = require 'underscore'
+Backbone = require 'backbone'
+
 module.exports = BackboneORM = require './core' # avoid circular dependencies
 publish =
   configure: require './lib/configure'
@@ -25,14 +28,14 @@ publish =
   ConnectionPool: require './lib/connection_pool'
   BaseConvention: require './conventions/base'
 
-  _: require 'underscore'
-  Backbone: require 'backbone'
-publish._.extend(BackboneORM, publish)
+  _: _
+  Backbone: Backbone
+_.extend(BackboneORM, publish)
 
 # re-expose modules
 BackboneORM.modules =
-  underscore: require 'underscore'
-  backbone: require 'backbone'
+  underscore: _
+  backbone: Backbone
   url: require 'url'
   querystring: require 'querystring'
   'lru-cache': require 'lru-cache'

@@ -48,7 +48,7 @@ module.exports = class JSONUtils
 
         # convert id attributes
         else if model_type?.schema().idType(key) is 'Integer'
-          (console.log "Warning: failed to convert '#{key}' type to integer. Model: #{model_type.model_name} value: #{result[key]}"; continue) if _.isNaN(value = +result[key])
+          (console.log "Warning: failed to convert key: #{key} value: #{result[key]} to integer. Model: #{model_type.model_name}"; continue) if _.isNaN(value = +result[key])
           result[key] = value
 
       return result
