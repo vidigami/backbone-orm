@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.6.2
+* Added unique to select distinct records
+
 ### 0.6.1
 * removed lib folder from release
 * simplified build and test

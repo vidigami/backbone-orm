@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.1
+  backbone-orm.js 0.6.2
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -18,7 +18,7 @@ JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
 
-CAPABILITIES = {embed: true, json: true, unique: false, self_reference: true}
+CAPABILITIES = {embed: true, json: true, unique: true, self_reference: true}
 
 # Backbone Sync for in-memory models.
 #

@@ -85,6 +85,21 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
               assert.equal(_.keys(result)[0], 'id', "finds only the $selected field")
             done()
 
+    it 'Handles a find unique query on name with select (chaining)', (done) ->
+      Flat.findOne (err, test_model) ->
+        assert.ifError(err)
+        assert.ok(test_model, 'found model')
+        test_clone = new Flat({name: test_model.get('name')})
+        test_clone.save (err) ->
+          assert.ifError(err)
+          Flat.cursor().unique('name').select('id').toJSON (err, results) ->
+            assert.ifError(err)
+            assert.equal(results.length, BASE_COUNT, "finds no extra results")
+            for result in results
+              assert.equal(_.keys(result).length, 1, "finds only the $selected field")
+              assert.equal(_.keys(result)[0], 'id', "finds only the $selected field")
+            done()
+
     it 'Handles a find unique query on name with $select name', (done) ->
       Flat.findOne (err, test_model) ->
         assert.ifError(err)

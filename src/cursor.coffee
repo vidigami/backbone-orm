@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.1
+  backbone-orm.js 0.6.2
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -109,6 +109,18 @@ module.exports = class MemoryCursor extends Cursor
           if @_cursor.$sort
             $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
             json.sort (model, next_model) => Utils.jsonFieldCompare(model, next_model, $sort_fields)
+
+          # TODO: optimize by combining sort and find, storing one result instead of processing the whole list and then reducing
+          if @_cursor.$unique
+            unique_json = []
+            unique_keys = {}
+            for model_json in json
+              key = ''
+              key += "#{field}:#{JSON.stringify(model_json[field])}" for field in @_cursor.$unique when model_json.hasOwnProperty(field)
+              continue if unique_keys[key]
+              unique_keys[key] = true
+              unique_json.push(model_json)
+            json = unique_json
 
           if @_cursor.$offset
             number = json.length - @_cursor.$offset
