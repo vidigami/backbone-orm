@@ -18,7 +18,7 @@ JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
 
-CAPABILITIES = {embed: true, json: true, self_reference: true}
+CAPABILITIES = {embed: true, json: true, unique: false, self_reference: true}
 
 # Backbone Sync for in-memory models.
 #
