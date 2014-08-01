@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.6.3
+* Added manual field option for ids so they can be manually set rather than auto-incremented
+
 ### 0.6.2
 * Added unique to select distinct records
 

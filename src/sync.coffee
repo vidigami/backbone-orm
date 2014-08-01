@@ -18,7 +18,7 @@ JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
 
-CAPABILITIES = {embed: true, json: true, unique: true, self_reference: true}
+CAPABILITIES = {embed: true, json: true, unique: true, manual_ids: true, self_reference: true}
 
 # Backbone Sync for in-memory models.
 #
@@ -45,6 +45,7 @@ class MemorySync
   initialize: ->
     return if @is_initialized; @is_initialized = true
     @schema.initialize()
+    @manual_id = true if @schema.field('id')?.manual
 
   ###################################
   # Classic Backbone Sync
@@ -60,13 +61,17 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
+    return options.error(new Error('Create should not be called for manual option. Set an id before calling save')) if @manual_id
+
     (attributes = {})[@model_type::idAttribute] = ++@id
     model.set(attributes)
-    model_json = @store[model.id] = model.toJSON()
+    @store[model.id] = model_json = model.toJSON()
     options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   update: (model, options) ->
+    return options.error(new Error("Update cannot create a new model without manual option")) if not @manual_id and not @store.hasOwnProperty(model.id)
+
     @store[model.id] = model_json = model.toJSON()
     options.success(JSONUtils.deepClone(model_json))
 

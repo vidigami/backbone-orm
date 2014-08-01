@@ -54,6 +54,7 @@ module.exports = class Schema
     return unless type = @type(key)
     type.schema?().type(other or 'id') or type
 
+  field: (key) -> return @fields[key] or @relation(key)
   relation: (key) -> return @relations[key] or @virtual_accessors[key]
   reverseRelation: (reverse_key) ->
     return relation.reverse_relation for key, relation of @relations when relation.reverse_relation and (relation.reverse_relation.join_key is reverse_key)

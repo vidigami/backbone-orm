@@ -12,7 +12,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  describe "Callbacks #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Callbacks #{options.$parameter_tags or ''}#{options.$tags} @callbacks", ->
     Flat = Flats = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
