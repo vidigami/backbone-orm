@@ -68,8 +68,8 @@
   Schema: require(&#39;.&#47;lib&#47;schema&#39;),
   ConnectionPool: require(&#39;.&#47;lib&#47;connection_pool&#39;),
   BaseConvention: require(&#39;.&#47;conventions&#47;base&#39;),
-  _: require(&#39;underscore&#39;),
-  Backbone: require(&#39;backbone&#39;)
+  _: _,
+  Backbone: Backbone
 }</code></pre>
     
   </dd>
@@ -79,8 +79,8 @@
   </dt>
   <dd>
     <pre><code class='coffeescript'>{
-  underscore: require(&#39;underscore&#39;),
-  backbone: require(&#39;backbone&#39;),
+  underscore: _,
+  backbone: Backbone,
   url: require(&#39;url&#39;),
   querystring: require(&#39;querystring&#39;),
   &#39;lru-cache&#39;: require(&#39;lru-cache&#39;),
@@ -95,7 +95,7 @@
 </dl>
     </div>
     <div id='footer'>
-  July 25, 14 19:38:55 by
+  August 01, 14 10:50:35 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
