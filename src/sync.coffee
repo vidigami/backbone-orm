@@ -61,7 +61,7 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
-    return options.error(new Error('Create should not be called for manual option. Set an id before calling save')) if @manual_id
+    return options.error(new Error("Create should not be called for manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
 
     (attributes = {})[@model_type::idAttribute] = ++@id
     model.set(attributes)
@@ -70,7 +70,7 @@ class MemorySync
 
   # @nodoc
   update: (model, options) ->
-    return options.error(new Error("Update cannot create a new model without manual option")) if not @manual_id and not @store.hasOwnProperty(model.id)
+    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and not @store.hasOwnProperty(model.id)
 
     @store[model.id] = model_json = model.toJSON()
     options.success(JSONUtils.deepClone(model_json))

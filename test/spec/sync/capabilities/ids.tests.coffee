@@ -27,7 +27,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
     beforeEach (callback) -> Utils.resetSchemas [Flat], callback
 
-    describe 'manual_id', ->
+    describe 'manual id option', ->
       it 'should fail to save if you do not provide an id', (done) ->
         model = new Flat({name: 'Bob'})
         model.save (err) ->
