@@ -12,7 +12,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 5
 
-  describe "Model.sort #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Model.sort #{options.$parameter_tags or ''}#{options.$tags} @sort", ->
     Flat = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}

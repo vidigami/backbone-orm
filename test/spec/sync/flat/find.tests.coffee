@@ -16,7 +16,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   START_DATE = new Date()
   END_DATE = new Date(START_DATE.getTime() + (BASE_COUNT - 1) * DATE_INTERVAL_MS)
 
-  describe "Model.find #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Model.find #{options.$parameter_tags or ''}#{options.$tags} @find", ->
     Flat = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
