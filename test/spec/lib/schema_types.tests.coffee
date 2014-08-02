@@ -1,8 +1,8 @@
 util = require 'util'
 assert = require 'assert'
 
-BackboneORM = require 'backbone-orm'
-{_, Backbone, Queue, Utils, JSONUtils} = BackboneORM
+BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
+{_, Backbone, Queue, Utils, JSONUtils, Fabricator} = BackboneORM
 
 _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   options = _.extend({}, options, __test__parameters) if __test__parameters?

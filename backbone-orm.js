@@ -5081,11 +5081,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DatabaseURL = __webpack_require__(12);
 
-	ModelStream = __webpack_require__(34);
+	ModelStream = __webpack_require__(36);
 
-	modelEach = __webpack_require__(35);
+	modelEach = __webpack_require__(34);
 
-	modelInterval = __webpack_require__(36);
+	modelInterval = __webpack_require__(35);
 
 	__webpack_require__(37);
 
@@ -8288,67 +8288,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	try {
-	  stream = __webpack_require__(3);
-	} catch (_error) {}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
 	var Cursor, Queue, _;
 
 	_ = __webpack_require__(1);
@@ -8415,7 +8354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -8577,6 +8516,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return runInterval(range.start);
 	  });
 	};
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var ModelStream, stream,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	try {
+	  stream = __webpack_require__(3);
+	} catch (_error) {}
+
+	if (stream != null ? stream.Readable : void 0) {
+	  module.exports = ModelStream = (function(_super) {
+	    __extends(ModelStream, _super);
+
+	    function ModelStream(model_type, query) {
+	      this.model_type = model_type;
+	      this.query = query != null ? query : {};
+	      ModelStream.__super__.constructor.call(this, {
+	        objectMode: true
+	      });
+	    }
+
+	    ModelStream.prototype._read = function() {
+	      var done;
+	      if (this.ended || this.started) {
+	        return;
+	      }
+	      this.started = true;
+	      done = (function(_this) {
+	        return function(err) {
+	          _this.ended = true;
+	          if (err) {
+	            _this.emit('error', err);
+	          }
+	          return _this.push(null);
+	        };
+	      })(this);
+	      return this.model_type.each(this.query, ((function(_this) {
+	        return function(model, callback) {
+	          _this.push(model);
+	          return callback();
+	        };
+	      })(this)), done);
+	    };
+
+	    return ModelStream;
+
+	  })(stream.Readable);
+	}
 
 
 /***/ },
