@@ -45,14 +45,15 @@ module.exports = class Schema
     return
 
   type: (key, type) ->
-    if arguments.length is 2
-      (@type_overrides[key] or= {})['type'] = type
-    else
-      return @type_overrides[key]?.type or @fields[key]?.type or @relation(key)?.reverse_model_type or (reverse_type = @reverseRelation(key)?.model_type)?.schema().type('id') or reverse_type
-  idType: (key) ->
+    ((@type_overrides[key] or= {})['type'] = type; return @) if arguments.length is 2
     (other = key.substr(index+1); key = key.substr(0, index)) if (index = key.indexOf('.')) >= 0 # queries like 'flat.id'
-    return unless type = @type(key)
-    type.schema?().type(other or 'id') or type
+    return unless type = @type_overrides[key]?.type or @fields[key]?.type or @relation(key)?.reverse_model_type or @reverseRelation(key)?.model_type
+    if @virtual_accessors[key]
+      (console.log "Unexpected other for virtual id key: #{key}.#{other}"; return) if other
+      return type.schema?().type('id') or type
+    return if other then type.schema?().type(other) else type
+
+  idType: (key) -> return type.schema?().type('id') or type if type = @type(key)
 
   field: (key) -> return @fields[key] or @relation(key)
   relation: (key) -> return @relations[key] or @virtual_accessors[key]

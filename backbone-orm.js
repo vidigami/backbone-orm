@@ -2154,24 +2154,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.type = function(key, type) {
-	    var reverse_type, _base, _ref, _ref1, _ref2, _ref3, _ref4;
+	    var index, other, _base, _ref, _ref1, _ref2, _ref3;
 	    if (arguments.length === 2) {
-	      return ((_base = this.type_overrides)[key] || (_base[key] = {}))['type'] = type;
-	    } else {
-	      return ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = (reverse_type = (_ref4 = this.reverseRelation(key)) != null ? _ref4.model_type : void 0)) != null ? _ref3.schema().type('id') : void 0) || reverse_type;
+	      ((_base = this.type_overrides)[key] || (_base[key] = {}))['type'] = type;
+	      return this;
 	    }
-	  };
-
-	  Schema.prototype.idType = function(key) {
-	    var index, other, type;
 	    if ((index = key.indexOf('.')) >= 0) {
 	      other = key.substr(index + 1);
 	      key = key.substr(0, index);
 	    }
-	    if (!(type = this.type(key))) {
+	    if (!(type = ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = this.reverseRelation(key)) != null ? _ref3.model_type : void 0))) {
 	      return;
 	    }
-	    return (typeof type.schema === "function" ? type.schema().type(other || 'id') : void 0) || type;
+	    if (this.virtual_accessors[key]) {
+	      if (other) {
+	        console.log("Unexpected other for virtual id key: " + key + "." + other);
+	        return;
+	      }
+	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
+	    }
+	    if (other) {
+	      return typeof type.schema === "function" ? type.schema().type(other) : void 0;
+	    } else {
+	      return type;
+	    }
+	  };
+
+	  Schema.prototype.idType = function(key) {
+	    var type;
+	    if (type = this.type(key)) {
+	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
+	    }
 	  };
 
 	  Schema.prototype.field = function(key) {
@@ -5081,11 +5094,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DatabaseURL = __webpack_require__(12);
 
-	ModelStream = __webpack_require__(36);
+	ModelStream = __webpack_require__(34);
 
-	modelEach = __webpack_require__(34);
+	modelEach = __webpack_require__(35);
 
-	modelInterval = __webpack_require__(35);
+	modelInterval = __webpack_require__(36);
 
 	__webpack_require__(37);
 
@@ -8288,6 +8301,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
+	var ModelStream, stream,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	try {
+	  stream = __webpack_require__(3);
+	} catch (_error) {}
+
+	if (stream != null ? stream.Readable : void 0) {
+	  module.exports = ModelStream = (function(_super) {
+	    __extends(ModelStream, _super);
+
+	    function ModelStream(model_type, query) {
+	      this.model_type = model_type;
+	      this.query = query != null ? query : {};
+	      ModelStream.__super__.constructor.call(this, {
+	        objectMode: true
+	      });
+	    }
+
+	    ModelStream.prototype._read = function() {
+	      var done;
+	      if (this.ended || this.started) {
+	        return;
+	      }
+	      this.started = true;
+	      done = (function(_this) {
+	        return function(err) {
+	          _this.ended = true;
+	          if (err) {
+	            _this.emit('error', err);
+	          }
+	          return _this.push(null);
+	        };
+	      })(this);
+	      return this.model_type.each(this.query, ((function(_this) {
+	        return function(model, callback) {
+	          _this.push(model);
+	          return callback();
+	        };
+	      })(this)), done);
+	    };
+
+	    return ModelStream;
+
+	  })(stream.Readable);
+	}
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
 	var Cursor, Queue, _;
 
 	_ = __webpack_require__(1);
@@ -8354,7 +8428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -8516,67 +8590,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return runInterval(range.start);
 	  });
 	};
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	try {
-	  stream = __webpack_require__(3);
-	} catch (_error) {}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
 
 
 /***/ },
