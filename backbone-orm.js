@@ -2154,11 +2154,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.type = function(key, type) {
-	    var _base, _ref, _ref1, _ref2, _ref3;
+	    var reverse_type, _base, _ref, _ref1, _ref2, _ref3, _ref4;
 	    if (arguments.length === 2) {
 	      return ((_base = this.type_overrides)[key] || (_base[key] = {}))['type'] = type;
 	    } else {
-	      return ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = this.reverseRelation(key)) != null ? _ref3.model_type : void 0);
+	      return ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = (reverse_type = (_ref4 = this.reverseRelation(key)) != null ? _ref4.model_type : void 0)) != null ? _ref3.schema().type('id') : void 0) || reverse_type;
 	    }
 	  };
 
@@ -5822,7 +5822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  One.prototype.initialize = function() {
-	    var _ref;
+	    var _ref, _ref1, _ref2;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
@@ -5830,7 +5830,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.embed) {
 	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
-	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, this.model_type) : void 0;
+	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, ((_ref1 = this.model_type) != null ? (_ref2 = _ref1.schema()) != null ? _ref2.type('id') : void 0 : void 0) || this.model_type) : void 0;
 	  };
 
 	  One.prototype.initializeModel = function(model) {
@@ -6328,7 +6328,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  Many.prototype.initialize = function() {
-	    var _ref, _ref1;
+	    var _ref, _ref1, _ref2, _ref3;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
@@ -6340,7 +6340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
 	    if ((_ref1 = this.reverse_model_type) != null) {
-	      _ref1.schema().type(this.foreign_key, this.model_type);
+	      _ref1.schema().type(this.foreign_key, ((_ref2 = this.model_type) != null ? (_ref3 = _ref2.schema()) != null ? _ref3.type('id') : void 0 : void 0) || this.model_type);
 	    }
 	    if (this.reverse_relation.type === 'hasMany') {
 	      return this.join_table = this.findOrGenerateJoinTable(this);
