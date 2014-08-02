@@ -145,11 +145,11 @@ Task.prototype.sync = require('backbone-mongo').sync(Task);
         <div class="row"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
         <div class="row example coffeescript">
           <pre><code class="language-coffeescript"># configure replicaset globally
-require('backbone-mongo').configure {
+require('backbone-mongo').configure {connection_options: {
   retryMiliSeconds: 1000
   numberOfRetries: 2*60
   autoReconnect: true
-}
+}}
 
 # set journalling for a specific model
 class Task extends Backbone.Model
