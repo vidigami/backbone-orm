@@ -280,7 +280,6 @@ module.exports = class JSONUtils
 
     if _.isArray(obj)                                     # an array
       clone = Array::slice.call(obj)
-
     else if obj.constructor isnt {}.constructor           # a reference
       return obj
     else                                                  # an object

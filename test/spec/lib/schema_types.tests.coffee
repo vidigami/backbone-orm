@@ -12,6 +12,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   SYNC = options.sync
   describe "Model.schema#idType #{options.$parameter_tags or ''}#{options.$tags} @schema", ->
     Flat = Reverse = Owner = null
+    owner_id_type = owner_id_parsed_result = reverse_id_type = reverse_id_parsed_result = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
@@ -41,6 +42,11 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(Owner)
 
+      owner_id_type = Flat.schema().idType()
+      owner_id_parsed_result = if owner_id_type is 'Integer' then 1 else '1'
+      reverse_id_type = Reverse.schema().idType()
+      reverse_id_parsed_result = if reverse_id_type is 'Integer' then 1 else '1'
+
     after (callback) -> Utils.resetSchemas [Flat], callback
     beforeEach (callback) ->
       queue = new Queue(1)
@@ -49,24 +55,24 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
     describe 'schema', ->
       it 'should return Integer for the schema type of the id', ->
-        assert.equal(Flat.schema().type('id'), 'Integer')
+        assert.equal(Flat.schema().type('id'), owner_id_type)
       it 'should return Integer for the schema type of a belongsTo id', ->
-        assert.equal(Reverse.schema().type('owner_id'), 'Integer')
+        assert.equal(Reverse.schema().type('owner_id'), owner_id_type)
       it 'should return Integer for the schema type of a hasMany id', ->
-        assert.equal(Owner.schema().type('reverse_ids'), 'Integer')
+        assert.equal(Owner.schema().type('reverse_ids'), reverse_id_type)
       it 'should parse a related belongsTo id as an Integer (dot)', ->
-        assert.equal(Reverse.schema().idType('owner.reverses.id'), 'Integer')
+        assert.equal(Reverse.schema().idType('owner.reverses.id'), reverse_id_type)
       it 'should parse a related belongsTo id as an Integer (underscore)', ->
-        assert.equal(Reverse.schema().idType('owner.reverse_id'), 'Integer')
+        assert.equal(Reverse.schema().idType('owner.reverse_id'), reverse_id_type)
       it 'should parse a related hasMany id as an Integer', ->
-        assert.equal(Owner.schema().idType('reverses.another_owner_id'), 'Integer')
+        assert.equal(Owner.schema().idType('reverses.another_owner_id'), owner_id_type)
 
     describe 'JSONUtils', ->
-      it 'should parse a belongsTo id as an Integer', ->
-        assert.strictEqual(JSONUtils.parse({'owner_id': '1'}, Reverse)['owner_id'], 1)
-      it 'should parse a hasMany id as an Integer', ->
-        assert.strictEqual(JSONUtils.parse({'reverse_id': '1'}, Owner)['reverse_id'], 1)
-      it 'should parse a related belongsTo id as an Integer', ->
-        assert.strictEqual(JSONUtils.parse({'owner.reverse_id': '1'}, Reverse)['owner.reverse_id'], 1)
-      it 'should parse a related hasMany id as an Integer', ->
-        assert.strictEqual(JSONUtils.parse({'reverses.another_owner_id': '1'}, Owner)['reverses.another_owner_id'], 1)
+      it 'should parse a belongsTo id as the correct type', ->
+        assert.strictEqual(JSONUtils.parse({'owner_id': '1'}, Reverse)['owner_id'], owner_id_parsed_result)
+      it 'should parse a hasMany id as the correct type', ->
+        assert.strictEqual(JSONUtils.parse({'reverse_id': '1'}, Owner)['reverse_id'], reverse_id_parsed_result)
+      it 'should parse a related belongsTo id as the correct type', ->
+        assert.strictEqual(JSONUtils.parse({'owner.reverse_id': '1'}, Reverse)['owner.reverse_id'], reverse_id_parsed_result)
+      it 'should parse a related hasMany id as the correct type', ->
+        assert.strictEqual(JSONUtils.parse({'reverses.another_owner_id': '1'}, Owner)['reverses.another_owner_id'], owner_id_parsed_result)

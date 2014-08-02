@@ -12,7 +12,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   SYNC = options.sync
   BASE_COUNT = 1
 
-  describe "Schema #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Schema #{options.$parameter_tags or ''}#{options.$tags} @schema", ->
     Flat = Reverse = Owner = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}

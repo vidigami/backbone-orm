@@ -14,6 +14,7 @@ One = require '../relations/one'
 Many = require '../relations/many'
 DatabaseURL = require './database_url'
 Utils = require './utils'
+JSONUtils = require './json_utils'
 
 RELATION_VARIANTS =
   'hasOne': 'hasOne'
@@ -34,6 +35,7 @@ module.exports = class Schema
   constructor: (@model_type, @type_overrides={}) ->
     @raw = _.clone(_.result(new @model_type(), 'schema') or {})
     @fields = {}; @relations = {}; @virtual_accessors = {}
+    @_parseField('id', @raw.id) if @raw.id
 
   # @nodoc
   initialize: ->
@@ -53,7 +55,9 @@ module.exports = class Schema
       return type.schema?().type('id') or type
     return if other then type.schema?().type(other) else type
 
-  idType: (key) -> return type.schema?().type('id') or type if type = @type(key)
+  idType: (key) ->
+    return @type('id') unless key
+    return type.schema?().type('id') or type if type = @type(key)
 
   field: (key) -> return @fields[key] or @relation(key)
   relation: (key) -> return @relations[key] or @virtual_accessors[key]

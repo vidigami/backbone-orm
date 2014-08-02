@@ -17,8 +17,9 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
-      schema = JSONUtils.deepClone(BASE_SCHEMA)
-      (schema.id or= []).push({manual: true})
+      schema = JSONUtils.deepClone(BASE_SCHEMA, 3)
+      schema.id or= []
+      if schema.id.length and _.isObject(type = schema.id[schema.id.length-1]) then type.manual = true else schema.id.push({manual: true})
 
       class Flat extends Backbone.Model
         urlRoot: "#{DATABASE_URL}/flats"

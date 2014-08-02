@@ -36,8 +36,8 @@ class MemorySync
   # @nodoc
   constructor: (@model_type) ->
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
-    @schema = new Schema(@model_type, {id: {type: 'Integer'}})
-
+    @schema = new Schema(@model_type)
+    @schema.type('id', 'Integer') unless @schema.field('id')?.type
     @store = @model_type.store or= {}
     @id = 0
 
@@ -46,6 +46,7 @@ class MemorySync
     return if @is_initialized; @is_initialized = true
     @schema.initialize()
     @manual_id = true if @schema.field('id')?.manual
+    @id_type = @schema.idType()
 
   ###################################
   # Classic Backbone Sync
@@ -63,7 +64,7 @@ class MemorySync
   create: (model, options) ->
     return options.error(new Error("Create should not be called for manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
 
-    (attributes = {})[@model_type::idAttribute] = ++@id
+    (attributes = {})[@model_type::idAttribute] = if @id_type is 'String' then "#{++@id}" else ++@id
     model.set(attributes)
     @store[model.id] = model_json = model.toJSON()
     options.success(JSONUtils.deepClone(model_json))
