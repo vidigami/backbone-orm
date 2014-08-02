@@ -3,6 +3,7 @@ Please refer to the following release notes when upgrading your version of Backb
 ### 0.6.3
 * Added manual field option for ids so they can be manually set rather than auto-incremented
 * Added tests for dynamic attributes
+* Added tests for id types and fixed broken lookups
 
 ### 0.6.2
 * Added unique to select distinct records
