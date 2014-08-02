@@ -1,5 +1,4 @@
-util = require 'util'
-assert = require 'assert'
+assert = assert or require?('chai').assert
 
 BackboneORM = window?.BackboneORM; try BackboneORM or= require?('backbone-orm') catch; try BackboneORM or= require?('../../../../backbone-orm')
 {_, Backbone, Queue, Utils, JSONUtils, Fabricator} = BackboneORM
