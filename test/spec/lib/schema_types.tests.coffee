@@ -60,6 +60,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
       assert.equal(Reverse.schema().idType('owner.reverse_id'), 'Integer')
     it 'should parse a related hasMany id as an Integer', ->
       assert.equal(Owner.schema().idType('reverse.another_owner_id'), 'Integer')
+
     describe 'JSONUtils', ->
       it 'should parse a belongsTo id as an Integer', ->
         assert.strictEqual(JSONUtils.parse({'owner_id': '1'}, Reverse)['owner_id'], 1)
