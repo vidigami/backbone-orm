@@ -14,7 +14,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
   PICK_KEYS = ['id', 'name']
 
-  describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags} @many", ->
     Reverse = Owner = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
@@ -44,6 +44,10 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
       queue = new Queue(1)
       queue.defer (callback) -> Utils.resetSchemas [Reverse, Owner], callback
+      queue.defer (callback) -> join_table = Reverse.schema().relation('owners').join_table; join_table.count (err, count) ->
+        return callback(err) if err
+        return callback(new Error "Join table not destroyed #{join_table.model_name}. Remaining: #{count}") if count
+        callback()
       queue.defer (callback) ->
         create_queue = new Queue()
 

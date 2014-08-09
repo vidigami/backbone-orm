@@ -1,5 +1,9 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.6.4
+* Bug fix for relationships not being destroyed
+* Memory sync optimizations
+
 ### 0.6.3
 * Added manual field option for ids so they can be manually set rather than auto-incremented
 * Added tests for dynamic attributes

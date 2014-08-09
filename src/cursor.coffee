@@ -75,9 +75,8 @@ module.exports = class MemoryCursor extends Cursor
 
             index = -1
             findNext = (err) =>
-              return callback(err) if err
+              return callback(err) if err or ++index >= @store.length
               return callback() if exists and json.length # exists only needs one result
-              return callback() if ++index >= @store.length
               model_json = @store[index]
               (return findNext() for key, values of ins when model_json[key] not in values) if ins_size
               (return findNext() for key, values of nins when model_json[key] in values) if nins_size

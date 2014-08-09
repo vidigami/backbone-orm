@@ -105,13 +105,16 @@ class MemorySync
     else
       @model_type.cursor(query).toJSON (err, models_json) =>
         return callback(err) if err
+
+        index = -1
         destroyNext = (err) =>
-          return callback(err) if err or not models_json.length
-          model_json = models_json.pop()
-          return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model_json.id)) < 0
-          Utils.patchRemoveByJSON(@model_type, @store.splice(index, 1), destroyNext)
+          return callback(err) if err or ++index >= models_json.length
+          model_json = models_json[index]
+          if (splice_index = @indexOf(model_json.id)) < 0
+            return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model_json.id}"))
+          @store.splice(splice_index, 1)
+          if @model_type.is_join_table then destroyNext() else Utils.patchRemoveByJSON(@model_type, model_json, destroyNext)
         destroyNext()
-        @store.push(model_json) for model_json in @store.splice() when not model_json.id in models_json
         return
 
   ###################################
