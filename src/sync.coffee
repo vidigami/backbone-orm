@@ -16,6 +16,7 @@ Utils = require './lib/utils'
 JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 1000
+BATCH_COUNT = 500 # TO LIMIT STACK DEPTH
 
 CAPABILITIES = {embed: true, json: true, unique: true, manual_ids: true, dynamic: true, self_reference: true}
 
@@ -98,23 +99,16 @@ class MemorySync
     [query, callback] = [{}, query] if arguments.length is 1
 
     if _.size(query) is 0
-      destroyNext = (err) =>
-        return callback(err) if err or not @store.length
-        Utils.patchRemoveByJSON(@model_type, @store.pop(), destroyNext)
-      destroyNext()
+      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) =>
+        Utils.patchRemoveByJSON(@model_type, model_json, callback)
     else
       @model_type.cursor(query).toJSON (err, models_json) =>
         return callback(err) if err
 
-        index = -1
-        destroyNext = (err) =>
-          return callback(err) if err or ++index >= models_json.length
-          model_json = models_json[index]
-          if (splice_index = @indexOf(model_json.id)) < 0
-            return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model_json.id}"))
+        Utils.eachC models_json, BATCH_COUNT, callback, (model_json, callback) =>
+          return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model_json.id}")) if (splice_index = @indexOf(model_json.id)) < 0
           @store.splice(splice_index, 1)
-          if @model_type.is_join_table then destroyNext() else Utils.patchRemoveByJSON(@model_type, model_json, destroyNext)
-        destroyNext()
+          if @model_type.is_join_table then callback() else Utils.patchRemoveByJSON(@model_type, model_json, callback)
         return
 
   ###################################

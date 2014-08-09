@@ -150,7 +150,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _;
+	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _;
 
 	_ = __webpack_require__(1);
 
@@ -167,6 +167,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	JSONUtils = __webpack_require__(8);
 
 	DESTROY_BATCH_LIMIT = 1000;
+
+	BATCH_COUNT = 500;
 
 	CAPABILITIES = {
 	  embed: true,
@@ -271,45 +273,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  MemorySync.prototype.destroy = function(query, callback) {
-	    var destroyNext, _ref;
+	    var _ref;
 	    if (arguments.length === 1) {
 	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
 	    }
 	    if (_.size(query) === 0) {
-	      destroyNext = (function(_this) {
-	        return function(err) {
-	          if (err || !_this.store.length) {
-	            return callback(err);
-	          }
-	          return Utils.patchRemoveByJSON(_this.model_type, _this.store.pop(), destroyNext);
+	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
+	        return function(model_json, callback) {
+	          return Utils.patchRemoveByJSON(_this.model_type, model_json, callback);
 	        };
-	      })(this);
-	      return destroyNext();
+	      })(this));
 	    } else {
 	      return this.model_type.cursor(query).toJSON((function(_this) {
 	        return function(err, models_json) {
-	          var index;
 	          if (err) {
 	            return callback(err);
 	          }
-	          index = -1;
-	          destroyNext = function(err) {
-	            var model_json, splice_index;
-	            if (err || ++index >= models_json.length) {
-	              return callback(err);
-	            }
-	            model_json = models_json[index];
+	          Utils.eachC(models_json, BATCH_COUNT, callback, function(model_json, callback) {
+	            var splice_index;
 	            if ((splice_index = _this.indexOf(model_json.id)) < 0) {
 	              return callback(new Error("Model not found. Type: " + _this.model_type.model_name + ". Id: " + model_json.id));
 	            }
 	            _this.store.splice(splice_index, 1);
 	            if (_this.model_type.is_join_table) {
-	              return destroyNext();
+	              return callback();
 	            } else {
-	              return Utils.patchRemoveByJSON(_this.model_type, model_json, destroyNext);
+	              return Utils.patchRemoveByJSON(_this.model_type, model_json, callback);
 	            }
-	          };
-	          destroyNext();
+	          });
 	        };
 	      })(this));
 	    }
@@ -777,6 +768,71 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    })(this);
 	    return model_type.prototype.sync('update', model, Utils.bbCallback(callback));
+	  };
+
+	  Utils.each = function(array, limit, iterator, callback) {
+	    var index, length, queue, start_index, _fn, _i, _ref;
+	    index = 0;
+	    queue = new Queue(1);
+	    _fn = function(start_index) {
+	      return queue.defer(function(callback) {
+	        var iteration_end, next;
+	        iteration_end = Math.min(start_index + limit, length);
+	        next = (function(_this) {
+	          return function(err, done) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (done || (index >= iteration_end)) {
+	              return callback();
+	            }
+	            return iterator(array[index++], next);
+	          };
+	        })(this);
+	        return next();
+	      });
+	    };
+	    for (start_index = _i = 0, _ref = (length = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	      _fn(start_index);
+	    }
+	    return queue.await(callback);
+	  };
+
+	  Utils.eachC = function(array, limit, iterator, callback) {
+	    return Utils.each(array, limit, callback, iterator);
+	  };
+
+	  Utils.popEach = function(array, limit, iterator, callback) {
+	    var index, length, queue, start_index, _fn, _i, _ref;
+	    index = 0;
+	    queue = new Queue(1);
+	    _fn = function(start_index) {
+	      return queue.defer(function(callback) {
+	        var iteration_end, next;
+	        iteration_end = Math.min(start_index + limit, length);
+	        next = (function(_this) {
+	          return function(err, done) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (done || (index >= iteration_end) || (array.length === 0)) {
+	              return callback();
+	            }
+	            index++;
+	            return iterator(array.pop(), next);
+	          };
+	        })(this);
+	        return next();
+	      });
+	    };
+	    for (start_index = _i = 0, _ref = (length = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	      _fn(start_index);
+	    }
+	    return queue.await(callback);
+	  };
+
+	  Utils.popEachC = function(array, limit, iterator, callback) {
+	    return Utils.popEach(array, limit, callback, iterator);
 	  };
 
 	  Utils.isSorted = function(models, fields) {
@@ -3551,7 +3607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
+	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -3567,6 +3623,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	DateUtils = __webpack_require__(9);
 
 	Cursor = __webpack_require__(14);
+
+	BATCH_COUNT = 500;
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
@@ -3641,7 +3699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        keys = _.keys(find_query);
 	        queue = new Queue(1);
 	        queue.defer(function(callback) {
-	          var findNext, index, ins, ins_size, key, model_json, nins, nins_size, value, _i, _len, _ref, _ref1, _ref2;
+	          var ins, ins_size, key, model_json, nins, nins_size, value, _i, _len, _ref, _ref1, _ref2;
 	          _ref = [{}, {}], ins = _ref[0], nins = _ref[1];
 	          for (key in find_query) {
 	            value = find_query[key];
@@ -3666,21 +3724,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	              return callback();
 	            } else {
-	              index = -1;
-	              findNext = function(err) {
+	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
 	                var find_keys, next, values, _ref3, _ref4;
-	                if (err || ++index >= _this.store.length) {
-	                  return callback(err);
-	                }
 	                if (exists && json.length) {
-	                  return callback();
+	                  return callback(null, true);
 	                }
-	                model_json = _this.store[index];
 	                if (ins_size) {
 	                  for (key in ins) {
 	                    values = ins[key];
 	                    if (_ref3 = model_json[key], __indexOf.call(values, _ref3) < 0) {
-	                      return findNext();
+	                      return callback();
 	                    }
 	                  }
 	                }
@@ -3688,24 +3741,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  for (key in nins) {
 	                    values = nins[key];
 	                    if (_ref4 = model_json[key], __indexOf.call(values, _ref4) >= 0) {
-	                      return findNext();
+	                      return callback();
 	                    }
 	                  }
 	                }
 	                find_keys = _.keys(find_query);
 	                next = function(err, is_match) {
 	                  if (err || !is_match) {
-	                    return findNext(err);
+	                    return callback(err);
 	                  }
-	                  if (!find_keys.length) {
+	                  if (find_keys.length === 0) {
 	                    json.push(JSONUtils.deepClone(model_json));
-	                    return findNext();
+	                    return callback();
 	                  }
 	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
 	                };
 	                return next(null, true);
-	              };
-	              return findNext();
+	              });
 	            }
 	          } else {
 	            if (_this._cursor.$ids) {
