@@ -71,25 +71,16 @@ module.exports = class MemoryCursor extends Cursor
             callback()
 
           else
-            find_queue = new Queue()
             # console.log "\nmodel: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} @store: #{JSONUtils.stringify(@store)}"
 
             index = -1
-            done = (err) =>
-              return callback(err) if err
-
-              # TODO: collapse into find
-              if ins_size
-                json = _.filter json, (model_json) => return true for key, values of ins when model_json[key] in values
-              if nins_size
-                json = _.filter json, (model_json) => return true for key, values of nins when model_json[key] not in values
-              callback()
-
             findNext = (err) =>
-              return done(err) if err
-              return done() if exists and json.length # exists only needs one result
-              return done() if ++index >= @store.length
+              return callback(err) if err
+              return callback() if exists and json.length # exists only needs one result
+              return callback() if ++index >= @store.length
               model_json = @store[index]
+              (return findNext() for key, values of ins when model_json[key] not in values) if ins_size
+              (return findNext() for key, values of nins when model_json[key] in values) if nins_size
 
               find_keys = _.keys(find_query)
               next = (err, is_match) =>
