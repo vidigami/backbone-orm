@@ -206,6 +206,8 @@ module.exports = class Utils
   ##############################
   # Iterating
   ##############################
+
+  # @nodoc
   @each: (array, limit, iterator, callback) =>
     index = 0
     queue = new Queue(1)
@@ -219,8 +221,10 @@ module.exports = class Utils
         next()
     queue.await callback
 
+  # @nodoc
   @eachC: (array, limit, iterator, callback) => Utils.each(array, limit, callback, iterator)
 
+  # @nodoc
   @popEach: (array, limit, iterator, callback) =>
     index = 0
     queue = new Queue(1)
@@ -234,6 +238,7 @@ module.exports = class Utils
         next()
     queue.await callback
 
+  # @nodoc
   @popEachC: (array, limit, iterator, callback) => Utils.popEach(array, limit, callback, iterator)
 
   ##############################
