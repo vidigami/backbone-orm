@@ -207,24 +207,11 @@ module.exports = class Utils
   # Iterating
   ##############################
   @each: (array, limit, iterator, callback) =>
-    # index = 0
-    # # queue = new Queue(1)
-    # # for start_index in [0..(length = array.length)] by limit
-    # #   do (start_index) => queue.defer (callback) ->
-    # #     iteration_end = Math.min(start_index+limit, length)
-    # iteration_end = array.length
-    # next = (err, done) =>
-    #   return callback(err) if err
-    #   return callback() if done or (index >= iteration_end)
-    #   iterator(array[index++], next)
-    # next()
-    # # queue.await callback
-
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(length = array.length)] by limit
+    for start_index in [0..(count = array.length)] by limit
       do (start_index) => queue.defer (callback) ->
-        iteration_end = Math.min(start_index+limit, length)
+        iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>
           return callback(err) if err
           return callback() if done or (index >= iteration_end)
@@ -237,9 +224,9 @@ module.exports = class Utils
   @popEach: (array, limit, iterator, callback) =>
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(length = array.length)] by limit
+    for start_index in [0..(count = array.length)] by limit
       do (start_index) => queue.defer (callback) ->
-        iteration_end = Math.min(start_index+limit, length)
+        iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>
           return callback(err) if err
           return callback() if done or (index >= iteration_end) or (array.length is 0)

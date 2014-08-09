@@ -166,7 +166,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	JSONUtils = __webpack_require__(8);
 
-	DESTROY_BATCH_LIMIT = 1000;
+	DESTROY_BATCH_LIMIT = 2000;
 
 	BATCH_COUNT = 500;
 
@@ -273,7 +273,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  MemorySync.prototype.destroy = function(query, callback) {
-	    var _ref;
+	    var cursor, is_done, next, _ref;
 	    if (arguments.length === 1) {
 	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
 	    }
@@ -284,25 +284,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	      })(this));
 	    } else {
-	      return this.model_type.cursor(query).toJSON((function(_this) {
-	        return function(err, models_json) {
-	          if (err) {
+	      is_done = false;
+	      cursor = this.model_type.cursor(query).limit(DESTROY_BATCH_LIMIT);
+	      next = (function(_this) {
+	        return function(err) {
+	          if (err || is_done) {
 	            return callback(err);
 	          }
-	          Utils.eachC(models_json, BATCH_COUNT, callback, function(model_json, callback) {
-	            var splice_index;
-	            if ((splice_index = _this.indexOf(model_json.id)) < 0) {
-	              return callback(new Error("Model not found. Type: " + _this.model_type.model_name + ". Id: " + model_json.id));
+	          return cursor.toJSON(function(err, models_json) {
+	            if (err) {
+	              return callback(err);
 	            }
-	            _this.store.splice(splice_index, 1);
-	            if (_this.model_type.is_join_table) {
+	            if (models_json.length === 0) {
 	              return callback();
-	            } else {
-	              return Utils.patchRemoveByJSON(_this.model_type, model_json, callback);
 	            }
+	            is_done = models_json.length < DESTROY_BATCH_LIMIT;
+	            Utils.eachC(models_json, BATCH_COUNT, next, function(model_json, callback) {
+	              var splice_index;
+	              if ((splice_index = _this.indexOf(model_json.id)) < 0) {
+	                return callback(new Error("Model not found. Type: " + _this.model_type.model_name + ". Id: " + model_json.id));
+	              }
+	              _this.store.splice(splice_index, 1);
+	              if (_this.model_type.is_join_table) {
+	                return callback();
+	              } else {
+	                return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
+	                  return callback(err);
+	                });
+	              }
+	            });
 	          });
 	        };
-	      })(this));
+	      })(this);
+	      return next();
 	    }
 	  };
 
@@ -771,13 +785,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.each = function(array, limit, iterator, callback) {
-	    var index, length, queue, start_index, _fn, _i, _ref;
+	    var count, index, queue, start_index, _fn, _i, _ref;
 	    index = 0;
 	    queue = new Queue(1);
 	    _fn = function(start_index) {
 	      return queue.defer(function(callback) {
 	        var iteration_end, next;
-	        iteration_end = Math.min(start_index + limit, length);
+	        iteration_end = Math.min(start_index + limit, count);
 	        next = (function(_this) {
 	          return function(err, done) {
 	            if (err) {
@@ -792,7 +806,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0, _ref = (length = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	    for (start_index = _i = 0, _ref = (count = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
 	      _fn(start_index);
 	    }
 	    return queue.await(callback);
@@ -803,13 +817,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.popEach = function(array, limit, iterator, callback) {
-	    var index, length, queue, start_index, _fn, _i, _ref;
+	    var count, index, queue, start_index, _fn, _i, _ref;
 	    index = 0;
 	    queue = new Queue(1);
 	    _fn = function(start_index) {
 	      return queue.defer(function(callback) {
 	        var iteration_end, next;
-	        iteration_end = Math.min(start_index + limit, length);
+	        iteration_end = Math.min(start_index + limit, count);
 	        next = (function(_this) {
 	          return function(err, done) {
 	            if (err) {
@@ -825,7 +839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0, _ref = (length = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	    for (start_index = _i = 0, _ref = (count = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
 	      _fn(start_index);
 	    }
 	    return queue.await(callback);
