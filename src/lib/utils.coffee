@@ -209,9 +209,10 @@ module.exports = class Utils
 
   # @nodoc
   @each: (array, limit, iterator, callback) =>
+    return callback() unless count = array.length
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(count = array.length)] by limit
+    for start_index in [0..count] by limit
       do (start_index) => queue.defer (callback) ->
         iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>
@@ -226,9 +227,10 @@ module.exports = class Utils
 
   # @nodoc
   @popEach: (array, limit, iterator, callback) =>
+    return callback() unless count = array.length
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(count = array.length)] by limit
+    for start_index in [0..count] by limit
       do (start_index) => queue.defer (callback) ->
         iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>
