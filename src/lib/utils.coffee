@@ -121,7 +121,7 @@ module.exports = class Utils
   @patchRemoveByJSON: (model_type, model_json, callback) ->
     return callback() unless schema = model_type.schema()
     queue = new Queue(1)
-    for key, relation in schema
+    for key, relation of schema.relations
       do (relation) -> queue.defer (callback) -> relation.patchRemove(model_json, callback)
     queue.await callback
 

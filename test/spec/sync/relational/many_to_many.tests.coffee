@@ -14,7 +14,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
   PICK_KEYS = ['id', 'name']
 
-  describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "Many to Many #{options.$parameter_tags or ''}#{options.$tags} @many", ->
     Reverse = Owner = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
