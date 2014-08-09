@@ -66,7 +66,7 @@ module.exports = class MemoryCursor extends Cursor
         # use find
         if keys.length or ins_size or nins_size
           if @_cursor.$ids
-            for id, model_json of @store
+            for model_json in @store
               json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
@@ -74,34 +74,40 @@ module.exports = class MemoryCursor extends Cursor
             find_queue = new Queue()
             # console.log "\nmodel: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} @store: #{JSONUtils.stringify(@store)}"
 
-            for id, model_json of @store
-              do (model_json) => find_queue.defer (callback) =>
-                return callback() if exists and json.length # exists only needs one result
-
-                find_keys = _.keys(find_query)
-                next = (err, is_match) =>
-                  return callback(err) if err or not is_match # done conditions
-                  (json.push(JSONUtils.deepClone(model_json)); return callback()) unless find_keys.length
-
-                  # check next key
-                  @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
-
-                next(null, true) # start checking
-
-            find_queue.await (err) =>
+            index = -1
+            done = (err) =>
               return callback(err) if err
+
+              # TODO: collapse into find
               if ins_size
                 json = _.filter json, (model_json) => return true for key, values of ins when model_json[key] in values
               if nins_size
                 json = _.filter json, (model_json) => return true for key, values of nins when model_json[key] not in values
               callback()
 
+            findNext = (err) =>
+              return done(err) if err
+              return done() if exists and json.length # exists only needs one result
+              return done() if ++index >= @store.length
+              model_json = @store[index]
+
+              find_keys = _.keys(find_query)
+              next = (err, is_match) =>
+                return findNext(err) if err or not is_match # done conditions
+                (json.push(JSONUtils.deepClone(model_json)); return findNext()) unless find_keys.length
+
+                # check next key
+                @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
+
+              next(null, true) # start checking
+            findNext()
+
         else
           # filter by ids
           if @_cursor.$ids
-            json.push(JSONUtils.deepClone(model_json)) for id, model_json of @store when _.contains(@_cursor.$ids, model_json.id)
+            json = (JSONUtils.deepClone(model_json) for model_json in @store when _.contains(@_cursor.$ids, model_json.id))
           else
-            json = (JSONUtils.deepClone(model_json) for id, model_json of @store)
+            json = (JSONUtils.deepClone(model_json) for model_json in @store)
           callback()
 
       if not exists

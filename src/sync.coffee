@@ -7,7 +7,6 @@
 ###
 
 _ = require 'underscore'
-Backbone = require 'backbone'
 
 BackboneORM = require './core'
 Queue = require './lib/queue'
@@ -38,8 +37,9 @@ class MemorySync
     @model_type.model_name = Utils.findOrGenerateModelName(@model_type)
     @schema = new Schema(@model_type)
     @schema.type('id', 'Integer') unless @schema.field('id')?.type
-    @store = @model_type.store or= {}
+    @store = @model_type.store or= []
     @id = 0
+    @id_attribute = @model_type::idAttribute
 
   # @nodoc
   initialize: ->
@@ -55,31 +55,32 @@ class MemorySync
   # @nodoc
   read: (model, options) ->
     if model.models
-      options.success(JSONUtils.deepClone(model_json) for id, model_json of @store)
+      options.success(JSONUtils.deepClone(model_json) for model_json in @store)
     else
-      return options.error(new Error("Model not found with id: #{model.id}")) if _.isUndefined(@store[model.id])
-      options.success(JSONUtils.deepClone(@store[model.id]))
+      return options.error(new Error("Model not found with id: #{model.id}")) unless model_json = @get(model.id)
+      options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   create: (model, options) ->
-    return options.error(new Error("Create should not be called for manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
+    return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
 
-    (attributes = {})[@model_type::idAttribute] = if @id_type is 'String' then "#{++@id}" else ++@id
-    model.set(attributes)
-    @store[model.id] = model_json = model.toJSON()
+    model.set(@id_attribute, if @id_type is 'String' then "#{++@id}" else ++@id)
+    @store.splice(@insertIndexOf(model.id), 0, model_json = model.toJSON())
     options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   update: (model, options) ->
-    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and not @store.hasOwnProperty(model.id)
+    create = (index = @insertIndexOf(model.id)) >= @store.length or @store[index].id isnt model.id
+    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and create
 
-    @store[model.id] = model_json = model.toJSON()
+    model_json = model.toJSON()
+    if create then @store.splice(index, 0, model_json) else @store[index] = model_json
     options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
   delete: (model, options) ->
-    return options.error(new Error('Model not found')) unless @store[model.id]
-    delete @store[model.id]
+    return options.error(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
+    @store.splice(index, 1)
     options.success()
 
   ###################################
@@ -96,12 +97,29 @@ class MemorySync
   destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
 
-    @model_type.each _.extend({$each: {limit: DESTROY_BATCH_LIMIT, json: true}}, query),
-      ((model_json, callback) =>
-        Utils.patchRemoveByJSON @model_type, model_json, (err) =>
-          delete @store[model_json[@model_type::idAttribute]] unless err
-          callback(err)
-      ), callback
+    if _.size(query) is 0
+      destroyNext = (err) =>
+        return callback(err) if err or not @store.length
+        Utils.patchRemoveByJSON(@model_type, @store.pop(), destroyNext)
+      destroyNext()
+    else
+      @model_type.cursor(query).toJSON (err, models_json) =>
+        return callback(err) if err
+        destroyNext = (err) =>
+          return callback(err) if err or not models_json.length
+          model_json = models_json.pop()
+          return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model_json.id)) < 0
+          Utils.patchRemoveByJSON(@model_type, @store.splice(index, 1), destroyNext)
+        destroyNext()
+        @store.push(model_json) for model_json in @store.splice() when not model_json.id in models_json
+        return
+
+  ###################################
+  # Helpers
+  ###################################
+  get: (id) -> return if (index = _.sortedIndex(@store, {id}, @id_attribute)) >= @store.length or (model = @store[index]).id isnt id then null else model
+  indexOf: (id) -> return if (index = _.sortedIndex(@store, {id}, @id_attribute)) >= @store.length or @store[index].id isnt id then -1 else index
+  insertIndexOf: (id) -> return _.sortedIndex(@store, {id}, @id_attribute)
 
 module.exports = (type) ->
   if Utils.isCollection(new type()) # collection
