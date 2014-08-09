@@ -239,7 +239,7 @@ module.exports = class MemoryCursor extends Cursor
       for model_json in json
         do (key, model_json) => load_queue.defer (callback) =>
           relation.cursor(model_json, key).toJSON (err, related_json) ->
-            return calback(err) if err
+            return callback(err) if err
             # console.log "\nkey: #{key}, model_json: #{JSONUtils.stringify(model_json)}\nrelated_json: #{JSONUtils.stringify(related_json)}"
             delete model_json[relation.foriegn_key]
             model_json[key] = related_json

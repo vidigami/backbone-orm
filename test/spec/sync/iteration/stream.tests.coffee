@@ -33,7 +33,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
         _transform: (model, encoding, next) -> @push(model) if @fn(model); next()
 
     pipeCheck = (query, expected, callback) ->
-      done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
+      done = _.once (err) -> assert.ifError(err); callback(err)
 
       Flat.stream(query)
         .pipe(counter = new Counter())
@@ -54,7 +54,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
     it 'should support data interface', (callback) ->
       model_count = 0
-      done = Utils.debounceCallback (err) -> assert.ifError(err); callback(err)
+      done = _.once (err) -> assert.ifError(err); callback(err)
 
       stream = Flat.stream()
       stream.on 'data', (model) -> model_count++

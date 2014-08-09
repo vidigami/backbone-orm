@@ -39,10 +39,6 @@ module.exports = class Utils
       callback()
 
   # @nodoc
-  @debounceCallback = (callback) ->
-    return debounced_callback = -> return if debounced_callback.was_called; debounced_callback.was_called = true; callback.apply(null, Array.prototype.slice.call(arguments, 0))
-
-  # @nodoc
   @bbCallback: (callback) -> return {success: ((model, resp, options) -> callback(null, model, resp, options)), error: ((model, resp, options) -> callback(resp or new Error('Backbone call failed'), model, resp, options))}
 
   # @nodoc
