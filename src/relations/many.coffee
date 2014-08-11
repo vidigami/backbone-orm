@@ -193,13 +193,13 @@ module.exports = class Many extends (require './relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
+    [relateds, callback] = [null, relateds] if arguments.length is 2
     return callback(new Error "Many.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
     if arguments.length is 2
-      callback = relateds
-
       return callback() if not @reverse_relation
+
       if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
         collection = @_ensureCollection(model)
@@ -218,6 +218,14 @@ module.exports = class Many extends (require './relation')
         return @join_table.destroy(query, callback)
 
       # clear back links on models and save
+      else if @type is 'belongsTo'
+        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+          return callback(err) if err
+          return callback() unless model_json
+
+          model_json[@foreign_key] = null
+          Utils.modelJSONSave(model_json, @model_type, callback)
+
       else
         (query = {})[@reverse_relation.foreign_key] = model.id
         @reverse_model_type.cursor(query).toJSON (err, json) =>
@@ -234,14 +242,13 @@ module.exports = class Many extends (require './relation')
 
     # REMOVE SOME
     return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
-    return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
+    return callback(new Error('Many.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
     collection = @_ensureCollection(model)
 
-    # destroy in memory
+      # clear in memory
     for related in relateds
-      for current_related_model in collection.models
-        (collection.remove(current_related_model); break) if Utils.dataIsSameModel(current_related_model, related) # a match
+      (collection.remove(current_related_model); break) for current_related_model in collection.models when Utils.dataIsSameModel(current_related_model, related)
 
     related_ids = (Utils.dataId(related) for related in relateds)
 
@@ -251,6 +258,16 @@ module.exports = class Many extends (require './relation')
       query[@join_key] = model.id
       query[@reverse_relation.join_key] = {$in: related_ids}
       @join_table.destroy query, callback
+
+    # clear back links on models and save
+    else if @type is 'belongsTo'
+      @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+        return callback(err) if err
+        return callback() unless model_json
+        return callback() unless _.contains(related_ids, model_json[@foreign_key])
+
+        model_json[@foreign_key] = null
+        Utils.modelJSONSave(model_json, @model_type, callback)
 
     # clear back links on models and save
     else

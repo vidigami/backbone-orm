@@ -79,17 +79,20 @@ class MemorySync
     options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
-  delete: (model, options) ->
-    return options.error(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
-    @store.splice(index, 1)
-    options.success()
+  delete: (model, options) -> @deleteCB(model, (err) => if err then options.error(err) else options.success())
+
+  # @nodoc
+  deleteCB: (model, callback) =>
+    return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
+    model_json = @store.splice(index, 1)
+    if @model_type.is_join_table then callback() else Utils.patchRemove(@model_type, model, callback)
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
 
   # @nodoc
-  resetSchema: (options, callback) -> @destroy({}, callback)
+  resetSchema: (options, callback) -> @destroy(callback)
 
   # @nodoc
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
@@ -100,7 +103,7 @@ class MemorySync
 
     if _.size(query) is 0
       Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) =>
-        Utils.patchRemoveByJSON(@model_type, model_json, callback)
+        if @model_type.is_join_table then callback() else Utils.patchRemove(@model_type, model_json, callback)
     else
       is_done = false
       cursor = @model_type.cursor(query).limit(DESTROY_BATCH_LIMIT)
@@ -111,12 +114,7 @@ class MemorySync
           return callback(err) if err
           return callback() if models_json.length is 0
           is_done = models_json.length < DESTROY_BATCH_LIMIT
-
-          Utils.eachC models_json, BATCH_COUNT, next, (model_json, callback) =>
-            return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model_json.id}")) if (splice_index = @indexOf(model_json.id)) < 0
-            @store.splice(splice_index, 1)
-            if @model_type.is_join_table then callback() else Utils.patchRemoveByJSON(@model_type, model_json, (err) -> callback(err))
-          return
+          Utils.each models_json, BATCH_COUNT, @deleteCB, next
       next()
 
   ###################################

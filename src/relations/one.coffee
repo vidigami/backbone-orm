@@ -163,20 +163,38 @@ module.exports = class One extends (require './relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
-    (callback = relateds; relateds = undefined) if arguments.length is 2
+    [relateds, callback] = [null, relateds] if arguments.length is 2
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
     if arguments.length is 2
       return callback() if not @reverse_relation
-      delete Utils.orSet(model, 'rel_dirty', {})[@key] if Utils.isModel(model)
 
-      @cursor(model, @key).toJSON (err, related_json) =>
-        return callback(err) if err
-        return callback() unless related_json
+      # clear in memory
+      if Utils.isModel(model)
+        delete Utils.orSet(model, 'rel_dirty', {})[@key]
+        related_model_id = model.get(@key)?.id
+        model.set(@key, null)
+      else
+        related_model_id = model[@foreign_key]
+      return callback() unless related_model_id
 
-        related_json[@reverse_relation.foreign_key] = null
-        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+      if @type is 'belongsTo'
+        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+          return callback(err) if err
+          return callback() unless model_json
+          return callback() if model_json[@foreign_key] isnt current_related_model.id
+
+          model_json[@foreign_key] = null
+          Utils.modelJSONSave(model_json, @model_type, callback)
+
+      else
+        @cursor(model, @key).toJSON (err, related_json) =>
+          return callback(err) if err
+          return callback() unless related_json
+
+          related_json[@reverse_relation.foreign_key] = null
+          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
       return
 
     # REMOVE SOME
@@ -187,9 +205,7 @@ module.exports = class One extends (require './relation')
 
     # destroy in memory
     if current_related_model = model.get(@key)
-      for related in relateds
-        (model.set(@key, null); break) if Utils.dataIsSameModel(current_related_model, related) # match
-
+      (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(current_related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store on us

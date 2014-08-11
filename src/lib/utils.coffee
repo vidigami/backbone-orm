@@ -118,12 +118,16 @@ module.exports = class Utils
     modelExtensions(type)
 
   # @nodoc
-  @patchRemoveByJSON: (model_type, model_json, callback) ->
+  @patchRemove: (model_type, model, callback) ->
     return callback() unless schema = model_type.schema()
     queue = new Queue(1)
     for key, relation of schema.relations
-      do (relation) -> queue.defer (callback) -> relation.patchRemove(model_json, callback)
+      do (relation) -> queue.defer (callback) -> relation.patchRemove(model, callback)
     queue.await callback
+
+  # TODO: remove
+  # @nodoc
+  @patchRemoveByJSON: (model_type, model_json, callback) -> Utils.patchRemove(model_type, model_json, callback)
 
   # @nodoc
   @presaveBelongsToRelationships: (model, callback) ->

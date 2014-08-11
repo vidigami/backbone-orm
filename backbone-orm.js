@@ -150,7 +150,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _;
+	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _,
+	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 	_ = __webpack_require__(1);
 
@@ -183,6 +184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function MemorySync(model_type) {
 	    var _base, _ref;
 	    this.model_type = model_type;
+	    this.deleteCB = __bind(this.deleteCB, this);
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
 	    this.schema = new Schema(this.model_type);
 	    if (!((_ref = this.schema.field('id')) != null ? _ref.type : void 0)) {
@@ -253,16 +255,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  MemorySync.prototype["delete"] = function(model, options) {
-	    var index;
+	    return this.deleteCB(model, (function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return options.error(err);
+	        } else {
+	          return options.success();
+	        }
+	      };
+	    })(this));
+	  };
+
+	  MemorySync.prototype.deleteCB = function(model, callback) {
+	    var index, model_json;
 	    if ((index = this.indexOf(model.id)) < 0) {
-	      return options.error(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
+	      return callback(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
 	    }
-	    this.store.splice(index, 1);
-	    return options.success();
+	    model_json = this.store.splice(index, 1);
+	    if (this.model_type.is_join_table) {
+	      return callback();
+	    } else {
+	      return Utils.patchRemove(this.model_type, model, callback);
+	    }
 	  };
 
 	  MemorySync.prototype.resetSchema = function(options, callback) {
-	    return this.destroy({}, callback);
+	    return this.destroy(callback);
 	  };
 
 	  MemorySync.prototype.cursor = function(query) {
@@ -280,7 +298,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (_.size(query) === 0) {
 	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
 	        return function(model_json, callback) {
-	          return Utils.patchRemoveByJSON(_this.model_type, model_json, callback);
+	          if (_this.model_type.is_join_table) {
+	            return callback();
+	          } else {
+	            return Utils.patchRemove(_this.model_type, model_json, callback);
+	          }
 	        };
 	      })(this));
 	    } else {
@@ -299,20 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return callback();
 	            }
 	            is_done = models_json.length < DESTROY_BATCH_LIMIT;
-	            Utils.eachC(models_json, BATCH_COUNT, next, function(model_json, callback) {
-	              var splice_index;
-	              if ((splice_index = _this.indexOf(model_json.id)) < 0) {
-	                return callback(new Error("Model not found. Type: " + _this.model_type.model_name + ". Id: " + model_json.id));
-	              }
-	              _this.store.splice(splice_index, 1);
-	              if (_this.model_type.is_join_table) {
-	                return callback();
-	              } else {
-	                return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
-	                  return callback(err);
-	                });
-	              }
-	            });
+	            return Utils.each(models_json, BATCH_COUNT, _this.deleteCB, next);
 	          });
 	        };
 	      })(this);
@@ -642,7 +651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return modelExtensions(type);
 	  };
 
-	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
+	  Utils.patchRemove = function(model_type, model, callback) {
 	    var key, queue, relation, schema, _fn, _ref;
 	    if (!(schema = model_type.schema())) {
 	      return callback();
@@ -651,7 +660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _ref = schema.relations;
 	    _fn = function(relation) {
 	      return queue.defer(function(callback) {
-	        return relation.patchRemove(model_json, callback);
+	        return relation.patchRemove(model, callback);
 	      });
 	    };
 	    for (key in _ref) {
@@ -659,6 +668,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _fn(relation);
 	    }
 	    return queue.await(callback);
+	  };
+
+	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
+	    return Utils.patchRemove(model_type, model_json, callback);
 	  };
 
 	  Utils.presaveBelongsToRelationships = function(model, callback) {
@@ -6171,10 +6184,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var current_related_model, related, related_ids, _i, _len;
+	    var current_related_model, related, related_ids, related_model_id, _i, _len, _ref, _ref1;
 	    if (arguments.length === 2) {
-	      callback = relateds;
-	      relateds = void 0;
+	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
 	    }
 	    if (!model.id) {
 	      return callback(new Error("One.patchRemove: model has null id for: " + this.key));
@@ -6185,19 +6197,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      if (Utils.isModel(model)) {
 	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	        related_model_id = (_ref1 = model.get(this.key)) != null ? _ref1.id : void 0;
+	        model.set(this.key, null);
+	      } else {
+	        related_model_id = model[this.foreign_key];
 	      }
-	      this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, related_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!related_json) {
-	            return callback();
-	          }
-	          related_json[_this.reverse_relation.foreign_key] = null;
-	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	        };
-	      })(this));
+	      if (!related_model_id) {
+	        return callback();
+	      }
+	      if (this.type === 'belongsTo') {
+	        this.model_type.cursor({
+	          id: model.id,
+	          $one: true
+	        }).toJSON((function(_this) {
+	          return function(err, model_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!model_json) {
+	              return callback();
+	            }
+	            if (model_json[_this.foreign_key] !== current_related_model.id) {
+	              return callback();
+	            }
+	            model_json[_this.foreign_key] = null;
+	            return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	          };
+	        })(this));
+	      } else {
+	        this.cursor(model, this.key).toJSON((function(_this) {
+	          return function(err, related_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!related_json) {
+	              return callback();
+	            }
+	            related_json[_this.reverse_relation.foreign_key] = null;
+	            return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	          };
+	        })(this));
+	      }
 	      return;
 	    }
 	    if (this.isEmbedded()) {
@@ -6768,12 +6808,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref;
+	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+	    if (arguments.length === 2) {
+	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
+	    }
 	    if (!model.id) {
 	      return callback(new Error("Many.patchRemove: model has null id for: " + this.key));
 	    }
 	    if (arguments.length === 2) {
-	      callback = relateds;
 	      if (!this.reverse_relation) {
 	        return callback();
 	      }
@@ -6783,11 +6825,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        related_models = _.clone(collection.models);
 	      } else {
 	        related_models = (function() {
-	          var _i, _len, _ref, _results;
-	          _ref = model[this.key] || [];
+	          var _i, _len, _ref1, _results;
+	          _ref1 = model[this.key] || [];
 	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            json = _ref[_i];
+	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+	            json = _ref1[_i];
 	            _results.push(new this.reverse_model_type(json));
 	          }
 	          return _results;
@@ -6803,6 +6845,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this.join_table) {
 	        (query = {})[this.join_key] = model.id;
 	        return this.join_table.destroy(query, callback);
+	      } else if (this.type === 'belongsTo') {
+	        this.model_type.cursor({
+	          id: model.id,
+	          $one: true
+	        }).toJSON((function(_this) {
+	          return function(err, model_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!model_json) {
+	              return callback();
+	            }
+	            model_json[_this.foreign_key] = null;
+	            return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	          };
+	        })(this));
 	      } else {
 	        (query = {})[this.reverse_relation.foreign_key] = model.id;
 	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
@@ -6832,7 +6890,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return callback(new Error('Many.patchRemove: embedded relationships are not supported'));
 	    }
 	    if (!relateds) {
-	      return callback(new Error('One.patchRemove: missing model for remove'));
+	      return callback(new Error('Many.patchRemove: missing model for remove'));
 	    }
 	    if (!_.isArray(relateds)) {
 	      relateds = [relateds];
@@ -6840,9 +6898,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    collection = this._ensureCollection(model);
 	    for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
 	      related = relateds[_j];
-	      _ref = collection.models;
-	      for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-	        current_related_model = _ref[_k];
+	      _ref1 = collection.models;
+	      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+	        current_related_model = _ref1[_k];
 	        if (Utils.dataIsSameModel(current_related_model, related)) {
 	          collection.remove(current_related_model);
 	          break;
@@ -6865,6 +6923,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        $in: related_ids
 	      };
 	      return this.join_table.destroy(query, callback);
+	    } else if (this.type === 'belongsTo') {
+	      return this.model_type.cursor({
+	        id: model.id,
+	        $one: true
+	      }).toJSON((function(_this) {
+	        return function(err, model_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!model_json) {
+	            return callback();
+	          }
+	          if (!_.contains(related_ids, model_json[_this.foreign_key])) {
+	            return callback();
+	          }
+	          model_json[_this.foreign_key] = null;
+	          return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	        };
+	      })(this));
 	    } else {
 	      query = {};
 	      query[this.reverse_relation.foreign_key] = model.id;
