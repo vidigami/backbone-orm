@@ -248,10 +248,9 @@ module.exports = class Many extends (require './relation')
     relateds = [relateds] unless _.isArray(relateds)
     collection = @_ensureCollection(model)
 
-      # clear in memory
+    # clear in memory
     for related in relateds
       (collection.remove(related_model); break) for related_model in collection.models when Utils.dataIsSameModel(related_model, related)
-
     related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store through join table
@@ -261,7 +260,7 @@ module.exports = class Many extends (require './relation')
       query[@reverse_relation.join_key] = {$in: related_ids}
       @join_table.destroy query, callback
 
-    # clear back links on models and save
+    # clear my links to models and save
     else if @type is 'belongsTo'
       @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
         return callback(err) if err

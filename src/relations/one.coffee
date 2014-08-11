@@ -209,12 +209,12 @@ module.exports = class One extends (require './relation')
     return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
 
-    # destroy in memory
+    # clear in memory
     if related_model = model.get(@key)
       (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
 
-    # clear in store on us
+    # clear my links to models and save
     if @type is 'belongsTo'
       @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
         return callback(err) if err
@@ -224,7 +224,7 @@ module.exports = class One extends (require './relation')
         model_json[@foreign_key] = null
         Utils.modelJSONSave(model_json, @model_type, callback)
 
-    # clear in store on related
+    # clear back links on models and save
     else
       @cursor(model, @key).toJSON (err, related_json) =>
         return callback(err) if err
