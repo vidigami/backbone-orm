@@ -200,6 +200,7 @@ module.exports = class Many extends (require './relation')
     if arguments.length is 2
       return callback() if not @reverse_relation
 
+      # get memory instance
       if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
         collection = @_ensureCollection(model)
@@ -209,7 +210,7 @@ module.exports = class Many extends (require './relation')
 
       # clear in memory
       for related_model in related_models
-        related_model.set(@foreign_key, null)
+        related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
         cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
       # clear in store through join table
@@ -217,7 +218,7 @@ module.exports = class Many extends (require './relation')
         (query = {})[@join_key] = model.id
         return @join_table.destroy(query, callback)
 
-      # clear back links on models and save
+      # clear my links to models and save
       else if @type is 'belongsTo'
         @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
           return callback(err) if err
@@ -226,6 +227,7 @@ module.exports = class Many extends (require './relation')
           model_json[@foreign_key] = null
           Utils.modelJSONSave(model_json, @model_type, callback)
 
+      # clear back links on models and save
       else
         (query = {})[@reverse_relation.foreign_key] = model.id
         @reverse_model_type.cursor(query).toJSON (err, json) =>

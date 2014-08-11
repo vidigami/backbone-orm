@@ -170,24 +170,27 @@ module.exports = class One extends (require './relation')
     if arguments.length is 2
       return callback() if not @reverse_relation
 
-      # clear in memory
+      # get memory instance
       if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
         related_model = model.get(@key)
         model.set(@key, null)
       else
         related_model = new @reverse_model_type(json) if json = model[@foreign_key]
-      return callback() unless related_model
 
+      # clear in memory
+      related_model.set(@foreign_key, null) if related_model?.get(@foreign_key)?.id is model.id
+
+      # clear my links to models and save
       if @type is 'belongsTo'
         @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
           return callback(err) if err
           return callback() unless model_json
-          return callback() if model_json[@foreign_key] isnt related_model.id
 
           model_json[@foreign_key] = null
           Utils.modelJSONSave(model_json, @model_type, callback)
 
+      # clear back links on models and save
       else
         @cursor(model, @key).toJSON (err, related_json) =>
           return callback(err) if err
