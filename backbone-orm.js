@@ -6172,7 +6172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var current_related_model, related, related_ids, related_model_id, _i, _len, _ref, _ref1;
+	    var json, related, related_ids, related_model, _i, _len, _ref;
 	    if (arguments.length === 2) {
 	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
 	    }
@@ -6185,12 +6185,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      if (Utils.isModel(model)) {
 	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
-	        related_model_id = (_ref1 = model.get(this.key)) != null ? _ref1.id : void 0;
+	        related_model = model.get(this.key);
 	        model.set(this.key, null);
 	      } else {
-	        related_model_id = model[this.foreign_key];
+	        if (json = model[this.foreign_key]) {
+	          related_model = new this.reverse_model_type(json);
+	        }
 	      }
-	      if (!related_model_id) {
+	      if (!related_model) {
 	        return callback();
 	      }
 	      if (this.type === 'belongsTo') {
@@ -6205,7 +6207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!model_json) {
 	              return callback();
 	            }
-	            if (model_json[_this.foreign_key] !== current_related_model.id) {
+	            if (model_json[_this.foreign_key] !== related_model.id) {
 	              return callback();
 	            }
 	            model_json[_this.foreign_key] = null;
@@ -6237,10 +6239,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!_.isArray(relateds)) {
 	      relateds = [relateds];
 	    }
-	    if (current_related_model = model.get(this.key)) {
+	    if (related_model = model.get(this.key)) {
 	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
 	        related = relateds[_i];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
+	        if (Utils.dataIsSameModel(related_model, related)) {
 	          model.set(this.key, null);
 	          break;
 	        }
@@ -6796,7 +6798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+	    var cache, collection, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
 	    if (arguments.length === 2) {
 	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
 	    }
@@ -6888,9 +6890,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      related = relateds[_j];
 	      _ref1 = collection.models;
 	      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-	        current_related_model = _ref1[_k];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
-	          collection.remove(current_related_model);
+	        related_model = _ref1[_k];
+	        if (Utils.dataIsSameModel(related_model, related)) {
+	          collection.remove(related_model);
 	          break;
 	        }
 	      }

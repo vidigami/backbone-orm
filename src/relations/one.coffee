@@ -173,17 +173,17 @@ module.exports = class One extends (require './relation')
       # clear in memory
       if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
-        related_model_id = model.get(@key)?.id
+        related_model = model.get(@key)
         model.set(@key, null)
       else
-        related_model_id = model[@foreign_key]
-      return callback() unless related_model_id
+        related_model = new @reverse_model_type(json) if json = model[@foreign_key]
+      return callback() unless related_model
 
       if @type is 'belongsTo'
         @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
           return callback(err) if err
           return callback() unless model_json
-          return callback() if model_json[@foreign_key] isnt current_related_model.id
+          return callback() if model_json[@foreign_key] isnt related_model.id
 
           model_json[@foreign_key] = null
           Utils.modelJSONSave(model_json, @model_type, callback)
@@ -204,8 +204,8 @@ module.exports = class One extends (require './relation')
     relateds = [relateds] unless _.isArray(relateds)
 
     # destroy in memory
-    if current_related_model = model.get(@key)
-      (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(current_related_model, related)
+    if related_model = model.get(@key)
+      (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store on us

@@ -248,7 +248,7 @@ module.exports = class Many extends (require './relation')
 
       # clear in memory
     for related in relateds
-      (collection.remove(current_related_model); break) for current_related_model in collection.models when Utils.dataIsSameModel(current_related_model, related)
+      (collection.remove(related_model); break) for related_model in collection.models when Utils.dataIsSameModel(related_model, related)
 
     related_ids = (Utils.dataId(related) for related in relateds)
 
