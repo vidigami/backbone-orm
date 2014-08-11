@@ -283,6 +283,7 @@ module.exports = class Many extends (require './relation')
         queue = new Queue(1)
         for related_json in json
           do (related_json) => queue.defer (callback) =>
+            return callback() unless related_json[@reverse_relation.foreign_key] is model.id
             related_json[@reverse_relation.foreign_key] = null
             Utils.modelJSONSave(related_json, @reverse_model_type, callback)
         queue.await callback

@@ -197,6 +197,7 @@ module.exports = class One extends (require './relation')
         @cursor(model, @key).toJSON (err, related_json) =>
           return callback(err) if err
           return callback() unless related_json
+          return callback() unless related_json[@reverse_relation.foreign_key] is model.id
 
           related_json[@reverse_relation.foreign_key] = null
           Utils.modelJSONSave(related_json, @reverse_model_type, callback)
