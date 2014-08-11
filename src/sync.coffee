@@ -85,7 +85,7 @@ class MemorySync
   deleteCB: (model, callback) =>
     return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
     model_json = @store.splice(index, 1)
-    if @model_type.is_join_table then callback() else Utils.patchRemove(@model_type, model, callback)
+    Utils.patchRemove(@model_type, model, callback)
 
   ###################################
   # Backbone ORM - Class Extensions
@@ -102,8 +102,7 @@ class MemorySync
     [query, callback] = [{}, query] if arguments.length is 1
 
     if _.size(query) is 0
-      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) =>
-        if @model_type.is_join_table then callback() else Utils.patchRemove(@model_type, model_json, callback)
+      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) => Utils.patchRemove(@model_type, model_json, callback)
     else
       is_done = false
       cursor = @model_type.cursor(query).limit(DESTROY_BATCH_LIMIT)

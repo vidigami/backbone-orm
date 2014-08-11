@@ -272,11 +272,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return callback(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
 	    }
 	    model_json = this.store.splice(index, 1);
-	    if (this.model_type.is_join_table) {
-	      return callback();
-	    } else {
-	      return Utils.patchRemove(this.model_type, model, callback);
-	    }
+	    return Utils.patchRemove(this.model_type, model, callback);
 	  };
 
 	  MemorySync.prototype.resetSchema = function(options, callback) {
@@ -298,11 +294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (_.size(query) === 0) {
 	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
 	        return function(model_json, callback) {
-	          if (_this.model_type.is_join_table) {
-	            return callback();
-	          } else {
-	            return Utils.patchRemove(_this.model_type, model_json, callback);
-	          }
+	          return Utils.patchRemove(_this.model_type, model_json, callback);
 	        };
 	      })(this));
 	    } else {
@@ -2460,8 +2452,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return JoinTable.__super__.constructor.apply(this, arguments);
 	        }
 
-	        JoinTable.is_join_table = true;
-
 	        JoinTable.prototype.model_name = name;
 
 	        JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
@@ -2482,8 +2472,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function JoinTable() {
 	          return JoinTable.__super__.constructor.apply(this, arguments);
 	        }
-
-	        JoinTable.is_join_table = true;
 
 	        JoinTable.prototype.model_name = name;
 

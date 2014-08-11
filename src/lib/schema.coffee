@@ -117,7 +117,6 @@ module.exports = class Schema
     try
       # @nodoc
       class JoinTable extends Backbone.Model
-        @is_join_table: true
         model_name: name
         urlRoot: "#{(new DatabaseURL(_.result(new relation.model_type, 'url'))).format({exclude_table: true})}/#{url}"
         schema: schema
@@ -125,7 +124,6 @@ module.exports = class Schema
     catch
       # @nodoc
       class JoinTable extends Backbone.Model
-        @is_join_table: true
         model_name: name
         urlRoot: "/#{url}"
         schema: schema
