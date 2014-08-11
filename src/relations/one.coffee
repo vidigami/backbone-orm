@@ -176,10 +176,12 @@ module.exports = class One extends (require './relation')
         related_model = model.get(@key)
         model.set(@key, null)
       else
-        related_model = new @reverse_model_type(json) if json = model[@foreign_key]
+        related_model = new @reverse_model_type(json) if json = model[@key]
 
       # clear in memory
-      related_model.set(@foreign_key, null) if related_model?.get(@foreign_key)?.id is model.id
+      if related_model
+        related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
+        cache.set(related_model.id, related_model) if cache = related_model.cache()
 
       # clear my links to models and save
       if @type is 'belongsTo'

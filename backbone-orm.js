@@ -6172,7 +6172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var json, related, related_ids, related_model, _i, _len, _ref, _ref1;
+	    var cache, json, related, related_ids, related_model, _i, _len, _ref, _ref1;
 	    if (arguments.length === 2) {
 	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
 	    }
@@ -6188,12 +6188,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        related_model = model.get(this.key);
 	        model.set(this.key, null);
 	      } else {
-	        if (json = model[this.foreign_key]) {
+	        if (json = model[this.key]) {
 	          related_model = new this.reverse_model_type(json);
 	        }
 	      }
-	      if ((related_model != null ? (_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0 : void 0) === model.id) {
-	        related_model.set(this.foreign_key, null);
+	      if (related_model) {
+	        if (((_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0) === model.id) {
+	          related_model.set(this.foreign_key, null);
+	        }
+	        if (cache = related_model.cache()) {
+	          cache.set(related_model.id, related_model);
+	        }
 	      }
 	      if (this.type === 'belongsTo') {
 	        this.model_type.cursor({
