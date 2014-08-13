@@ -63,7 +63,7 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
-    return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
+    return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model name: #{@model_type.model_name}. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
 
     model.set(@id_attribute, if @id_type is 'String' then "#{++@id}" else ++@id)
     @store.splice(@insertIndexOf(model.id), 0, model_json = model.toJSON())
@@ -72,7 +72,7 @@ class MemorySync
   # @nodoc
   update: (model, options) ->
     create = (index = @insertIndexOf(model.id)) >= @store.length or @store[index].id isnt model.id
-    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and create
+    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model name: #{@model_type.model_name}. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and create
 
     model_json = model.toJSON()
     if create then @store.splice(index, 0, model_json) else @store[index] = model_json

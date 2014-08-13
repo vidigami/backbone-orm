@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.6.6
+* Fixed error messages not being passed through when using a cache sync
+
 ### 0.6.5
 * Bug fix for relationships not being destroyed
 

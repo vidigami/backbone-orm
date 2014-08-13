@@ -30,30 +30,32 @@ class CacheSync
     @wrapped_sync_fn 'read', model, options
 
   create: (model, options) ->
-    @wrapped_sync_fn 'create', model, bbCallback (err, json) =>
-      return options.error(err) if err
-      (attributes = {})[@model_type::idAttribute] = json[@model_type::idAttribute]
-      model.set(attributes)
-      if cache_model = @model_type.cache.get(model.id)
-        Utils.updateModel(cache_model, model) if cache_model isnt model
-      else
-        @model_type.cache.set(model.id, model)
-      options.success(json)
+    @wrapped_sync_fn 'create', model, {
+      success: (json) =>
+        (attributes = {})[@model_type::idAttribute] = json[@model_type::idAttribute]
+        model.set(attributes)
+        if cache_model = @model_type.cache.get(model.id)
+          Utils.updateModel(cache_model, model) if cache_model isnt model
+        else
+          @model_type.cache.set(model.id, model)
+        options.success(json)
+      error: (resp) => options.error?(resp)
+    }
 
   update: (model, options) ->
-    @wrapped_sync_fn 'update', model, bbCallback (err, json) =>
-      return options.error(err) if err
-      if cache_model = @model_type.cache.get(model.id)
-        Utils.updateModel(cache_model, model) if cache_model isnt model
-      else
-        @model_type.cache.set(model.id, model)
-      options.success(json)
+    @wrapped_sync_fn 'update', model, {
+      success: (json) =>
+        if cache_model = @model_type.cache.get(model.id)
+          Utils.updateModel(cache_model, model) if cache_model isnt model
+        else
+          @model_type.cache.set(model.id, model)
+        options.success(json)
+      error: (resp) => options.error?(resp)
+    }
 
   delete: (model, options) ->
     @model_type.cache.destroy(model.id) # remove from the cache
-    @wrapped_sync_fn 'delete', model, bbCallback (err, json) =>
-      return options.error(err) if err
-      options.success(json)
+    @wrapped_sync_fn 'delete', model, options
 
   ###################################
   # Backbone ORM - Class Extensions
