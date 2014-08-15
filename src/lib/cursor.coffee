@@ -9,6 +9,7 @@
 _ = require 'underscore'
 
 Utils = require './utils'
+JSONUtils = require './json_utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or']
 

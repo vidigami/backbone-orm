@@ -10,6 +10,7 @@ _ = require 'underscore'
 
 Queue = require '../lib/queue'
 Utils = require '../lib/utils'
+JSONUtils = require '../lib/json_utils'
 DateUtils = require '../lib/date_utils'
 
 INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']

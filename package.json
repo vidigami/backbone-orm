@@ -4,14 +4,24 @@
   "description": "A polystore ORM for Node.js and the browser",
   "main": "backbone-orm.js",
   "license": "MIT",
-  "author": "Kevin Malakoff (https://github.com/kmalakoff)",
+  "author": {
+    "name": "Kevin Malakoff",
+    "url": "https://github.com/kmalakoff"
+  },
   "contributors": [
-    "Gwilym Humphreys (https://github.com/gwilymhumphreys)"
+    {
+      "name": "Gwilym Humphreys",
+      "url": "https://github.com/gwilymhumphreys"
+    }
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/vidigami/backbone-orm.git"
   },
+  "bugs": {
+    "url": "https://github.com/vidigami/backbone-orm/issues"
+  },
+  "homepage": "https://github.com/vidigami/backbone-orm",
   "keywords": [
     "backbone",
     "orm",

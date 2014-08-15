@@ -32,6 +32,7 @@ module.exports = class Utils
           console.log "Error when dropping schema for #{model_type.model_name}. #{err}"
         callback()
     queue.await (err) ->
+      return callback(err) if err
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
 
       BackboneORM.model_cache.reset()
