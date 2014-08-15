@@ -200,6 +200,7 @@ module.exports = class Utils
 
   # @nodoc
   @modelJSONSave: (model_json, model_type, callback) ->
+    model_json = _.pick(model_json, model_type::whitelist) if model_type::whitelist
     model = new Backbone.Model(model_json)
     model._orm_never_cache = true
     model.urlRoot = =>
