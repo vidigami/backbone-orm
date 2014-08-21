@@ -10,18 +10,25 @@ _ = require 'underscore'
 Queue = require './queue'
 Utils = require './utils'
 
-reconsituteDates = (json) ->
-  if _.isString(json)
-    # Date: A trailing 'Z' means that the date will _always_ be parsed as UTC
-    return date if (json.length >= 20) and json[json.length-1] is 'Z' and not _.isNaN((date = new Date(json)).getTime())
-  else if _.isObject(json) or _.isArray(json)
-    json[key] = reconsituteDates(value) for key, value of json
-  return json
-
 module.exports = class JSONUtils
 
   # @nodoc
   @stringify: (json) -> try return JSON.stringify(json) catch err then return 'Failed to stringify'
+
+  # Parse an object whose values are still JSON.
+  #
+  # @examples
+  #   date = JSONUtils.parseDates('2014-08-21T17:48:01.971Z')
+  #   array = JSONUtils.parseDates(['2014-08-21T17:48:01.971Z', '2014-08-21T17:48:01.971Z'])
+  #   object = JSONUtils.parseDates({created_at: '2014-08-21T17:48:01.971Z', changes: ['2014-08-21T17:48:01.971Z', '2014-08-21T17:48:01.971Z']})
+  #
+  @parseDates: (json) ->
+    if _.isString(json)
+      # Date: A trailing 'Z' means that the date will _always_ be parsed as UTC
+      return date if (json.length >= 20) and json[json.length-1] is 'Z' and not _.isNaN((date = new Date(json)).getTime())
+    else if _.isObject(json) or _.isArray(json)
+      json[key] = JSONUtils.parseDates(value) for key, value of json
+    return json
 
   # Parse an object whose values are still JSON .
   #
@@ -29,7 +36,7 @@ module.exports = class JSONUtils
   #   id = JSONUtils.parseField(csv_column[0], MyModel, 'id')
   #
   @parseField: (value, model_type, key) ->
-    return value unless model_type?.schema().idType(key) is 'Integer'
+    return JSONUtils.parseDates(value) unless model_type?.schema().idType(key) is 'Integer'
     return integer_value unless _.isNaN(integer_value = +value)
     console.log "Warning: failed to convert key: #{key} value: #{result[key]} to integer. Model: #{model_type.model_name}"
     return value
@@ -41,7 +48,7 @@ module.exports = class JSONUtils
   #
   @parse: (object, model_type) ->
     json = {}
-    json[key] = reconsituteDates(JSONUtils.parseField(value, model_type, key)) for key, value of object
+    json[key] = JSONUtils.parseField(value, model_type, key) for key, value of object
     return json
 
   # Serialze json to a strict-JSON query format
@@ -63,7 +70,7 @@ module.exports = class JSONUtils
     json = {}
     for key, value of query
       (console.log "JSONUtils::fromQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
-      json[key] = reconsituteDates(JSON.parse(value)) # check for strings that need to be converted to dates
+      json[key] = JSONUtils.parseDates(JSON.parse(value)) # check for strings that need to be converted to dates
 
     return json
 
