@@ -1048,11 +1048,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      json[key] = value;
 	      if (value.length) {
 	        try {
-	          json[key] = JSONUtils.parseDates(JSON.parse(value));
+	          value = JSON.parse(value);
 	        } catch (_error) {
 	          err = _error;
-	          console.log("Failed to parse query key: " + key + " value: " + value + ". Error: " + err.message);
+	          console.log("Failed to JSON.parse query key: " + key + " value: " + value + ". Missing quotes on a string? Error: " + err.message);
 	        }
+	        json[key] = JSONUtils.parseDates(value);
 	      }
 	    }
 	    return json;
