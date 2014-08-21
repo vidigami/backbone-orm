@@ -63,12 +63,13 @@ module.exports = class JSONUtils
   # @example
   #   json = JSONUtils.parseQuery(query)
   #
-  @parseQuery: (query, model_type) ->
+  @parseQuery: (query) ->
     json = {}
     for key, value of query
       (console.log "JSONUtils::parseQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
-      json[key] = if value.length then JSONUtils.parseDates(JSON.parse(value)) else '' # check for strings that need to be converted to dates
-
+      json[key] = value
+      if value.length
+        try json[key] = JSONUtils.parseDates(JSON.parse(value)) catch err then console.log "Failed to parse query key: #{key} value: #{value}. Error: #{err.message}"
     return json
 
   # Serialze json to a strict-JSON query format
