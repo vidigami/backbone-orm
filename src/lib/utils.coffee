@@ -200,13 +200,16 @@ module.exports = class Utils
 
   # @nodoc
   @modelJSONSave: (model_json, model_type, callback) ->
+    model_type._orm or= {}
+    unless model_type._orm.model_type_json
+      try url_root = _.result(new model_type, 'url')
+
+      model_type._orm.model_type_json = class JSONModel extends Backbone.Model
+        _orm_never_cache: true
+        urlRoot: -> url_root
+
     model_json = _.pick(model_json, model_type::whitelist) if model_type::whitelist
-    model = new Backbone.Model(model_json)
-    model._orm_never_cache = true
-    model.urlRoot = =>
-      try url = _.result(new model_type, 'url') catch e
-      return url
-    model_type::sync 'update', model, Utils.bbCallback callback
+    model_type::sync 'update', new model_type._orm.model_type_json(model_json), Utils.bbCallback callback
 
   ##############################
   # Iterating
