@@ -51,11 +51,11 @@ module.exports = class JSONUtils
     return JSONUtils.parseDates(obj) unless _.isObject(obj)
     if _.isArray(obj)
       result = []
-      result.push(JSONUtils.parseField(value, model_type, key)) for value in object
+      result.push(JSONUtils.parseField(value, model_type, key)) for value in obj
       return result
     else
       result = {}
-      result[key] = JSONUtils.parseField(value, model_type, key) for key, value of object
+      result[key] = JSONUtils.parseField(value, model_type, key) for key, value of obj
       return result
 
   # Deserialze a strict-JSON query to a json format
