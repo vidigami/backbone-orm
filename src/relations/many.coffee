@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -193,13 +193,14 @@ module.exports = class Many extends (require './relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
+    [relateds, callback] = [null, relateds] if arguments.length is 2
     return callback(new Error "Many.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
     if arguments.length is 2
-      callback = relateds
-
       return callback() if not @reverse_relation
+
+      # get memory instance
       if Utils.isModel(model)
         delete Utils.orSet(model, 'rel_dirty', {})[@key]
         collection = @_ensureCollection(model)
@@ -209,13 +210,22 @@ module.exports = class Many extends (require './relation')
 
       # clear in memory
       for related_model in related_models
-        related_model.set(@foreign_key, null)
+        related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
         cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
       # clear in store through join table
       if @join_table
         (query = {})[@join_key] = model.id
         return @join_table.destroy(query, callback)
+
+      # clear my links to models and save
+      else if @type is 'belongsTo'
+        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+          return callback(err) if err
+          return callback() unless model_json
+
+          model_json[@foreign_key] = null
+          Utils.modelJSONSave(model_json, @model_type, callback)
 
       # clear back links on models and save
       else
@@ -234,15 +244,13 @@ module.exports = class Many extends (require './relation')
 
     # REMOVE SOME
     return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
-    return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
+    return callback(new Error('Many.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
     collection = @_ensureCollection(model)
 
-    # destroy in memory
+    # clear in memory
     for related in relateds
-      for current_related_model in collection.models
-        (collection.remove(current_related_model); break) if Utils.dataIsSameModel(current_related_model, related) # a match
-
+      (collection.remove(related_model); break) for related_model in collection.models when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
 
     # clear in store through join table
@@ -251,6 +259,16 @@ module.exports = class Many extends (require './relation')
       query[@join_key] = model.id
       query[@reverse_relation.join_key] = {$in: related_ids}
       @join_table.destroy query, callback
+
+    # clear my links to models and save
+    else if @type is 'belongsTo'
+      @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+        return callback(err) if err
+        return callback() unless model_json
+        return callback() unless _.contains(related_ids, model_json[@foreign_key])
+
+        model_json[@foreign_key] = null
+        Utils.modelJSONSave(model_json, @model_type, callback)
 
     # clear back links on models and save
     else
@@ -264,6 +282,7 @@ module.exports = class Many extends (require './relation')
         queue = new Queue(1)
         for related_json in json
           do (related_json) => queue.defer (callback) =>
+            return callback() unless related_json[@reverse_relation.foreign_key] is model.id
             related_json[@reverse_relation.foreign_key] = null
             Utils.modelJSONSave(related_json, @reverse_model_type, callback)
         queue.await callback

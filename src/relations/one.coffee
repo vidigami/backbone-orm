@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -163,20 +163,44 @@ module.exports = class One extends (require './relation')
         queue.await callback
 
   patchRemove: (model, relateds, callback) ->
-    (callback = relateds; relateds = undefined) if arguments.length is 2
+    [relateds, callback] = [null, relateds] if arguments.length is 2
     return callback(new Error "One.patchRemove: model has null id for: #{@key}") unless model.id
 
     # REMOVE ALL
     if arguments.length is 2
       return callback() if not @reverse_relation
-      delete Utils.orSet(model, 'rel_dirty', {})[@key] if Utils.isModel(model)
 
-      @cursor(model, @key).toJSON (err, related_json) =>
-        return callback(err) if err
-        return callback() unless related_json
+      # get memory instance
+      if Utils.isModel(model)
+        delete Utils.orSet(model, 'rel_dirty', {})[@key]
+        related_model = model.get(@key)
+        model.set(@key, null)
+      else
+        related_model = new @reverse_model_type(json) if json = model[@key]
 
-        related_json[@reverse_relation.foreign_key] = null
-        Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+      # clear in memory
+      if related_model
+        related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
+        cache.set(related_model.id, related_model) if cache = related_model.cache()
+
+      # clear my links to models and save
+      if @type is 'belongsTo'
+        @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
+          return callback(err) if err
+          return callback() unless model_json
+
+          model_json[@foreign_key] = null
+          Utils.modelJSONSave(model_json, @model_type, callback)
+
+      # clear back links on models and save
+      else
+        @cursor(model, @key).toJSON (err, related_json) =>
+          return callback(err) if err
+          return callback() unless related_json
+          return callback() unless related_json[@reverse_relation.foreign_key] is model.id
+
+          related_json[@reverse_relation.foreign_key] = null
+          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
       return
 
     # REMOVE SOME
@@ -185,14 +209,12 @@ module.exports = class One extends (require './relation')
     return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
 
-    # destroy in memory
-    if current_related_model = model.get(@key)
-      for related in relateds
-        (model.set(@key, null); break) if Utils.dataIsSameModel(current_related_model, related) # match
-
+    # clear in memory
+    if related_model = model.get(@key)
+      (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
 
-    # clear in store on us
+    # clear my links to models and save
     if @type is 'belongsTo'
       @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
         return callback(err) if err
@@ -202,7 +224,7 @@ module.exports = class One extends (require './relation')
         model_json[@foreign_key] = null
         Utils.modelJSONSave(model_json, @model_type, callback)
 
-    # clear in store on related
+    # clear back links on models and save
     else
       @cursor(model, @key).toJSON (err, related_json) =>
         return callback(err) if err

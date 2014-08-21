@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -9,6 +9,7 @@
 _ = require 'underscore'
 
 Utils = require './utils'
+JSONUtils = require './json_utils'
 
 CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or']
 

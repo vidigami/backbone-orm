@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -63,7 +63,7 @@ class MemorySync
 
   # @nodoc
   create: (model, options) ->
-    return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
+    return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model name: #{@model_type.model_name}. Model: #{JSONUtils.stringify(model.toJSON())}")) if @manual_id
 
     model.set(@id_attribute, if @id_type is 'String' then "#{++@id}" else ++@id)
     @store.splice(@insertIndexOf(model.id), 0, model_json = model.toJSON())
@@ -72,24 +72,27 @@ class MemorySync
   # @nodoc
   update: (model, options) ->
     create = (index = @insertIndexOf(model.id)) >= @store.length or @store[index].id isnt model.id
-    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and create
+    return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model name: #{@model_type.model_name}. Model: #{JSONUtils.stringify(model.toJSON())}")) if not @manual_id and create
 
     model_json = model.toJSON()
     if create then @store.splice(index, 0, model_json) else @store[index] = model_json
     options.success(JSONUtils.deepClone(model_json))
 
   # @nodoc
-  delete: (model, options) ->
-    return options.error(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
-    @store.splice(index, 1)
-    options.success()
+  delete: (model, options) -> @deleteCB(model, (err) => if err then options.error(err) else options.success())
+
+  # @nodoc
+  deleteCB: (model, callback) =>
+    return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model.id}")) if (index = @indexOf(model.id)) < 0
+    model_json = @store.splice(index, 1)
+    Utils.patchRemove(@model_type, model, callback)
 
   ###################################
   # Backbone ORM - Class Extensions
   ###################################
 
   # @nodoc
-  resetSchema: (options, callback) -> @destroy({}, callback)
+  resetSchema: (options, callback) -> @destroy(callback)
 
   # @nodoc
   cursor: (query={}) -> return new MemoryCursor(query, _.pick(@, ['model_type', 'store']))
@@ -99,8 +102,7 @@ class MemorySync
     [query, callback] = [{}, query] if arguments.length is 1
 
     if _.size(query) is 0
-      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) =>
-        Utils.patchRemoveByJSON(@model_type, model_json, callback)
+      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) => Utils.patchRemove(@model_type, model_json, callback)
     else
       is_done = false
       cursor = @model_type.cursor(query).limit(DESTROY_BATCH_LIMIT)
@@ -111,12 +113,7 @@ class MemorySync
           return callback(err) if err
           return callback() if models_json.length is 0
           is_done = models_json.length < DESTROY_BATCH_LIMIT
-
-          Utils.eachC models_json, BATCH_COUNT, next, (model_json, callback) =>
-            return callback(new Error("Model not found. Type: #{@model_type.model_name}. Id: #{model_json.id}")) if (splice_index = @indexOf(model_json.id)) < 0
-            @store.splice(splice_index, 1)
-            if @model_type.is_join_table then callback() else Utils.patchRemoveByJSON(@model_type, model_json, (err) -> callback(err))
-          return
+          Utils.each models_json, BATCH_COUNT, @deleteCB, next
       next()
 
   ###################################

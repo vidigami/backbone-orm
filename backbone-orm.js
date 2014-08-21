@@ -1,5 +1,5 @@
 /*
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -63,7 +63,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -144,13 +144,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _;
+	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _,
+	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 	_ = __webpack_require__(1);
 
@@ -158,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	MemoryCursor = __webpack_require__(25);
+	MemoryCursor = __webpack_require__(21);
 
 	Schema = __webpack_require__(15);
 
@@ -183,6 +184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function MemorySync(model_type) {
 	    var _base, _ref;
 	    this.model_type = model_type;
+	    this.deleteCB = __bind(this.deleteCB, this);
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
 	    this.schema = new Schema(this.model_type);
 	    if (!((_ref = this.schema.field('id')) != null ? _ref.type : void 0)) {
@@ -230,7 +232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  MemorySync.prototype.create = function(model, options) {
 	    var model_json;
 	    if (this.manual_id) {
-	      return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model: " + (JSONUtils.stringify(model.toJSON()))));
+	      return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
 	    }
 	    model.set(this.id_attribute, this.id_type === 'String' ? "" + (++this.id) : ++this.id);
 	    this.store.splice(this.insertIndexOf(model.id), 0, model_json = model.toJSON());
@@ -241,7 +243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var create, index, model_json;
 	    create = (index = this.insertIndexOf(model.id)) >= this.store.length || this.store[index].id !== model.id;
 	    if (!this.manual_id && create) {
-	      return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model: " + (JSONUtils.stringify(model.toJSON()))));
+	      return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
 	    }
 	    model_json = model.toJSON();
 	    if (create) {
@@ -253,16 +255,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  MemorySync.prototype["delete"] = function(model, options) {
-	    var index;
+	    return this.deleteCB(model, (function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return options.error(err);
+	        } else {
+	          return options.success();
+	        }
+	      };
+	    })(this));
+	  };
+
+	  MemorySync.prototype.deleteCB = function(model, callback) {
+	    var index, model_json;
 	    if ((index = this.indexOf(model.id)) < 0) {
-	      return options.error(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
+	      return callback(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
 	    }
-	    this.store.splice(index, 1);
-	    return options.success();
+	    model_json = this.store.splice(index, 1);
+	    return Utils.patchRemove(this.model_type, model, callback);
 	  };
 
 	  MemorySync.prototype.resetSchema = function(options, callback) {
-	    return this.destroy({}, callback);
+	    return this.destroy(callback);
 	  };
 
 	  MemorySync.prototype.cursor = function(query) {
@@ -280,7 +294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (_.size(query) === 0) {
 	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
 	        return function(model_json, callback) {
-	          return Utils.patchRemoveByJSON(_this.model_type, model_json, callback);
+	          return Utils.patchRemove(_this.model_type, model_json, callback);
 	        };
 	      })(this));
 	    } else {
@@ -299,20 +313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return callback();
 	            }
 	            is_done = models_json.length < DESTROY_BATCH_LIMIT;
-	            Utils.eachC(models_json, BATCH_COUNT, next, function(model_json, callback) {
-	              var splice_index;
-	              if ((splice_index = _this.indexOf(model_json.id)) < 0) {
-	                return callback(new Error("Model not found. Type: " + _this.model_type.model_name + ". Id: " + model_json.id));
-	              }
-	              _this.store.splice(splice_index, 1);
-	              if (_this.model_type.is_join_table) {
-	                return callback();
-	              } else {
-	                return Utils.patchRemoveByJSON(_this.model_type, model_json, function(err) {
-	                  return callback(err);
-	                });
-	              }
-	            });
+	            return Utils.each(models_json, BATCH_COUNT, _this.deleteCB, next);
 	          });
 	        };
 	      })(this);
@@ -409,15 +410,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	BackboneORM = __webpack_require__(4);
 
 	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(21),
-	  underscore: __webpack_require__(21),
-	  camelize: __webpack_require__(22),
-	  classify: __webpack_require__(23)
+	  "default": __webpack_require__(22),
+	  underscore: __webpack_require__(22),
+	  camelize: __webpack_require__(23),
+	  classify: __webpack_require__(24)
 	};
 
 	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
 
-	BackboneORM.model_cache = new (__webpack_require__(24))();
+	BackboneORM.model_cache = new (__webpack_require__(25))();
 
 	module.exports = function(options) {
 	  var convention, key, value, _results;
@@ -456,7 +457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -642,7 +643,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return modelExtensions(type);
 	  };
 
-	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
+	  Utils.patchRemove = function(model_type, model, callback) {
 	    var key, queue, relation, schema, _fn, _ref;
 	    if (!(schema = model_type.schema())) {
 	      return callback();
@@ -651,7 +652,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _ref = schema.relations;
 	    _fn = function(relation) {
 	      return queue.defer(function(callback) {
-	        return relation.patchRemove(model_json, callback);
+	        return relation.patchRemove(model, callback);
 	      });
 	    };
 	    for (key in _ref) {
@@ -659,6 +660,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _fn(relation);
 	    }
 	    return queue.await(callback);
+	  };
+
+	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
+	    return Utils.patchRemove(model_type, model_json, callback);
 	  };
 
 	  Utils.presaveBelongsToRelationships = function(model, callback) {
@@ -767,28 +772,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.modelJSONSave = function(model_json, model_type, callback) {
-	    var model;
+	    var JSONModel, url_root;
+	    model_type._orm || (model_type._orm = {});
+	    if (!model_type._orm.model_type_json) {
+	      try {
+	        url_root = _.result(new model_type, 'url');
+	      } catch (_error) {}
+	      model_type._orm.model_type_json = JSONModel = (function(_super) {
+	        __extends(JSONModel, _super);
+
+	        function JSONModel() {
+	          return JSONModel.__super__.constructor.apply(this, arguments);
+	        }
+
+	        JSONModel.prototype._orm_never_cache = true;
+
+	        JSONModel.prototype.urlRoot = function() {
+	          return url_root;
+	        };
+
+	        return JSONModel;
+
+	      })(Backbone.Model);
+	    }
 	    if (model_type.prototype.whitelist) {
 	      model_json = _.pick(model_json, model_type.prototype.whitelist);
 	    }
-	    model = new Backbone.Model(model_json);
-	    model._orm_never_cache = true;
-	    model.urlRoot = (function(_this) {
-	      return function() {
-	        var e, url;
-	        try {
-	          url = _.result(new model_type, 'url');
-	        } catch (_error) {
-	          e = _error;
-	        }
-	        return url;
-	      };
-	    })(this);
-	    return model_type.prototype.sync('update', model, Utils.bbCallback(callback));
+	    return model_type.prototype.sync('update', new model_type._orm.model_type_json(model_json), Utils.bbCallback(callback));
 	  };
 
 	  Utils.each = function(array, limit, iterator, callback) {
-	    var count, index, queue, start_index, _fn, _i, _ref;
+	    var count, index, queue, start_index, _fn, _i;
+	    if (!(count = array.length)) {
+	      return callback();
+	    }
 	    index = 0;
 	    queue = new Queue(1);
 	    _fn = function(start_index) {
@@ -809,7 +826,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0, _ref = (count = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	    for (start_index = _i = 0; limit > 0 ? _i <= count : _i >= count; start_index = _i += limit) {
 	      _fn(start_index);
 	    }
 	    return queue.await(callback);
@@ -820,7 +837,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.popEach = function(array, limit, iterator, callback) {
-	    var count, index, queue, start_index, _fn, _i, _ref;
+	    var count, index, queue, start_index, _fn, _i;
+	    if (!(count = array.length)) {
+	      return callback();
+	    }
 	    index = 0;
 	    queue = new Queue(1);
 	    _fn = function(start_index) {
@@ -842,7 +862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0, _ref = (count = array.length); limit > 0 ? _i <= _ref : _i >= _ref; start_index = _i += limit) {
+	    for (start_index = _i = 0; limit > 0 ? _i <= count : _i >= count; start_index = _i += limit) {
 	      _fn(start_index);
 	    }
 	    return queue.await(callback);
@@ -940,7 +960,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1371,7 +1391,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1485,7 +1505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1560,7 +1580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1773,18 +1793,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var CURSOR_KEYS, Cursor, Utils, _,
+	var CURSOR_KEYS, Cursor, JSONUtils, Utils, _,
 	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 	_ = __webpack_require__(1);
 
 	Utils = __webpack_require__(7);
+
+	JSONUtils = __webpack_require__(8);
 
 	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or'];
 
@@ -2208,7 +2230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2444,8 +2466,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return JoinTable.__super__.constructor.apply(this, arguments);
 	        }
 
-	        JoinTable.is_join_table = true;
-
 	        JoinTable.prototype.model_name = name;
 
 	        JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
@@ -2466,8 +2486,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function JoinTable() {
 	          return JoinTable.__super__.constructor.apply(this, arguments);
 	        }
-
-	        JoinTable.is_join_table = true;
 
 	        JoinTable.prototype.model_name = name;
 
@@ -2549,7 +2567,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2572,7 +2590,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -3610,203 +3628,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return obj;
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseConvention, UnderscoreConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = UnderscoreConvention = (function(_super) {
-	  __extends(UnderscoreConvention, _super);
-
-	  function UnderscoreConvention() {
-	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  UnderscoreConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  };
-
-	  return UnderscoreConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, CamelizeConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = CamelizeConvention = (function(_super) {
-	  __extends(CamelizeConvention, _super);
-
-	  function CamelizeConvention() {
-	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  CamelizeConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
-	  };
-
-	  return CamelizeConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, ClassifyConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = ClassifyConvention = (function(_super) {
-	  __extends(ClassifyConvention, _super);
-
-	  function ClassifyConvention() {
-	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  ClassifyConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
-	  };
-
-	  return ClassifyConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, MemoryStore, ModelCache, Queue, _;
-
-	Backbone = __webpack_require__(2);
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	MemoryStore = __webpack_require__(17);
-
-	module.exports = ModelCache = (function() {
-	  function ModelCache() {
-	    this.enabled = false;
-	    this.caches = {};
-	    this.options = {
-	      modelTypes: {}
-	    };
-	    this.verbose = false;
-	  }
-
-	  ModelCache.prototype.configure = function(options) {
-	    var key, value, value_key, value_value, values, _base;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.enabled = options.enabled;
-	    for (key in options) {
-	      value = options[key];
-	      if (_.isObject(value)) {
-	        (_base = this.options)[key] || (_base[key] = {});
-	        values = this.options[key];
-	        for (value_key in value) {
-	          value_value = value[value_key];
-	          values[value_key] = value_value;
-	        }
-	      } else {
-	        this.options[key] = value;
-	      }
-	    }
-	    return this.reset();
-	  };
-
-	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
-	      return sync_fn;
-	    }
-	    return (__webpack_require__(33))(model_type, sync_fn);
-	  };
-
-	  ModelCache.prototype.reset = function() {
-	    var key, value, _ref, _results;
-	    _ref = this.caches;
-	    _results = [];
-	    for (key in _ref) {
-	      value = _ref[key];
-	      _results.push(this.createCache(value.model_type));
-	    }
-	    return _results;
-	  };
-
-	  ModelCache.prototype.createCache = function(model_type) {
-	    var cache_info, cuid, model_name, options;
-	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
-	      throw new Error("Missing model name for cache");
-	    }
-	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
-	    if (cache_info = this.caches[cuid]) {
-	      delete this.caches[cuid];
-	      cache_info.cache.reset();
-	      cache_info.model_type.cache = null;
-	    }
-	    if (!this.enabled) {
-	      return null;
-	    }
-	    if (!(options = this.options.modelTypes[model_name])) {
-	      if (!(this.options.store || this.options.max || this.options.max_age)) {
-	        return null;
-	      }
-	      options = this.options;
-	    }
-	    cache_info = this.caches[cuid] = {
-	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
-	      model_type: model_type
-	    };
-	    return model_type.cache = cache_info.cache;
-	  };
-
-	  return ModelCache;
-
-	})();
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -4284,6 +4114,194 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return MemoryCursor;
 
 	})(Cursor);
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, UnderscoreConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = UnderscoreConvention = (function(_super) {
+	  __extends(UnderscoreConvention, _super);
+
+	  function UnderscoreConvention() {
+	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  UnderscoreConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  };
+
+	  return UnderscoreConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, CamelizeConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = CamelizeConvention = (function(_super) {
+	  __extends(CamelizeConvention, _super);
+
+	  function CamelizeConvention() {
+	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  CamelizeConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
+	  };
+
+	  return CamelizeConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, ClassifyConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = ClassifyConvention = (function(_super) {
+	  __extends(ClassifyConvention, _super);
+
+	  function ClassifyConvention() {
+	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  ClassifyConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
+	  };
+
+	  return ClassifyConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, MemoryStore, ModelCache, Queue, _;
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	MemoryStore = __webpack_require__(17);
+
+	module.exports = ModelCache = (function() {
+	  function ModelCache() {
+	    this.enabled = false;
+	    this.caches = {};
+	    this.options = {
+	      modelTypes: {}
+	    };
+	    this.verbose = false;
+	  }
+
+	  ModelCache.prototype.configure = function(options) {
+	    var key, value, value_key, value_value, values, _base;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.enabled = options.enabled;
+	    for (key in options) {
+	      value = options[key];
+	      if (_.isObject(value)) {
+	        (_base = this.options)[key] || (_base[key] = {});
+	        values = this.options[key];
+	        for (value_key in value) {
+	          value_value = value[value_key];
+	          values[value_key] = value_value;
+	        }
+	      } else {
+	        this.options[key] = value;
+	      }
+	    }
+	    return this.reset();
+	  };
+
+	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
+	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
+	      return sync_fn;
+	    }
+	    return (__webpack_require__(32))(model_type, sync_fn);
+	  };
+
+	  ModelCache.prototype.reset = function() {
+	    var key, value, _ref, _results;
+	    _ref = this.caches;
+	    _results = [];
+	    for (key in _ref) {
+	      value = _ref[key];
+	      _results.push(this.createCache(value.model_type));
+	    }
+	    return _results;
+	  };
+
+	  ModelCache.prototype.createCache = function(model_type) {
+	    var cache_info, cuid, model_name, options;
+	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
+	      throw new Error("Missing model name for cache");
+	    }
+	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
+	    if (cache_info = this.caches[cuid]) {
+	      delete this.caches[cuid];
+	      cache_info.cache.reset();
+	      cache_info.model_type.cache = null;
+	    }
+	    if (!this.enabled) {
+	      return null;
+	    }
+	    if (!(options = this.options.modelTypes[model_name])) {
+	      if (!(this.options.store || this.options.max || this.options.max_age)) {
+	        return null;
+	      }
+	      options = this.options;
+	    }
+	    cache_info = this.caches[cuid] = {
+	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
+	      model_type: model_type
+	    };
+	    return model_type.cache = cache_info.cache;
+	  };
+
+	  return ModelCache;
+
+	})();
 
 
 /***/ },
@@ -5194,7 +5212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -5212,13 +5230,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DatabaseURL = __webpack_require__(12);
 
-	ModelStream = __webpack_require__(34);
+	ModelStream = __webpack_require__(35);
 
-	modelEach = __webpack_require__(35);
+	modelEach = __webpack_require__(36);
 
-	modelInterval = __webpack_require__(36);
+	modelInterval = __webpack_require__(37);
 
-	__webpack_require__(37);
+	__webpack_require__(38);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, fn, key, overrides, _findOrClone, _results;
@@ -5912,7 +5930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -6168,10 +6186,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var current_related_model, related, related_ids, _i, _len;
+	    var cache, json, related, related_ids, related_model, _i, _len, _ref, _ref1;
 	    if (arguments.length === 2) {
-	      callback = relateds;
-	      relateds = void 0;
+	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
 	    }
 	    if (!model.id) {
 	      return callback(new Error("One.patchRemove: model has null id for: " + this.key));
@@ -6182,19 +6199,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      if (Utils.isModel(model)) {
 	        delete Utils.orSet(model, 'rel_dirty', {})[this.key];
+	        related_model = model.get(this.key);
+	        model.set(this.key, null);
+	      } else {
+	        if (json = model[this.key]) {
+	          related_model = new this.reverse_model_type(json);
+	        }
 	      }
-	      this.cursor(model, this.key).toJSON((function(_this) {
-	        return function(err, related_json) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          if (!related_json) {
-	            return callback();
-	          }
-	          related_json[_this.reverse_relation.foreign_key] = null;
-	          return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	        };
-	      })(this));
+	      if (related_model) {
+	        if (((_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0) === model.id) {
+	          related_model.set(this.foreign_key, null);
+	        }
+	        if (cache = related_model.cache()) {
+	          cache.set(related_model.id, related_model);
+	        }
+	      }
+	      if (this.type === 'belongsTo') {
+	        this.model_type.cursor({
+	          id: model.id,
+	          $one: true
+	        }).toJSON((function(_this) {
+	          return function(err, model_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!model_json) {
+	              return callback();
+	            }
+	            model_json[_this.foreign_key] = null;
+	            return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	          };
+	        })(this));
+	      } else {
+	        this.cursor(model, this.key).toJSON((function(_this) {
+	          return function(err, related_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!related_json) {
+	              return callback();
+	            }
+	            if (related_json[_this.reverse_relation.foreign_key] !== model.id) {
+	              return callback();
+	            }
+	            related_json[_this.reverse_relation.foreign_key] = null;
+	            return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	          };
+	        })(this));
+	      }
 	      return;
 	    }
 	    if (this.isEmbedded()) {
@@ -6206,10 +6258,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!_.isArray(relateds)) {
 	      relateds = [relateds];
 	    }
-	    if (current_related_model = model.get(this.key)) {
+	    if (related_model = model.get(this.key)) {
 	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
 	        related = relateds[_i];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
+	        if (Utils.dataIsSameModel(related_model, related)) {
 	          model.set(this.key, null);
 	          break;
 	        }
@@ -6392,7 +6444,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(34));
 
 
 /***/ },
@@ -6401,7 +6453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -6765,12 +6817,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, collection, current_related_model, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref;
+	    var cache, collection, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+	    if (arguments.length === 2) {
+	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
+	    }
 	    if (!model.id) {
 	      return callback(new Error("Many.patchRemove: model has null id for: " + this.key));
 	    }
 	    if (arguments.length === 2) {
-	      callback = relateds;
 	      if (!this.reverse_relation) {
 	        return callback();
 	      }
@@ -6780,11 +6834,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        related_models = _.clone(collection.models);
 	      } else {
 	        related_models = (function() {
-	          var _i, _len, _ref, _results;
-	          _ref = model[this.key] || [];
+	          var _i, _len, _ref1, _results;
+	          _ref1 = model[this.key] || [];
 	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            json = _ref[_i];
+	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+	            json = _ref1[_i];
 	            _results.push(new this.reverse_model_type(json));
 	          }
 	          return _results;
@@ -6792,7 +6846,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      for (_i = 0, _len = related_models.length; _i < _len; _i++) {
 	        related_model = related_models[_i];
-	        related_model.set(this.foreign_key, null);
+	        if (((_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0) === model.id) {
+	          related_model.set(this.foreign_key, null);
+	        }
 	        if (cache = related_model.cache()) {
 	          cache.set(related_model.id, related_model);
 	        }
@@ -6800,6 +6856,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this.join_table) {
 	        (query = {})[this.join_key] = model.id;
 	        return this.join_table.destroy(query, callback);
+	      } else if (this.type === 'belongsTo') {
+	        this.model_type.cursor({
+	          id: model.id,
+	          $one: true
+	        }).toJSON((function(_this) {
+	          return function(err, model_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!model_json) {
+	              return callback();
+	            }
+	            model_json[_this.foreign_key] = null;
+	            return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	          };
+	        })(this));
 	      } else {
 	        (query = {})[this.reverse_relation.foreign_key] = model.id;
 	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
@@ -6829,7 +6901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return callback(new Error('Many.patchRemove: embedded relationships are not supported'));
 	    }
 	    if (!relateds) {
-	      return callback(new Error('One.patchRemove: missing model for remove'));
+	      return callback(new Error('Many.patchRemove: missing model for remove'));
 	    }
 	    if (!_.isArray(relateds)) {
 	      relateds = [relateds];
@@ -6837,11 +6909,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    collection = this._ensureCollection(model);
 	    for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
 	      related = relateds[_j];
-	      _ref = collection.models;
-	      for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-	        current_related_model = _ref[_k];
-	        if (Utils.dataIsSameModel(current_related_model, related)) {
-	          collection.remove(current_related_model);
+	      _ref2 = collection.models;
+	      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+	        related_model = _ref2[_k];
+	        if (Utils.dataIsSameModel(related_model, related)) {
+	          collection.remove(related_model);
 	          break;
 	        }
 	      }
@@ -6862,6 +6934,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        $in: related_ids
 	      };
 	      return this.join_table.destroy(query, callback);
+	    } else if (this.type === 'belongsTo') {
+	      return this.model_type.cursor({
+	        id: model.id,
+	        $one: true
+	      }).toJSON((function(_this) {
+	        return function(err, model_json) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          if (!model_json) {
+	            return callback();
+	          }
+	          if (!_.contains(related_ids, model_json[_this.foreign_key])) {
+	            return callback();
+	          }
+	          model_json[_this.foreign_key] = null;
+	          return Utils.modelJSONSave(model_json, _this.model_type, callback);
+	        };
+	      })(this));
 	    } else {
 	      query = {};
 	      query[this.reverse_relation.foreign_key] = model.id;
@@ -6877,6 +6968,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          queue = new Queue(1);
 	          _fn = function(related_json) {
 	            return queue.defer(function(callback) {
+	              if (related_json[_this.reverse_relation.foreign_key] !== model.id) {
+	                return callback();
+	              }
 	              related_json[_this.reverse_relation.foreign_key] = null;
 	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
 	            });
@@ -7020,7 +7114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(34));
 
 
 /***/ },
@@ -7065,6 +7159,175 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
+
+	_ = __webpack_require__(1);
+
+	CacheCursor = __webpack_require__(39);
+
+	Schema = __webpack_require__(15);
+
+	Utils = __webpack_require__(7);
+
+	bbCallback = Utils.bbCallback;
+
+	DESTROY_BATCH_LIMIT = 1000;
+
+	DESTROY_THREADS = 100;
+
+	CacheSync = (function() {
+	  function CacheSync(model_type, wrapped_sync_fn) {
+	    this.model_type = model_type;
+	    this.wrapped_sync_fn = wrapped_sync_fn;
+	  }
+
+	  CacheSync.prototype.initialize = function() {
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    this.wrapped_sync_fn('initialize');
+	    if (!this.model_type.model_name) {
+	      throw new Error('Missing model_name for model');
+	    }
+	  };
+
+	  CacheSync.prototype.read = function(model, options) {
+	    var cached_model;
+	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
+	      return options.success(cached_model.toJSON());
+	    }
+	    return this.wrapped_sync_fn('read', model, options);
+	  };
+
+	  CacheSync.prototype.create = function(model, options) {
+	    return this.wrapped_sync_fn('create', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var attributes, cache_model;
+	          (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
+	          model.set(attributes);
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype.update = function(model, options) {
+	    return this.wrapped_sync_fn('update', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var cache_model;
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype["delete"] = function(model, options) {
+	    this.model_type.cache.destroy(model.id);
+	    return this.wrapped_sync_fn('delete', model, options);
+	  };
+
+	  CacheSync.prototype.resetSchema = function(options, callback) {
+	    return this.model_type.cache.reset((function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        return _this.wrapped_sync_fn('resetSchema', options, callback);
+	      };
+	    })(this));
+	  };
+
+	  CacheSync.prototype.cursor = function(query) {
+	    if (query == null) {
+	      query = {};
+	    }
+	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
+	  };
+
+	  CacheSync.prototype.destroy = function(query, callback) {
+	    return this.model_type.each(_.extend({
+	      $each: {
+	        limit: DESTROY_BATCH_LIMIT,
+	        threads: DESTROY_THREADS
+	      }
+	    }, query), ((function(_this) {
+	      return function(model, callback) {
+	        return model.destroy(callback);
+	      };
+	    })(this)), callback);
+	  };
+
+	  CacheSync.prototype.connect = function(url) {
+	    this.model_type.cache.reset();
+	    return this.wrapped_sync_fn('connect');
+	  };
+
+	  return CacheSync;
+
+	})();
+
+	module.exports = function(model_type, wrapped_sync_fn) {
+	  var sync, sync_fn;
+	  sync = new CacheSync(model_type, wrapped_sync_fn);
+	  model_type.prototype.sync = sync_fn = function(method, model, options) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    sync.initialize();
+	    if (method === 'createSync') {
+	      return wrapped_sync_fn.apply(null, arguments);
+	    }
+	    if (method === 'sync') {
+	      return sync;
+	    }
+	    if (sync[method]) {
+	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+	    }
+	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
+	  };
+	  return sync_fn;
+	};
+
+
+/***/ },
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {/*!
@@ -8237,175 +8500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!test) throw new Error(message || 'Failed assertion')
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
-
-	_ = __webpack_require__(1);
-
-	CacheCursor = __webpack_require__(39);
-
-	Schema = __webpack_require__(15);
-
-	Utils = __webpack_require__(7);
-
-	bbCallback = Utils.bbCallback;
-
-	DESTROY_BATCH_LIMIT = 1000;
-
-	DESTROY_THREADS = 100;
-
-	CacheSync = (function() {
-	  function CacheSync(model_type, wrapped_sync_fn) {
-	    this.model_type = model_type;
-	    this.wrapped_sync_fn = wrapped_sync_fn;
-	  }
-
-	  CacheSync.prototype.initialize = function() {
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    this.wrapped_sync_fn('initialize');
-	    if (!this.model_type.model_name) {
-	      throw new Error('Missing model_name for model');
-	    }
-	  };
-
-	  CacheSync.prototype.read = function(model, options) {
-	    var cached_model;
-	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
-	      return options.success(cached_model.toJSON());
-	    }
-	    return this.wrapped_sync_fn('read', model, options);
-	  };
-
-	  CacheSync.prototype.create = function(model, options) {
-	    return this.wrapped_sync_fn('create', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        var attributes, cache_model;
-	        if (err) {
-	          return options.error(err);
-	        }
-	        (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
-	        model.set(attributes);
-	        if (cache_model = _this.model_type.cache.get(model.id)) {
-	          if (cache_model !== model) {
-	            Utils.updateModel(cache_model, model);
-	          }
-	        } else {
-	          _this.model_type.cache.set(model.id, model);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype.update = function(model, options) {
-	    return this.wrapped_sync_fn('update', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        var cache_model;
-	        if (err) {
-	          return options.error(err);
-	        }
-	        if (cache_model = _this.model_type.cache.get(model.id)) {
-	          if (cache_model !== model) {
-	            Utils.updateModel(cache_model, model);
-	          }
-	        } else {
-	          _this.model_type.cache.set(model.id, model);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype["delete"] = function(model, options) {
-	    this.model_type.cache.destroy(model.id);
-	    return this.wrapped_sync_fn('delete', model, bbCallback((function(_this) {
-	      return function(err, json) {
-	        if (err) {
-	          return options.error(err);
-	        }
-	        return options.success(json);
-	      };
-	    })(this)));
-	  };
-
-	  CacheSync.prototype.resetSchema = function(options, callback) {
-	    return this.model_type.cache.reset((function(_this) {
-	      return function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        return _this.wrapped_sync_fn('resetSchema', options, callback);
-	      };
-	    })(this));
-	  };
-
-	  CacheSync.prototype.cursor = function(query) {
-	    if (query == null) {
-	      query = {};
-	    }
-	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
-	  };
-
-	  CacheSync.prototype.destroy = function(query, callback) {
-	    return this.model_type.each(_.extend({
-	      $each: {
-	        limit: DESTROY_BATCH_LIMIT,
-	        threads: DESTROY_THREADS
-	      }
-	    }, query), ((function(_this) {
-	      return function(model, callback) {
-	        return model.destroy(callback);
-	      };
-	    })(this)), callback);
-	  };
-
-	  CacheSync.prototype.connect = function(url) {
-	    this.model_type.cache.reset();
-	    return this.wrapped_sync_fn('connect');
-	  };
-
-	  return CacheSync;
-
-	})();
-
-	module.exports = function(model_type, wrapped_sync_fn) {
-	  var sync, sync_fn;
-	  sync = new CacheSync(model_type, wrapped_sync_fn);
-	  model_type.prototype.sync = sync_fn = function(method, model, options) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    sync.initialize();
-	    if (method === 'createSync') {
-	      return wrapped_sync_fn.apply(null, arguments);
-	    }
-	    if (method === 'sync') {
-	      return sync;
-	    }
-	    if (sync[method]) {
-	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-	    }
-	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
-	  };
-	  return sync_fn;
-	};
-
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
 /* 34 */
@@ -8413,380 +8508,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	try {
-	  stream = __webpack_require__(3);
-	} catch (_error) {}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Cursor, Queue, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Cursor = null;
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var method, model_limit, options, parsed_query, processed_count, runBatch;
-	  if (!Cursor) {
-	    Cursor = __webpack_require__(25);
-	  }
-	  options = query.$each || {};
-	  method = options.json ? 'toJSON' : 'toModels';
-	  processed_count = 0;
-	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
-	  _.defaults(parsed_query.cursor, {
-	    $offset: 0,
-	    $sort: 'id'
-	  });
-	  model_limit = parsed_query.cursor.$limit || Infinity;
-	  if (options.fetch) {
-	    parsed_query.cursor.$limit = options.fetch;
-	  }
-	  runBatch = function() {
-	    var cursor;
-	    cursor = model_type.cursor(parsed_query);
-	    return cursor[method].call(cursor, function(err, models) {
-	      var model, queue, _fn, _i, _len;
-	      if (err || !models) {
-	        return callback(new Error("Failed to get models. Error: " + err));
-	      }
-	      if (!models.length) {
-	        return callback(null, processed_count);
-	      }
-	      queue = new Queue(options.threads);
-	      _fn = function(model) {
-	        return queue.defer(function(callback) {
-	          return iterator(model, callback);
-	        });
-	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
-	        if (processed_count++ >= model_limit) {
-	          break;
-	        }
-	        _fn(model);
-	      }
-	      return queue.await(function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
-	          return callback(null, processed_count);
-	        }
-	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
-	        return runBatch();
-	      });
-	    });
-	  };
-	  return runBatch();
-	};
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var DateUtils, INTERVAL_TYPES, Queue, Utils, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Utils = __webpack_require__(7);
-
-	DateUtils = __webpack_require__(9);
-
-	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var iteration_info, key, no_models, options, queue, range;
-	  options = query.$interval || {};
-	  if (!(key = options.key)) {
-	    throw new Error('missing option: key');
-	  }
-	  if (!options.type) {
-	    throw new Error('missing option: type');
-	  }
-	  if (!_.contains(INTERVAL_TYPES, options.type)) {
-	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
-	  }
-	  iteration_info = _.clone(options);
-	  if (!iteration_info.range) {
-	    iteration_info.range = {};
-	  }
-	  range = iteration_info.range;
-	  no_models = false;
-	  queue = new Queue(1);
-	  queue.defer(function(callback) {
-	    var start;
-	    if (!(start = range.$gte || range.$gt)) {
-	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.start = iteration_info.first = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.start = start;
-	      return model_type.findOneNearestDate(start, {
-	        key: key,
-	        reverse: true
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.first = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  queue.defer(function(callback) {
-	    var end;
-	    if (no_models) {
-	      return callback();
-	    }
-	    if (!(end = range.$lte || range.$lt)) {
-	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.end = iteration_info.last = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.end = end;
-	      return model_type.findOneNearestDate(end, {
-	        key: key
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.last = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  return queue.await(function(err) {
-	    var length_ms, processed_count, runInterval, start_ms;
-	    if (err) {
-	      return callback(err);
-	    }
-	    if (no_models) {
-	      return callback();
-	    }
-	    start_ms = range.start.getTime();
-	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
-	    if (!length_ms) {
-	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
-	    }
-	    query = _.omit(query, '$interval');
-	    query.$sort = [key];
-	    processed_count = 0;
-	    iteration_info.index = 0;
-	    runInterval = function(current) {
-	      if (DateUtils.isAfter(current, range.end)) {
-	        return callback();
-	      }
-	      query[key] = {
-	        $gte: current,
-	        $lte: iteration_info.last
-	      };
-	      return model_type.findOne(query, function(err, model) {
-	        var next;
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          return callback();
-	        }
-	        next = model.get(key);
-	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
-	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
-	        iteration_info.start = current;
-	        next = new Date(current.getTime() + length_ms);
-	        iteration_info.end = next;
-	        query[key] = {
-	          $gte: current,
-	          $lt: next
-	        };
-	        return iterator(query, iteration_info, function(err) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          return runInterval(next);
-	        });
-	      });
-	    };
-	    return runInterval(range.start);
-	  });
-	};
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, Utils, collection_type, fn, key, overrides, _;
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	Utils = __webpack_require__(7);
-
-	collection_type = Backbone.Collection;
-
-	overrides = {
-	  fetch: function(options) {
-	    var callback;
-	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
-	      switch (arguments.length) {
-	        case 1:
-	          options = Utils.wrapOptions({}, callback);
-	          break;
-	        case 2:
-	          options = Utils.wrapOptions(options, callback);
-	      }
-	    }
-	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
-	      return function(err, model, resp, options) {
-	        if (err) {
-	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
-	        }
-	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
-	      };
-	    })(this)));
-	  },
-	  _prepareModel: function(attrs, options) {
-	    var id, is_new, model;
-	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
-	      if (this.model.cache) {
-	        is_new = !!this.model.cache.get(id);
-	      }
-	      model = Utils.updateOrNew(attrs, this.model);
-	      if (is_new && !model._validate(attrs, options)) {
-	        this.trigger('invalid', this, attrs, options);
-	        return false;
-	      }
-	      return model;
-	    }
-	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
-	  }
-	};
-
-	if (!collection_type.prototype._orm_original_fns) {
-	  collection_type.prototype._orm_original_fns = {};
-	  for (key in overrides) {
-	    fn = overrides[key];
-	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
-	    collection_type.prototype[key] = fn;
-	  }
-	}
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8965,12 +8687,387 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var ModelStream, stream,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	try {
+	  stream = __webpack_require__(3);
+	} catch (_error) {}
+
+	if (stream != null ? stream.Readable : void 0) {
+	  module.exports = ModelStream = (function(_super) {
+	    __extends(ModelStream, _super);
+
+	    function ModelStream(model_type, query) {
+	      this.model_type = model_type;
+	      this.query = query != null ? query : {};
+	      ModelStream.__super__.constructor.call(this, {
+	        objectMode: true
+	      });
+	    }
+
+	    ModelStream.prototype._read = function() {
+	      var done;
+	      if (this.ended || this.started) {
+	        return;
+	      }
+	      this.started = true;
+	      done = (function(_this) {
+	        return function(err) {
+	          _this.ended = true;
+	          if (err) {
+	            _this.emit('error', err);
+	          }
+	          return _this.push(null);
+	        };
+	      })(this);
+	      return this.model_type.each(this.query, ((function(_this) {
+	        return function(model, callback) {
+	          _this.push(model);
+	          return callback();
+	        };
+	      })(this)), done);
+	    };
+
+	    return ModelStream;
+
+	  })(stream.Readable);
+	}
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Cursor, Queue, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	Cursor = null;
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var method, model_limit, options, parsed_query, processed_count, runBatch;
+	  if (!Cursor) {
+	    Cursor = __webpack_require__(21);
+	  }
+	  options = query.$each || {};
+	  method = options.json ? 'toJSON' : 'toModels';
+	  processed_count = 0;
+	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
+	  _.defaults(parsed_query.cursor, {
+	    $offset: 0,
+	    $sort: 'id'
+	  });
+	  model_limit = parsed_query.cursor.$limit || Infinity;
+	  if (options.fetch) {
+	    parsed_query.cursor.$limit = options.fetch;
+	  }
+	  runBatch = function() {
+	    var cursor;
+	    cursor = model_type.cursor(parsed_query);
+	    return cursor[method].call(cursor, function(err, models) {
+	      var model, queue, _fn, _i, _len;
+	      if (err || !models) {
+	        return callback(new Error("Failed to get models. Error: " + err));
+	      }
+	      if (!models.length) {
+	        return callback(null, processed_count);
+	      }
+	      queue = new Queue(options.threads);
+	      _fn = function(model) {
+	        return queue.defer(function(callback) {
+	          return iterator(model, callback);
+	        });
+	      };
+	      for (_i = 0, _len = models.length; _i < _len; _i++) {
+	        model = models[_i];
+	        if (processed_count++ >= model_limit) {
+	          break;
+	        }
+	        _fn(model);
+	      }
+	      return queue.await(function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
+	          return callback(null, processed_count);
+	        }
+	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
+	        return runBatch();
+	      });
+	    });
+	  };
+	  return runBatch();
+	};
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var DateUtils, INTERVAL_TYPES, JSONUtils, Queue, Utils, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	JSONUtils = __webpack_require__(8);
+
+	DateUtils = __webpack_require__(9);
+
+	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var iteration_info, key, no_models, options, queue, range;
+	  options = query.$interval || {};
+	  if (!(key = options.key)) {
+	    throw new Error('missing option: key');
+	  }
+	  if (!options.type) {
+	    throw new Error('missing option: type');
+	  }
+	  if (!_.contains(INTERVAL_TYPES, options.type)) {
+	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
+	  }
+	  iteration_info = _.clone(options);
+	  if (!iteration_info.range) {
+	    iteration_info.range = {};
+	  }
+	  range = iteration_info.range;
+	  no_models = false;
+	  queue = new Queue(1);
+	  queue.defer(function(callback) {
+	    var start;
+	    if (!(start = range.$gte || range.$gt)) {
+	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.start = iteration_info.first = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.start = start;
+	      return model_type.findOneNearestDate(start, {
+	        key: key,
+	        reverse: true
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.first = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  queue.defer(function(callback) {
+	    var end;
+	    if (no_models) {
+	      return callback();
+	    }
+	    if (!(end = range.$lte || range.$lt)) {
+	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.end = iteration_info.last = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.end = end;
+	      return model_type.findOneNearestDate(end, {
+	        key: key
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.last = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  return queue.await(function(err) {
+	    var length_ms, processed_count, runInterval, start_ms;
+	    if (err) {
+	      return callback(err);
+	    }
+	    if (no_models) {
+	      return callback();
+	    }
+	    start_ms = range.start.getTime();
+	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
+	    if (!length_ms) {
+	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
+	    }
+	    query = _.omit(query, '$interval');
+	    query.$sort = [key];
+	    processed_count = 0;
+	    iteration_info.index = 0;
+	    runInterval = function(current) {
+	      if (DateUtils.isAfter(current, range.end)) {
+	        return callback();
+	      }
+	      query[key] = {
+	        $gte: current,
+	        $lte: iteration_info.last
+	      };
+	      return model_type.findOne(query, function(err, model) {
+	        var next;
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          return callback();
+	        }
+	        next = model.get(key);
+	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
+	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
+	        iteration_info.start = current;
+	        next = new Date(current.getTime() + length_ms);
+	        iteration_info.end = next;
+	        query[key] = {
+	          $gte: current,
+	          $lt: next
+	        };
+	        return iterator(query, iteration_info, function(err) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          return runInterval(next);
+	        });
+	      });
+	    };
+	    return runInterval(range.start);
+	  });
+	};
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.6.5
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, Utils, collection_type, fn, key, overrides, _;
+
+	_ = __webpack_require__(1);
+
+	Backbone = __webpack_require__(2);
+
+	Utils = __webpack_require__(7);
+
+	collection_type = Backbone.Collection;
+
+	overrides = {
+	  fetch: function(options) {
+	    var callback;
+	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
+	      switch (arguments.length) {
+	        case 1:
+	          options = Utils.wrapOptions({}, callback);
+	          break;
+	        case 2:
+	          options = Utils.wrapOptions(options, callback);
+	      }
+	    }
+	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
+	      return function(err, model, resp, options) {
+	        if (err) {
+	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
+	        }
+	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
+	      };
+	    })(this)));
+	  },
+	  _prepareModel: function(attrs, options) {
+	    var id, is_new, model;
+	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
+	      if (this.model.cache) {
+	        is_new = !!this.model.cache.get(id);
+	      }
+	      model = Utils.updateOrNew(attrs, this.model);
+	      if (is_new && !model._validate(attrs, options)) {
+	        this.trigger('invalid', this, attrs, options);
+	        return false;
+	      }
+	      return model;
+	    }
+	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
+	  }
+	};
+
+	if (!collection_type.prototype._orm_original_fns) {
+	  collection_type.prototype._orm_original_fns = {};
+	  for (key in overrides) {
+	    fn = overrides[key];
+	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
+	    collection_type.prototype[key] = fn;
+	  }
+	}
+
+
+/***/ },
 /* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.6.4
+	  backbone-orm.js 0.6.5
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8995,7 +9092,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(25));
+	})(__webpack_require__(21));
 
 
 /***/ },
@@ -9216,4 +9313,4 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }
 /******/ ])
-})
+});

@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -118,12 +118,16 @@ module.exports = class Utils
     modelExtensions(type)
 
   # @nodoc
-  @patchRemoveByJSON: (model_type, model_json, callback) ->
+  @patchRemove: (model_type, model, callback) ->
     return callback() unless schema = model_type.schema()
     queue = new Queue(1)
     for key, relation of schema.relations
-      do (relation) -> queue.defer (callback) -> relation.patchRemove(model_json, callback)
+      do (relation) -> queue.defer (callback) -> relation.patchRemove(model, callback)
     queue.await callback
+
+  # TODO: remove
+  # @nodoc
+  @patchRemoveByJSON: (model_type, model_json, callback) -> Utils.patchRemove(model_type, model_json, callback)
 
   # @nodoc
   @presaveBelongsToRelationships: (model, callback) ->
@@ -196,13 +200,16 @@ module.exports = class Utils
 
   # @nodoc
   @modelJSONSave: (model_json, model_type, callback) ->
+    model_type._orm or= {}
+    unless model_type._orm.model_type_json
+      try url_root = _.result(new model_type, 'url')
+
+      model_type._orm.model_type_json = class JSONModel extends Backbone.Model
+        _orm_never_cache: true
+        urlRoot: -> url_root
+
     model_json = _.pick(model_json, model_type::whitelist) if model_type::whitelist
-    model = new Backbone.Model(model_json)
-    model._orm_never_cache = true
-    model.urlRoot = =>
-      try url = _.result(new model_type, 'url') catch e
-      return url
-    model_type::sync 'update', model, Utils.bbCallback callback
+    model_type::sync 'update', new model_type._orm.model_type_json(model_json), Utils.bbCallback callback
 
   ##############################
   # Iterating
@@ -210,9 +217,10 @@ module.exports = class Utils
 
   # @nodoc
   @each: (array, limit, iterator, callback) =>
+    return callback() unless count = array.length
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(count = array.length)] by limit
+    for start_index in [0..count] by limit
       do (start_index) => queue.defer (callback) ->
         iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>
@@ -227,9 +235,10 @@ module.exports = class Utils
 
   # @nodoc
   @popEach: (array, limit, iterator, callback) =>
+    return callback() unless count = array.length
     index = 0
     queue = new Queue(1)
-    for start_index in [0..(count = array.length)] by limit
+    for start_index in [0..count] by limit
       do (start_index) => queue.defer (callback) ->
         iteration_end = Math.min(start_index+limit, count)
         next = (err, done) =>

@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.4
+  backbone-orm.js 0.6.5
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -117,7 +117,6 @@ module.exports = class Schema
     try
       # @nodoc
       class JoinTable extends Backbone.Model
-        @is_join_table: true
         model_name: name
         urlRoot: "#{(new DatabaseURL(_.result(new relation.model_type, 'url'))).format({exclude_table: true})}/#{url}"
         schema: schema
@@ -125,7 +124,6 @@ module.exports = class Schema
     catch
       # @nodoc
       class JoinTable extends Backbone.Model
-        @is_join_table: true
         model_name: name
         urlRoot: "/#{url}"
         schema: schema
