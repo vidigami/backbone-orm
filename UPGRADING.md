@@ -1,6 +1,16 @@
 ### From 0.6.x to 0.7.x
 
-1. Use JSONUtils.parseField instead of JSONUtils.parseParams.
+1. Use JSONUtils.parseQuery instead of JSONUtils.parse.
+
+```
+# change
+JSONUtils.parse(req.query)
+
+# to
+JSONUtils.parseQuery(req.query)
+```
+
+2. Use JSONUtils.parseField instead of JSONUtils.parseParams.
 
 ```
 # change
@@ -10,7 +20,8 @@ JSONUtils.parseParams(req.params)
 JSONUtils.parseField(req.params.id, MyModel, 'id')
 ```
 
-2. Remove strict types that were required for queries.
+
+3. Remove strict types that were required for queries.
 
 ```
 # change

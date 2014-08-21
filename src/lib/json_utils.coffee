@@ -68,7 +68,7 @@ module.exports = class JSONUtils
     for key, value of query
       json[key] = value
       if _.isString(value) and value.length # needs parsing
-        try value = JSON.parse(value) catch err then console.log "Failed to JSON.parse query key: #{key} value: #{value}. Missing quotes on a string? Error: #{err.message}"
+        try value = JSON.parse(value) # BE FORGIVING AND ALLOW FOR NON-QUOTED STRINGS DESPITE THE RISK OF INTEGER LOOKING STRINGS LIKE "12683162e63": catch err then console.log "Failed to JSON.parse query key: #{key} value: #{value}. Missing quotes on a string? Error: #{err.message}"
         json[key] = JSONUtils.parseDates(value)
     return json
 
