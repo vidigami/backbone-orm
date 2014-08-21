@@ -51,28 +51,30 @@ module.exports = class JSONUtils
     json[key] = JSONUtils.parseField(value, model_type, key) for key, value of object
     return json
 
+  # Deserialze a strict-JSON query to a json format
+  #
+  # @example
+  #   json = JSONUtils.parseQuery(query)
+  #
+  @parseQuery: (query, model_type) ->
+    json = {}
+    for key, value of query
+      (console.log "JSONUtils::parseQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
+      json[key] = if value.length then JSONUtils.parseDates(JSON.parse(value)) else '' # check for strings that need to be converted to dates
+
+    return json
+
   # Serialze json to a strict-JSON query format
   #
   # @example
-  #   query = JSONUtils.toQuery(json)
+  #   query = JSONUtils.querify(json)
   #
-  @toQuery: (json) ->
+  @querify: (json) ->
     query = {}
     query[key] = JSON.stringify(value) for key, value of json
     return query
 
-  # Deserialze a strict-JSON query to a json format
-  #
-  # @example
-  #   json = JSONUtils.fromQuery(query)
-  #
-  @fromQuery: (query, model_type) ->
-    json = {}
-    for key, value of query
-      (console.log "JSONUtils::fromQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
-      json[key] = if value.length then JSONUtils.parseDates(JSON.parse(value)) else '' # check for strings that need to be converted to dates
-
-    return json
+  @toQuery: (json) -> console.log "JSONUtils.toQuery has been deprecated. Use JSONUtils.querify instead"
 
   # Render a template that can be a key, keys, DSL object, or function.
   #

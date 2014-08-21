@@ -99,7 +99,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
         done()
 
-    it 'JSONUtils.toQuery converts types correctly for nested models', (done) ->
+    it 'JSONUtils.querify converts types correctly for nested models', (done) ->
       Owner.findOne (err, test_model) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(test_model, 'found model')
