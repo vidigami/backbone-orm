@@ -11,7 +11,7 @@ _ = require 'underscore'
 Utils = require './utils'
 JSONUtils = require './json_utils'
 
-CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or']
+CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or']
 
 module.exports = class Cursor
   # @nodoc
@@ -21,7 +21,7 @@ module.exports = class Cursor
     @_find = parsed_query.find; @_cursor = parsed_query.cursor
 
     # ensure arrays
-    @_cursor[key] = [@_cursor[key]] for key in ['$white_list', '$select', '$values', '$unique'] when @_cursor[key] and not _.isArray(@_cursor[key])
+    @_cursor[key] = [@_cursor[key]] for key in ['$whitelist', '$select', '$values', '$unique'] when @_cursor[key] and not _.isArray(@_cursor[key])
 
   # @nodoc
   @validateQuery = (query, memo, model_type) =>
@@ -55,7 +55,7 @@ module.exports = class Cursor
 
   whiteList: (args) ->
     keys = _.flatten(arguments)
-    @_cursor.$white_list = if @_cursor.$white_list then _.intersection(@_cursor.$white_list, keys) else keys
+    @_cursor.$whitelist = if @_cursor.$whitelist then _.intersection(@_cursor.$whitelist, keys) else keys
     return @
 
   select: (args) ->
@@ -186,7 +186,7 @@ module.exports = class Cursor
 
     # TODO: OPTIMIZE TO REMOVE 'id' and '_rev' if needed
     if @_cursor.$values
-      $values = if @_cursor.$white_list then _.intersection(@_cursor.$values, @_cursor.$white_list) else @_cursor.$values
+      $values = if @_cursor.$whitelist then _.intersection(@_cursor.$values, @_cursor.$whitelist) else @_cursor.$values
       if @_cursor.$values.length is 1
         key = @_cursor.$values[0]
         json = if $values.length then ((if item.hasOwnProperty(key) then item[key] else null) for item in json) else _.map(json, -> null)
@@ -194,11 +194,11 @@ module.exports = class Cursor
         json = (((item[key] for key in $values when item.hasOwnProperty(key))) for item in json)
 
     else if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      $select = if @_cursor.$whitelist then _.intersection(@_cursor.$select, @_cursor.$whitelist) else @_cursor.$select
       json = (_.pick(item, $select) for item in json)
 
-    else if @_cursor.$white_list
-      json = (_.pick(item, @_cursor.$white_list) for item in json)
+    else if @_cursor.$whitelist
+      json = (_.pick(item, @_cursor.$whitelist) for item in json)
 
     return json if @hasCursorQuery('$page') # paging expects an array
     return if @_cursor.$one then (json[0] or null) else json
@@ -206,11 +206,11 @@ module.exports = class Cursor
   # @nodoc
   selectFromModels: (models, callback) ->
     if @_cursor.$select
-      $select = if @_cursor.$white_list then _.intersection(@_cursor.$select, @_cursor.$white_list) else @_cursor.$select
+      $select = if @_cursor.$whitelist then _.intersection(@_cursor.$select, @_cursor.$whitelist) else @_cursor.$select
       models = (model = new @model_type(_.pick(model.attributes, $select)); model.setPartial(true); model for item in models)
 
-    else if @_cursor.$white_list
-      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$white_list)); model.setPartial(true); model for item in models)
+    else if @_cursor.$whitelist
+      models = (model = new @model_type(_.pick(model.attributes, @_cursor.$whitelist)); model.setPartial(true); model for item in models)
 
     return models
 

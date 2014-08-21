@@ -171,7 +171,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
       runTest = (err) ->
         assert.ifError(err)
 
-        Flat.cursor({$white_list: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
+        Flat.cursor({$whitelist: WHITE_LIST}).select(FIELD_NAMES).toJSON (err, models_json) ->
           assert.ifError(err)
           assert.ok(_.isArray(models_json), 'cursor toJSON gives us models')
           for json in models_json
@@ -190,7 +190,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
       runTest = (err) ->
         assert.ifError(err)
 
-        Flat.cursor({$white_list: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
+        Flat.cursor({$whitelist: WHITE_LIST}).values(FIELD_NAMES).toJSON (err, values) ->
           assert.ifError(err)
           assert.ok(_.isArray(values), 'cursor values is an array')
           for json in values

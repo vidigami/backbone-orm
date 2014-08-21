@@ -10,82 +10,62 @@ _ = require 'underscore'
 Queue = require './queue'
 Utils = require './utils'
 
+reconsituteDates = (json) ->
+  if _.isString(json)
+    # Date: A trailing 'Z' means that the date will _always_ be parsed as UTC
+    return date if (json.length >= 20) and json[json.length-1] is 'Z' and not _.isNaN((date = new Date(json)).getTime())
+  else if _.isObject(json) or _.isArray(json)
+    json[key] = reconsituteDates(value) for key, value of json
+  return json
+
 module.exports = class JSONUtils
 
   # @nodoc
   @stringify: (json) -> try return JSON.stringify(json) catch err then return 'Failed to stringify'
 
-  # Parse an a request's parameters whose values are still JSON stringified (for example, ids as strings).
+  # Parse an object whose values are still JSON .
   #
   # @example
-  #   method: (req, res) ->
-  #     params = JSONUtils.parseParams(req.params)
+  #   id = JSONUtils.parseField(csv_column[0], MyModel, 'id')
   #
-  @parseParams: (params) ->
-    result = {}
-    result[key] = JSON.parse(value) for key, value of params
-    return result
+  @parseField: (value, model_type, key) ->
+    return value unless model_type?.schema().idType(key) is 'Integer'
+    return integer_value unless _.isNaN(integer_value = +value)
+    console.log "Warning: failed to convert key: #{key} value: #{result[key]} to integer. Model: #{model_type.model_name}"
+    return value
 
-  # Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format).
+  # Parse an object whose values types need to be inferred.
   #
   # @example
-  #   method: (req, res) ->
-  #     query = JSONUtils.parse(req.query)
+  #   json = JSONUtils.parse({id: csv_column[0], created_at: csv_column[1]}, MyModel)
   #
-  @parse: (values, model_type) ->
-    return null if _.isNull(values) or (values is 'null')
-    return values if _.isDate(values)
-    return (JSONUtils.parse(value) for value in values) if _.isArray(values)
-    if _.isObject(values)
-      result = {}
-      for key, value of values
-        result[key] = JSONUtils.parse(value)
-        continue unless (_.isString(result[key]) and result[key].length)
+  @parse: (object, model_type) ->
+    json = {}
+    json[key] = reconsituteDates(JSONUtils.parseField(value, model_type, key)) for key, value of object
+    return json
 
-        # convert control directives
-        if key[0] is '$'
-          result[key] = value unless _.isNaN(value = +result[key])
-
-        # convert id attributes
-        else if model_type?.schema().idType(key) is 'Integer'
-          (console.log "Warning: failed to convert key: #{key} value: #{result[key]} to integer. Model: #{model_type.model_name}"; continue) if _.isNaN(value = +result[key])
-          result[key] = value
-
-      return result
-    else if _.isString(values)
-      # Date
-      # A trailing 'Z' means that the date will _always_ be parsed as UTC
-      if (values.length >= 20) and values[values.length-1] is 'Z'
-        return if _.isNaN((date = new Date(values)).getTime()) then values else date
-
-      # Boolean
-      return true if values is 'true'
-      return false if values is 'false'
-
-      # "quoted string"
-      return match[0] if match = /^\"(.*)\"$/.exec(values)
-
-      # stringified JSON
-      if (values[0] is '{' or values[0] is '[')
-        try return JSONUtils.parse(parsed_values) if parsed_values = JSON.parse(values)
-
-    return values
-
-  # Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL
+  # Serialze json to a strict-JSON query format
   #
   # @example
   #   query = JSONUtils.toQuery(json)
   #
-  @toQuery: (values, depth=0) ->
-    return 'null' if _.isNull(values)
-    return JSONUtils.stringify(values) if _.isArray(values)
-    return values.toJSON() if _.isDate(values) or values.toJSON
-    if _.isObject(values)
-      return JSONUtils.stringify(values) if depth > 0
-      result = {}
-      result[key] = JSONUtils.toQuery(value, 1) for key, value of values
-      return result
-    return values
+  @toQuery: (json) ->
+    query = {}
+    query[key] = JSON.stringify(value) for key, value of json
+    return query
+
+  # Deserialze a strict-JSON query to a json format
+  #
+  # @example
+  #   json = JSONUtils.fromQuery(query)
+  #
+  @fromQuery: (query, model_type) ->
+    json = {}
+    for key, value of query
+      (console.log "JSONUtils::fromQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
+      json[key] = reconsituteDates(JSON.parse(value)) # check for strings that need to be converted to dates
+
+    return json
 
   # Render a template that can be a key, keys, DSL object, or function.
   #

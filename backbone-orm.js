@@ -966,13 +966,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var JSONUtils, Queue, Utils, _;
+	var JSONUtils, Queue, Utils, reconsituteDates, _;
 
 	_ = __webpack_require__(1);
 
 	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
+
+	reconsituteDates = function(json) {
+	  var date, key, value;
+	  if (_.isString(json)) {
+	    if ((json.length >= 20) && json[json.length - 1] === 'Z' && !_.isNaN((date = new Date(json)).getTime())) {
+	      return date;
+	    }
+	  } else if (_.isObject(json) || _.isArray(json)) {
+	    for (key in json) {
+	      value = json[key];
+	      json[key] = reconsituteDates(value);
+	    }
+	  }
+	  return json;
+	};
 
 	module.exports = JSONUtils = (function() {
 	  function JSONUtils() {}
@@ -987,110 +1002,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  JSONUtils.parseParams = function(params) {
-	    var key, result, value;
-	    result = {};
-	    for (key in params) {
-	      value = params[key];
-	      result[key] = JSON.parse(value);
+	  JSONUtils.parseField = function(value, model_type, key) {
+	    var integer_value;
+	    if ((model_type != null ? model_type.schema().idType(key) : void 0) !== 'Integer') {
+	      return value;
 	    }
-	    return result;
+	    if (!_.isNaN(integer_value = +value)) {
+	      return integer_value;
+	    }
+	    console.log("Warning: failed to convert key: " + key + " value: " + result[key] + " to integer. Model: " + model_type.model_name);
+	    return value;
 	  };
 
-	  JSONUtils.parse = function(values, model_type) {
-	    var date, key, match, parsed_values, result, value;
-	    if (_.isNull(values) || (values === 'null')) {
-	      return null;
+	  JSONUtils.parse = function(object, model_type) {
+	    var json, key, value;
+	    json = {};
+	    for (key in object) {
+	      value = object[key];
+	      json[key] = reconsituteDates(JSONUtils.parseField(value, model_type, key));
 	    }
-	    if (_.isDate(values)) {
-	      return values;
-	    }
-	    if (_.isArray(values)) {
-	      return (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = values.length; _i < _len; _i++) {
-	          value = values[_i];
-	          _results.push(JSONUtils.parse(value));
-	        }
-	        return _results;
-	      })();
-	    }
-	    if (_.isObject(values)) {
-	      result = {};
-	      for (key in values) {
-	        value = values[key];
-	        result[key] = JSONUtils.parse(value);
-	        if (!(_.isString(result[key]) && result[key].length)) {
-	          continue;
-	        }
-	        if (key[0] === '$') {
-	          if (!_.isNaN(value = +result[key])) {
-	            result[key] = value;
-	          }
-	        } else if ((model_type != null ? model_type.schema().idType(key) : void 0) === 'Integer') {
-	          if (_.isNaN(value = +result[key])) {
-	            console.log("Warning: failed to convert key: " + key + " value: " + result[key] + " to integer. Model: " + model_type.model_name);
-	            continue;
-	          }
-	          result[key] = value;
-	        }
-	      }
-	      return result;
-	    } else if (_.isString(values)) {
-	      if ((values.length >= 20) && values[values.length - 1] === 'Z') {
-	        if (_.isNaN((date = new Date(values)).getTime())) {
-	          return values;
-	        } else {
-	          return date;
-	        }
-	      }
-	      if (values === 'true') {
-	        return true;
-	      }
-	      if (values === 'false') {
-	        return false;
-	      }
-	      if (match = /^\"(.*)\"$/.exec(values)) {
-	        return match[0];
-	      }
-	      if (values[0] === '{' || values[0] === '[') {
-	        try {
-	          if (parsed_values = JSON.parse(values)) {
-	            return JSONUtils.parse(parsed_values);
-	          }
-	        } catch (_error) {}
-	      }
-	    }
-	    return values;
+	    return json;
 	  };
 
-	  JSONUtils.toQuery = function(values, depth) {
-	    var key, result, value;
-	    if (depth == null) {
-	      depth = 0;
+	  JSONUtils.toQuery = function(json) {
+	    var key, query, value;
+	    query = {};
+	    for (key in json) {
+	      value = json[key];
+	      query[key] = JSON.stringify(value);
 	    }
-	    if (_.isNull(values)) {
-	      return 'null';
-	    }
-	    if (_.isArray(values)) {
-	      return JSONUtils.stringify(values);
-	    }
-	    if (_.isDate(values) || values.toJSON) {
-	      return values.toJSON();
-	    }
-	    if (_.isObject(values)) {
-	      if (depth > 0) {
-	        return JSONUtils.stringify(values);
+	    return query;
+	  };
+
+	  JSONUtils.fromQuery = function(query, model_type) {
+	    var json, key, value;
+	    json = {};
+	    for (key in query) {
+	      value = query[key];
+	      if (!_.isString(value)) {
+	        console.log("JSONUtils::fromQuery - expecting a string for key '" + key + "' in query", query);
+	        continue;
 	      }
-	      result = {};
-	      for (key in values) {
-	        value = values[key];
-	        result[key] = JSONUtils.toQuery(value, 1);
-	      }
-	      return result;
+	      json[key] = reconsituteDates(JSON.parse(value));
 	    }
-	    return values;
+	    return json;
 	  };
 
 	  JSONUtils.renderTemplate = function(models, template, options, callback) {
@@ -1808,7 +1763,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	JSONUtils = __webpack_require__(8);
 
-	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$white_list', '$select', '$include', '$values', '$ids', '$or'];
+	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or'];
 
 	module.exports = Cursor = (function() {
 	  function Cursor(query, options) {
@@ -1821,7 +1776,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parsed_query = Cursor.parseQuery(query, this.model_type);
 	    this._find = parsed_query.find;
 	    this._cursor = parsed_query.cursor;
-	    _ref = ['$white_list', '$select', '$values', '$unique'];
+	    _ref = ['$whitelist', '$select', '$values', '$unique'];
 	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
 	      key = _ref[_i];
 	      if (this._cursor[key] && !_.isArray(this._cursor[key])) {
@@ -1913,7 +1868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Cursor.prototype.whiteList = function(args) {
 	    var keys;
 	    keys = _.flatten(arguments);
-	    this._cursor.$white_list = this._cursor.$white_list ? _.intersection(this._cursor.$white_list, keys) : keys;
+	    this._cursor.$whitelist = this._cursor.$whitelist ? _.intersection(this._cursor.$whitelist, keys) : keys;
 	    return this;
 	  };
 
@@ -2073,7 +2028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      json = json.slice(0, 1);
 	    }
 	    if (this._cursor.$values) {
-	      $values = this._cursor.$white_list ? _.intersection(this._cursor.$values, this._cursor.$white_list) : this._cursor.$values;
+	      $values = this._cursor.$whitelist ? _.intersection(this._cursor.$values, this._cursor.$whitelist) : this._cursor.$values;
 	      if (this._cursor.$values.length === 1) {
 	        key = this._cursor.$values[0];
 	        json = $values.length ? (function() {
@@ -2109,7 +2064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        })();
 	      }
 	    } else if (this._cursor.$select) {
-	      $select = this._cursor.$white_list ? _.intersection(this._cursor.$select, this._cursor.$white_list) : this._cursor.$select;
+	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
 	      json = (function() {
 	        var _i, _len, _results;
 	        _results = [];
@@ -2119,13 +2074,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return _results;
 	      })();
-	    } else if (this._cursor.$white_list) {
+	    } else if (this._cursor.$whitelist) {
 	      json = (function() {
 	        var _i, _len, _results;
 	        _results = [];
 	        for (_i = 0, _len = json.length; _i < _len; _i++) {
 	          item = json[_i];
-	          _results.push(_.pick(item, this._cursor.$white_list));
+	          _results.push(_.pick(item, this._cursor.$whitelist));
 	        }
 	        return _results;
 	      }).call(this);
@@ -2143,7 +2098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Cursor.prototype.selectFromModels = function(models, callback) {
 	    var $select, item, model;
 	    if (this._cursor.$select) {
-	      $select = this._cursor.$white_list ? _.intersection(this._cursor.$select, this._cursor.$white_list) : this._cursor.$select;
+	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
 	      models = ((function() {
 	        var _i, _len, _results;
 	        model = new this.model_type(_.pick(model.attributes, $select));
@@ -2155,10 +2110,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return _results;
 	      }).call(this));
-	    } else if (this._cursor.$white_list) {
+	    } else if (this._cursor.$whitelist) {
 	      models = ((function() {
 	        var _i, _len, _results;
-	        model = new this.model_type(_.pick(model.attributes, this._cursor.$white_list));
+	        model = new this.model_type(_.pick(model.attributes, this._cursor.$whitelist));
 	        model.setPartial(true);
 	        _results = [];
 	        for (_i = 0, _len = models.length; _i < _len; _i++) {

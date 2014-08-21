@@ -1,5 +1,11 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.0
+* Implemented strict-json syntax in the query string, eg. https://things/1?string="value"&number=1
+* Removed parseParams. Use JSONUtils.parseField(value, model_type, 'id') instead
+* Bug fix to respect whitelisting in modelJSONSave
+* Naming consistency for whitelist (removed hypenated version like white_list).
+
 ### 0.6.6
 * Fixed error messages not being passed through when using a cache sync
 
