@@ -1043,7 +1043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        console.log("JSONUtils::fromQuery - expecting a string for key '" + key + "' in query", query);
 	        continue;
 	      }
-	      json[key] = JSONUtils.parseDates(JSON.parse(value));
+	      json[key] = value.length ? JSONUtils.parseDates(JSON.parse(value)) : '';
 	    }
 	    return json;
 	  };

@@ -70,7 +70,7 @@ module.exports = class JSONUtils
     json = {}
     for key, value of query
       (console.log "JSONUtils::fromQuery - expecting a string for key '#{key}' in query", query; continue) unless _.isString(value)
-      json[key] = JSONUtils.parseDates(JSON.parse(value)) # check for strings that need to be converted to dates
+      json[key] = if value.length then JSONUtils.parseDates(JSON.parse(value)) else '' # check for strings that need to be converted to dates
 
     return json
 
