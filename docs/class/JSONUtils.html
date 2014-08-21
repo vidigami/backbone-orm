@@ -48,14 +48,26 @@
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#parseParams-static'>
+      <a href='#parseDates-static'>
         .
 (void)
-<b>parseParams</b><span>(params)</span>
+<b>parseDates</b><span>(json)</span>
       </a>
     </span>
     <span class='desc'>
-      Parse an a request&#39;s parameters whose values are still JSON stringified (for example, ids as strings). 
+      Parse an object whose values are still JSON. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#parseField-static'>
+        .
+(void)
+<b>parseField</b><span>(value, model_type, key)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Parse an object whose values are still JSON . 
     </span>
   </li>
   <li>
@@ -63,11 +75,35 @@
       <a href='#parse-static'>
         .
 (void)
-<b>parse</b><span>(values, model_type)</span>
+<b>parse</b><span>(obj, model_type)</span>
       </a>
     </span>
     <span class='desc'>
-      Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format). 
+      Parse an object whose values types need to be inferred. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#parseQuery-static'>
+        .
+(void)
+<b>parseQuery</b><span>(query)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Deserialze a strict-JSON query to a json format 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#querify-static'>
+        .
+(void)
+<b>querify</b><span>(json)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Serialze json to a strict-JSON query format 
     </span>
   </li>
   <li>
@@ -75,11 +111,10 @@
       <a href='#toQuery-static'>
         .
 (void)
-<b>toQuery</b><span>(values, depth = 0)</span>
+<b>toQuery</b><span>(json)</span>
       </a>
     </span>
     <span class='desc'>
-      Serialze json to a toQuery format. 
     </span>
   </li>
   <li>
@@ -160,21 +195,42 @@
       <h2>Class Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='parseParams-static'>
+    <p class='signature' id='parseDates-static'>
       .
 (void)
-<b>parseParams</b><span>(params)</span>
+<b>parseDates</b><span>(json)</span>
       <br>
     </p>
     <div class='docstring'>
-  <p>Parse an a request&#39;s parameters whose values are still JSON stringified (for example, ids as strings).</p>
+  <p>Parse an object whose values are still JSON.</p>
   <div class='examples'>
     <h3>Examples:</h3>
     <h4>
       
     </h4>
-    <pre><code class='coffeescript'>method: (req, res) -&gt;
-  params = JSONUtils.parseParams(req.params)</code></pre>
+    <pre><code class='coffeescript'>date = JSONUtils.parseDates(&#39;2014-08-21T17:48:01.971Z&#39;)
+array = JSONUtils.parseDates([&#39;2014-08-21T17:48:01.971Z&#39;, &#39;2014-08-21T17:48:01.971Z&#39;])
+object = JSONUtils.parseDates({created_at: &#39;2014-08-21T17:48:01.971Z&#39;, changes: [&#39;2014-08-21T17:48:01.971Z&#39;, &#39;2014-08-21T17:48:01.971Z&#39;]})</code></pre>
+  </div>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='parseField-static'>
+      .
+(void)
+<b>parseField</b><span>(value, model_type, key)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Parse an object whose values are still JSON .</p>
+  <div class='examples'>
+    <h3>Examples:</h3>
+    <h4>
+      
+    </h4>
+    <pre><code class='coffeescript'>id = JSONUtils.parseField(csv_column[0], MyModel, &#39;id&#39;)</code></pre>
   </div>
 </div>
 <div class='tags'>
@@ -184,18 +240,58 @@
     <p class='signature' id='parse-static'>
       .
 (void)
-<b>parse</b><span>(values, model_type)</span>
+<b>parse</b><span>(obj, model_type)</span>
       <br>
     </p>
     <div class='docstring'>
-  <p>Parse an object whose values are still JSON stringified (for example, dates as strings in ISO8601 format).</p>
+  <p>Parse an object whose values types need to be inferred.</p>
   <div class='examples'>
     <h3>Examples:</h3>
     <h4>
       
     </h4>
-    <pre><code class='coffeescript'>method: (req, res) -&gt;
-  query = JSONUtils.parse(req.query)</code></pre>
+    <pre><code class='coffeescript'>object = JSONUtils.parse({id: csv_column[0], created_at: csv_column[1]}, MyModel)
+array = JSONUtils.parse([{id: csv_column[0], created_at: csv_column[1]]}, MyModel)</code></pre>
+  </div>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='parseQuery-static'>
+      .
+(void)
+<b>parseQuery</b><span>(query)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Deserialze a strict-JSON query to a json format</p>
+  <div class='examples'>
+    <h3>Examples:</h3>
+    <h4>
+      
+    </h4>
+    <pre><code class='coffeescript'>json = JSONUtils.parseQuery(query)</code></pre>
+  </div>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='querify-static'>
+      .
+(void)
+<b>querify</b><span>(json)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Serialze json to a strict-JSON query format</p>
+  <div class='examples'>
+    <h3>Examples:</h3>
+    <h4>
+      
+    </h4>
+    <pre><code class='coffeescript'>query = JSONUtils.querify(json)</code></pre>
   </div>
 </div>
 <div class='tags'>
@@ -205,21 +301,10 @@
     <p class='signature' id='toQuery-static'>
       .
 (void)
-<b>toQuery</b><span>(values, depth = 0)</span>
+<b>toQuery</b><span>(json)</span>
       <br>
     </p>
-    <div class='docstring'>
-  <p>Serialze json to a toQuery format. Note: the caller should use encodeURIComponent on all keys and values when added to URL</p>
-  <div class='examples'>
-    <h3>Examples:</h3>
-    <h4>
-      
-    </h4>
-    <pre><code class='coffeescript'>query = JSONUtils.toQuery(json)</code></pre>
-  </div>
-</div>
-<div class='tags'>
-</div>
+    
   </div>
   <div class='method_details'>
     <p class='signature' id='renderTemplate-static'>
@@ -318,7 +403,7 @@
 </div>
     </div>
     <div id='footer'>
-  August 09, 14 14:23:08 by
+  August 21, 14 15:17:46 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
