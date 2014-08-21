@@ -1,4 +1,29 @@
-### From 0.5.x to 0.6.1
+### From 0.6.x to 0.7.x
+
+1. Use JSONUtils.parseField instead of JSONUtils.parseParams.
+
+```
+# change
+JSONUtils.parseParams(req.params)
+
+# to
+JSONUtils.parseField(req.params.id, MyModel, 'id')
+```
+
+2. Remove strict types that were required for queries.
+
+```
+# change
+class MyModel extends Backbone.Model
+  schema:
+    status: ['Integer']
+
+# to
+class MyModel extends Backbone.Model
+```
+
+
+### From 0.5.x to 0.6.x
 
 1. All references to BackboneORM.CacheSingletons.ModelCache.configure should be replaces with configure.
 
