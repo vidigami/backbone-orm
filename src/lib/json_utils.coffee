@@ -44,12 +44,19 @@ module.exports = class JSONUtils
   # Parse an object whose values types need to be inferred.
   #
   # @example
-  #   json = JSONUtils.parse({id: csv_column[0], created_at: csv_column[1]}, MyModel)
+  #   object = JSONUtils.parse({id: csv_column[0], created_at: csv_column[1]}, MyModel)
+  #   array = JSONUtils.parse([{id: csv_column[0], created_at: csv_column[1]]}, MyModel)
   #
-  @parse: (object, model_type) ->
-    json = {}
-    json[key] = JSONUtils.parseField(value, model_type, key) for key, value of object
-    return json
+  @parse: (obj, model_type) ->
+    return JSONUtils.parseDates(obj) unless _.isObject(obj)
+    if _.isArray(obj)
+      result = []
+      result.push(JSONUtils.parseField(value, model_type, key)) for value in object
+      return result
+    else
+      result = {}
+      result[key] = JSONUtils.parseField(value, model_type, key) for key, value of object
+      return result
 
   # Deserialze a strict-JSON query to a json format
   #
