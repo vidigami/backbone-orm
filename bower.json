@@ -9,6 +9,11 @@
   ],
   "description": "A polystore ORM for Node.js and the browser",
   "keywords": ["backbone", "orm", "backbone-orm"],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
   "dependencies": {
     "underscore": ">=1.2.0",
     "backbone": ">=1.0.0"
