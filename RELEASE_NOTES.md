@@ -1,5 +1,9 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.1
+* Bug fix for JSONUtils.parse for array type
+* Fixed references to 0.7.x
+
 ### 0.7.0
 * Implemented strict-json syntax in the query string, eg. https://things/1?string="value"&number=1. Use JSONUtils.parseQuery instead of JSONUtils.parse.
 * Removed parseParams. Use JSONUtils.parseField(value, model_type, 'id') instead
