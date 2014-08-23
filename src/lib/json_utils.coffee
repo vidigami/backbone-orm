@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.6.5
+  backbone-orm.js 0.7.1
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -49,14 +49,10 @@ module.exports = class JSONUtils
   #
   @parse: (obj, model_type) ->
     return JSONUtils.parseDates(obj) unless _.isObject(obj)
-    if _.isArray(obj)
-      result = []
-      result.push(JSONUtils.parseField(value, model_type, key)) for value in obj
-      return result
-    else
-      result = {}
-      result[key] = JSONUtils.parseField(value, model_type, key) for key, value of obj
-      return result
+    return (JSONUtils.parse(value, model_type) for value in obj) if _.isArray(obj)
+    result = {}
+    result[key] = JSONUtils.parseField(value, model_type, key) for key, value of obj
+    return result
 
   # Deserialze a strict-JSON query to a json format
   #
