@@ -65,7 +65,7 @@
     "karma-cli": "*",
     "karma-coffee-preprocessor": "*",
     "karma-firefox-launcher": "*",
-    "karma-mocha": "git+https://github.com/forivall/karma-mocha#develop-publish",
+    "karma-mocha": "*",
     "karma-phantomjs-launcher": "*",
     "karma-safari-launcher": "*",
     "karma-spec-reporter": "*",
