@@ -55,26 +55,16 @@ module.exports = class Utils
   @isCollection: (obj) -> return obj and obj.models and ((obj instanceof Backbone.Collection) or (obj.reset and obj.fetch))
 
   # @nodoc
-  @get: (model, key, default_value) ->
-    model._orm or= {}
-    return if model._orm.hasOwnProperty(key) then model._orm[key] else default_value
+  @get: (obj, key, default_value) -> return if not obj._orm or not obj._orm.hasOwnProperty(key) then default_value else obj._orm[key]
 
   # @nodoc
-  @set: (model, key, value) ->
-    model._orm or= {}
-    model._orm[key] = value
-    return model._orm[key]
+  @set: (obj, key, value) -> return ((obj._orm or= {}))[key] = value
 
   # @nodoc
-  @orSet: (model, key, value) ->
-    model._orm or= {}
-    model._orm[key] = value unless model._orm.hasOwnProperty(key)
-    return model._orm[key]
+  @orSet: (obj, key, value) -> obj._orm[key] = value unless ((obj._orm or= {})).hasOwnProperty(key); return obj._orm[key]
 
   # @nodoc
-  @unset: (model, key) ->
-    model._orm or= {}
-    delete model._orm[key]
+  @unset: (obj, key) -> delete (obj._orm or= {})[key]
 
   ##############################
   # ModelType

@@ -9,9 +9,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["underscore", "backbone"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
-			return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]);
-		});
+		define(["underscore", "backbone"], (function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) { return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]); }));
 	else if(typeof exports === 'object')
 		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
@@ -557,32 +555,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj && obj.models && ((obj instanceof Backbone.Collection) || (obj.reset && obj.fetch));
 	  };
 
-	  Utils.get = function(model, key, default_value) {
-	    model._orm || (model._orm = {});
-	    if (model._orm.hasOwnProperty(key)) {
-	      return model._orm[key];
-	    } else {
+	  Utils.get = function(obj, key, default_value) {
+	    if (!obj._orm || !obj._orm.hasOwnProperty(key)) {
 	      return default_value;
+	    } else {
+	      return obj._orm[key];
 	    }
 	  };
 
-	  Utils.set = function(model, key, value) {
-	    model._orm || (model._orm = {});
-	    model._orm[key] = value;
-	    return model._orm[key];
+	  Utils.set = function(obj, key, value) {
+	    return (obj._orm || (obj._orm = {}))[key] = value;
 	  };
 
-	  Utils.orSet = function(model, key, value) {
-	    model._orm || (model._orm = {});
-	    if (!model._orm.hasOwnProperty(key)) {
-	      model._orm[key] = value;
+	  Utils.orSet = function(obj, key, value) {
+	    if (!(obj._orm || (obj._orm = {})).hasOwnProperty(key)) {
+	      obj._orm[key] = value;
 	    }
-	    return model._orm[key];
+	    return obj._orm[key];
 	  };
 
-	  Utils.unset = function(model, key) {
-	    model._orm || (model._orm = {});
-	    return delete model._orm[key];
+	  Utils.unset = function(obj, key) {
+	    return delete (obj._orm || (obj._orm = {}))[key];
 	  };
 
 	  Utils.findOrGenerateModelName = function(model_type) {
@@ -4543,7 +4536,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	 * inflection
 	 * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
 	 * MIT Licensed
@@ -4554,7 +4547,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	( function ( root, factory ){
 	  if( true ){
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (factory.apply(null, __WEBPACK_AMD_DEFINE_ARRAY__)), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  }else if( typeof exports === 'object' ){
 	    module.exports = factory();
 	  }else{
@@ -4822,6 +4815,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	    singularize : function ( str, singular ){
 	      return inflector._apply_rules( str, singular_rules, uncountable_words, singular );
+	    },
+
+
+	  /**
+	   * This function will pluralize or singularlize a String appropriately based on an integer value
+	   * @public
+	   * @function
+	   * @param {String} str The subject string.
+	   * @param {Number} count The number to base pluralization off of.
+	   * @param {String} singular Overrides normal output with said String.(optional)
+	   * @param {String} plural Overrides normal output with said String.(optional)
+	   * @returns {String} English language nouns are returned in the plural or singular form based on the count.
+	   * @example
+	   *
+	   *     var inflection = require( 'inflection' );
+	   *
+	   *     inflection.inflect( 'people' 1 ); // === 'person'
+	   *     inflection.inflect( 'octopi' 1 ); // === 'octopus'
+	   *     inflection.inflect( 'Hats' 1 ); // === 'Hat'
+	   *     inflection.inflect( 'guys', 1 , 'person' ); // === 'person'
+	   *     inflection.inflect( 'person', 2 ); // === 'people'
+	   *     inflection.inflect( 'octopus', 2 ); // === 'octopi'
+	   *     inflection.inflect( 'Hat', 2 ); // === 'Hats'
+	   *     inflection.inflect( 'person', 2, null, 'guys' ); // === 'guys'
+	   */
+	    inflect : function ( str, count, singular, plural ){
+	      count = parseInt( count, 10 );
+
+	      if( isNaN( count )) return str;
+
+	      if( count === 0 || count > 1 ){
+	        return inflector._apply_rules( str, plural_rules, uncountable_words, plural );
+	      }else{
+	        return inflector._apply_rules( str, singular_rules, uncountable_words, singular );
+	      }
 	    },
 
 
@@ -5177,7 +5205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.3.8';
+	  inflector.version = '1.4.0';
 
 	  return inflector;
 	}));
