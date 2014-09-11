@@ -9,7 +9,9 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["underscore", "backbone"], (function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) { return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]); }));
+		define(["underscore", "backbone"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
+			return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]);
+		});
 	else if(typeof exports === 'object')
 		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
@@ -1038,15 +1040,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    json = {};
 	    for (key in query) {
 	      value = query[key];
-	      json[key] = value;
-	      if (_.isString(value) && value.length) {
-	        try {
-	          value = JSON.parse(value);
-	        } catch (_error) {}
-	        json[key] = JSONUtils.parseDates(value);
-	      }
+	      json[key] = JSONUtils.parseQueryValue(value);
 	    }
 	    return json;
+	  };
+
+	  JSONUtils.parseQueryValue = function(value) {
+	    if (_.isString(value) && value.length) {
+	      try {
+	        value = JSON.parse(value);
+	      } catch (_error) {}
+	      return JSONUtils.parseDates(value);
+	    }
+	    return value;
 	  };
 
 	  JSONUtils.querify = function(json) {
@@ -4536,7 +4542,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	 * inflection
 	 * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
 	 * MIT Licensed
@@ -4547,7 +4553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	( function ( root, factory ){
 	  if( true ){
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (factory.apply(null, __WEBPACK_AMD_DEFINE_ARRAY__)), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  }else if( typeof exports === 'object' ){
 	    module.exports = factory();
 	  }else{
@@ -4596,6 +4602,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ new RegExp( '^(ox)en',            'gi' )],
 	    [ new RegExp( '(vert|ind)ices$',    'gi' )],
 	    [ new RegExp( '(matr)ices$',        'gi' )],
+	    [ new RegExp( '^feet$',             'gi' )],
+	    [ new RegExp( '^teeth$',            'gi' )],
+	    [ new RegExp( '^geese$',            'gi' )],
 	    [ new RegExp( '(quiz)zes$',         'gi' )],
 
 	    // original rule
@@ -4616,6 +4625,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ new RegExp( '(x|ch|ss|sh)$', 'gi' ),          '$1es' ],
 	    [ new RegExp( '(matr|vert|ind)ix|ex$', 'gi' ),  '$1ices' ],
 	    [ new RegExp( '([m|l])ouse$', 'gi' ),           '$1ice' ],
+	    [ new RegExp( '^foot$', 'gi' ),                 'feet' ],
+	    [ new RegExp( '^tooth$', 'gi' ),                'teeth' ],
+	    [ new RegExp( '^goose$', 'gi' ),                'geese' ],
 	    [ new RegExp( '(quiz)$', 'gi' ),                '$1zes' ],
 
 	    [ new RegExp( 's$', 'gi' ), 's' ],
@@ -4646,6 +4658,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ new RegExp( '(x|ch|ss|sh)$',          'gi' )],
 	    [ new RegExp( '(matr|vert|ind)ix|ex$',  'gi' )],
 	    [ new RegExp( '([m|l])ouse$',           'gi' )],
+	    [ new RegExp( '^foot$',                 'gi' )],
+	    [ new RegExp( '^tooth$',                'gi' )],
+	    [ new RegExp( '^goose$',                'gi' )],
 	    [ new RegExp( '(quiz)$',                'gi' )],
 
 	    // original rule
@@ -4673,6 +4688,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ new RegExp( '^(ox)en', 'gi' ),                                                      '$1' ],
 	    [ new RegExp( '(vert|ind)ices$', 'gi' ),                                              '$1ex' ],
 	    [ new RegExp( '(matr)ices$', 'gi' ),                                                  '$1ix' ],
+	    [ new RegExp( '^feet$', 'gi' ),                                                       'foot' ],
+	    [ new RegExp( '^teeth$', 'gi' ),                                                      'tooth' ],
+	    [ new RegExp( '^geese$', 'gi' ),                                                      'goose' ],
 	    [ new RegExp( '(quiz)zes$', 'gi' ),                                                   '$1' ],
 	    [ new RegExp( 'ss$', 'gi' ),                                                          'ss' ],
 	    [ new RegExp( 's$', 'gi' ),                                                           '' ]
@@ -5205,7 +5223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.4.0';
+	  inflector.version = '1.4.2';
 
 	  return inflector;
 	}));
