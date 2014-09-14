@@ -61,8 +61,7 @@ module.exports = class JSONUtils
   #
   @parseQuery: (query) ->
     json = {}
-    for key, value of query
-      json[key] = JSONUtils.parseQueryValue(value)
+    json[key] = JSONUtils.parseQueryValue(value) for key, value of query
     return json
 
   @parseQueryValue: (value) ->
