@@ -61,14 +61,12 @@ module.exports = class JSONUtils
   #
   @parseQuery: (query) ->
     json = {}
-    json[key] = JSONUtils.parseQueryValue(value) for key, value of query
+    for key, value of query
+      json[key] = value
+      if _.isString(value) and value.length # needs parsing
+        try value = JSON.parse(value) # BE FORGIVING AND ALLOW FOR NON-QUOTED STRINGS DESPITE THE RISK OF INTEGER LOOKING STRINGS LIKE "12683162e63": catch err then console.log "Failed to JSON.parse query key: #{key} value: #{value}. Missing quotes on a string? Error: #{err.message}"
+        json[key] = JSONUtils.parseDates(value)
     return json
-
-  @parseQueryValue: (value) ->
-    if _.isString(value) and value.length # needs parsing
-      try value = JSON.parse(value) # BE FORGIVING AND ALLOW FOR NON-QUOTED STRINGS DESPITE THE RISK OF INTEGER LOOKING STRINGS LIKE "12683162e63": catch err then console.log "Failed to JSON.parse query key: #{key} value: #{value}. Missing quotes on a string? Error: #{err.message}"
-      return JSONUtils.parseDates(value)
-    return value
 
   # Serialze json to a strict-JSON query format
   #
