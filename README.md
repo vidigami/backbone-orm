@@ -19,6 +19,15 @@ Other great things:
 * BackboneMongo provides a CouchDB-like '_rev' versioning solution
 * BackboneREST provides authorization middleware hooks and emits REST events
 
+#### Modules
+
+Out of the box, BackboneORM comes packaged with a memory store. Other modules:
+
+* [BackboneHTTP](https://github.com/vidigami/backbone-http) - remote storage over HTTP
+* [BackboneMongo](https://github.com/vidigami/backbone-mongo) - MongoDB
+* [BackboneSQL](https://github.com/vidigami/backbone-sql) - PostgreSQL, MySQL
+* [BackboneREST](https://github.com/vidigami/backbone-rest) - Express and Restify REST endpoint generator for BackboneHTTP
+
 
 #### Examples (CoffeeScript)
 
