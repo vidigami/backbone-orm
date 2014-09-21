@@ -8,7 +8,6 @@
 
 _ = require 'underscore'
 Queue = require './queue'
-Utils = require './utils'
 
 module.exports = class JSONUtils
 
@@ -38,7 +37,7 @@ module.exports = class JSONUtils
   @parseField: (value, model_type, key) ->
     return JSONUtils.parseDates(value) unless model_type?.schema().idType(key) is 'Integer'
     return integer_value unless _.isNaN(integer_value = +value)
-    console.log "Warning: failed to convert key: #{key} value: #{result[key]} to integer. Model: #{model_type.model_name}"
+    console.log "Warning: failed to convert key: #{key} value: #{value} to integer. Model: #{model_type.model_name}"
     return value
 
   # Parse an object whose values types need to be inferred.

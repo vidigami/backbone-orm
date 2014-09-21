@@ -969,8 +969,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(7);
-
 	module.exports = JSONUtils = (function() {
 	  function JSONUtils() {}
 
@@ -1007,7 +1005,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!_.isNaN(integer_value = +value)) {
 	      return integer_value;
 	    }
-	    console.log("Warning: failed to convert key: " + key + " value: " + result[key] + " to integer. Model: " + model_type.model_name);
+	    console.log("Warning: failed to convert key: " + key + " value: " + value + " to integer. Model: " + model_type.model_name);
 	    return value;
 	  };
 
