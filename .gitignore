@@ -3,6 +3,7 @@ bower_components/
 .idea/
 _build/
 .DS_Store
+npm-debug.log
 *.map
 docs/
 components/
