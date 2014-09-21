@@ -3,6 +3,8 @@ _ = require 'underscore'
 
 module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   entry: ['./test/parameters.coffee'].concat((require '../../files').tests_browser)
+  output:
+    filename: 'browser.tests.js'
   externals: [
     {chai: 'chai'}
   ]

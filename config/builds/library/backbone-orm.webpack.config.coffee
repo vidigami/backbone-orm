@@ -7,6 +7,7 @@ module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   output:
     library: 'BackboneORM'
     libraryTarget: 'umd2'
+    filename: 'backbone-orm.js'
 
   externals: [
     {jquery: {root: 'jQuery', amd: 'jquery', commonjs: 'jquery', commonjs2: 'jquery'}}

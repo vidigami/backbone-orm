@@ -5,6 +5,7 @@ module.exports = _.extend {}, (require '../../webpack/base-config.coffee'), {
   output:
     library: 'BackboneORM'
     libraryTarget: 'umd2'
+    filename: 'backbone-orm-lodash.js'
 
   externals: [
     {stream: 'stream'}
