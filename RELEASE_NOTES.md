@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.2
+* Added $exists query
+
 ### 0.7.1
 * Bug fix for JSONUtils.parse for array type
 * Fixed references to 0.7.x

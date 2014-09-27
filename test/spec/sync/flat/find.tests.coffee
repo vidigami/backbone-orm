@@ -453,3 +453,28 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
             for model in models
               assert.notEqual(test_model.get('name'), model.get('name'), "Names don't match:\nExpected: #{test_model.get('name')}, Actual: #{model.get('name')}")
             done()
+
+    describe '$exists query', ->
+      it 'Handles a $exists true - exists', (done) ->
+        Flat.cursor({created_at: {$exists: true}}).toModels (err, models) ->
+          assert.ifError(err)
+          assert.equal(models.length, BASE_COUNT, 'found models')
+          done()
+
+      it 'Handles a $exists false - exists', (done) ->
+        Flat.cursor({created_at: {$exists: false}}).toModels (err, models) ->
+          assert.ifError(err)
+          assert.equal(models.length, 0, 'no models')
+          done()
+
+      it 'Handles a $exists true - not exists', (done) ->
+        Flat.cursor({created2_at: {$exists: true}}).toModels (err, models) ->
+          assert.ifError(err)
+          assert.equal(models.length, 0, 'no models')
+          done()
+
+      it 'Handles a $exists false - not exists', (done) ->
+        Flat.cursor({created2_at: {$exists: false}}).toModels (err, models) ->
+          assert.ifError(err)
+          assert.equal(models.length, BASE_COUNT, 'found models')
+          done()

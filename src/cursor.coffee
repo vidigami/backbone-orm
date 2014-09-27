@@ -35,6 +35,8 @@ IS_MATCH_FNS =
     throw Error 'Cannot compare to null' if _.isNull(tv)
     return if _.isDate(tv) then !DateUtils.isBefore(mv, tv) else (mv >= tv)
 
+  $exists: (mv, tv) -> if !tv then _.isUndefined(mv) else not _.isUndefined(mv)
+
 IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS)
 
 # @nodoc
