@@ -40,7 +40,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
         assert.ifError(err)
         assert.ok(data.rows, 'models received')
         assert.equal(data.total_rows, BASE_COUNT, 'has the correct total_rows')
-        assert.equal(LIMIT, data.rows.length, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
+        assert.equal(data.rows.length, LIMIT, "\nExpected: #{LIMIT}, Actual: #{data.rows.length}")
         done()
 
     it 'Cursor can chain limit without paging', (done) ->
@@ -48,6 +48,13 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
       Flat.cursor({$page: false}).limit(LIMIT).toJSON (err, data) ->
         assert.ifError(err)
         assert.equal(LIMIT, data.length, "\nExpected: #{LIMIT}, Actual: #{data.length}")
+        done()
+
+    it 'Cursor can chain offset without paging', (done) ->
+      OFFSET = 1; COUNT = BASE_COUNT - OFFSET
+      Flat.cursor({$page: false}).offset(OFFSET).toJSON (err, data) ->
+        assert.ifError(err)
+        assert.equal(COUNT, data.length, "\nExpected: #{COUNT}, Actual: #{data.length}")
         done()
 
     it 'Cursor can chain limit and offset with paging', (done) ->
