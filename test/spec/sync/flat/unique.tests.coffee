@@ -18,7 +18,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   END_DATE = new Date(START_DATE.getTime() + (BASE_COUNT - 1) * DATE_INTERVAL_MS)
 
   describe "Model.unique #{options.$parameter_tags or ''}#{options.$tags} @unique", ->
-    Flat = null
+    Flat = Empty = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
 
@@ -29,7 +29,14 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
         }, BASE_SCHEMA)
         sync: SYNC(Flat)
 
-    after (callback) -> Utils.resetSchemas [Flat], callback
+      class Empty extends Backbone.Model
+        urlRoot: "#{DATABASE_URL}/empty"
+        schema: _.defaults({
+          boolean: 'Boolean'
+        }, BASE_SCHEMA)
+        sync: SYNC(Empty)
+
+    after (callback) -> Utils.resetSchemas [Flat, Empty], callback
 
     new_updated_at = null
     beforeEach (callback) ->
@@ -112,6 +119,13 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
       Flat.count {$unique: 'name'}, (err, result) ->
         assert.ifError(err)
         assert.equal(result, BASE_COUNT, "finds no extra results")
+        done()
+
+    # TODO: test more edge cases
+    it 'Handles a find unique query with count on empty collection', (done) ->
+      Empty.count {$unique: 'name'}, (err, result) ->
+        assert.ifError(err)
+        assert.equal(result, 0, "finds no extra results")
         done()
 
 
