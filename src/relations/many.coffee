@@ -12,6 +12,7 @@ _ = require 'underscore'
 BackboneORM = require '../core'
 Queue = require '../lib/queue'
 Utils = require '../lib/utils'
+JSONUtils = require '../lib/json_utils'
 
 # @nodoc
 module.exports = class Many extends (require './relation')
