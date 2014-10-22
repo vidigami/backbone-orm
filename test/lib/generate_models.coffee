@@ -27,6 +27,14 @@ module.exports = (options) ->
       }, BASE_SCHEMA)
       sync: SYNC(Flat)
 
+    # flat/unique
+    results.push class Empty extends Backbone.Model
+      urlRoot: "#{DATABASE_URL}/empty"
+      schema: _.defaults({
+        boolean: 'Boolean'
+      }, BASE_SCHEMA)
+      sync: SYNC(Empty)
+
     # compatibility/events, conventions/many, conventions/one
     # relational/dsl, relational/many_to_many, relational/to_json
     # relational/has_many, relational/has_one - another_owner
