@@ -57,7 +57,7 @@ testBrowsers = (callback) ->
   (require './config/karma/run')({tags: tags}, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node', ['build'], testNode
+gulp.task 'test-node', ['minify'], testNode
 gulp.task 'test-browsers', ['minify'], testBrowsers
 gulp.task 'test', ['minify'], (callback) ->
   Async.series [testNode, testBrowsers], (err) -> if err then process.exit(1) else callback(err)
