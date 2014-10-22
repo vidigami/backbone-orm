@@ -1,6 +1,6 @@
 {
   "name": "backbone-orm",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "A polystore ORM for Node.js and the browser",
   "main": "backbone-orm.js",
   "license": "MIT",
