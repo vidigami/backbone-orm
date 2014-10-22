@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.3
+* Bug fix for $unique with $page
+
 ### 0.7.2
 * Added $exists query
 

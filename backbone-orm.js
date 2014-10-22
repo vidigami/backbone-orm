@@ -161,7 +161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	MemoryCursor = __webpack_require__(25);
+	MemoryCursor = __webpack_require__(21);
 
 	Schema = __webpack_require__(15);
 
@@ -412,15 +412,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	BackboneORM = __webpack_require__(4);
 
 	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(21),
-	  underscore: __webpack_require__(21),
-	  camelize: __webpack_require__(22),
-	  classify: __webpack_require__(23)
+	  "default": __webpack_require__(22),
+	  underscore: __webpack_require__(22),
+	  camelize: __webpack_require__(23),
+	  classify: __webpack_require__(24)
 	};
 
 	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
 
-	BackboneORM.model_cache = new (__webpack_require__(24))();
+	BackboneORM.model_cache = new (__webpack_require__(25))();
 
 	module.exports = function(options) {
 	  var convention, key, value, _results;
@@ -3604,194 +3604,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseConvention, UnderscoreConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = UnderscoreConvention = (function(_super) {
-	  __extends(UnderscoreConvention, _super);
-
-	  function UnderscoreConvention() {
-	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  UnderscoreConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  };
-
-	  return UnderscoreConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, CamelizeConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = CamelizeConvention = (function(_super) {
-	  __extends(CamelizeConvention, _super);
-
-	  function CamelizeConvention() {
-	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  CamelizeConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
-	  };
-
-	  return CamelizeConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, ClassifyConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = ClassifyConvention = (function(_super) {
-	  __extends(ClassifyConvention, _super);
-
-	  function ClassifyConvention() {
-	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  ClassifyConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
-	  };
-
-	  return ClassifyConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, MemoryStore, ModelCache, Queue, _;
-
-	Backbone = __webpack_require__(2);
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	MemoryStore = __webpack_require__(17);
-
-	module.exports = ModelCache = (function() {
-	  function ModelCache() {
-	    this.enabled = false;
-	    this.caches = {};
-	    this.options = {
-	      modelTypes: {}
-	    };
-	    this.verbose = false;
-	  }
-
-	  ModelCache.prototype.configure = function(options) {
-	    var key, value, value_key, value_value, values, _base;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.enabled = options.enabled;
-	    for (key in options) {
-	      value = options[key];
-	      if (_.isObject(value)) {
-	        (_base = this.options)[key] || (_base[key] = {});
-	        values = this.options[key];
-	        for (value_key in value) {
-	          value_value = value[value_key];
-	          values[value_key] = value_value;
-	        }
-	      } else {
-	        this.options[key] = value;
-	      }
-	    }
-	    return this.reset();
-	  };
-
-	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
-	      return sync_fn;
-	    }
-	    return (__webpack_require__(32))(model_type, sync_fn);
-	  };
-
-	  ModelCache.prototype.reset = function() {
-	    var key, value, _ref, _results;
-	    _ref = this.caches;
-	    _results = [];
-	    for (key in _ref) {
-	      value = _ref[key];
-	      _results.push(this.createCache(value.model_type));
-	    }
-	    return _results;
-	  };
-
-	  ModelCache.prototype.createCache = function(model_type) {
-	    var cache_info, cuid, model_name, options;
-	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
-	      throw new Error("Missing model name for cache");
-	    }
-	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
-	    if (cache_info = this.caches[cuid]) {
-	      delete this.caches[cuid];
-	      cache_info.cache.reset();
-	      cache_info.model_type.cache = null;
-	    }
-	    if (!this.enabled) {
-	      return null;
-	    }
-	    if (!(options = this.options.modelTypes[model_name])) {
-	      if (!(this.options.store || this.options.max || this.options.max_age)) {
-	        return null;
-	      }
-	      options = this.options;
-	    }
-	    cache_info = this.caches[cuid] = {
-	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
-	      model_type: model_type
-	    };
-	    return model_type.cache = cache_info.cache;
-	  };
-
-	  return ModelCache;
-
-	})();
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
 	  backbone-orm.js 0.7.2
@@ -4045,7 +3857,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return callback(null, (_.isArray(json) ? !!json.length : json));
 	          }
 	          if (_this.hasCursorQuery('$page')) {
-	            count_cursor = new MemoryCursor(_this._find, _.extend(_.pick(_this, ['model_type', 'store'])));
+	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
 	            return count_cursor.count(function(err, count) {
 	              if (err) {
 	                return callback(err);
@@ -4279,6 +4091,194 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return MemoryCursor;
 
 	})(Cursor);
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, UnderscoreConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = UnderscoreConvention = (function(_super) {
+	  __extends(UnderscoreConvention, _super);
+
+	  function UnderscoreConvention() {
+	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  UnderscoreConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  };
+
+	  return UnderscoreConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, CamelizeConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = CamelizeConvention = (function(_super) {
+	  __extends(CamelizeConvention, _super);
+
+	  function CamelizeConvention() {
+	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  CamelizeConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
+	  };
+
+	  return CamelizeConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, ClassifyConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(27);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = ClassifyConvention = (function(_super) {
+	  __extends(ClassifyConvention, _super);
+
+	  function ClassifyConvention() {
+	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  ClassifyConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
+	  };
+
+	  return ClassifyConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, MemoryStore, ModelCache, Queue, _;
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	MemoryStore = __webpack_require__(17);
+
+	module.exports = ModelCache = (function() {
+	  function ModelCache() {
+	    this.enabled = false;
+	    this.caches = {};
+	    this.options = {
+	      modelTypes: {}
+	    };
+	    this.verbose = false;
+	  }
+
+	  ModelCache.prototype.configure = function(options) {
+	    var key, value, value_key, value_value, values, _base;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.enabled = options.enabled;
+	    for (key in options) {
+	      value = options[key];
+	      if (_.isObject(value)) {
+	        (_base = this.options)[key] || (_base[key] = {});
+	        values = this.options[key];
+	        for (value_key in value) {
+	          value_value = value[value_key];
+	          values[value_key] = value_value;
+	        }
+	      } else {
+	        this.options[key] = value;
+	      }
+	    }
+	    return this.reset();
+	  };
+
+	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
+	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
+	      return sync_fn;
+	    }
+	    return (__webpack_require__(32))(model_type, sync_fn);
+	  };
+
+	  ModelCache.prototype.reset = function() {
+	    var key, value, _ref, _results;
+	    _ref = this.caches;
+	    _results = [];
+	    for (key in _ref) {
+	      value = _ref[key];
+	      _results.push(this.createCache(value.model_type));
+	    }
+	    return _results;
+	  };
+
+	  ModelCache.prototype.createCache = function(model_type) {
+	    var cache_info, cuid, model_name, options;
+	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
+	      throw new Error("Missing model name for cache");
+	    }
+	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
+	    if (cache_info = this.caches[cuid]) {
+	      delete this.caches[cuid];
+	      cache_info.cache.reset();
+	      cache_info.model_type.cache = null;
+	    }
+	    if (!this.enabled) {
+	      return null;
+	    }
+	    if (!(options = this.options.modelTypes[model_name])) {
+	      if (!(this.options.store || this.options.max || this.options.max_age)) {
+	        return null;
+	      }
+	      options = this.options;
+	    }
+	    cache_info = this.caches[cuid] = {
+	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
+	      model_type: model_type
+	    };
+	    return model_type.cache = cache_info.cache;
+	  };
+
+	  return ModelCache;
+
+	})();
 
 
 /***/ },
@@ -4889,64 +4889,132 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @description These rules translate from the singular form of a noun to its plural form.
 	   * @private
 	   */
+
+	  var regex = {
+	    plural : {
+	      men       : new RegExp( '^(m)en$'    , 'gi' ),
+	      people    : new RegExp( '(pe)ople$'  , 'gi' ),
+	      children  : new RegExp( '(child)ren$', 'gi' ),
+	      tia       : new RegExp( '([ti])a$'   , 'gi' ),
+	      analyses  : new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ),
+	      hives     : new RegExp( '(hi|ti)ves$'       , 'gi' ),
+	      curves    : new RegExp( '(curve)s$'         , 'gi' ),
+	      lrves     : new RegExp( '([lr])ves$'        , 'gi' ),
+	      foves     : new RegExp( '([^fo])ves$'       , 'gi' ),
+	      movies    : new RegExp( '(m)ovies$'         , 'gi' ),
+	      aeiouyies : new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),
+	      series    : new RegExp( '(s)eries$'         , 'gi' ),
+	      xes       : new RegExp( '(x|ch|ss|sh)es$'   , 'gi' ),
+	      mice      : new RegExp( '([m|l])ice$'       , 'gi' ),
+	      buses     : new RegExp( '(bus)es$'          , 'gi' ),
+	      oes       : new RegExp( '(o)es$'            , 'gi' ),
+	      shoes     : new RegExp( '(shoe)s$'          , 'gi' ),
+	      crises    : new RegExp( '(cris|ax|test)es$' , 'gi' ),
+	      octopi    : new RegExp( '(octop|vir)i$'     , 'gi' ),
+	      aliases   : new RegExp( '(alias|status)es$' , 'gi' ),
+	      summonses : new RegExp( '^(summons)es$'     , 'gi' ),
+	      oxen      : new RegExp( '^(ox)en'           , 'gi' ),
+	      matrices  : new RegExp( '(matr)ices$'       , 'gi' ),
+	      vertices  : new RegExp( '(vert|ind)ices$'   , 'gi' ),
+	      feet      : new RegExp( '^feet$'            , 'gi' ),
+	      teeth     : new RegExp( '^teeth$'           , 'gi' ),
+	      geese     : new RegExp( '^geese$'           , 'gi' ),
+	      quizzes   : new RegExp( '(quiz)zes$'        , 'gi' ),
+	      whereases : new RegExp( '^(whereas)es$'     , 'gi' ),
+	      ss        : new RegExp( 'ss$'               , 'gi' ),
+	      s         : new RegExp( 's$'                , 'gi' )
+	    },
+
+	    singular : {
+	      man     : new RegExp( '^(m)an$'               , 'gi' ),
+	      person  : new RegExp( '(pe)rson$'             , 'gi' ),
+	      child   : new RegExp( '(child)$'              , 'gi' ),
+	      ox      : new RegExp( '^(ox)$'                , 'gi' ),
+	      axis    : new RegExp( '(ax|test)is$'          , 'gi' ),
+	      octopus : new RegExp( '(octop|vir)us$'        , 'gi' ),
+	      alias   : new RegExp( '(alias|status)$'       , 'gi' ),
+	      summons : new RegExp( '^(summons)$'           , 'gi' ),
+	      bus     : new RegExp( '(bu)s$'                , 'gi' ),
+	      buffalo : new RegExp( '(buffal|tomat|potat)o$', 'gi' ),
+	      tium    : new RegExp( '([ti])um$'             , 'gi' ),
+	      sis     : new RegExp( 'sis$'                  , 'gi' ),
+	      ffe     : new RegExp( '(?:([^f])fe|([lr])f)$' , 'gi' ),
+	      hive    : new RegExp( '(hi|ti)ve$'            , 'gi' ),
+	      aeiouyy : new RegExp( '([^aeiouy]|qu)y$'      , 'gi' ),
+	      x       : new RegExp( '(x|ch|ss|sh)$'         , 'gi' ),
+	      matrix  : new RegExp( '(matr)ix$'             , 'gi' ),
+	      vertex  : new RegExp( '(vert|ind)ex$'         , 'gi' ),
+	      mouse   : new RegExp( '([m|l])ouse$'          , 'gi' ),
+	      foot    : new RegExp( '^foot$'                , 'gi' ),
+	      tooth   : new RegExp( '^tooth$'               , 'gi' ),
+	      goose   : new RegExp( '^goose$'               , 'gi' ),
+	      quiz    : new RegExp( '(quiz)$'               , 'gi' ),
+	      whereas : new RegExp( '^(whereas)$'           , 'gi' ),
+	      s       : new RegExp( 's$'                    , 'gi' ),
+	      common  : new RegExp( '$'                     , 'gi' )
+	    }
+	  };
+
 	  var plural_rules = [
 
 	    // do not replace if its already a plural word
-	    [ new RegExp( '^(m)en$'    , 'gi' )],
-	    [ new RegExp( '(pe)ople$'  , 'gi' )],
-	    [ new RegExp( '(child)ren$', 'gi' )],
-	    [ new RegExp( '([ti])a$'   , 'gi' )],
-	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' )],
-	    [ new RegExp( '(hi|ti)ves$'       , 'gi' )],
-	    [ new RegExp( '(curve)s$'         , 'gi' )],
-	    [ new RegExp( '([lr])ves$'        , 'gi' )],
-	    [ new RegExp( '([^fo])ves$'       , 'gi' )],
-	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' )],
-	    [ new RegExp( '(s)eries$'         , 'gi' )],
-	    [ new RegExp( '(m)ovies$'         , 'gi' )],
-	    [ new RegExp( '(x|ch|ss|sh)es$'   , 'gi' )],
-	    [ new RegExp( '([m|l])ice$'       , 'gi' )],
-	    [ new RegExp( '(bus)es$'          , 'gi' )],
-	    [ new RegExp( '(o)es$'            , 'gi' )],
-	    [ new RegExp( '(shoe)s$'          , 'gi' )],
-	    [ new RegExp( '(cris|ax|test)es$' , 'gi' )],
-	    [ new RegExp( '(octop|vir)i$'     , 'gi' )],
-	    [ new RegExp( '(alias|status)es$' , 'gi' )],
-	    [ new RegExp( '^(summons)es$'     , 'gi' )],
-	    [ new RegExp( '^(ox)en'           , 'gi' )],
-	    [ new RegExp( '(vert|ind)ices$'   , 'gi' )],
-	    [ new RegExp( '(matr)ices$'       , 'gi' )],
-	    [ new RegExp( '^feet$'            , 'gi' )],
-	    [ new RegExp( '^teeth$'           , 'gi' )],
-	    [ new RegExp( '^geese$'           , 'gi' )],
-	    [ new RegExp( '(quiz)zes$'        , 'gi' )],
+	    [ regex.plural.men       ],
+	    [ regex.plural.people    ],
+	    [ regex.plural.children  ],
+	    [ regex.plural.tia       ],
+	    [ regex.plural.analyses  ],
+	    [ regex.plural.hives     ],
+	    [ regex.plural.curves    ],
+	    [ regex.plural.lrves     ],
+	    [ regex.plural.foves     ],
+	    [ regex.plural.aeiouyies ],
+	    [ regex.plural.series    ],
+	    [ regex.plural.movies    ],
+	    [ regex.plural.xes       ],
+	    [ regex.plural.mice      ],
+	    [ regex.plural.buses     ],
+	    [ regex.plural.oes       ],
+	    [ regex.plural.shoes     ],
+	    [ regex.plural.crises    ],
+	    [ regex.plural.octopi    ],
+	    [ regex.plural.aliases   ],
+	    [ regex.plural.summonses ],
+	    [ regex.plural.oxen      ],
+	    [ regex.plural.matrices  ],
+	    [ regex.plural.feet      ],
+	    [ regex.plural.teeth     ],
+	    [ regex.plural.geese     ],
+	    [ regex.plural.quizzes   ],
+	    [ regex.plural.whereases ],
 
 	    // original rule
-	    [ new RegExp( '^(m)an$'                      , 'gi' ), '$1en' ],
-	    [ new RegExp( '(pe)rson$'                    , 'gi' ), '$1ople' ],
-	    [ new RegExp( '(child)$'                     , 'gi' ), '$1ren' ],
-	    [ new RegExp( '^(ox)$'                       , 'gi' ), '$1en' ],
-	    [ new RegExp( '(ax|test)is$'                 , 'gi' ), '$1es' ],
-	    [ new RegExp( '(octop|vir)us$'               , 'gi' ), '$1i' ],
-	    [ new RegExp( '(alias|status)$'              , 'gi' ), '$1es' ],
-	    [ new RegExp( '^(summons)$'                  , 'gi' ), '$1es' ],
-	    [ new RegExp( '(bu)s$'                       , 'gi' ), '$1ses' ],
-	    [ new RegExp( '(buffal|tomat|potat|volcan)o$', 'gi' ), '$1oes' ],
-	    [ new RegExp( '([ti])um$'                    , 'gi' ), '$1a' ],
-	    [ new RegExp( 'sis$'                         , 'gi' ), 'ses' ],
-	    [ new RegExp( '(?:([^f])fe|([lr])f)$'        , 'gi' ), '$1$2ves' ],
-	    [ new RegExp( '(hi|ti)ve$'                   , 'gi' ), '$1ves' ],
-	    [ new RegExp( '([^aeiouy]|qu)y$'             , 'gi' ), '$1ies' ],
-	    [ new RegExp( '(x|ch|ss|sh)$'                , 'gi' ), '$1es' ],
-	    [ new RegExp( '(matr|vert|ind)ix|ex$'        , 'gi' ), '$1ices' ],
-	    [ new RegExp( '([m|l])ouse$'                 , 'gi' ), '$1ice' ],
-	    [ new RegExp( '^foot$'                       , 'gi' ), 'feet' ],
-	    [ new RegExp( '^tooth$'                      , 'gi' ), 'teeth' ],
-	    [ new RegExp( '^goose$'                      , 'gi' ), 'geese' ],
-	    [ new RegExp( '(quiz)$'                      , 'gi' ), '$1zes' ],
+	    [ regex.singular.man    , '$1en' ],
+	    [ regex.singular.person , '$1ople' ],
+	    [ regex.singular.child  , '$1ren' ],
+	    [ regex.singular.ox     , '$1en' ],
+	    [ regex.singular.axis   , '$1es' ],
+	    [ regex.singular.octopus, '$1i' ],
+	    [ regex.singular.alias  , '$1es' ],
+	    [ regex.singular.summons, '$1es' ],
+	    [ regex.singular.bus    , '$1ses' ],
+	    [ regex.singular.buffalo, '$1oes' ],
+	    [ regex.singular.tium   , '$1a' ],
+	    [ regex.singular.sis    , 'ses' ],
+	    [ regex.singular.ffe    , '$1$2ves' ],
+	    [ regex.singular.hive   , '$1ves' ],
+	    [ regex.singular.aeiouyy, '$1ies' ],
+	    [ regex.singular.x      , '$1es' ],
+	    [ regex.singular.matrix , '$1ices' ],
+	    [ regex.singular.vertex , '$1ices' ],
+	    [ regex.singular.mouse  , '$1ice' ],
+	    [ regex.singular.foot   , 'feet' ],
+	    [ regex.singular.tooth  , 'teeth' ],
+	    [ regex.singular.goose  , 'geese' ],
+	    [ regex.singular.quiz   , '$1zes' ],
+	    [ regex.singular.whereas, '$1es' ],
 
-	    [ new RegExp( 's$', 'gi' ), 's' ],
-	    [ new RegExp( '$' , 'gi' ), 's' ]
+	    [ regex.singular.s     , 's' ],
+	    [ regex.singular.common, 's' ]
 	  ];
 
 	  /**
@@ -4956,60 +5024,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var singular_rules = [
 
 	    // do not replace if its already a singular word
-	    [ new RegExp( '^(m)an$'               , 'gi' )],
-	    [ new RegExp( '(pe)rson$'             , 'gi' )],
-	    [ new RegExp( '(child)$'              , 'gi' )],
-	    [ new RegExp( '^(ox)$'                , 'gi' )],
-	    [ new RegExp( '(ax|test)is$'          , 'gi' )],
-	    [ new RegExp( '(octop|vir)us$'        , 'gi' )],
-	    [ new RegExp( '(alias|status)$'       , 'gi' )],
-	    [ new RegExp( '^(summons)$'           , 'gi' )],
-	    [ new RegExp( '(bu)s$'                , 'gi' )],
-	    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' )],
-	    [ new RegExp( '([ti])um$'             , 'gi' )],
-	    [ new RegExp( 'sis$'                  , 'gi' )],
-	    [ new RegExp( '(?:([^f])fe|([lr])f)$' , 'gi' )],
-	    [ new RegExp( '(hi|ti)ve$'            , 'gi' )],
-	    [ new RegExp( '([^aeiouy]|qu)y$'      , 'gi' )],
-	    [ new RegExp( '(x|ch|ss|sh)$'         , 'gi' )],
-	    [ new RegExp( '(matr|vert|ind)ix|ex$' , 'gi' )],
-	    [ new RegExp( '([m|l])ouse$'          , 'gi' )],
-	    [ new RegExp( '^foot$'                , 'gi' )],
-	    [ new RegExp( '^tooth$'               , 'gi' )],
-	    [ new RegExp( '^goose$'               , 'gi' )],
-	    [ new RegExp( '(quiz)$'               , 'gi' )],
+	    [ regex.singular.man     ],
+	    [ regex.singular.person  ],
+	    [ regex.singular.child   ],
+	    [ regex.singular.ox      ],
+	    [ regex.singular.axis    ],
+	    [ regex.singular.octopus ],
+	    [ regex.singular.alias   ],
+	    [ regex.singular.summons ],
+	    [ regex.singular.bus     ],
+	    [ regex.singular.buffalo ],
+	    [ regex.singular.tium    ],
+	    [ regex.singular.sis     ],
+	    [ regex.singular.ffe     ],
+	    [ regex.singular.hive    ],
+	    [ regex.singular.aeiouyy ],
+	    [ regex.singular.x       ],
+	    [ regex.singular.matrix  ],
+	    [ regex.singular.mouse   ],
+	    [ regex.singular.foot    ],
+	    [ regex.singular.tooth   ],
+	    [ regex.singular.goose   ],
+	    [ regex.singular.quiz    ],
+	    [ regex.singular.whereas ],
 
 	    // original rule
-	    [ new RegExp( '^(m)en$'    , 'gi' ), '$1an' ],
-	    [ new RegExp( '(pe)ople$'  , 'gi' ), '$1rson' ],
-	    [ new RegExp( '(child)ren$', 'gi' ), '$1' ],
-	    [ new RegExp( '([ti])a$'   , 'gi' ), '$1um' ],
-	    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ), '$1$2sis' ],
-	    [ new RegExp( '(hi|ti)ves$'       , 'gi' ), '$1ve' ],
-	    [ new RegExp( '(curve)s$'         , 'gi' ), '$1' ],
-	    [ new RegExp( '([lr])ves$'        , 'gi' ), '$1f' ],
-	    [ new RegExp( '([^fo])ves$'       , 'gi' ), '$1fe' ],
-	    [ new RegExp( '(m)ovies$'         , 'gi' ), '$1ovie' ],
-	    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ), '$1y' ],
-	    [ new RegExp( '(s)eries$'         , 'gi' ), '$1eries' ],
-	    [ new RegExp( '(x|ch|ss|sh)es$'   , 'gi' ), '$1' ],
-	    [ new RegExp( '([m|l])ice$'       , 'gi' ), '$1ouse' ],
-	    [ new RegExp( '(bus)es$'          , 'gi' ), '$1' ],
-	    [ new RegExp( '(o)es$'            , 'gi' ), '$1' ],
-	    [ new RegExp( '(shoe)s$'          , 'gi' ), '$1' ],
-	    [ new RegExp( '(cris|ax|test)es$' , 'gi' ), '$1is' ],
-	    [ new RegExp( '(octop|vir)i$'     , 'gi' ), '$1us' ],
-	    [ new RegExp( '(alias|status)es$' , 'gi' ), '$1' ],
-	    [ new RegExp( '^(summons)es$'     , 'gi' ), '$1' ],
-	    [ new RegExp( '^(ox)en'           , 'gi' ), '$1' ],
-	    [ new RegExp( '(vert|ind)ices$'   , 'gi' ), '$1ex' ],
-	    [ new RegExp( '(matr)ices$'       , 'gi' ), '$1ix' ],
-	    [ new RegExp( '^feet$'            , 'gi' ), 'foot' ],
-	    [ new RegExp( '^teeth$'           , 'gi' ), 'tooth' ],
-	    [ new RegExp( '^geese$'           , 'gi' ), 'goose' ],
-	    [ new RegExp( '(quiz)zes$'        , 'gi' ), '$1' ],
-	    [ new RegExp( 'ss$'               , 'gi' ), 'ss' ],
-	    [ new RegExp( 's$'                , 'gi' ), '' ]
+	    [ regex.plural.men      , '$1an' ],
+	    [ regex.plural.people   , '$1rson' ],
+	    [ regex.plural.children , '$1' ],
+	    [ regex.plural.tia      , '$1um' ],
+	    [ regex.plural.analyses , '$1$2sis' ],
+	    [ regex.plural.hives    , '$1ve' ],
+	    [ regex.plural.curves   , '$1' ],
+	    [ regex.plural.lrves    , '$1f' ],
+	    [ regex.plural.foves    , '$1fe' ],
+	    [ regex.plural.movies   , '$1ovie' ],
+	    [ regex.plural.aeiouyies, '$1y' ],
+	    [ regex.plural.series   , '$1eries' ],
+	    [ regex.plural.xes      , '$1' ],
+	    [ regex.plural.mice     , '$1ouse' ],
+	    [ regex.plural.buses    , '$1' ],
+	    [ regex.plural.oes      , '$1' ],
+	    [ regex.plural.shoes    , '$1' ],
+	    [ regex.plural.crises   , '$1is' ],
+	    [ regex.plural.octopi   , '$1us' ],
+	    [ regex.plural.aliases  , '$1' ],
+	    [ regex.plural.summonses, '$1' ],
+	    [ regex.plural.oxen     , '$1' ],
+	    [ regex.plural.matrices , '$1ix' ],
+	    [ regex.plural.vertices , '$1ex' ],
+	    [ regex.plural.feet     , 'foot' ],
+	    [ regex.plural.teeth    , 'tooth' ],
+	    [ regex.plural.geese    , 'goose' ],
+	    [ regex.plural.quizzes  , '$1' ],
+	    [ regex.plural.whereases, '$1' ],
+
+	    [ regex.plural.ss, 'ss' ],
+	    [ regex.plural.s , '' ]
 	  ];
 
 	  /**
@@ -5319,11 +5390,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	  /**
-	   * This function adds dasherization support to every String object.
+	   * This function replaces underscores with dashes in the string.
 	   * @public
 	   * @function
 	   * @param {String} str The subject string.
-	   * @returns {String} Replaces all spaces or underbars with dashes.
+	   * @returns {String} Replaces all spaces or underscores with dashes.
 	   * @example
 	   *
 	   *     var inflection = require( 'inflection' );
@@ -5539,7 +5610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.5.0';
+	  inflector.version = '1.5.1';
 
 	  return inflector;
 	}));
@@ -5569,13 +5640,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DatabaseURL = __webpack_require__(12);
 
-	ModelStream = __webpack_require__(34);
+	ModelStream = __webpack_require__(35);
 
-	modelEach = __webpack_require__(35);
+	modelEach = __webpack_require__(36);
 
-	modelInterval = __webpack_require__(36);
+	modelInterval = __webpack_require__(37);
 
-	__webpack_require__(37);
+	__webpack_require__(38);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, fn, key, overrides, _findOrClone, _results;
@@ -6783,7 +6854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(34));
 
 
 /***/ },
@@ -6798,7 +6869,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, BackboneORM, Many, Queue, Utils, _,
+	var Backbone, BackboneORM, JSONUtils, Many, Queue, Utils, _,
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6811,6 +6882,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	Queue = __webpack_require__(11);
 
 	Utils = __webpack_require__(7);
+
+	JSONUtils = __webpack_require__(8);
 
 	module.exports = Many = (function(_super) {
 	  __extends(Many, _super);
@@ -7453,7 +7526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(34));
 
 
 /***/ },
@@ -7677,8 +7750,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var base64 = __webpack_require__(42)
-	var ieee754 = __webpack_require__(40)
-	var isArray = __webpack_require__(41)
+	var ieee754 = __webpack_require__(41)
+	var isArray = __webpack_require__(40)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = Buffer
@@ -8734,381 +8807,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	try {
-	  stream = __webpack_require__(3);
-	} catch (_error) {}
-
-	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
-
-	    function ModelStream(model_type, query) {
-	      this.model_type = model_type;
-	      this.query = query != null ? query : {};
-	      ModelStream.__super__.constructor.call(this, {
-	        objectMode: true
-	      });
-	    }
-
-	    ModelStream.prototype._read = function() {
-	      var done;
-	      if (this.ended || this.started) {
-	        return;
-	      }
-	      this.started = true;
-	      done = (function(_this) {
-	        return function(err) {
-	          _this.ended = true;
-	          if (err) {
-	            _this.emit('error', err);
-	          }
-	          return _this.push(null);
-	        };
-	      })(this);
-	      return this.model_type.each(this.query, ((function(_this) {
-	        return function(model, callback) {
-	          _this.push(model);
-	          return callback();
-	        };
-	      })(this)), done);
-	    };
-
-	    return ModelStream;
-
-	  })(stream.Readable);
-	}
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Cursor, Queue, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Cursor = null;
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var method, model_limit, options, parsed_query, processed_count, runBatch;
-	  if (!Cursor) {
-	    Cursor = __webpack_require__(25);
-	  }
-	  options = query.$each || {};
-	  method = options.json ? 'toJSON' : 'toModels';
-	  processed_count = 0;
-	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
-	  _.defaults(parsed_query.cursor, {
-	    $offset: 0,
-	    $sort: 'id'
-	  });
-	  model_limit = parsed_query.cursor.$limit || Infinity;
-	  if (options.fetch) {
-	    parsed_query.cursor.$limit = options.fetch;
-	  }
-	  runBatch = function() {
-	    var cursor;
-	    cursor = model_type.cursor(parsed_query);
-	    return cursor[method].call(cursor, function(err, models) {
-	      var model, queue, _fn, _i, _len;
-	      if (err || !models) {
-	        return callback(new Error("Failed to get models. Error: " + err));
-	      }
-	      if (!models.length) {
-	        return callback(null, processed_count);
-	      }
-	      queue = new Queue(options.threads);
-	      _fn = function(model) {
-	        return queue.defer(function(callback) {
-	          return iterator(model, callback);
-	        });
-	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
-	        if (processed_count++ >= model_limit) {
-	          break;
-	        }
-	        _fn(model);
-	      }
-	      return queue.await(function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
-	          return callback(null, processed_count);
-	        }
-	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
-	        return runBatch();
-	      });
-	    });
-	  };
-	  return runBatch();
-	};
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var DateUtils, INTERVAL_TYPES, JSONUtils, Queue, Utils, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Utils = __webpack_require__(7);
-
-	JSONUtils = __webpack_require__(8);
-
-	DateUtils = __webpack_require__(9);
-
-	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
-
-	module.exports = function(model_type, query, iterator, callback) {
-	  var iteration_info, key, no_models, options, queue, range;
-	  options = query.$interval || {};
-	  if (!(key = options.key)) {
-	    throw new Error('missing option: key');
-	  }
-	  if (!options.type) {
-	    throw new Error('missing option: type');
-	  }
-	  if (!_.contains(INTERVAL_TYPES, options.type)) {
-	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
-	  }
-	  iteration_info = _.clone(options);
-	  if (!iteration_info.range) {
-	    iteration_info.range = {};
-	  }
-	  range = iteration_info.range;
-	  no_models = false;
-	  queue = new Queue(1);
-	  queue.defer(function(callback) {
-	    var start;
-	    if (!(start = range.$gte || range.$gt)) {
-	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.start = iteration_info.first = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.start = start;
-	      return model_type.findOneNearestDate(start, {
-	        key: key,
-	        reverse: true
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.first = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  queue.defer(function(callback) {
-	    var end;
-	    if (no_models) {
-	      return callback();
-	    }
-	    if (!(end = range.$lte || range.$lt)) {
-	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!models.length) {
-	          no_models = true;
-	          return callback();
-	        }
-	        range.end = iteration_info.last = models[0].get(key);
-	        return callback();
-	      });
-	    } else {
-	      range.end = end;
-	      return model_type.findOneNearestDate(end, {
-	        key: key
-	      }, query, function(err, model) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          no_models = true;
-	          return callback();
-	        }
-	        iteration_info.last = model.get(key);
-	        return callback();
-	      });
-	    }
-	  });
-	  return queue.await(function(err) {
-	    var length_ms, processed_count, runInterval, start_ms;
-	    if (err) {
-	      return callback(err);
-	    }
-	    if (no_models) {
-	      return callback();
-	    }
-	    start_ms = range.start.getTime();
-	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
-	    if (!length_ms) {
-	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
-	    }
-	    query = _.omit(query, '$interval');
-	    query.$sort = [key];
-	    processed_count = 0;
-	    iteration_info.index = 0;
-	    runInterval = function(current) {
-	      if (DateUtils.isAfter(current, range.end)) {
-	        return callback();
-	      }
-	      query[key] = {
-	        $gte: current,
-	        $lte: iteration_info.last
-	      };
-	      return model_type.findOne(query, function(err, model) {
-	        var next;
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (!model) {
-	          return callback();
-	        }
-	        next = model.get(key);
-	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
-	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
-	        iteration_info.start = current;
-	        next = new Date(current.getTime() + length_ms);
-	        iteration_info.end = next;
-	        query[key] = {
-	          $gte: current,
-	          $lt: next
-	        };
-	        return iterator(query, iteration_info, function(err) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          return runInterval(next);
-	        });
-	      });
-	    };
-	    return runInterval(range.start);
-	  });
-	};
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, Utils, collection_type, fn, key, overrides, _;
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	Utils = __webpack_require__(7);
-
-	collection_type = Backbone.Collection;
-
-	overrides = {
-	  fetch: function(options) {
-	    var callback;
-	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
-	      switch (arguments.length) {
-	        case 1:
-	          options = Utils.wrapOptions({}, callback);
-	          break;
-	        case 2:
-	          options = Utils.wrapOptions(options, callback);
-	      }
-	    }
-	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
-	      return function(err, model, resp, options) {
-	        if (err) {
-	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
-	        }
-	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
-	      };
-	    })(this)));
-	  },
-	  _prepareModel: function(attrs, options) {
-	    var id, is_new, model;
-	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
-	      if (this.model.cache) {
-	        is_new = !!this.model.cache.get(id);
-	      }
-	      model = Utils.updateOrNew(attrs, this.model);
-	      if (is_new && !model._validate(attrs, options)) {
-	        this.trigger('invalid', this, attrs, options);
-	        return false;
-	      }
-	      return model;
-	    }
-	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
-	  }
-	};
-
-	if (!collection_type.prototype._orm_original_fns) {
-	  collection_type.prototype._orm_original_fns = {};
-	  for (key in overrides) {
-	    fn = overrides[key];
-	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
-	    collection_type.prototype[key] = fn;
-	  }
-	}
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.2
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
 	var Backbone, BackboneORM, Queue, Relation, Utils, _;
 
 	_ = __webpack_require__(1);
@@ -9282,6 +8980,381 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var ModelStream, stream,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	try {
+	  stream = __webpack_require__(3);
+	} catch (_error) {}
+
+	if (stream != null ? stream.Readable : void 0) {
+	  module.exports = ModelStream = (function(_super) {
+	    __extends(ModelStream, _super);
+
+	    function ModelStream(model_type, query) {
+	      this.model_type = model_type;
+	      this.query = query != null ? query : {};
+	      ModelStream.__super__.constructor.call(this, {
+	        objectMode: true
+	      });
+	    }
+
+	    ModelStream.prototype._read = function() {
+	      var done;
+	      if (this.ended || this.started) {
+	        return;
+	      }
+	      this.started = true;
+	      done = (function(_this) {
+	        return function(err) {
+	          _this.ended = true;
+	          if (err) {
+	            _this.emit('error', err);
+	          }
+	          return _this.push(null);
+	        };
+	      })(this);
+	      return this.model_type.each(this.query, ((function(_this) {
+	        return function(model, callback) {
+	          _this.push(model);
+	          return callback();
+	        };
+	      })(this)), done);
+	    };
+
+	    return ModelStream;
+
+	  })(stream.Readable);
+	}
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Cursor, Queue, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	Cursor = null;
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var method, model_limit, options, parsed_query, processed_count, runBatch;
+	  if (!Cursor) {
+	    Cursor = __webpack_require__(21);
+	  }
+	  options = query.$each || {};
+	  method = options.json ? 'toJSON' : 'toModels';
+	  processed_count = 0;
+	  parsed_query = Cursor.parseQuery(_.omit(query, '$each'));
+	  _.defaults(parsed_query.cursor, {
+	    $offset: 0,
+	    $sort: 'id'
+	  });
+	  model_limit = parsed_query.cursor.$limit || Infinity;
+	  if (options.fetch) {
+	    parsed_query.cursor.$limit = options.fetch;
+	  }
+	  runBatch = function() {
+	    var cursor;
+	    cursor = model_type.cursor(parsed_query);
+	    return cursor[method].call(cursor, function(err, models) {
+	      var model, queue, _fn, _i, _len;
+	      if (err || !models) {
+	        return callback(new Error("Failed to get models. Error: " + err));
+	      }
+	      if (!models.length) {
+	        return callback(null, processed_count);
+	      }
+	      queue = new Queue(options.threads);
+	      _fn = function(model) {
+	        return queue.defer(function(callback) {
+	          return iterator(model, callback);
+	        });
+	      };
+	      for (_i = 0, _len = models.length; _i < _len; _i++) {
+	        model = models[_i];
+	        if (processed_count++ >= model_limit) {
+	          break;
+	        }
+	        _fn(model);
+	      }
+	      return queue.await(function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if ((processed_count >= model_limit) || (models.length < parsed_query.cursor.$limit) || !parsed_query.cursor.$limit) {
+	          return callback(null, processed_count);
+	        }
+	        parsed_query.cursor.$offset += parsed_query.cursor.$limit;
+	        return runBatch();
+	      });
+	    });
+	  };
+	  return runBatch();
+	};
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var DateUtils, INTERVAL_TYPES, JSONUtils, Queue, Utils, _;
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	JSONUtils = __webpack_require__(8);
+
+	DateUtils = __webpack_require__(9);
+
+	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
+
+	module.exports = function(model_type, query, iterator, callback) {
+	  var iteration_info, key, no_models, options, queue, range;
+	  options = query.$interval || {};
+	  if (!(key = options.key)) {
+	    throw new Error('missing option: key');
+	  }
+	  if (!options.type) {
+	    throw new Error('missing option: type');
+	  }
+	  if (!_.contains(INTERVAL_TYPES, options.type)) {
+	    throw new Error("type is not recognized: " + options.type + ", " + (_.contains(INTERVAL_TYPES, options.type)));
+	  }
+	  iteration_info = _.clone(options);
+	  if (!iteration_info.range) {
+	    iteration_info.range = {};
+	  }
+	  range = iteration_info.range;
+	  no_models = false;
+	  queue = new Queue(1);
+	  queue.defer(function(callback) {
+	    var start;
+	    if (!(start = range.$gte || range.$gt)) {
+	      return model_type.cursor(query).limit(1).sort(key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.start = iteration_info.first = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.start = start;
+	      return model_type.findOneNearestDate(start, {
+	        key: key,
+	        reverse: true
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.first = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  queue.defer(function(callback) {
+	    var end;
+	    if (no_models) {
+	      return callback();
+	    }
+	    if (!(end = range.$lte || range.$lt)) {
+	      return model_type.cursor(query).limit(1).sort("-" + key).toModels(function(err, models) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!models.length) {
+	          no_models = true;
+	          return callback();
+	        }
+	        range.end = iteration_info.last = models[0].get(key);
+	        return callback();
+	      });
+	    } else {
+	      range.end = end;
+	      return model_type.findOneNearestDate(end, {
+	        key: key
+	      }, query, function(err, model) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          no_models = true;
+	          return callback();
+	        }
+	        iteration_info.last = model.get(key);
+	        return callback();
+	      });
+	    }
+	  });
+	  return queue.await(function(err) {
+	    var length_ms, processed_count, runInterval, start_ms;
+	    if (err) {
+	      return callback(err);
+	    }
+	    if (no_models) {
+	      return callback();
+	    }
+	    start_ms = range.start.getTime();
+	    length_ms = DateUtils.durationAsMilliseconds((_.isUndefined(options.length) ? 1 : options.length), options.type);
+	    if (!length_ms) {
+	      throw Error("length_ms is invalid: " + length_ms + " for range: " + (JSONUtils.stringify(range)));
+	    }
+	    query = _.omit(query, '$interval');
+	    query.$sort = [key];
+	    processed_count = 0;
+	    iteration_info.index = 0;
+	    runInterval = function(current) {
+	      if (DateUtils.isAfter(current, range.end)) {
+	        return callback();
+	      }
+	      query[key] = {
+	        $gte: current,
+	        $lte: iteration_info.last
+	      };
+	      return model_type.findOne(query, function(err, model) {
+	        var next;
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (!model) {
+	          return callback();
+	        }
+	        next = model.get(key);
+	        iteration_info.index = Math.floor((next.getTime() - start_ms) / length_ms);
+	        current = new Date(range.start.getTime() + iteration_info.index * length_ms);
+	        iteration_info.start = current;
+	        next = new Date(current.getTime() + length_ms);
+	        iteration_info.end = next;
+	        query[key] = {
+	          $gte: current,
+	          $lt: next
+	        };
+	        return iterator(query, iteration_info, function(err) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          return runInterval(next);
+	        });
+	      });
+	    };
+	    return runInterval(range.start);
+	  });
+	};
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.2
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, Utils, collection_type, fn, key, overrides, _;
+
+	_ = __webpack_require__(1);
+
+	Backbone = __webpack_require__(2);
+
+	Utils = __webpack_require__(7);
+
+	collection_type = Backbone.Collection;
+
+	overrides = {
+	  fetch: function(options) {
+	    var callback;
+	    if (_.isFunction(callback = arguments[arguments.length - 1])) {
+	      switch (arguments.length) {
+	        case 1:
+	          options = Utils.wrapOptions({}, callback);
+	          break;
+	        case 2:
+	          options = Utils.wrapOptions(options, callback);
+	      }
+	    }
+	    return collection_type.prototype._orm_original_fns.fetch.call(this, Utils.wrapOptions(options, (function(_this) {
+	      return function(err, model, resp, options) {
+	        if (err) {
+	          return typeof options.error === "function" ? options.error(_this, resp, options) : void 0;
+	        }
+	        return typeof options.success === "function" ? options.success(model, resp, options) : void 0;
+	      };
+	    })(this)));
+	  },
+	  _prepareModel: function(attrs, options) {
+	    var id, is_new, model;
+	    if (!Utils.isModel(attrs) && (id = Utils.dataId(attrs))) {
+	      if (this.model.cache) {
+	        is_new = !!this.model.cache.get(id);
+	      }
+	      model = Utils.updateOrNew(attrs, this.model);
+	      if (is_new && !model._validate(attrs, options)) {
+	        this.trigger('invalid', this, attrs, options);
+	        return false;
+	      }
+	      return model;
+	    }
+	    return collection_type.prototype._orm_original_fns._prepareModel.call(this, attrs, options);
+	  }
+	};
+
+	if (!collection_type.prototype._orm_original_fns) {
+	  collection_type.prototype._orm_original_fns = {};
+	  for (key in overrides) {
+	    fn = overrides[key];
+	    collection_type.prototype._orm_original_fns[key] = collection_type.prototype[key];
+	    collection_type.prototype[key] = fn;
+	  }
+	}
+
+
+/***/ },
 /* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -9312,11 +9385,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(25));
+	})(__webpack_require__(21));
 
 
 /***/ },
 /* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * isArray
+	 */
+
+	var isArray = Array.isArray;
+
+	/**
+	 * toString
+	 */
+
+	var str = Object.prototype.toString;
+
+	/**
+	 * Whether or not the given `val`
+	 * is an array.
+	 *
+	 * example:
+	 *
+	 *        isArray([]);
+	 *        // > true
+	 *        isArray(arguments);
+	 *        // > false
+	 *        isArray('');
+	 *        // > false
+	 *
+	 * @param {mixed} val
+	 * @return {bool}
+	 */
+
+	module.exports = isArray || function (val) {
+	  return !! val && '[object Array]' == str.call(val);
+	};
+
+
+/***/ },
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -9402,45 +9514,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
 
 	  buffer[offset + i - d] |= s * 128;
-	};
-
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * isArray
-	 */
-
-	var isArray = Array.isArray;
-
-	/**
-	 * toString
-	 */
-
-	var str = Object.prototype.toString;
-
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
 	};
 
 

@@ -136,7 +136,7 @@ module.exports = class MemoryCursor extends Cursor
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
 
         if @hasCursorQuery('$page')
-          count_cursor = new MemoryCursor(@_find, _.extend(_.pick(@, ['model_type', 'store'])))
+          count_cursor = new MemoryCursor(_.extend(_.pick(@_cursor, '$unique'), @_find), _.extend(_.pick(@, ['model_type', 'store'])))
           count_cursor.count (err, count) =>
             return callback(err) if err
             callback(null, {
