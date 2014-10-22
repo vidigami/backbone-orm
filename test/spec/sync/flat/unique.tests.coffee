@@ -60,13 +60,13 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on one field', (done) ->
       Flat.cursor({$unique: 'name'}).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         done()
 
     it 'Handles a find unique query on one field and gives the correct result with sort', (done) ->
       Flat.cursor({$unique: 'name'}).select('created_at', 'updated_at').sort('-updated_at').limit(1).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, 1, "finds no extra results")
+        assert.equal(results.length, 1, 'finds no extra results')
         retrieved_clone = results[0]
         assert.equal(retrieved_clone.created_at, null, "loaded model has no created_at")
         assert.equal(retrieved_clone.updated_at.getTime(), new_updated_at.getTime(), "finds the correct model")
@@ -75,7 +75,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on name with $select', (done) ->
       Flat.cursor({$unique: ['name'], $select: ['id']}).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         for result in results
           assert.equal(_.keys(result).length, 1, "finds only the $selected field")
           assert.equal(_.keys(result)[0], 'id', "finds only the $selected field")
@@ -84,7 +84,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on name with select (chaining)', (done) ->
       Flat.cursor().unique('name').select('id').toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         for result in results
           assert.equal(_.keys(result).length, 1, "finds only the $selected field")
           assert.equal(_.keys(result)[0], 'id', "finds only the $selected field")
@@ -93,7 +93,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on name with $select name', (done) ->
       Flat.cursor({$unique: ['name'], $select: ['name']}).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         for result in results
           assert.equal(_.keys(result).length, 1, "finds only the $selected field")
           assert.equal(_.keys(result)[0], 'name', "finds only the $selected field")
@@ -102,7 +102,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on name with $values', (done) ->
       Flat.cursor({$unique: ['name'], $values: ['id']}).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         for result in results
           assert.ok(!_.isObject(result), "finds only the $selected field")
         done()
@@ -110,7 +110,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query on name with $values name', (done) ->
       Flat.cursor({$unique: ['name'], $values: ['name']}).toJSON (err, results) ->
         assert.ifError(err)
-        assert.equal(results.length, BASE_COUNT, "finds no extra results")
+        assert.equal(results.length, BASE_COUNT, 'finds no extra results')
         for result in results
           assert.ok(!_.isObject(result), "finds only the $selected field")
         done()
@@ -118,14 +118,14 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
     it 'Handles a find unique query with count', (done) ->
       Flat.count {$unique: 'name'}, (err, result) ->
         assert.ifError(err)
-        assert.equal(result, BASE_COUNT, "finds no extra results")
+        assert.equal(result, BASE_COUNT, 'finds no extra results')
         done()
 
     # TODO: test more edge cases
     it 'Handles a find unique query with count on empty collection', (done) ->
       Empty.count {$unique: 'name'}, (err, result) ->
         assert.ifError(err)
-        assert.equal(result, 0, "finds no extra results")
+        assert.equal(result, 0, 'finds no extra results')
         done()
 
 
