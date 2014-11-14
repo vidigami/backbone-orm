@@ -1,5 +1,5 @@
 /*
-  backbone-orm.js 0.7.5
+  backbone-orm.js 0.7.6
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -65,7 +65,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -459,7 +459,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -957,7 +957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1361,7 +1361,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1475,7 +1475,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1550,7 +1550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1763,7 +1763,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2200,7 +2200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2537,7 +2537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2560,7 +2560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -3606,7 +3606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -4183,7 +4183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -5622,7 +5622,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -6340,7 +6340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -6867,7 +6867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -7587,7 +7587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -7762,8 +7762,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var base64 = __webpack_require__(42)
-	var ieee754 = __webpack_require__(41)
-	var isArray = __webpack_require__(40)
+	var ieee754 = __webpack_require__(40)
+	var isArray = __webpack_require__(41)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = Buffer
@@ -8814,7 +8814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8875,7 +8875,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8952,7 +8952,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9119,7 +9119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9189,7 +9189,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9373,7 +9373,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.5
+	  backbone-orm.js 0.7.6
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9403,45 +9403,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * isArray
-	 */
-
-	var isArray = Array.isArray;
-
-	/**
-	 * toString
-	 */
-
-	var str = Object.prototype.toString;
-
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
-	};
-
-
-/***/ },
-/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -9527,6 +9488,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
 
 	  buffer[offset + i - d] |= s * 128;
+	};
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * isArray
+	 */
+
+	var isArray = Array.isArray;
+
+	/**
+	 * toString
+	 */
+
+	var str = Object.prototype.toString;
+
+	/**
+	 * Whether or not the given `val`
+	 * is an array.
+	 *
+	 * example:
+	 *
+	 *        isArray([]);
+	 *        // > true
+	 *        isArray(arguments);
+	 *        // > false
+	 *        isArray('');
+	 *        // > false
+	 *
+	 * @param {mixed} val
+	 * @return {bool}
+	 */
+
+	module.exports = isArray || function (val) {
+	  return !! val && '[object Array]' == str.call(val);
 	};
 
 
