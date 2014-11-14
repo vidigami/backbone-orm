@@ -280,6 +280,7 @@ module.exports = class One extends (require './relation')
       related_model = model.get(@key)
       previous_related_model = model.previous(@key)
       return if Utils.dataId(related_model) is Utils.dataId(previous_related_model) # no change
+      Utils.orSet(model, 'rel_dirty', {})[@key] = true
 
       # update backlinks
       if previous_related_model and (@reverse_relation and @reverse_relation.type isnt 'belongsTo') # allow for multiple

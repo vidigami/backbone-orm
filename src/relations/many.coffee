@@ -124,6 +124,7 @@ module.exports = class Many extends (require './relation')
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
+    Utils.orSet(model, 'rel_dirty', {})[@key] = true
 
     # TODO: this is needed for model lifecycle - not knowing when a model is actually disposed and not wanting to remove a model from a relationship
     # throw new Error "\nModel added twice: #{JSONUtils.stringify(current_related_model)}\nand\n#{JSONUtils.stringify(related_model)}" if current_related_model
@@ -137,6 +138,7 @@ module.exports = class Many extends (require './relation')
   remove: (model, related_model) ->
     collection = @_ensureCollection(model)
     return unless current_related_model = collection.get(related_model.id)
+    Utils.orSet(model, 'rel_dirty', {})[@key] = true
     collection.remove(current_related_model)
 
   patchAdd: (model, relateds, callback) ->
@@ -304,6 +306,7 @@ module.exports = class Many extends (require './relation')
 
     events = Utils.set(collection, 'events', {})
     events.add = (related_model) =>
+      Utils.orSet(model, 'rel_dirty', {})[@key] = true
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
@@ -312,6 +315,7 @@ module.exports = class Many extends (require './relation')
         related_model.set(@reverse_relation.key, model) if not is_current or (is_current and not current_model.isLoaded())
 
     events.remove = (related_model) =>
+      Utils.orSet(model, 'rel_dirty', {})[@key] = true
       if @reverse_relation.remove
         @reverse_relation.remove(related_model, model)
       else
@@ -319,6 +323,7 @@ module.exports = class Many extends (require './relation')
         related_model.set(@reverse_relation.key, null) if Utils.dataId(current_model) is model.id
 
     events.reset = (collection, options) =>
+      Utils.orSet(model, 'rel_dirty', {})[@key] = true
       current_models = collection.models
       previous_models = options.previousModels or []
       changes = _.groupBy(previous_models, (test) -> if !!_.find(current_models, (current_model) -> current_model.id is test.id) then 'kept' else 'removed')
