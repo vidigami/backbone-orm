@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.6
+* Bug fix for trying to remove an embedded model
+
 ### 0.7.5
 * Bug fix for initializing collection during clone
 

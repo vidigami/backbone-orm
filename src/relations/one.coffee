@@ -183,6 +183,8 @@ module.exports = class One extends (require './relation')
         related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
         cache.set(related_model.id, related_model) if cache = related_model.cache()
 
+      return callback() if @embed # embedded so done
+
       # clear my links to models and save
       if @type is 'belongsTo'
         @model_type.cursor({id: model.id, $one: true}).toJSON (err, model_json) =>
@@ -204,8 +206,6 @@ module.exports = class One extends (require './relation')
       return
 
     # REMOVE SOME
-    # TODO: review for embedded
-    return callback(new Error('One.patchRemove: embedded relationships are not supported')) if @isEmbedded()
     return callback(new Error('One.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
 
@@ -213,6 +213,8 @@ module.exports = class One extends (require './relation')
     if related_model = model.get(@key)
       (model.set(@key, null); break) for related in relateds when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
+
+    return callback() if @embed # embedded so done
 
     # clear my links to models and save
     if @type is 'belongsTo'

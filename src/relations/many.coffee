@@ -216,6 +216,8 @@ module.exports = class Many extends (require './relation')
         related_model.set(@foreign_key, null) if related_model.get(@foreign_key)?.id is model.id
         cache.set(related_model.id, related_model) if cache = related_model.cache() # ensure the cache is up-to-date
 
+      return callback() if @embed # embedded so done
+
       # clear in store through join table
       if @join_table
         (query = {})[@join_key] = model.id
@@ -246,7 +248,6 @@ module.exports = class Many extends (require './relation')
       return
 
     # REMOVE SOME
-    return callback(new Error('Many.patchRemove: embedded relationships are not supported')) if @isEmbedded()
     return callback(new Error('Many.patchRemove: missing model for remove')) unless relateds
     relateds = [relateds] unless _.isArray(relateds)
     collection = @_ensureCollection(model)
@@ -255,6 +256,8 @@ module.exports = class Many extends (require './relation')
     for related in relateds
       (collection.remove(related_model); break) for related_model in collection.models when Utils.dataIsSameModel(related_model, related)
     related_ids = (Utils.dataId(related) for related in relateds)
+
+    return callback() if @embed # embedded so done
 
     # clear in store through join table
     if @join_table # can directly destroy the join table entry
