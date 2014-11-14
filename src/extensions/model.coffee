@@ -465,7 +465,7 @@ module.exports = (model_type) ->
         value = @attributes[key]
         if Utils.isCollection(value)
           clone.attributes[key] = new value.constructor() unless clone.attributes[key]?.values
-          clone.attributes[key].models = (_findOrClone(model, options) for model in value.models)
+          clone.attributes[key].reset(_findOrClone(model, options) for model in value.models)
 
         else if Utils.isModel(value)
           clone.attributes[key] = _findOrClone(value, options)
