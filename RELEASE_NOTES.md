@@ -6,7 +6,7 @@ Please refer to the following release notes when upgrading your version of Backb
 ### 0.7.4
 * Bug fix for dirty check when modifying a relationship
 
-### 0.7.4
+### 0.7.3
 * Bug fix for $unique with $page
 
 ### 0.7.2
