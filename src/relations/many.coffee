@@ -353,9 +353,4 @@ module.exports = class Many extends (require './relation')
     return
 
   _ensureCollection: (model) -> return @_bindBacklinks(model)
-  _hasChanged: (model) ->
-    return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)
-    return false unless @reverse_relation
-    collection = @_ensureCollection(model)
-    return true for model in model.models when model.hasChanged(@reverse_relation.foreign_key)
-    return false
+  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)

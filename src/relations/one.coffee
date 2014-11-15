@@ -314,8 +314,4 @@ module.exports = class One extends (require './relation')
     events.change = null
     return
 
-  _hasChanged: (model) ->
-    return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)
-    return false unless @reverse_relation
-    return false unless related_model = model.attributes[@key]
-    return related_model.hasChanged(@reverse_relation.foreign_key)
+  _hasChanged: (model) -> return !!Utils.orSet(model, 'rel_dirty', {})[@key] or model.hasChanged(@key)
