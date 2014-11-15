@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.7.6
+  backbone-orm.js 0.7.7
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -124,7 +124,7 @@ module.exports = class Many extends (require './relation')
     collection = @_ensureCollection(model)
     current_related_model = collection.get(related_model.id)
     return if current_related_model is related_model
-    Utils.orSet(model, 'rel_dirty', {})[@key] = true
+    # Utils.orSet(model, 'rel_dirty', {})[@key] = true # TODO: add tests for updating
 
     # TODO: this is needed for model lifecycle - not knowing when a model is actually disposed and not wanting to remove a model from a relationship
     # throw new Error "\nModel added twice: #{JSONUtils.stringify(current_related_model)}\nand\n#{JSONUtils.stringify(related_model)}" if current_related_model
@@ -309,7 +309,7 @@ module.exports = class Many extends (require './relation')
 
     events = Utils.set(collection, 'events', {})
     events.add = (related_model) =>
-      Utils.orSet(model, 'rel_dirty', {})[@key] = true
+      # Utils.orSet(model, 'rel_dirty', {})[@key] = true # TODO: add tests for updating
       if @reverse_relation.add
         @reverse_relation.add(related_model, model)
       else
