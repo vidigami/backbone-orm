@@ -1601,9 +1601,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      }
 	    }
-	    database_parts = url_parts.pathname.split('/');
+	    database_parts = _.compact(url_parts.pathname.split('/'));
 	    this.table = database_parts.pop();
-	    this.database = database_parts[database_parts.length - 1];
+	    this.database = database_parts.join('/');
 	    for (_k = 0, _len2 = SUPPORTED_KEYS.length; _k < _len2; _k++) {
 	      key = SUPPORTED_KEYS[_k];
 	      if (url_parts.hasOwnProperty(key)) {

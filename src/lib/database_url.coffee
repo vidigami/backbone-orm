@@ -40,9 +40,9 @@ module.exports = class DatabaseURL
         host = database.split(':')
         @hosts.push if host.length is 1 then {host: host[0], hostname: host[0]} else {host: host[0], hostname: "#{host[0]}:#{host[1]}", port: host[1]}
 
-    database_parts = url_parts.pathname.split('/')
+    database_parts = _.compact(url_parts.pathname.split('/'))
     @table = database_parts.pop()
-    @database = database_parts[database_parts.length-1]
+    @database = database_parts.join('/')
     @[key] = url_parts[key] for key in SUPPORTED_KEYS when url_parts.hasOwnProperty(key)
 
   format: (options={}) ->
