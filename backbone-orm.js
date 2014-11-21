@@ -6004,7 +6004,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    cache = (_base = options._cache)[_name = model.modelName()] || (_base[_name] = {});
 	    if (!(clone = cache[model.id])) {
-	      clone = cache[model.id] = model.clone(options);
+	      clone = model.clone(options);
+          if (model.isLoaded()) {
+            cache[model.id] = clone;
+          }
 	    }
 	    return clone;
 	  };
@@ -6285,7 +6288,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this._orm.clone++;
 	      if (this.id) {
 	        if (!(clone = cache[this.id])) {
-	          cache[this.id] = clone = new this.constructor();
+              clone = new this.constructor();
+              if (this.isLoaded()) {
+                cache[this.id] = clone;
+              }
 	        }
 	      } else {
 	        clone = new this.constructor();
