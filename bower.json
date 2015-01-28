@@ -25,6 +25,10 @@
     "bower_components",
     "test",
     "src",
-    "client"
+    "client",
+    "*.md",
+    "config",
+    "media",
+    "gulpfile.coffee"
   ]
 }
