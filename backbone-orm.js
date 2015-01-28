@@ -1,6 +1,6 @@
 /*
   backbone-orm.js 0.7.8
-  Copyright (c) 2013-2014 Vidigami
+  Copyright (c) 2013-2015 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js and Underscore.js.
@@ -80,8 +80,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = BackboneORM = __webpack_require__(4);
 
 	publish = {
-	  configure: __webpack_require__(6),
-	  sync: __webpack_require__(5),
+	  configure: __webpack_require__(5),
+	  sync: __webpack_require__(6),
 	  Utils: __webpack_require__(7),
 	  JSONUtils: __webpack_require__(8),
 	  DateUtils: __webpack_require__(9),
@@ -89,10 +89,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Queue: __webpack_require__(11),
 	  DatabaseURL: __webpack_require__(12),
 	  Fabricator: __webpack_require__(13),
-	  MemoryStore: __webpack_require__(17),
-	  Cursor: __webpack_require__(14),
-	  Schema: __webpack_require__(15),
-	  ConnectionPool: __webpack_require__(16),
+	  MemoryStore: __webpack_require__(14),
+	  Cursor: __webpack_require__(15),
+	  Schema: __webpack_require__(16),
+	  ConnectionPool: __webpack_require__(17),
 	  BaseConvention: __webpack_require__(18),
 	  _: _,
 	  Backbone: Backbone
@@ -105,8 +105,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  backbone: Backbone,
 	  url: __webpack_require__(19),
 	  querystring: __webpack_require__(20),
-	  'lru-cache': __webpack_require__(26),
-	  inflection: __webpack_require__(27)
+	  'lru-cache': __webpack_require__(21),
+	  inflection: __webpack_require__(22)
 	};
 
 	try {
@@ -144,6 +144,58 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var ALL_CONVENTIONS, BackboneORM, _;
+
+	_ = __webpack_require__(1);
+
+	BackboneORM = __webpack_require__(4);
+
+	ALL_CONVENTIONS = {
+	  "default": __webpack_require__(23),
+	  underscore: __webpack_require__(23),
+	  camelize: __webpack_require__(24),
+	  classify: __webpack_require__(25)
+	};
+
+	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
+
+	BackboneORM.model_cache = new (__webpack_require__(26))();
+
+	module.exports = function(options) {
+	  var convention, key, value, _results;
+	  if (options == null) {
+	    options = {};
+	  }
+	  _results = [];
+	  for (key in options) {
+	    value = options[key];
+	    switch (key) {
+	      case 'model_cache':
+	        _results.push(BackboneORM.model_cache.configure(options.model_cache));
+	        break;
+	      case 'naming_conventions':
+	        if (_.isString(value)) {
+	          if (convention = ALL_CONVENTIONS[value]) {
+	            BackboneORM.naming_conventions = convention;
+	            continue;
+	          }
+	          _results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
+	        } else {
+	          _results.push(BackboneORM.naming_conventions = value);
+	        }
+	        break;
+	      default:
+	        _results.push(BackboneORM[key] = value);
+	    }
+	  }
+	  return _results;
+	};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
 	  backbone-orm.js 0.7.8
@@ -161,9 +213,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	MemoryCursor = __webpack_require__(21);
+	MemoryCursor = __webpack_require__(28);
 
-	Schema = __webpack_require__(15);
+	Schema = __webpack_require__(16);
 
 	Utils = __webpack_require__(7);
 
@@ -402,58 +454,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ALL_CONVENTIONS, BackboneORM, _;
-
-	_ = __webpack_require__(1);
-
-	BackboneORM = __webpack_require__(4);
-
-	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(22),
-	  underscore: __webpack_require__(22),
-	  camelize: __webpack_require__(23),
-	  classify: __webpack_require__(24)
-	};
-
-	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
-
-	BackboneORM.model_cache = new (__webpack_require__(25))();
-
-	module.exports = function(options) {
-	  var convention, key, value, _results;
-	  if (options == null) {
-	    options = {};
-	  }
-	  _results = [];
-	  for (key in options) {
-	    value = options[key];
-	    switch (key) {
-	      case 'model_cache':
-	        _results.push(BackboneORM.model_cache.configure(options.model_cache));
-	        break;
-	      case 'naming_conventions':
-	        if (_.isString(value)) {
-	          if (convention = ALL_CONVENTIONS[value]) {
-	            BackboneORM.naming_conventions = convention;
-	            continue;
-	          }
-	          _results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
-	        } else {
-	          _results.push(BackboneORM.naming_conventions = value);
-	        }
-	        break;
-	      default:
-	        _results.push(BackboneORM[key] = value);
-	    }
-	  }
-	  return _results;
-	};
-
-
-/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -636,7 +636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.configureModelType = function(type) {
-	    modelExtensions || (modelExtensions = __webpack_require__(28));
+	    modelExtensions || (modelExtensions = __webpack_require__(27));
 	    return modelExtensions(type);
 	  };
 
@@ -1769,6 +1769,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
+	var LRU, MemoryStore, _,
+	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+	_ = __webpack_require__(1);
+
+	LRU = __webpack_require__(21);
+
+	module.exports = MemoryStore = (function() {
+	  function MemoryStore(options) {
+	    var max_age;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.forEach = __bind(this.forEach, this);
+	    this.reset = __bind(this.reset, this);
+	    this.destroy = __bind(this.destroy, this);
+	    this.get = __bind(this.get, this);
+	    this.set = __bind(this.set, this);
+	    if (max_age = options.max_age) {
+	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
+	    }
+	    this.cache = new LRU(options);
+	  }
+
+	  MemoryStore.prototype.set = function(key, value, callback) {
+	    if (value._orm_never_cache) {
+	      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
+	    }
+	    this.cache.set(key, value);
+	    if (typeof callback === "function") {
+	      callback(null, value);
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.get = function(key, callback) {
+	    var value;
+	    value = this.cache.get(key);
+	    if (typeof callback === "function") {
+	      callback(null, value);
+	    }
+	    return value;
+	  };
+
+	  MemoryStore.prototype.destroy = function(key, callback) {
+	    this.cache.del(key);
+	    if (typeof callback === "function") {
+	      callback();
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.del = MemoryStore.prototype.destroy;
+
+	  MemoryStore.prototype.reset = function(callback) {
+	    this.cache.reset();
+	    if (typeof callback === "function") {
+	      callback();
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.forEach = function(callback) {
+	    return this.cache.forEach(callback);
+	  };
+
+	  return MemoryStore;
+
+	})();
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.8
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
 	var CURSOR_KEYS, Cursor, JSONUtils, Utils, _,
 	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -2195,7 +2278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2532,7 +2615,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2545,7 +2628,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var MemoryStore;
 
-	MemoryStore = __webpack_require__(17);
+	MemoryStore = __webpack_require__(14);
 
 	module.exports = new MemoryStore({
 	  destroy: function(url, connection) {
@@ -2555,95 +2638,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var LRU, MemoryStore, _,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-	_ = __webpack_require__(1);
-
-	LRU = __webpack_require__(26);
-
-	module.exports = MemoryStore = (function() {
-	  function MemoryStore(options) {
-	    var max_age;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.forEach = __bind(this.forEach, this);
-	    this.reset = __bind(this.reset, this);
-	    this.destroy = __bind(this.destroy, this);
-	    this.get = __bind(this.get, this);
-	    this.set = __bind(this.set, this);
-	    if (max_age = options.max_age) {
-	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
-	    }
-	    this.cache = new LRU(options);
-	  }
-
-	  MemoryStore.prototype.set = function(key, value, callback) {
-	    if (value._orm_never_cache) {
-	      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
-	    }
-	    this.cache.set(key, value);
-	    if (typeof callback === "function") {
-	      callback(null, value);
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.get = function(key, callback) {
-	    var value;
-	    value = this.cache.get(key);
-	    if (typeof callback === "function") {
-	      callback(null, value);
-	    }
-	    return value;
-	  };
-
-	  MemoryStore.prototype.destroy = function(key, callback) {
-	    this.cache.del(key);
-	    if (typeof callback === "function") {
-	      callback();
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.del = MemoryStore.prototype.destroy;
-
-	  MemoryStore.prototype.reset = function(callback) {
-	    this.cache.reset();
-	    if (typeof callback === "function") {
-	      callback();
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.forEach = function(callback) {
-	    return this.cache.forEach(callback);
-	  };
-
-	  return MemoryStore;
-
-	})();
-
-
-/***/ },
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseConvention, inflection;
 
-	inflection = __webpack_require__(27);
+	inflection = __webpack_require__(22);
 
 	module.exports = BaseConvention = (function() {
 	  function BaseConvention() {}
@@ -3598,691 +3598,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return obj;
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
 
 /***/ },
 /* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-	  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Utils = __webpack_require__(7);
-
-	JSONUtils = __webpack_require__(8);
-
-	DateUtils = __webpack_require__(9);
-
-	Cursor = __webpack_require__(14);
-
-	BATCH_COUNT = 500;
-
-	IS_MATCH_FNS = {
-	  $ne: function(mv, tv) {
-	    return !_.isEqual(mv, tv);
-	  },
-	  $lt: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    return (_.isDate(tv) ? DateUtils.isBefore(mv, tv) : mv < tv);
-	  },
-	  $lte: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    if (_.isDate(tv)) {
-	      return !DateUtils.isAfter(mv, tv);
-	    } else {
-	      return mv <= tv;
-	    }
-	  },
-	  $gt: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    return (_.isDate(tv) ? DateUtils.isAfter(mv, tv) : mv > tv);
-	  },
-	  $gte: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    if (_.isDate(tv)) {
-	      return !DateUtils.isBefore(mv, tv);
-	    } else {
-	      return mv >= tv;
-	    }
-	  },
-	  $exists: function(mv, tv) {
-	    if (!tv) {
-	      return _.isUndefined(mv);
-	    } else {
-	      return !_.isUndefined(mv);
-	    }
-	  }
-	};
-
-	IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS);
-
-	valueToArray = function(value) {
-	  return (_.isArray(value) ? value : (_.isNull(value) ? [] : (value.$in ? value.$in : [value])));
-	};
-
-	mergeQuery = function(query, key, value) {
-	  return query[key] = query.hasOwnProperty(key) ? {
-	    $in: _.intersection(valueToArray(query[key]), valueToArray(value))
-	  } : value;
-	};
-
-	module.exports = MemoryCursor = (function(_super) {
-	  __extends(MemoryCursor, _super);
-
-	  function MemoryCursor() {
-	    return MemoryCursor.__super__.constructor.apply(this, arguments);
-	  }
-
-	  MemoryCursor.prototype.queryToJSON = function(callback) {
-	    var exists;
-	    if (this.hasCursorQuery('$zero')) {
-	      return callback(null, this.hasCursorQuery('$one') ? null : []);
-	    }
-	    exists = this.hasCursorQuery('$exists');
-	    return this.buildFindQuery((function(_this) {
-	      return function(err, find_query) {
-	        var json, keys, queue;
-	        if (err) {
-	          return callback(err);
-	        }
-	        json = [];
-	        keys = _.keys(find_query);
-	        queue = new Queue(1);
-	        queue.defer(function(callback) {
-	          var ins, ins_size, key, model_json, nins, nins_size, value, _i, _len, _ref, _ref1, _ref2;
-	          _ref = [{}, {}], ins = _ref[0], nins = _ref[1];
-	          for (key in find_query) {
-	            value = find_query[key];
-	            if (value != null ? value.$in : void 0) {
-	              delete find_query[key];
-	              ins[key] = value.$in;
-	            }
-	            if (value != null ? value.$nin : void 0) {
-	              delete find_query[key];
-	              nins[key] = value.$nin;
-	            }
-	          }
-	          _ref1 = [_.size(ins), _.size(nins)], ins_size = _ref1[0], nins_size = _ref1[1];
-	          if (keys.length || ins_size || nins_size) {
-	            if (_this._cursor.$ids) {
-	              _ref2 = _this.store;
-	              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-	                model_json = _ref2[_i];
-	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
-	                  json.push(JSONUtils.deepClone(model_json));
-	                }
-	              }
-	              return callback();
-	            } else {
-	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
-	                var find_keys, next, values, _ref3, _ref4;
-	                if (exists && json.length) {
-	                  return callback(null, true);
-	                }
-	                if (ins_size) {
-	                  for (key in ins) {
-	                    values = ins[key];
-	                    if (_ref3 = model_json[key], __indexOf.call(values, _ref3) < 0) {
-	                      return callback();
-	                    }
-	                  }
-	                }
-	                if (nins_size) {
-	                  for (key in nins) {
-	                    values = nins[key];
-	                    if (_ref4 = model_json[key], __indexOf.call(values, _ref4) >= 0) {
-	                      return callback();
-	                    }
-	                  }
-	                }
-	                find_keys = _.keys(find_query);
-	                next = function(err, is_match) {
-	                  if (err || !is_match) {
-	                    return callback(err);
-	                  }
-	                  if (find_keys.length === 0) {
-	                    json.push(JSONUtils.deepClone(model_json));
-	                    return callback();
-	                  }
-	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
-	                };
-	                return next(null, true);
-	              });
-	            }
-	          } else {
-	            if (_this._cursor.$ids) {
-	              json = (function() {
-	                var _j, _len1, _ref3, _results;
-	                _ref3 = this.store;
-	                _results = [];
-	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-	                  model_json = _ref3[_j];
-	                  if (_.contains(this._cursor.$ids, model_json.id)) {
-	                    _results.push(JSONUtils.deepClone(model_json));
-	                  }
-	                }
-	                return _results;
-	              }).call(_this);
-	            } else {
-	              json = (function() {
-	                var _j, _len1, _ref3, _results;
-	                _ref3 = this.store;
-	                _results = [];
-	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-	                  model_json = _ref3[_j];
-	                  _results.push(JSONUtils.deepClone(model_json));
-	                }
-	                return _results;
-	              }).call(_this);
-	            }
-	            return callback();
-	          }
-	        });
-	        if (!exists) {
-	          queue.defer(function(callback) {
-	            var $sort_fields, field, key, model_json, number, unique_json, unique_keys, _i, _j, _len, _len1, _ref;
-	            if (_this._cursor.$sort) {
-	              $sort_fields = _.isArray(_this._cursor.$sort) ? _this._cursor.$sort : [_this._cursor.$sort];
-	              json.sort(function(model, next_model) {
-	                return Utils.jsonFieldCompare(model, next_model, $sort_fields);
-	              });
-	            }
-	            if (_this._cursor.$unique) {
-	              unique_json = [];
-	              unique_keys = {};
-	              for (_i = 0, _len = json.length; _i < _len; _i++) {
-	                model_json = json[_i];
-	                key = '';
-	                _ref = _this._cursor.$unique;
-	                for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-	                  field = _ref[_j];
-	                  if (model_json.hasOwnProperty(field)) {
-	                    key += "" + field + ":" + (JSON.stringify(model_json[field]));
-	                  }
-	                }
-	                if (unique_keys[key]) {
-	                  continue;
-	                }
-	                unique_keys[key] = true;
-	                unique_json.push(model_json);
-	              }
-	              json = unique_json;
-	            }
-	            if (_this._cursor.$offset) {
-	              number = json.length - _this._cursor.$offset;
-	              if (number < 0) {
-	                number = 0;
-	              }
-	              json = number ? json.slice(_this._cursor.$offset, _this._cursor.$offset + number) : [];
-	            }
-	            if (_this._cursor.$one) {
-	              json = json.slice(0, 1);
-	            } else if (_this._cursor.$limit) {
-	              json = json.splice(0, Math.min(json.length, _this._cursor.$limit));
-	            }
-	            return callback();
-	          });
-	          queue.defer(function(callback) {
-	            return _this.fetchIncludes(json, callback);
-	          });
-	        }
-	        queue.await(function() {
-	          var count_cursor;
-	          if (_this.hasCursorQuery('$count')) {
-	            return callback(null, (_.isArray(json) ? json.length : (json ? 1 : 0)));
-	          }
-	          if (exists) {
-	            return callback(null, (_.isArray(json) ? !!json.length : json));
-	          }
-	          if (_this.hasCursorQuery('$page')) {
-	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
-	            return count_cursor.count(function(err, count) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              return callback(null, {
-	                offset: _this._cursor.$offset || 0,
-	                total_rows: count,
-	                rows: _this.selectResults(json)
-	              });
-	            });
-	          } else {
-	            return callback(null, _this.selectResults(json));
-	          }
-	        });
-	      };
-	    })(this));
-	  };
-
-	  MemoryCursor.prototype.buildFindQuery = function(callback) {
-	    var find_query, key, queue, relation_key, reverse_relation, value, value_key, _fn, _ref, _ref1;
-	    queue = new Queue();
-	    find_query = {};
-	    _ref = this._find;
-	    _fn = (function(_this) {
-	      return function(relation_key, value_key, value) {
-	        return queue.defer(function(callback) {
-	          var related_query, relation;
-	          if (!(relation = _this.model_type.relation(relation_key))) {
-	            mergeQuery(find_query, key, value);
-	            return callback();
-	          }
-	          if (!relation.join_table && (value_key === 'id')) {
-	            mergeQuery(find_query, relation.foreign_key, value);
-	            return callback();
-	          } else if (relation.join_table || (relation.type === 'belongsTo')) {
-	            (related_query = {
-	              $values: 'id'
-	            })[value_key] = value;
-	            return relation.reverse_relation.model_type.cursor(related_query).toJSON(function(err, related_ids) {
-	              var join_query;
-	              if (err) {
-	                return callback(err);
-	              }
-	              if (relation.join_table) {
-	                (join_query = {})[relation.reverse_relation.join_key] = {
-	                  $in: related_ids
-	                };
-	                join_query.$values = relation.foreign_key;
-	                return relation.join_table.cursor(join_query).toJSON(function(err, model_ids) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, 'id', {
-	                    $in: model_ids
-	                  });
-	                  return callback();
-	                });
-	              } else {
-	                mergeQuery(find_query, relation.foreign_key, {
-	                  $in: related_ids
-	                });
-	                return callback();
-	              }
-	            });
-	          } else {
-	            (related_query = {})[value_key] = value;
-	            related_query.$values = relation.foreign_key;
-	            return relation.reverse_model_type.cursor(related_query).toJSON(function(err, model_ids) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              mergeQuery(find_query, 'id', {
-	                $in: model_ids
-	              });
-	              return callback();
-	            });
-	          }
-	        });
-	      };
-	    })(this);
-	    for (key in _ref) {
-	      value = _ref[key];
-	      if (key.indexOf('.') < 0) {
-	        if (!(reverse_relation = this.model_type.reverseRelation(key))) {
-	          mergeQuery(find_query, key, value);
-	          continue;
-	        }
-	        if (!reverse_relation.embed && !reverse_relation.join_table) {
-	          mergeQuery(find_query, key, value);
-	          continue;
-	        }
-	        (function(_this) {
-	          return (function(key, value, reverse_relation) {
-	            return queue.defer(function(callback) {
-	              var related_query;
-	              if (reverse_relation.embed) {
-	                throw Error("Embedded find is not yet supported. @_find: " + (JSONUtils.stringify(_this._find)));
-	                (related_query = {}).id = value;
-	                return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, '_json', _.map(models_json, function(test) {
-	                    return test[reverse_relation.key];
-	                  }));
-	                  return callback();
-	                });
-	              } else {
-	                (related_query = {})[key] = value;
-	                related_query.$values = reverse_relation.reverse_relation.join_key;
-	                return reverse_relation.join_table.cursor(related_query).toJSON(function(err, model_ids) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, 'id', {
-	                    $in: model_ids
-	                  });
-	                  return callback();
-	                });
-	              }
-	            });
-	          });
-	        })(this)(key, value, reverse_relation);
-	        continue;
-	      }
-	      _ref1 = key.split('.'), relation_key = _ref1[0], value_key = _ref1[1];
-	      if (this.model_type.relationIsEmbedded(relation_key)) {
-	        mergeQuery(find_query, key, value);
-	        continue;
-	      }
-	      _fn(relation_key, value_key, value);
-	    }
-	    return queue.await((function(_this) {
-	      return function(err) {
-	        return callback(err, find_query);
-	      };
-	    })(this));
-	  };
-
-	  MemoryCursor.prototype.fetchIncludes = function(json, callback) {
-	    var include_keys, key, load_queue, model_json, relation, _fn, _i, _j, _len, _len1;
-	    if (!this._cursor.$include) {
-	      return callback();
-	    }
-	    load_queue = new Queue(1);
-	    include_keys = _.isArray(this._cursor.$include) ? this._cursor.$include : [this._cursor.$include];
-	    for (_i = 0, _len = include_keys.length; _i < _len; _i++) {
-	      key = include_keys[_i];
-	      if (this.model_type.relationIsEmbedded(key)) {
-	        continue;
-	      }
-	      if (!(relation = this.model_type.relation(key))) {
-	        return callback(new Error("Included relation '" + key + "' is not a relation"));
-	      }
-	      _fn = (function(_this) {
-	        return function(key, model_json) {
-	          return load_queue.defer(function(callback) {
-	            return relation.cursor(model_json, key).toJSON(function(err, related_json) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              delete model_json[relation.foriegn_key];
-	              model_json[key] = related_json;
-	              return callback();
-	            });
-	          });
-	        };
-	      })(this);
-	      for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
-	        model_json = json[_j];
-	        _fn(key, model_json);
-	      }
-	    }
-	    return load_queue.await(callback);
-	  };
-
-	  MemoryCursor.prototype._valueIsMatch = function(find_query, key_path, model_json, callback) {
-	    var key_components, model_type, next;
-	    key_components = key_path.split('.');
-	    model_type = this.model_type;
-	    next = (function(_this) {
-	      return function(err, models_json) {
-	        var find_value, is_match, key, model_value, operator, relation, was_handled, _i, _j, _len, _len1;
-	        if (err) {
-	          return callback(err);
-	        }
-	        key = key_components.shift();
-	        if (key === 'id') {
-	          key = model_type.prototype.idAttribute;
-	        }
-	        if (!key_components.length) {
-	          was_handled = false;
-	          find_value = find_query[key_path];
-	          if (!_.isArray(models_json)) {
-	            models_json = [models_json];
-	          }
-	          for (_i = 0, _len = models_json.length; _i < _len; _i++) {
-	            model_json = models_json[_i];
-	            model_value = model_json[key];
-	            if (_.isObject(find_value)) {
-	              for (_j = 0, _len1 = IS_MATCH_OPERATORS.length; _j < _len1; _j++) {
-	                operator = IS_MATCH_OPERATORS[_j];
-	                if (!(find_value.hasOwnProperty(operator))) {
-	                  continue;
-	                }
-	                was_handled = true;
-	                if (!(is_match = IS_MATCH_FNS[operator](model_value, find_value[operator]))) {
-	                  break;
-	                }
-	              }
-	            }
-	            if (was_handled) {
-	              if (is_match) {
-	                return callback(null, is_match);
-	              }
-	            } else if (is_match = _.isEqual(model_value, find_value)) {
-	              return callback(null, is_match);
-	            }
-	          }
-	          return callback(null, false);
-	        }
-	        if ((relation = model_type.relation(key)) && !relation.embed) {
-	          return relation.cursor(model_json, key).toJSON(next);
-	        }
-	        return next(null, model_json[key]);
-	      };
-	    })(this);
-	    return next(null, model_json);
-	  };
-
-	  return MemoryCursor;
-
-	})(Cursor);
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, UnderscoreConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = UnderscoreConvention = (function(_super) {
-	  __extends(UnderscoreConvention, _super);
-
-	  function UnderscoreConvention() {
-	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  UnderscoreConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  };
-
-	  return UnderscoreConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, CamelizeConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = CamelizeConvention = (function(_super) {
-	  __extends(CamelizeConvention, _super);
-
-	  function CamelizeConvention() {
-	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  CamelizeConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
-	  };
-
-	  return CamelizeConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, ClassifyConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(27);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = ClassifyConvention = (function(_super) {
-	  __extends(ClassifyConvention, _super);
-
-	  function ClassifyConvention() {
-	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  ClassifyConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
-	  };
-
-	  return ClassifyConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, MemoryStore, ModelCache, Queue, _;
-
-	Backbone = __webpack_require__(2);
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	MemoryStore = __webpack_require__(17);
-
-	module.exports = ModelCache = (function() {
-	  function ModelCache() {
-	    this.enabled = false;
-	    this.caches = {};
-	    this.options = {
-	      modelTypes: {}
-	    };
-	    this.verbose = false;
-	  }
-
-	  ModelCache.prototype.configure = function(options) {
-	    var key, value, value_key, value_value, values, _base;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.enabled = options.enabled;
-	    for (key in options) {
-	      value = options[key];
-	      if (_.isObject(value)) {
-	        (_base = this.options)[key] || (_base[key] = {});
-	        values = this.options[key];
-	        for (value_key in value) {
-	          value_value = value[value_key];
-	          values[value_key] = value_value;
-	        }
-	      } else {
-	        this.options[key] = value;
-	      }
-	    }
-	    return this.reset();
-	  };
-
-	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
-	      return sync_fn;
-	    }
-	    return (__webpack_require__(32))(model_type, sync_fn);
-	  };
-
-	  ModelCache.prototype.reset = function() {
-	    var key, value, _ref, _results;
-	    _ref = this.caches;
-	    _results = [];
-	    for (key in _ref) {
-	      value = _ref[key];
-	      _results.push(this.createCache(value.model_type));
-	    }
-	    return _results;
-	  };
-
-	  ModelCache.prototype.createCache = function(model_type) {
-	    var cache_info, cuid, model_name, options;
-	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
-	      throw new Error("Missing model name for cache");
-	    }
-	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
-	    if (cache_info = this.caches[cuid]) {
-	      delete this.caches[cuid];
-	      cache_info.cache.reset();
-	      cache_info.model_type.cache = null;
-	    }
-	    if (!this.enabled) {
-	      return null;
-	    }
-	    if (!(options = this.options.modelTypes[model_name])) {
-	      if (!(this.options.store || this.options.max || this.options.max_age)) {
-	        return null;
-	      }
-	      options = this.options;
-	    }
-	    cache_info = this.caches[cuid] = {
-	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
-	      model_type: model_type
-	    };
-	    return model_type.cache = cache_info.cache;
-	  };
-
-	  return ModelCache;
-
-	})();
-
-
-/***/ },
-/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	;(function () { // closure for web browsers
@@ -4540,7 +3859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -4581,18 +3900,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'anger',
 	    'applause',
 	    'arithmetic',
-	    'art',
+	    // 'art',
 	    'assistance',
 	    'athletics',
-	    'attention',
+	    // 'attention',
 
 	    'bacon',
 	    'baggage',
-	    'ballet',
-	    'beauty',
+	    // 'ballet',
+	    // 'beauty',
 	    'beef',
-	    'beer',
-	    'behavior',
+	    // 'beer',
+	    // 'behavior',
 	    'biology',
 	    // 'billiards',
 	    'blood',
@@ -4611,41 +3930,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'crossroads',
 	    'countryside',
 
-	    'damage',
+	    // 'damage',
 	    'dancing',
-	    'danger',
+	    // 'danger',
 	    'deer',
-	    'delight',
-	    'dessert',
+	    // 'delight',
+	    // 'dessert',
 	    'dignity',
 	    'dirt',
-	    'distribution',
+	    // 'distribution',
 	    'dust',
 
 	    'economics',
 	    'education',
 	    'electricity',
-	    'employment',
-	    'energy',
+	    // 'employment',
+	    // 'energy',
 	    'engineering',
 	    'enjoyment',
-	    'entertainment',
+	    // 'entertainment',
 	    'envy',
 	    'equipment',
 	    'ethics',
 	    'evidence',
 	    'evolution',
 
-	    'failure',
-	    'faith',
+	    // 'failure',
+	    // 'faith',
 	    'fame',
 	    'fiction',
 	    // 'fish',
 	    'flour',
 	    'flu',
 	    'food',
-	    'freedom',
-	    'fruit',
+	    // 'freedom',
+	    // 'fruit',
 	    'fuel',
 	    'fun',
 	    // 'funeral',
@@ -4654,21 +3973,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'gallows',
 	    'garbage',
 	    'garlic',
-	    'gas',
+	    // 'gas',
 	    'genetics',
-	    'glass',
+	    // 'glass',
 	    'gold',
 	    'golf',
 	    'gossip',
 	    'grammar',
-	    'grass',
+	    // 'grass',
 	    'gratitude',
 	    'grief',
-	    'ground',
+	    // 'ground',
 	    'guilt',
 	    'gymnastics',
 
-	    'hair',
+	    // 'hair',
 	    'happiness',
 	    'hardware',
 	    'harm',
@@ -4676,7 +3995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'hatred',
 	    'health',
 	    'heat',
-	    'height',
+	    // 'height',
 	    'help',
 	    'homework',
 	    'honesty',
@@ -4691,28 +4010,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'importance',
 	    'inflation',
 	    'information',
-	    'injustice',
+	    // 'injustice',
 	    'innocence',
-	    'intelligence',
+	    // 'intelligence',
 	    'iron',
 	    'irony',
 
 	    'jam',
-	    'jealousy',
-	    'jelly',
+	    // 'jealousy',
+	    // 'jelly',
 	    'jewelry',
-	    'joy',
+	    // 'joy',
 	    'judo',
-	    'juice',
-	    'justice',
+	    // 'juice',
+	    // 'justice',
 
 	    'karate',
-	    'kindness',
+	    // 'kindness',
 	    'knowledge',
 
-	    'labour',
+	    // 'labour',
 	    'lack',
-	    'land',
+	    // 'land',
 	    'laughter',
 	    'lava',
 	    'leather',
@@ -4726,22 +4045,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'livestock',
 	    'logic',
 	    'loneliness',
-	    'love',
+	    // 'love',
 	    'luck',
 	    'luggage',
 
 	    'macaroni',
 	    'machinery',
 	    'magic',
-	    'mail',
+	    // 'mail',
 	    'management',
 	    'mankind',
 	    'marble',
 	    'mathematics',
 	    'mayonnaise',
 	    'measles',
-	    'meat',
-	    'metal',
+	    // 'meat',
+	    // 'metal',
 	    'methane',
 	    'milk',
 	    'money',
@@ -4759,34 +4078,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    'obedience',
 	    'obesity',
-	    'oil',
+	    // 'oil',
 	    'oxygen',
 
-	    'paper',
-	    'passion',
+	    // 'paper',
+	    // 'passion',
 	    'pasta',
 	    'patience',
-	    'permission',
+	    // 'permission',
 	    'physics',
 	    'poetry',
 	    'pollution',
 	    'poverty',
-	    'power',
+	    // 'power',
 	    'pride',
-	    'production',
-	    'progress',
-	    'pronunciation',
+	    // 'production',
+	    // 'progress',
+	    // 'pronunciation',
 	    'psychology',
 	    'publicity',
 	    'punctuation',
 
-	    'quality',
-	    'quantity',
+	    // 'quality',
+	    // 'quantity',
 	    'quartz',
 
 	    'racism',
-	    'rain',
-	    'recreation',
+	    // 'rain',
+	    // 'recreation',
 	    'relaxation',
 	    'reliability',
 	    'research',
@@ -4797,10 +4116,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'rum',
 
 	    'safety',
-	    'salad',
-	    'salt',
-	    'sand',
-	    'satire',
+	    // 'salad',
+	    // 'salt',
+	    // 'sand',
+	    // 'satire',
 	    'scenery',
 	    'seafood',
 	    'seaside',
@@ -4808,7 +4127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'shame',
 	    'sheep',
 	    'shopping',
-	    'silence',
+	    // 'silence',
 	    'sleep',
 	    // 'slang'
 	    'smoke',
@@ -4817,41 +4136,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'soap',
 	    'software',
 	    'soil',
-	    'sorrow',
-	    'soup',
+	    // 'sorrow',
+	    // 'soup',
 	    'spaghetti',
-	    'speed',
+	    // 'speed',
 	    'species',
-	    'spelling',
-	    'sport',
+	    // 'spelling',
+	    // 'sport',
 	    'steam',
-	    'strength',
+	    // 'strength',
 	    'stuff',
 	    'stupidity',
-	    'success',
-	    'sugar',
+	    // 'success',
+	    // 'sugar',
 	    'sunshine',
 	    'symmetry',
 
-	    'tea',
+	    // 'tea',
 	    'tennis',
 	    'thirst',
 	    'thunder',
 	    'timber',
-	    'time',
-	    'toast',
-	    'tolerance',
-	    'trade',
+	    // 'time',
+	    // 'toast',
+	    // 'tolerance',
+	    // 'trade',
 	    'traffic',
 	    'transportation',
-	    'travel',
+	    // 'travel',
 	    'trust',
 
-	    'understanding',
+	    // 'understanding',
 	    'underwear',
 	    'unemployment',
 	    'unity',
-	    'usage',
+	    // 'usage',
 
 	    'validity',
 	    'veal',
@@ -4859,26 +4178,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'vegetarianism',
 	    'vengeance',
 	    'violence',
-	    'vision',
+	    // 'vision',
 	    'vitality',
 
 	    'warmth',
-	    'water',
+	    // 'water',
 	    'wealth',
 	    'weather',
-	    'weight',
+	    // 'weight',
 	    'welfare',
 	    'wheat',
-	    'whiskey',
-	    'width',
+	    // 'whiskey',
+	    // 'width',
 	    'wildlife',
-	    'wine',
+	    // 'wine',
 	    'wisdom',
-	    'wood',
-	    'wool',
-	    'work',
+	    // 'wood',
+	    // 'wool',
+	    // 'work',
 
-	    'yeast',
+	    // 'yeast',
 	    'yoga',
 
 	    'zinc',
@@ -5610,14 +4929,202 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.5.2';
+	  inflector.version = '1.5.3';
 
 	  return inflector;
 	}));
 
 
 /***/ },
-/* 28 */
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, UnderscoreConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = UnderscoreConvention = (function(_super) {
+	  __extends(UnderscoreConvention, _super);
+
+	  function UnderscoreConvention() {
+	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  UnderscoreConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  };
+
+	  return UnderscoreConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, CamelizeConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = CamelizeConvention = (function(_super) {
+	  __extends(CamelizeConvention, _super);
+
+	  function CamelizeConvention() {
+	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  CamelizeConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
+	  };
+
+	  return CamelizeConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, ClassifyConvention, inflection,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = ClassifyConvention = (function(_super) {
+	  __extends(ClassifyConvention, _super);
+
+	  function ClassifyConvention() {
+	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  ClassifyConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
+	  };
+
+	  return ClassifyConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.8
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, MemoryStore, ModelCache, Queue, _;
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	MemoryStore = __webpack_require__(14);
+
+	module.exports = ModelCache = (function() {
+	  function ModelCache() {
+	    this.enabled = false;
+	    this.caches = {};
+	    this.options = {
+	      modelTypes: {}
+	    };
+	    this.verbose = false;
+	  }
+
+	  ModelCache.prototype.configure = function(options) {
+	    var key, value, value_key, value_value, values, _base;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.enabled = options.enabled;
+	    for (key in options) {
+	      value = options[key];
+	      if (_.isObject(value)) {
+	        (_base = this.options)[key] || (_base[key] = {});
+	        values = this.options[key];
+	        for (value_key in value) {
+	          value_value = value[value_key];
+	          values[value_key] = value_value;
+	        }
+	      } else {
+	        this.options[key] = value;
+	      }
+	    }
+	    return this.reset();
+	  };
+
+	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
+	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
+	      return sync_fn;
+	    }
+	    return (__webpack_require__(33))(model_type, sync_fn);
+	  };
+
+	  ModelCache.prototype.reset = function() {
+	    var key, value, _ref, _results;
+	    _ref = this.caches;
+	    _results = [];
+	    for (key in _ref) {
+	      value = _ref[key];
+	      _results.push(this.createCache(value.model_type));
+	    }
+	    return _results;
+	  };
+
+	  ModelCache.prototype.createCache = function(model_type) {
+	    var cache_info, cuid, model_name, options;
+	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
+	      throw new Error("Missing model name for cache");
+	    }
+	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
+	    if (cache_info = this.caches[cuid]) {
+	      delete this.caches[cuid];
+	      cache_info.cache.reset();
+	      cache_info.model_type.cache = null;
+	    }
+	    if (!this.enabled) {
+	      return null;
+	    }
+	    if (!(options = this.options.modelTypes[model_name])) {
+	      if (!(this.options.store || this.options.max || this.options.max_age)) {
+	        return null;
+	      }
+	      options = this.options;
+	    }
+	    cache_info = this.caches[cuid] = {
+	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
+	      model_type: model_type
+	    };
+	    return model_type.cache = cache_info.cache;
+	  };
+
+	  return ModelCache;
+
+	})();
+
+
+/***/ },
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6005,9 +5512,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    cache = (_base = options._cache)[_name = model.modelName()] || (_base[_name] = {});
 	    if (!(clone = cache[model.id])) {
 	      clone = model.clone(options);
-          if (model.isLoaded()) {
-            cache[model.id] = clone;
-          }
+	      if (model.isLoaded()) {
+	        cache[model.id] = clone;
+	      }
 	    }
 	    return clone;
 	  };
@@ -6288,10 +5795,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this._orm.clone++;
 	      if (this.id) {
 	        if (!(clone = cache[this.id])) {
-              clone = new this.constructor();
-              if (this.isLoaded()) {
-                cache[this.id] = clone;
-              }
+	          clone = new this.constructor();
+	          if (this.isLoaded()) {
+	            cache[this.id] = clone;
+	          }
 	        }
 	      } else {
 	        clone = new this.constructor();
@@ -6338,6 +5845,499 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _results;
 	  }
 	};
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.8
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
+	  __hasProp = {}.hasOwnProperty,
+	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+	_ = __webpack_require__(1);
+
+	Queue = __webpack_require__(11);
+
+	Utils = __webpack_require__(7);
+
+	JSONUtils = __webpack_require__(8);
+
+	DateUtils = __webpack_require__(9);
+
+	Cursor = __webpack_require__(15);
+
+	BATCH_COUNT = 500;
+
+	IS_MATCH_FNS = {
+	  $ne: function(mv, tv) {
+	    return !_.isEqual(mv, tv);
+	  },
+	  $lt: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    return (_.isDate(tv) ? DateUtils.isBefore(mv, tv) : mv < tv);
+	  },
+	  $lte: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    if (_.isDate(tv)) {
+	      return !DateUtils.isAfter(mv, tv);
+	    } else {
+	      return mv <= tv;
+	    }
+	  },
+	  $gt: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    return (_.isDate(tv) ? DateUtils.isAfter(mv, tv) : mv > tv);
+	  },
+	  $gte: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    if (_.isDate(tv)) {
+	      return !DateUtils.isBefore(mv, tv);
+	    } else {
+	      return mv >= tv;
+	    }
+	  },
+	  $exists: function(mv, tv) {
+	    if (!tv) {
+	      return _.isUndefined(mv);
+	    } else {
+	      return !_.isUndefined(mv);
+	    }
+	  }
+	};
+
+	IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS);
+
+	valueToArray = function(value) {
+	  return (_.isArray(value) ? value : (_.isNull(value) ? [] : (value.$in ? value.$in : [value])));
+	};
+
+	mergeQuery = function(query, key, value) {
+	  return query[key] = query.hasOwnProperty(key) ? {
+	    $in: _.intersection(valueToArray(query[key]), valueToArray(value))
+	  } : value;
+	};
+
+	module.exports = MemoryCursor = (function(_super) {
+	  __extends(MemoryCursor, _super);
+
+	  function MemoryCursor() {
+	    return MemoryCursor.__super__.constructor.apply(this, arguments);
+	  }
+
+	  MemoryCursor.prototype.queryToJSON = function(callback) {
+	    var exists;
+	    if (this.hasCursorQuery('$zero')) {
+	      return callback(null, this.hasCursorQuery('$one') ? null : []);
+	    }
+	    exists = this.hasCursorQuery('$exists');
+	    return this.buildFindQuery((function(_this) {
+	      return function(err, find_query) {
+	        var json, keys, queue;
+	        if (err) {
+	          return callback(err);
+	        }
+	        json = [];
+	        keys = _.keys(find_query);
+	        queue = new Queue(1);
+	        queue.defer(function(callback) {
+	          var ins, ins_size, key, model_json, nins, nins_size, value, _i, _len, _ref, _ref1, _ref2;
+	          _ref = [{}, {}], ins = _ref[0], nins = _ref[1];
+	          for (key in find_query) {
+	            value = find_query[key];
+	            if (value != null ? value.$in : void 0) {
+	              delete find_query[key];
+	              ins[key] = value.$in;
+	            }
+	            if (value != null ? value.$nin : void 0) {
+	              delete find_query[key];
+	              nins[key] = value.$nin;
+	            }
+	          }
+	          _ref1 = [_.size(ins), _.size(nins)], ins_size = _ref1[0], nins_size = _ref1[1];
+	          if (keys.length || ins_size || nins_size) {
+	            if (_this._cursor.$ids) {
+	              _ref2 = _this.store;
+	              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+	                model_json = _ref2[_i];
+	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
+	                  json.push(JSONUtils.deepClone(model_json));
+	                }
+	              }
+	              return callback();
+	            } else {
+	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
+	                var find_keys, next, values, _ref3, _ref4;
+	                if (exists && json.length) {
+	                  return callback(null, true);
+	                }
+	                if (ins_size) {
+	                  for (key in ins) {
+	                    values = ins[key];
+	                    if (_ref3 = model_json[key], __indexOf.call(values, _ref3) < 0) {
+	                      return callback();
+	                    }
+	                  }
+	                }
+	                if (nins_size) {
+	                  for (key in nins) {
+	                    values = nins[key];
+	                    if (_ref4 = model_json[key], __indexOf.call(values, _ref4) >= 0) {
+	                      return callback();
+	                    }
+	                  }
+	                }
+	                find_keys = _.keys(find_query);
+	                next = function(err, is_match) {
+	                  if (err || !is_match) {
+	                    return callback(err);
+	                  }
+	                  if (find_keys.length === 0) {
+	                    json.push(JSONUtils.deepClone(model_json));
+	                    return callback();
+	                  }
+	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
+	                };
+	                return next(null, true);
+	              });
+	            }
+	          } else {
+	            if (_this._cursor.$ids) {
+	              json = (function() {
+	                var _j, _len1, _ref3, _results;
+	                _ref3 = this.store;
+	                _results = [];
+	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+	                  model_json = _ref3[_j];
+	                  if (_.contains(this._cursor.$ids, model_json.id)) {
+	                    _results.push(JSONUtils.deepClone(model_json));
+	                  }
+	                }
+	                return _results;
+	              }).call(_this);
+	            } else {
+	              json = (function() {
+	                var _j, _len1, _ref3, _results;
+	                _ref3 = this.store;
+	                _results = [];
+	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+	                  model_json = _ref3[_j];
+	                  _results.push(JSONUtils.deepClone(model_json));
+	                }
+	                return _results;
+	              }).call(_this);
+	            }
+	            return callback();
+	          }
+	        });
+	        if (!exists) {
+	          queue.defer(function(callback) {
+	            var $sort_fields, field, key, model_json, number, unique_json, unique_keys, _i, _j, _len, _len1, _ref;
+	            if (_this._cursor.$sort) {
+	              $sort_fields = _.isArray(_this._cursor.$sort) ? _this._cursor.$sort : [_this._cursor.$sort];
+	              json.sort(function(model, next_model) {
+	                return Utils.jsonFieldCompare(model, next_model, $sort_fields);
+	              });
+	            }
+	            if (_this._cursor.$unique) {
+	              unique_json = [];
+	              unique_keys = {};
+	              for (_i = 0, _len = json.length; _i < _len; _i++) {
+	                model_json = json[_i];
+	                key = '';
+	                _ref = _this._cursor.$unique;
+	                for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+	                  field = _ref[_j];
+	                  if (model_json.hasOwnProperty(field)) {
+	                    key += "" + field + ":" + (JSON.stringify(model_json[field]));
+	                  }
+	                }
+	                if (unique_keys[key]) {
+	                  continue;
+	                }
+	                unique_keys[key] = true;
+	                unique_json.push(model_json);
+	              }
+	              json = unique_json;
+	            }
+	            if (_this._cursor.$offset) {
+	              number = json.length - _this._cursor.$offset;
+	              if (number < 0) {
+	                number = 0;
+	              }
+	              json = number ? json.slice(_this._cursor.$offset, _this._cursor.$offset + number) : [];
+	            }
+	            if (_this._cursor.$one) {
+	              json = json.slice(0, 1);
+	            } else if (_this._cursor.$limit) {
+	              json = json.splice(0, Math.min(json.length, _this._cursor.$limit));
+	            }
+	            return callback();
+	          });
+	          queue.defer(function(callback) {
+	            return _this.fetchIncludes(json, callback);
+	          });
+	        }
+	        queue.await(function() {
+	          var count_cursor;
+	          if (_this.hasCursorQuery('$count')) {
+	            return callback(null, (_.isArray(json) ? json.length : (json ? 1 : 0)));
+	          }
+	          if (exists) {
+	            return callback(null, (_.isArray(json) ? !!json.length : json));
+	          }
+	          if (_this.hasCursorQuery('$page')) {
+	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
+	            return count_cursor.count(function(err, count) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              return callback(null, {
+	                offset: _this._cursor.$offset || 0,
+	                total_rows: count,
+	                rows: _this.selectResults(json)
+	              });
+	            });
+	          } else {
+	            return callback(null, _this.selectResults(json));
+	          }
+	        });
+	      };
+	    })(this));
+	  };
+
+	  MemoryCursor.prototype.buildFindQuery = function(callback) {
+	    var find_query, key, queue, relation_key, reverse_relation, value, value_key, _fn, _ref, _ref1;
+	    queue = new Queue();
+	    find_query = {};
+	    _ref = this._find;
+	    _fn = (function(_this) {
+	      return function(relation_key, value_key, value) {
+	        return queue.defer(function(callback) {
+	          var related_query, relation;
+	          if (!(relation = _this.model_type.relation(relation_key))) {
+	            mergeQuery(find_query, key, value);
+	            return callback();
+	          }
+	          if (!relation.join_table && (value_key === 'id')) {
+	            mergeQuery(find_query, relation.foreign_key, value);
+	            return callback();
+	          } else if (relation.join_table || (relation.type === 'belongsTo')) {
+	            (related_query = {
+	              $values: 'id'
+	            })[value_key] = value;
+	            return relation.reverse_relation.model_type.cursor(related_query).toJSON(function(err, related_ids) {
+	              var join_query;
+	              if (err) {
+	                return callback(err);
+	              }
+	              if (relation.join_table) {
+	                (join_query = {})[relation.reverse_relation.join_key] = {
+	                  $in: related_ids
+	                };
+	                join_query.$values = relation.foreign_key;
+	                return relation.join_table.cursor(join_query).toJSON(function(err, model_ids) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, 'id', {
+	                    $in: model_ids
+	                  });
+	                  return callback();
+	                });
+	              } else {
+	                mergeQuery(find_query, relation.foreign_key, {
+	                  $in: related_ids
+	                });
+	                return callback();
+	              }
+	            });
+	          } else {
+	            (related_query = {})[value_key] = value;
+	            related_query.$values = relation.foreign_key;
+	            return relation.reverse_model_type.cursor(related_query).toJSON(function(err, model_ids) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              mergeQuery(find_query, 'id', {
+	                $in: model_ids
+	              });
+	              return callback();
+	            });
+	          }
+	        });
+	      };
+	    })(this);
+	    for (key in _ref) {
+	      value = _ref[key];
+	      if (key.indexOf('.') < 0) {
+	        if (!(reverse_relation = this.model_type.reverseRelation(key))) {
+	          mergeQuery(find_query, key, value);
+	          continue;
+	        }
+	        if (!reverse_relation.embed && !reverse_relation.join_table) {
+	          mergeQuery(find_query, key, value);
+	          continue;
+	        }
+	        (function(_this) {
+	          return (function(key, value, reverse_relation) {
+	            return queue.defer(function(callback) {
+	              var related_query;
+	              if (reverse_relation.embed) {
+	                throw Error("Embedded find is not yet supported. @_find: " + (JSONUtils.stringify(_this._find)));
+	                (related_query = {}).id = value;
+	                return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, '_json', _.map(models_json, function(test) {
+	                    return test[reverse_relation.key];
+	                  }));
+	                  return callback();
+	                });
+	              } else {
+	                (related_query = {})[key] = value;
+	                related_query.$values = reverse_relation.reverse_relation.join_key;
+	                return reverse_relation.join_table.cursor(related_query).toJSON(function(err, model_ids) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, 'id', {
+	                    $in: model_ids
+	                  });
+	                  return callback();
+	                });
+	              }
+	            });
+	          });
+	        })(this)(key, value, reverse_relation);
+	        continue;
+	      }
+	      _ref1 = key.split('.'), relation_key = _ref1[0], value_key = _ref1[1];
+	      if (this.model_type.relationIsEmbedded(relation_key)) {
+	        mergeQuery(find_query, key, value);
+	        continue;
+	      }
+	      _fn(relation_key, value_key, value);
+	    }
+	    return queue.await((function(_this) {
+	      return function(err) {
+	        return callback(err, find_query);
+	      };
+	    })(this));
+	  };
+
+	  MemoryCursor.prototype.fetchIncludes = function(json, callback) {
+	    var include_keys, key, load_queue, model_json, relation, _fn, _i, _j, _len, _len1;
+	    if (!this._cursor.$include) {
+	      return callback();
+	    }
+	    load_queue = new Queue(1);
+	    include_keys = _.isArray(this._cursor.$include) ? this._cursor.$include : [this._cursor.$include];
+	    for (_i = 0, _len = include_keys.length; _i < _len; _i++) {
+	      key = include_keys[_i];
+	      if (this.model_type.relationIsEmbedded(key)) {
+	        continue;
+	      }
+	      if (!(relation = this.model_type.relation(key))) {
+	        return callback(new Error("Included relation '" + key + "' is not a relation"));
+	      }
+	      _fn = (function(_this) {
+	        return function(key, model_json) {
+	          return load_queue.defer(function(callback) {
+	            return relation.cursor(model_json, key).toJSON(function(err, related_json) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              delete model_json[relation.foriegn_key];
+	              model_json[key] = related_json;
+	              return callback();
+	            });
+	          });
+	        };
+	      })(this);
+	      for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
+	        model_json = json[_j];
+	        _fn(key, model_json);
+	      }
+	    }
+	    return load_queue.await(callback);
+	  };
+
+	  MemoryCursor.prototype._valueIsMatch = function(find_query, key_path, model_json, callback) {
+	    var key_components, model_type, next;
+	    key_components = key_path.split('.');
+	    model_type = this.model_type;
+	    next = (function(_this) {
+	      return function(err, models_json) {
+	        var find_value, is_match, key, model_value, operator, relation, was_handled, _i, _j, _len, _len1;
+	        if (err) {
+	          return callback(err);
+	        }
+	        key = key_components.shift();
+	        if (key === 'id') {
+	          key = model_type.prototype.idAttribute;
+	        }
+	        if (!key_components.length) {
+	          was_handled = false;
+	          find_value = find_query[key_path];
+	          if (!_.isArray(models_json)) {
+	            models_json = [models_json];
+	          }
+	          for (_i = 0, _len = models_json.length; _i < _len; _i++) {
+	            model_json = models_json[_i];
+	            model_value = model_json[key];
+	            if (_.isObject(find_value)) {
+	              for (_j = 0, _len1 = IS_MATCH_OPERATORS.length; _j < _len1; _j++) {
+	                operator = IS_MATCH_OPERATORS[_j];
+	                if (!(find_value.hasOwnProperty(operator))) {
+	                  continue;
+	                }
+	                was_handled = true;
+	                if (!(is_match = IS_MATCH_FNS[operator](model_value, find_value[operator]))) {
+	                  break;
+	                }
+	              }
+	            }
+	            if (was_handled) {
+	              if (is_match) {
+	                return callback(null, is_match);
+	              }
+	            } else if (is_match = _.isEqual(model_value, find_value)) {
+	              return callback(null, is_match);
+	            }
+	          }
+	          return callback(null, false);
+	        }
+	        if ((relation = model_type.relation(key)) && !relation.embed) {
+	          return relation.cursor(model_json, key).toJSON(next);
+	        }
+	        return next(null, model_json[key]);
+	      };
+	    })(this);
+	    return next(null, model_json);
+	  };
+
+	  return MemoryCursor;
+
+	})(Cursor);
 
 
 /***/ },
@@ -7568,175 +7568,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
-
-	_ = __webpack_require__(1);
-
-	CacheCursor = __webpack_require__(39);
-
-	Schema = __webpack_require__(15);
-
-	Utils = __webpack_require__(7);
-
-	bbCallback = Utils.bbCallback;
-
-	DESTROY_BATCH_LIMIT = 1000;
-
-	DESTROY_THREADS = 100;
-
-	CacheSync = (function() {
-	  function CacheSync(model_type, wrapped_sync_fn) {
-	    this.model_type = model_type;
-	    this.wrapped_sync_fn = wrapped_sync_fn;
-	  }
-
-	  CacheSync.prototype.initialize = function() {
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    this.wrapped_sync_fn('initialize');
-	    if (!this.model_type.model_name) {
-	      throw new Error('Missing model_name for model');
-	    }
-	  };
-
-	  CacheSync.prototype.read = function(model, options) {
-	    var cached_model;
-	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
-	      return options.success(cached_model.toJSON());
-	    }
-	    return this.wrapped_sync_fn('read', model, options);
-	  };
-
-	  CacheSync.prototype.create = function(model, options) {
-	    return this.wrapped_sync_fn('create', model, {
-	      success: (function(_this) {
-	        return function(json) {
-	          var attributes, cache_model;
-	          (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
-	          model.set(attributes);
-	          if (cache_model = _this.model_type.cache.get(model.id)) {
-	            if (cache_model !== model) {
-	              Utils.updateModel(cache_model, model);
-	            }
-	          } else {
-	            _this.model_type.cache.set(model.id, model);
-	          }
-	          return options.success(json);
-	        };
-	      })(this),
-	      error: (function(_this) {
-	        return function(resp) {
-	          return typeof options.error === "function" ? options.error(resp) : void 0;
-	        };
-	      })(this)
-	    });
-	  };
-
-	  CacheSync.prototype.update = function(model, options) {
-	    return this.wrapped_sync_fn('update', model, {
-	      success: (function(_this) {
-	        return function(json) {
-	          var cache_model;
-	          if (cache_model = _this.model_type.cache.get(model.id)) {
-	            if (cache_model !== model) {
-	              Utils.updateModel(cache_model, model);
-	            }
-	          } else {
-	            _this.model_type.cache.set(model.id, model);
-	          }
-	          return options.success(json);
-	        };
-	      })(this),
-	      error: (function(_this) {
-	        return function(resp) {
-	          return typeof options.error === "function" ? options.error(resp) : void 0;
-	        };
-	      })(this)
-	    });
-	  };
-
-	  CacheSync.prototype["delete"] = function(model, options) {
-	    this.model_type.cache.destroy(model.id);
-	    return this.wrapped_sync_fn('delete', model, options);
-	  };
-
-	  CacheSync.prototype.resetSchema = function(options, callback) {
-	    return this.model_type.cache.reset((function(_this) {
-	      return function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        return _this.wrapped_sync_fn('resetSchema', options, callback);
-	      };
-	    })(this));
-	  };
-
-	  CacheSync.prototype.cursor = function(query) {
-	    if (query == null) {
-	      query = {};
-	    }
-	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
-	  };
-
-	  CacheSync.prototype.destroy = function(query, callback) {
-	    return this.model_type.each(_.extend({
-	      $each: {
-	        limit: DESTROY_BATCH_LIMIT,
-	        threads: DESTROY_THREADS
-	      }
-	    }, query), ((function(_this) {
-	      return function(model, callback) {
-	        return model.destroy(callback);
-	      };
-	    })(this)), callback);
-	  };
-
-	  CacheSync.prototype.connect = function(url) {
-	    this.model_type.cache.reset();
-	    return this.wrapped_sync_fn('connect');
-	  };
-
-	  return CacheSync;
-
-	})();
-
-	module.exports = function(model_type, wrapped_sync_fn) {
-	  var sync, sync_fn;
-	  sync = new CacheSync(model_type, wrapped_sync_fn);
-	  model_type.prototype.sync = sync_fn = function(method, model, options) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    sync.initialize();
-	    if (method === 'createSync') {
-	      return wrapped_sync_fn.apply(null, arguments);
-	    }
-	    if (method === 'sync') {
-	      return sync;
-	    }
-	    if (sync[method]) {
-	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-	    }
-	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
-	  };
-	  return sync_fn;
-	};
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
 	/* WEBPACK VAR INJECTION */(function(Buffer) {/*!
 	 * The buffer module from node.js, for the browser.
 	 *
@@ -7745,8 +7576,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var base64 = __webpack_require__(42)
-	var ieee754 = __webpack_require__(40)
-	var isArray = __webpack_require__(41)
+	var ieee754 = __webpack_require__(41)
+	var isArray = __webpack_require__(40)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = Buffer
@@ -8088,7 +7919,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function utf16leWrite (buf, string, offset, length) {
-	  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+	  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
 	  return charsWritten
 	}
 
@@ -8772,7 +8603,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return base64.toByteArray(str)
 	}
 
-	function blitBuffer (src, dst, offset, length) {
+	function blitBuffer (src, dst, offset, length, unitSize) {
+	  if (unitSize) length -= length % unitSize;
 	  for (var i = 0; i < length; i++) {
 	    if ((i + offset >= dst.length) || (i >= src.length))
 	      break
@@ -8789,7 +8621,176 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.8
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
+
+	_ = __webpack_require__(1);
+
+	CacheCursor = __webpack_require__(39);
+
+	Schema = __webpack_require__(16);
+
+	Utils = __webpack_require__(7);
+
+	bbCallback = Utils.bbCallback;
+
+	DESTROY_BATCH_LIMIT = 1000;
+
+	DESTROY_THREADS = 100;
+
+	CacheSync = (function() {
+	  function CacheSync(model_type, wrapped_sync_fn) {
+	    this.model_type = model_type;
+	    this.wrapped_sync_fn = wrapped_sync_fn;
+	  }
+
+	  CacheSync.prototype.initialize = function() {
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    this.wrapped_sync_fn('initialize');
+	    if (!this.model_type.model_name) {
+	      throw new Error('Missing model_name for model');
+	    }
+	  };
+
+	  CacheSync.prototype.read = function(model, options) {
+	    var cached_model;
+	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
+	      return options.success(cached_model.toJSON());
+	    }
+	    return this.wrapped_sync_fn('read', model, options);
+	  };
+
+	  CacheSync.prototype.create = function(model, options) {
+	    return this.wrapped_sync_fn('create', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var attributes, cache_model;
+	          (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
+	          model.set(attributes);
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype.update = function(model, options) {
+	    return this.wrapped_sync_fn('update', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var cache_model;
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype["delete"] = function(model, options) {
+	    this.model_type.cache.destroy(model.id);
+	    return this.wrapped_sync_fn('delete', model, options);
+	  };
+
+	  CacheSync.prototype.resetSchema = function(options, callback) {
+	    return this.model_type.cache.reset((function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        return _this.wrapped_sync_fn('resetSchema', options, callback);
+	      };
+	    })(this));
+	  };
+
+	  CacheSync.prototype.cursor = function(query) {
+	    if (query == null) {
+	      query = {};
+	    }
+	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
+	  };
+
+	  CacheSync.prototype.destroy = function(query, callback) {
+	    return this.model_type.each(_.extend({
+	      $each: {
+	        limit: DESTROY_BATCH_LIMIT,
+	        threads: DESTROY_THREADS
+	      }
+	    }, query), ((function(_this) {
+	      return function(model, callback) {
+	        return model.destroy(callback);
+	      };
+	    })(this)), callback);
+	  };
+
+	  CacheSync.prototype.connect = function(url) {
+	    this.model_type.cache.reset();
+	    return this.wrapped_sync_fn('connect');
+	  };
+
+	  return CacheSync;
+
+	})();
+
+	module.exports = function(model_type, wrapped_sync_fn) {
+	  var sync, sync_fn;
+	  sync = new CacheSync(model_type, wrapped_sync_fn);
+	  model_type.prototype.sync = sync_fn = function(method, model, options) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    sync.initialize();
+	    if (method === 'createSync') {
+	      return wrapped_sync_fn.apply(null, arguments);
+	    }
+	    if (method === 'sync') {
+	      return sync;
+	    }
+	    if (sync[method]) {
+	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+	    }
+	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
+	  };
+	  return sync_fn;
+	};
+
 
 /***/ },
 /* 34 */
@@ -8875,7 +8876,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function(model_type, query, iterator, callback) {
 	  var method, model_limit, options, parsed_query, processed_count, runBatch;
 	  if (!Cursor) {
-	    Cursor = __webpack_require__(21);
+	    Cursor = __webpack_require__(28);
 	  }
 	  options = query.$each || {};
 	  method = options.json ? 'toJSON' : 'toModels';
@@ -9381,11 +9382,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(21));
+	})(__webpack_require__(28));
 
 
 /***/ },
 /* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * isArray
+	 */
+
+	var isArray = Array.isArray;
+
+	/**
+	 * toString
+	 */
+
+	var str = Object.prototype.toString;
+
+	/**
+	 * Whether or not the given `val`
+	 * is an array.
+	 *
+	 * example:
+	 *
+	 *        isArray([]);
+	 *        // > true
+	 *        isArray(arguments);
+	 *        // > false
+	 *        isArray('');
+	 *        // > false
+	 *
+	 * @param {mixed} val
+	 * @return {bool}
+	 */
+
+	module.exports = isArray || function (val) {
+	  return !! val && '[object Array]' == str.call(val);
+	};
+
+
+/***/ },
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -9471,45 +9511,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
 
 	  buffer[offset + i - d] |= s * 128;
-	};
-
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * isArray
-	 */
-
-	var isArray = Array.isArray;
-
-	/**
-	 * toString
-	 */
-
-	var str = Object.prototype.toString;
-
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
 	};
 
 
