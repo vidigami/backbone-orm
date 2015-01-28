@@ -6,4 +6,5 @@ module.exports =
     'backbone-orm': {exports: 'BackboneORM', deps: ['backbone', 'stream']}
     'parameters': {exports: '__test__parameters__', deps: ['backbone-orm']}
   post_load: 'window._ = window.Backbone = null; window.BackboneORM = backbone_orm;'
-  aliases: {'lodash': 'underscore'}
+
+  aliases: {'index': 'underscore'} # aliases: {'lodash': 'underscore'} # WARNING: not scalable if multiple files with index name
