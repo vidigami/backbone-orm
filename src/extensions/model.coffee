@@ -272,7 +272,9 @@ module.exports = (model_type) ->
   _findOrClone = (model, options) ->
     return model.clone(options) if model.isNew() or not model.modelName
     cache = options._cache[model.modelName()] or= {}
-    clone = cache[model.id] = model.clone(options) unless clone = cache[model.id]
+    unless clone = cache[model.id]
+      clone = model.clone(options)
+      cache[model.id] = clone if model.isLoaded()
     return clone
 
   overrides =
@@ -455,7 +457,9 @@ module.exports = (model_type) ->
 
       # create a shell to refer to
       if @id
-        cache[@id] = clone = new @constructor() unless clone = cache[@id]
+        unless clone = cache[@id]
+          clone = new @constructor()
+          cache[@id] = clone if @isLoaded()
       else
         clone = new @constructor()
       clone.id = @attributes.id if @attributes.id
