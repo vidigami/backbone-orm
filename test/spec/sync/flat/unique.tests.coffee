@@ -40,7 +40,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
     new_updated_at = null
     beforeEach (callback) ->
-      Utils.resetSchemas [Flat], (err) ->
+      Utils.resetSchemas [Flat, Empty], (err) ->
         return callback(err) if err
 
         Fabricator.create Flat, BASE_COUNT, {
