@@ -325,6 +325,7 @@ module.exports = class Many extends (require './relation')
       # update back links
       (events.remove(related_model) for related_model in changes.removed) if changes.removed
       (events.add(related_model) for related_model in added)
+      return
 
     collection.on(method, events[method]) for method in ['add', 'remove', 'reset'] # bind
 

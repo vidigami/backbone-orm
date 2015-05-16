@@ -182,7 +182,10 @@ module.exports = class Utils
   # @nodoc
   @updateOrNew: (data, model_type) ->
     if (cache = model_type.cache) and (id = Utils.dataId(data))
-      Utils.updateModel(model, data) if model = cache.get(id)
+      if Utils.isModel(data) and data.isLoaded()
+        model = data
+      else if model = cache.get(id)
+        Utils.updateModel(model, data)
     unless model
       model = if Utils.isModel(data) then data else Utils.dataToModel(data, model_type)
       cache.set(model.id, model) if model and cache

@@ -2,6 +2,7 @@ Please refer to the following release notes when upgrading your version of Backb
 
 ### 0.7.10
 * Bug fix and optimizations for large data sets to use process.nextTick (node) or setImmediate (browser)
+* Bug fix for cache replacing desired model during collection array set
 
 ### 0.7.9
 * Bug fix clone to not cache non loaded models
