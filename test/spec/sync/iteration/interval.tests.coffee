@@ -16,7 +16,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   DATE_START = new Date('2013-06-09T08:00:00.000Z')
   DATE_STEP_MS = 1000
 
-  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @slow", ->
+  describe "Model.interval #{options.$parameter_tags or ''}#{options.$tags} @interval @slow", ->
     Flat = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
