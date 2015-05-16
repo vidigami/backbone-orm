@@ -9,14 +9,14 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("backbone"), require("underscore"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["backbone", "underscore"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__) {
-			return factory(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__, root["stream"]);
+		define(["backbone", "underscore"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_22__) {
+			return factory(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_22__, root["stream"]);
 		});
 	else if(typeof exports === 'object')
 		exports["BackboneORM"] = factory(require("backbone"), require("underscore"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
 		root["BackboneORM"] = factory(root["Backbone"], root["_"], root["stream"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_3__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Backbone, BackboneORM, _, publish;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Backbone = __webpack_require__(2);
 
@@ -105,8 +105,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  backbone: Backbone,
 	  url: __webpack_require__(19),
 	  querystring: __webpack_require__(20),
-	  'lru-cache': __webpack_require__(1),
-	  inflection: __webpack_require__(22)
+	  'lru-cache': __webpack_require__(21),
+	  inflection: __webpack_require__(1)
 	};
 
 	try {
@@ -116,3772 +116,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	;(function () { // closure for web browsers
-
-	if (typeof module === 'object' && module.exports) {
-	  module.exports = LRUCache
-	} else {
-	  // just set the global for non-node platforms.
-	  this.LRUCache = LRUCache
-	}
-
-	function hOP (obj, key) {
-	  return Object.prototype.hasOwnProperty.call(obj, key)
-	}
-
-	function naiveLength () { return 1 }
-
-	function LRUCache (options) {
-	  if (!(this instanceof LRUCache))
-	    return new LRUCache(options)
-
-	  if (typeof options === 'number')
-	    options = { max: options }
-
-	  if (!options)
-	    options = {}
-
-	  this._max = options.max
-	  // Kind of weird to have a default max of Infinity, but oh well.
-	  if (!this._max || !(typeof this._max === "number") || this._max <= 0 )
-	    this._max = Infinity
-
-	  this._lengthCalculator = options.length || naiveLength
-	  if (typeof this._lengthCalculator !== "function")
-	    this._lengthCalculator = naiveLength
-
-	  this._allowStale = options.stale || false
-	  this._maxAge = options.maxAge || null
-	  this._dispose = options.dispose
-	  this.reset()
-	}
-
-	// resize the cache when the max changes.
-	Object.defineProperty(LRUCache.prototype, "max",
-	  { set : function (mL) {
-	      if (!mL || !(typeof mL === "number") || mL <= 0 ) mL = Infinity
-	      this._max = mL
-	      if (this._length > this._max) trim(this)
-	    }
-	  , get : function () { return this._max }
-	  , enumerable : true
-	  })
-
-	// resize the cache when the lengthCalculator changes.
-	Object.defineProperty(LRUCache.prototype, "lengthCalculator",
-	  { set : function (lC) {
-	      if (typeof lC !== "function") {
-	        this._lengthCalculator = naiveLength
-	        this._length = this._itemCount
-	        for (var key in this._cache) {
-	          this._cache[key].length = 1
-	        }
-	      } else {
-	        this._lengthCalculator = lC
-	        this._length = 0
-	        for (var key in this._cache) {
-	          this._cache[key].length = this._lengthCalculator(this._cache[key].value)
-	          this._length += this._cache[key].length
-	        }
-	      }
-
-	      if (this._length > this._max) trim(this)
-	    }
-	  , get : function () { return this._lengthCalculator }
-	  , enumerable : true
-	  })
-
-	Object.defineProperty(LRUCache.prototype, "length",
-	  { get : function () { return this._length }
-	  , enumerable : true
-	  })
-
-
-	Object.defineProperty(LRUCache.prototype, "itemCount",
-	  { get : function () { return this._itemCount }
-	  , enumerable : true
-	  })
-
-	LRUCache.prototype.forEach = function (fn, thisp) {
-	  thisp = thisp || this
-	  var i = 0
-	  var itemCount = this._itemCount
-
-	  for (var k = this._mru - 1; k >= 0 && i < itemCount; k--) if (this._lruList[k]) {
-	    i++
-	    var hit = this._lruList[k]
-	    if (isStale(this, hit)) {
-	      del(this, hit)
-	      if (!this._allowStale) hit = undefined
-	    }
-	    if (hit) {
-	      fn.call(thisp, hit.value, hit.key, this)
-	    }
-	  }
-	}
-
-	LRUCache.prototype.keys = function () {
-	  var keys = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    keys[i++] = hit.key
-	  }
-	  return keys
-	}
-
-	LRUCache.prototype.values = function () {
-	  var values = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    values[i++] = hit.value
-	  }
-	  return values
-	}
-
-	LRUCache.prototype.reset = function () {
-	  if (this._dispose && this._cache) {
-	    for (var k in this._cache) {
-	      this._dispose(k, this._cache[k].value)
-	    }
-	  }
-
-	  this._cache = Object.create(null) // hash of items by key
-	  this._lruList = Object.create(null) // list of items in order of use recency
-	  this._mru = 0 // most recently used
-	  this._lru = 0 // least recently used
-	  this._length = 0 // number of items in the list
-	  this._itemCount = 0
-	}
-
-	// Provided for debugging/dev purposes only. No promises whatsoever that
-	// this API stays stable.
-	LRUCache.prototype.dump = function () {
-	  return this._cache
-	}
-
-	LRUCache.prototype.dumpLru = function () {
-	  return this._lruList
-	}
-
-	LRUCache.prototype.set = function (key, value, maxAge) {
-	  maxAge = maxAge || this._maxAge
-	  var now = maxAge ? Date.now() : 0
-
-	  if (hOP(this._cache, key)) {
-	    // dispose of the old one before overwriting
-	    if (this._dispose)
-	      this._dispose(key, this._cache[key].value)
-
-	    this._cache[key].now = now
-	    this._cache[key].maxAge = maxAge
-	    this._cache[key].value = value
-	    this.get(key)
-	    return true
-	  }
-
-	  var len = this._lengthCalculator(value)
-	  var hit = new Entry(key, value, this._mru++, len, now, maxAge)
-
-	  // oversized objects fall out of cache automatically.
-	  if (hit.length > this._max) {
-	    if (this._dispose) this._dispose(key, value)
-	    return false
-	  }
-
-	  this._length += hit.length
-	  this._lruList[hit.lu] = this._cache[key] = hit
-	  this._itemCount ++
-
-	  if (this._length > this._max)
-	    trim(this)
-
-	  return true
-	}
-
-	LRUCache.prototype.has = function (key) {
-	  if (!hOP(this._cache, key)) return false
-	  var hit = this._cache[key]
-	  if (isStale(this, hit)) {
-	    return false
-	  }
-	  return true
-	}
-
-	LRUCache.prototype.get = function (key) {
-	  return get(this, key, true)
-	}
-
-	LRUCache.prototype.peek = function (key) {
-	  return get(this, key, false)
-	}
-
-	LRUCache.prototype.pop = function () {
-	  var hit = this._lruList[this._lru]
-	  del(this, hit)
-	  return hit || null
-	}
-
-	LRUCache.prototype.del = function (key) {
-	  del(this, this._cache[key])
-	}
-
-	function get (self, key, doUse) {
-	  var hit = self._cache[key]
-	  if (hit) {
-	    if (isStale(self, hit)) {
-	      del(self, hit)
-	      if (!self._allowStale) hit = undefined
-	    } else {
-	      if (doUse) use(self, hit)
-	    }
-	    if (hit) hit = hit.value
-	  }
-	  return hit
-	}
-
-	function isStale(self, hit) {
-	  if (!hit || (!hit.maxAge && !self._maxAge)) return false
-	  var stale = false;
-	  var diff = Date.now() - hit.now
-	  if (hit.maxAge) {
-	    stale = diff > hit.maxAge
-	  } else {
-	    stale = self._maxAge && (diff > self._maxAge)
-	  }
-	  return stale;
-	}
-
-	function use (self, hit) {
-	  shiftLU(self, hit)
-	  hit.lu = self._mru ++
-	  self._lruList[hit.lu] = hit
-	}
-
-	function trim (self) {
-	  while (self._lru < self._mru && self._length > self._max)
-	    del(self, self._lruList[self._lru])
-	}
-
-	function shiftLU (self, hit) {
-	  delete self._lruList[ hit.lu ]
-	  while (self._lru < self._mru && !self._lruList[self._lru]) self._lru ++
-	}
-
-	function del (self, hit) {
-	  if (hit) {
-	    if (self._dispose) self._dispose(hit.key, hit.value)
-	    self._length -= hit.length
-	    self._itemCount --
-	    delete self._cache[ hit.key ]
-	    shiftLU(self, hit)
-	  }
-	}
-
-	// classy, since V8 prefers predictable objects.
-	function Entry (key, value, lu, length, now, maxAge) {
-	  this.key = key
-	  this.value = value
-	  this.lu = lu
-	  this.length = length
-	  this.now = now
-	  if (maxAge) this.maxAge = maxAge
-	}
-
-	})()
-
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	if(typeof __WEBPACK_EXTERNAL_MODULE_3__ === 'undefined') {var e = new Error("Cannot find module \"stream\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
-	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Fabricator, Queue, _;
-
-	_ = __webpack_require__(21);
-
-	Queue = __webpack_require__(12);
-
-	module.exports = Fabricator = (function() {
-	  function Fabricator() {}
-
-	  Fabricator["new"] = function(model_type, count, attributes_info) {
-	    var attributes, key, results, value;
-	    results = [];
-	    while (count-- > 0) {
-	      attributes = {};
-	      for (key in attributes_info) {
-	        value = attributes_info[key];
-	        attributes[key] = _.isFunction(value) ? value() : value;
-	      }
-	      results.push(new model_type(attributes));
-	    }
-	    return results;
-	  };
-
-	  Fabricator.create = function(model_type, count, attributes_info, callback) {
-	    var fn, i, len, model, models, queue;
-	    models = Fabricator["new"](model_type, count, attributes_info);
-	    queue = new Queue();
-	    fn = function(model) {
-	      return queue.defer(function(callback) {
-	        return model.save(callback);
-	      });
-	    };
-	    for (i = 0, len = models.length; i < len; i++) {
-	      model = models[i];
-	      fn(model);
-	    }
-	    return queue.await(function(err) {
-	      return callback(err, models);
-	    });
-	  };
-
-	  Fabricator.value = function(value) {
-	    if (arguments.length === 0) {
-	      return void 0;
-	    }
-	    return function() {
-	      return value;
-	    };
-	  };
-
-	  Fabricator.uniqueId = function(prefix) {
-	    if (arguments.length === 0) {
-	      return _.uniqueId();
-	    }
-	    return function() {
-	      return _.uniqueId(prefix);
-	    };
-	  };
-
-	  Fabricator.uniqueString = Fabricator.uniqueId;
-
-	  Fabricator.date = function(start, step_ms) {
-	    var current_ms, now, ref;
-	    now = new Date();
-	    if (arguments.length === 0) {
-	      return now;
-	    }
-	    if (arguments.length === 1) {
-	      ref = [now, start], start = ref[0], step_ms = ref[1];
-	    }
-	    current_ms = start.getTime();
-	    return function() {
-	      var current;
-	      current = new Date(current_ms);
-	      current_ms += step_ms;
-	      return current;
-	    };
-	  };
-
-	  return Fabricator;
-
-	})();
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {};
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ALL_CONVENTIONS, BackboneORM, _;
-
-	_ = __webpack_require__(21);
-
-	BackboneORM = __webpack_require__(5);
-
-	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(23),
-	  underscore: __webpack_require__(23),
-	  camelize: __webpack_require__(24),
-	  classify: __webpack_require__(25)
-	};
-
-	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
-
-	BackboneORM.model_cache = new (__webpack_require__(26))();
-
-	module.exports = function(options) {
-	  var convention, key, results, value;
-	  if (options == null) {
-	    options = {};
-	  }
-	  results = [];
-	  for (key in options) {
-	    value = options[key];
-	    switch (key) {
-	      case 'model_cache':
-	        results.push(BackboneORM.model_cache.configure(options.model_cache));
-	        break;
-	      case 'naming_conventions':
-	        if (_.isString(value)) {
-	          if (convention = ALL_CONVENTIONS[value]) {
-	            BackboneORM.naming_conventions = convention;
-	            continue;
-	          }
-	          results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
-	        } else {
-	          results.push(BackboneORM.naming_conventions = value);
-	        }
-	        break;
-	      default:
-	        results.push(BackboneORM[key] = value);
-	    }
-	  }
-	  return results;
-	};
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _,
-	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-	_ = __webpack_require__(21);
-
-	BackboneORM = __webpack_require__(5);
-
-	Queue = __webpack_require__(12);
-
-	MemoryCursor = __webpack_require__(27);
-
-	Schema = __webpack_require__(16);
-
-	Utils = __webpack_require__(8);
-
-	JSONUtils = __webpack_require__(9);
-
-	DESTROY_BATCH_LIMIT = 2000;
-
-	BATCH_COUNT = 500;
-
-	CAPABILITIES = {
-	  embed: true,
-	  json: true,
-	  unique: true,
-	  manual_ids: true,
-	  dynamic: true,
-	  self_reference: true
-	};
-
-	MemorySync = (function() {
-	  function MemorySync(model_type1) {
-	    var base, ref;
-	    this.model_type = model_type1;
-	    this.deleteCB = bind(this.deleteCB, this);
-	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
-	    this.schema = new Schema(this.model_type);
-	    if (!((ref = this.schema.field('id')) != null ? ref.type : void 0)) {
-	      this.schema.type('id', 'Integer');
-	    }
-	    this.store = (base = this.model_type).store || (base.store = []);
-	    this.id = 0;
-	    this.id_attribute = this.model_type.prototype.idAttribute;
-	  }
-
-	  MemorySync.prototype.initialize = function() {
-	    var ref;
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    this.schema.initialize();
-	    if ((ref = this.schema.field('id')) != null ? ref.manual : void 0) {
-	      this.manual_id = true;
-	    }
-	    return this.id_type = this.schema.idType();
-	  };
-
-	  MemorySync.prototype.read = function(model, options) {
-	    var model_json;
-	    if (model.models) {
-	      return options.success((function() {
-	        var i, len, ref, results;
-	        ref = this.store;
-	        results = [];
-	        for (i = 0, len = ref.length; i < len; i++) {
-	          model_json = ref[i];
-	          results.push(JSONUtils.deepClone(model_json));
-	        }
-	        return results;
-	      }).call(this));
-	    } else {
-	      if (!(model_json = this.get(model.id))) {
-	        return options.error(new Error("Model not found with id: " + model.id));
-	      }
-	      return options.success(JSONUtils.deepClone(model_json));
-	    }
-	  };
-
-	  MemorySync.prototype.create = function(model, options) {
-	    var model_json;
-	    if (this.manual_id) {
-	      return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
-	    }
-	    model.set(this.id_attribute, this.id_type === 'String' ? "" + (++this.id) : ++this.id);
-	    this.store.splice(this.insertIndexOf(model.id), 0, model_json = model.toJSON());
-	    return options.success(JSONUtils.deepClone(model_json));
-	  };
-
-	  MemorySync.prototype.update = function(model, options) {
-	    var create, index, model_json;
-	    create = (index = this.insertIndexOf(model.id)) >= this.store.length || this.store[index].id !== model.id;
-	    if (!this.manual_id && create) {
-	      return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
-	    }
-	    model_json = model.toJSON();
-	    if (create) {
-	      this.store.splice(index, 0, model_json);
-	    } else {
-	      this.store[index] = model_json;
-	    }
-	    return options.success(JSONUtils.deepClone(model_json));
-	  };
-
-	  MemorySync.prototype["delete"] = function(model, options) {
-	    return this.deleteCB(model, (function(_this) {
-	      return function(err) {
-	        if (err) {
-	          return options.error(err);
-	        } else {
-	          return options.success();
-	        }
-	      };
-	    })(this));
-	  };
-
-	  MemorySync.prototype.deleteCB = function(model, callback) {
-	    var index, model_json;
-	    if ((index = this.indexOf(model.id)) < 0) {
-	      return callback(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
-	    }
-	    model_json = this.store.splice(index, 1);
-	    return Utils.patchRemove(this.model_type, model, callback);
-	  };
-
-	  MemorySync.prototype.resetSchema = function(options, callback) {
-	    return this.destroy(callback);
-	  };
-
-	  MemorySync.prototype.cursor = function(query) {
-	    if (query == null) {
-	      query = {};
-	    }
-	    return new MemoryCursor(query, _.pick(this, ['model_type', 'store']));
-	  };
-
-	  MemorySync.prototype.destroy = function(query, callback) {
-	    var cursor, is_done, next, ref;
-	    if (arguments.length === 1) {
-	      ref = [{}, query], query = ref[0], callback = ref[1];
-	    }
-	    if (_.size(query) === 0) {
-	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
-	        return function(model_json, callback) {
-	          return Utils.patchRemove(_this.model_type, model_json, callback);
-	        };
-	      })(this));
-	    } else {
-	      is_done = false;
-	      cursor = this.model_type.cursor(query).limit(DESTROY_BATCH_LIMIT);
-	      next = (function(_this) {
-	        return function(err) {
-	          if (err || is_done) {
-	            return callback(err);
-	          }
-	          return cursor.toJSON(function(err, models_json) {
-	            if (err) {
-	              return callback(err);
-	            }
-	            if (models_json.length === 0) {
-	              return callback();
-	            }
-	            is_done = models_json.length < DESTROY_BATCH_LIMIT;
-	            return Utils.each(models_json, BATCH_COUNT, _this.deleteCB, next);
-	          });
-	        };
-	      })(this);
-	      return next();
-	    }
-	  };
-
-	  MemorySync.prototype.get = function(id) {
-	    var index, model;
-	    if ((index = _.sortedIndex(this.store, {
-	      id: id
-	    }, this.id_attribute)) >= this.store.length || (model = this.store[index]).id !== id) {
-	      return null;
-	    } else {
-	      return model;
-	    }
-	  };
-
-	  MemorySync.prototype.indexOf = function(id) {
-	    var index;
-	    if ((index = _.sortedIndex(this.store, {
-	      id: id
-	    }, this.id_attribute)) >= this.store.length || this.store[index].id !== id) {
-	      return -1;
-	    } else {
-	      return index;
-	    }
-	  };
-
-	  MemorySync.prototype.insertIndexOf = function(id) {
-	    return _.sortedIndex(this.store, {
-	      id: id
-	    }, this.id_attribute);
-	  };
-
-	  return MemorySync;
-
-	})();
-
-	module.exports = function(type) {
-	  var model_type, sync, sync_fn;
-	  if (Utils.isCollection(new type())) {
-	    model_type = Utils.configureCollectionModelType(type, module.exports);
-	    return type.prototype.sync = model_type.prototype.sync;
-	  }
-	  sync = new MemorySync(type);
-	  type.prototype.sync = sync_fn = function(method, model, options) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    sync.initialize();
-	    if (method === 'createSync') {
-	      return module.exports.apply(null, Array.prototype.slice.call(arguments, 1));
-	    }
-	    if (method === 'sync') {
-	      return sync;
-	    }
-	    if (method === 'isRemote') {
-	      return false;
-	    }
-	    if (method === 'schema') {
-	      return sync.schema;
-	    }
-	    if (method === 'tableName') {
-	      return void 0;
-	    }
-	    if (sync[method]) {
-	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-	    } else {
-	      return void 0;
-	    }
-	  };
-	  Utils.configureModelType(type);
-	  return BackboneORM.model_cache.configureSync(type, sync_fn);
-	};
-
-	module.exports.Sync = MemorySync;
-
-	module.exports.Cursor = MemoryCursor;
-
-	module.exports.capabilities = function(url) {
-	  return CAPABILITIES;
-	};
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Queue, URL, Utils, _, modelExtensions,
-	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-	  hasProp = {}.hasOwnProperty;
-
-	URL = __webpack_require__(19);
-
-	Backbone = __webpack_require__(2);
-
-	_ = __webpack_require__(21);
-
-	BackboneORM = __webpack_require__(5);
-
-	DatabaseURL = __webpack_require__(13);
-
-	Queue = __webpack_require__(12);
-
-	JSONUtils = __webpack_require__(9);
-
-	modelExtensions = null;
-
-	module.exports = Utils = (function() {
-	  function Utils() {}
-
-	  Utils.resetSchemas = function(model_types, options, callback) {
-	    var failed_schemas, fn, i, j, len, len1, model_type, queue, ref;
-	    if (arguments.length === 2) {
-	      ref = [{}, options], options = ref[0], callback = ref[1];
-	    }
-	    for (i = 0, len = model_types.length; i < len; i++) {
-	      model_type = model_types[i];
-	      model_type.schema();
-	    }
-	    failed_schemas = [];
-	    queue = new Queue(1);
-	    fn = function(model_type) {
-	      return queue.defer(function(callback) {
-	        return model_type.resetSchema(options, function(err) {
-	          if (err) {
-	            failed_schemas.push(model_type.model_name);
-	            console.log("Error when dropping schema for " + model_type.model_name + ". " + err);
-	          }
-	          return callback();
-	        });
-	      });
-	    };
-	    for (j = 0, len1 = model_types.length; j < len1; j++) {
-	      model_type = model_types[j];
-	      fn(model_type);
-	    }
-	    return queue.await(function(err) {
-	      if (options.verbose) {
-	        console.log((model_types.length - failed_schemas.length) + " schemas dropped.");
-	      }
-	      BackboneORM.model_cache.reset();
-	      if (failed_schemas.length) {
-	        return callback(new Error("Failed to migrate schemas: " + (failed_schemas.join(', '))));
-	      }
-	      return callback();
-	    });
-	  };
-
-	  Utils.bbCallback = function(callback) {
-	    return {
-	      success: (function(model, resp, options) {
-	        return callback(null, model, resp, options);
-	      }),
-	      error: (function(model, resp, options) {
-	        return callback(resp || new Error('Backbone call failed'), model, resp, options);
-	      })
-	    };
-	  };
-
-	  Utils.wrapOptions = function(options, callback) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    if (_.isFunction(options)) {
-	      options = Utils.bbCallback(options);
-	    }
-	    return _.defaults(Utils.bbCallback(function(err, model, resp, modified_options) {
-	      return callback(err, model, resp, options);
-	    }), options);
-	  };
-
-	  Utils.isModel = function(obj) {
-	    return obj && obj.attributes && ((obj instanceof Backbone.Model) || (obj.parse && obj.fetch));
-	  };
-
-	  Utils.isCollection = function(obj) {
-	    return obj && obj.models && ((obj instanceof Backbone.Collection) || (obj.reset && obj.fetch));
-	  };
-
-	  Utils.get = function(obj, key, default_value) {
-	    if (!obj._orm || !obj._orm.hasOwnProperty(key)) {
-	      return default_value;
-	    } else {
-	      return obj._orm[key];
-	    }
-	  };
-
-	  Utils.set = function(obj, key, value) {
-	    return (obj._orm || (obj._orm = {}))[key] = value;
-	  };
-
-	  Utils.orSet = function(obj, key, value) {
-	    if (!(obj._orm || (obj._orm = {})).hasOwnProperty(key)) {
-	      obj._orm[key] = value;
-	    }
-	    return obj._orm[key];
-	  };
-
-	  Utils.unset = function(obj, key) {
-	    return delete (obj._orm || (obj._orm = {}))[key];
-	  };
-
-	  Utils.findOrGenerateModelName = function(model_type) {
-	    var model_name, url;
-	    if (model_type.prototype.model_name) {
-	      return model_type.prototype.model_name;
-	    }
-	    if (url = _.result(new model_type, 'url')) {
-	      if (model_name = (new DatabaseURL(url)).modelName()) {
-	        return model_name;
-	      }
-	    }
-	    if (model_type.name) {
-	      return model_type.name;
-	    }
-	    throw "Could not find or generate model name for " + model_type;
-	  };
-
-	  Utils.configureCollectionModelType = function(type, sync) {
-	    var ORMModel, modelURL, model_type;
-	    modelURL = function() {
-	      var url, url_parts;
-	      url = _.result(this.collection || type.prototype, 'url');
-	      if (!this.isNew()) {
-	        url_parts = URL.parse(url);
-	        url_parts.pathname = url_parts.pathname + "/encodeURIComponent(@id)";
-	        url = URL.format(url_parts);
-	      }
-	      return url;
-	    };
-	    model_type = type.prototype.model;
-	    if (!model_type || (model_type === Backbone.Model)) {
-	      ORMModel = (function(superClass) {
-	        extend(ORMModel, superClass);
-
-	        function ORMModel() {
-	          return ORMModel.__super__.constructor.apply(this, arguments);
-	        }
-
-	        ORMModel.prototype.url = modelURL;
-
-	        ORMModel.prototype.schema = type.prototype.schema;
-
-	        ORMModel.prototype.sync = sync(ORMModel);
-
-	        return ORMModel;
-
-	      })(Backbone.Model);
-	      return type.prototype.model = ORMModel;
-	    } else if (model_type.prototype.sync === Backbone.Model.prototype.sync) {
-	      model_type.prototype.url = modelURL;
-	      model_type.prototype.schema = type.prototype.schema;
-	      model_type.prototype.sync = sync(model_type);
-	    }
-	    return model_type;
-	  };
-
-	  Utils.configureModelType = function(type) {
-	    modelExtensions || (modelExtensions = __webpack_require__(28));
-	    return modelExtensions(type);
-	  };
-
-	  Utils.patchRemove = function(model_type, model, callback) {
-	    var fn, key, queue, ref, relation, schema;
-	    if (!(schema = model_type.schema())) {
-	      return callback();
-	    }
-	    queue = new Queue(1);
-	    ref = schema.relations;
-	    fn = function(relation) {
-	      return queue.defer(function(callback) {
-	        return relation.patchRemove(model, callback);
-	      });
-	    };
-	    for (key in ref) {
-	      relation = ref[key];
-	      fn(relation);
-	    }
-	    return queue.await(callback);
-	  };
-
-	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
-	    return Utils.patchRemove(model_type, model_json, callback);
-	  };
-
-	  Utils.presaveBelongsToRelationships = function(model, callback) {
-	    var fn, i, key, len, queue, ref, related_model, related_models, relation, schema, value;
-	    if (!model.schema) {
-	      return callback();
-	    }
-	    queue = new Queue(1);
-	    schema = model.schema();
-	    ref = schema.relations;
-	    for (key in ref) {
-	      relation = ref[key];
-	      if (relation.type !== 'belongsTo' || relation.isVirtual() || !(value = model.get(key))) {
-	        continue;
-	      }
-	      related_models = value.models ? value.models : [value];
-	      fn = (function(_this) {
-	        return function(related_model) {
-	          return queue.defer(function(callback) {
-	            return related_model.save(callback);
-	          });
-	        };
-	      })(this);
-	      for (i = 0, len = related_models.length; i < len; i++) {
-	        related_model = related_models[i];
-	        if (related_model.id) {
-	          continue;
-	        }
-	        fn(related_model);
-	      }
-	    }
-	    return queue.await(callback);
-	  };
-
-	  Utils.dataId = function(data) {
-	    if (_.isObject(data)) {
-	      return data.id;
-	    } else {
-	      return data;
-	    }
-	  };
-
-	  Utils.dataIsSameModel = function(data1, data2) {
-	    if (Utils.dataId(data1) || Utils.dataId(data2)) {
-	      return Utils.dataId(data1) === Utils.dataId(data2);
-	    }
-	    return _.isEqual(data1, data2);
-	  };
-
-	  Utils.dataToModel = function(data, model_type) {
-	    var attributes, item, model;
-	    if (!data) {
-	      return null;
-	    }
-	    if (_.isArray(data)) {
-	      return (function() {
-	        var i, len, results;
-	        results = [];
-	        for (i = 0, len = data.length; i < len; i++) {
-	          item = data[i];
-	          results.push(Utils.dataToModel(item, model_type));
-	        }
-	        return results;
-	      })();
-	    }
-	    if (Utils.isModel(data)) {
-	      model = data;
-	    } else if (Utils.dataId(data) !== data) {
-	      model = new model_type(model_type.prototype.parse(data));
-	    } else {
-	      (attributes = {})[model_type.prototype.idAttribute] = data;
-	      model = new model_type(attributes);
-	      model.setLoaded(false);
-	    }
-	    return model;
-	  };
-
-	  Utils.updateModel = function(model, data) {
-	    if (!data || (model === data) || data._orm_needs_load) {
-	      return model;
-	    }
-	    if (Utils.isModel(data)) {
-	      data = data.toJSON();
-	    }
-	    if (Utils.dataId(data) !== data) {
-	      model.setLoaded(true);
-	      model.set(data);
-	    }
-	    return model;
-	  };
-
-	  Utils.updateOrNew = function(data, model_type) {
-	    var cache, id, model;
-	    if ((cache = model_type.cache) && (id = Utils.dataId(data))) {
-	      if (model = cache.get(id)) {
-	        Utils.updateModel(model, data);
-	      }
-	    }
-	    if (!model) {
-	      model = Utils.isModel(data) ? data : Utils.dataToModel(data, model_type);
-	      if (model && cache) {
-	        cache.set(model.id, model);
-	      }
-	    }
-	    return model;
-	  };
-
-	  Utils.modelJSONSave = function(model_json, model_type, callback) {
-	    var JSONModel, url_root;
-	    model_type._orm || (model_type._orm = {});
-	    if (!model_type._orm.model_type_json) {
-	      try {
-	        url_root = _.result(new model_type, 'url');
-	      } catch (_error) {}
-	      model_type._orm.model_type_json = JSONModel = (function(superClass) {
-	        extend(JSONModel, superClass);
-
-	        function JSONModel() {
-	          return JSONModel.__super__.constructor.apply(this, arguments);
-	        }
-
-	        JSONModel.prototype._orm_never_cache = true;
-
-	        JSONModel.prototype.urlRoot = function() {
-	          return url_root;
-	        };
-
-	        return JSONModel;
-
-	      })(Backbone.Model);
-	    }
-	    if (model_type.prototype.whitelist) {
-	      model_json = _.pick(model_json, model_type.prototype.whitelist);
-	    }
-	    return model_type.prototype.sync('update', new model_type._orm.model_type_json(model_json), Utils.bbCallback(callback));
-	  };
-
-	  Utils.each = function(array, limit, iterator, callback) {
-	    var count, fn, i, index, queue, ref, ref1, start_index;
-	    if (!(count = array.length)) {
-	      return callback();
-	    }
-	    index = 0;
-	    queue = new Queue(1);
-	    fn = function(start_index) {
-	      return queue.defer(function(callback) {
-	        var iteration_end, next;
-	        iteration_end = Math.min(start_index + limit, count);
-	        next = (function(_this) {
-	          return function(err, done) {
-	            if (err) {
-	              return callback(err);
-	            }
-	            if (done || (index >= iteration_end)) {
-	              return callback();
-	            }
-	            return iterator(array[index++], next);
-	          };
-	        })(this);
-	        return next();
-	      });
-	    };
-	    for (start_index = i = 0, ref = count, ref1 = limit; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
-	      fn(start_index);
-	    }
-	    return queue.await(callback);
-	  };
-
-	  Utils.eachC = function(array, limit, iterator, callback) {
-	    return Utils.each(array, limit, callback, iterator);
-	  };
-
-	  Utils.popEach = function(array, limit, iterator, callback) {
-	    var count, fn, i, index, queue, ref, ref1, start_index;
-	    if (!(count = array.length)) {
-	      return callback();
-	    }
-	    index = 0;
-	    queue = new Queue(1);
-	    fn = function(start_index) {
-	      return queue.defer(function(callback) {
-	        var iteration_end, next;
-	        iteration_end = Math.min(start_index + limit, count);
-	        next = (function(_this) {
-	          return function(err, done) {
-	            if (err) {
-	              return callback(err);
-	            }
-	            if (done || (index >= iteration_end) || (array.length === 0)) {
-	              return callback();
-	            }
-	            index++;
-	            return iterator(array.pop(), next);
-	          };
-	        })(this);
-	        return next();
-	      });
-	    };
-	    for (start_index = i = 0, ref = count, ref1 = limit; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
-	      fn(start_index);
-	    }
-	    return queue.await(callback);
-	  };
-
-	  Utils.popEachC = function(array, limit, iterator, callback) {
-	    return Utils.popEach(array, limit, callback, iterator);
-	  };
-
-	  Utils.isSorted = function(models, fields) {
-	    var i, last_model, len, model;
-	    fields = _.uniq(fields);
-	    for (i = 0, len = models.length; i < len; i++) {
-	      model = models[i];
-	      if (last_model && this.fieldCompare(last_model, model, fields) === 1) {
-	        return false;
-	      }
-	      last_model = model;
-	    }
-	    return true;
-	  };
-
-	  Utils.fieldCompare = function(model, other_model, fields) {
-	    var desc, field;
-	    field = fields[0];
-	    if (_.isArray(field)) {
-	      field = field[0];
-	    }
-	    if (field.charAt(0) === '-') {
-	      field = field.substr(1);
-	      desc = true;
-	    }
-	    if (model.get(field) === other_model.get(field)) {
-	      if (fields.length > 1) {
-	        return this.fieldCompare(model, other_model, fields.splice(1));
-	      } else {
-	        return 0;
-	      }
-	    }
-	    if (desc) {
-	      if (model.get(field) < other_model.get(field)) {
-	        return 1;
-	      } else {
-	        return -1;
-	      }
-	    } else {
-	      if (model.get(field) > other_model.get(field)) {
-	        return 1;
-	      } else {
-	        return -1;
-	      }
-	    }
-	  };
-
-	  Utils.jsonFieldCompare = function(model, other_model, fields) {
-	    var desc, field;
-	    field = fields[0];
-	    if (_.isArray(field)) {
-	      field = field[0];
-	    }
-	    if (field.charAt(0) === '-') {
-	      field = field.substr(1);
-	      desc = true;
-	    }
-	    if (model[field] === other_model[field]) {
-	      if (fields.length > 1) {
-	        return this.jsonFieldCompare(model, other_model, fields.splice(1));
-	      } else {
-	        return 0;
-	      }
-	    }
-	    if (desc) {
-	      if (JSONUtils.stringify(model[field]) < JSONUtils.stringify(other_model[field])) {
-	        return 1;
-	      } else {
-	        return -1;
-	      }
-	    } else {
-	      if (JSONUtils.stringify(model[field]) > JSONUtils.stringify(other_model[field])) {
-	        return 1;
-	      } else {
-	        return -1;
-	      }
-	    }
-	  };
-
-	  return Utils;
-
-	})();
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var JSONUtils, Queue, _;
-
-	_ = __webpack_require__(21);
-
-	Queue = __webpack_require__(12);
-
-	module.exports = JSONUtils = (function() {
-	  function JSONUtils() {}
-
-	  JSONUtils.stringify = function(json) {
-	    var err;
-	    try {
-	      return JSON.stringify(json);
-	    } catch (_error) {
-	      err = _error;
-	      return 'Failed to stringify';
-	    }
-	  };
-
-	  JSONUtils.parseDates = function(json) {
-	    var date, key, value;
-	    if (_.isString(json)) {
-	      if ((json.length >= 20) && json[json.length - 1] === 'Z' && !_.isNaN((date = new Date(json)).getTime())) {
-	        return date;
-	      }
-	    } else if (_.isObject(json) || _.isArray(json)) {
-	      for (key in json) {
-	        value = json[key];
-	        json[key] = JSONUtils.parseDates(value);
-	      }
-	    }
-	    return json;
-	  };
-
-	  JSONUtils.parseField = function(value, model_type, key) {
-	    var integer_value;
-	    if ((model_type != null ? model_type.schema().idType(key) : void 0) !== 'Integer') {
-	      return JSONUtils.parseDates(value);
-	    }
-	    if (!_.isNaN(integer_value = +value)) {
-	      return integer_value;
-	    }
-	    console.log("Warning: failed to convert key: " + key + " value: " + value + " to integer. Model: " + model_type.model_name);
-	    return value;
-	  };
-
-	  JSONUtils.parse = function(obj, model_type) {
-	    var key, result, value;
-	    if (!_.isObject(obj)) {
-	      return JSONUtils.parseDates(obj);
-	    }
-	    if (_.isArray(obj)) {
-	      return (function() {
-	        var i, len, results1;
-	        results1 = [];
-	        for (i = 0, len = obj.length; i < len; i++) {
-	          value = obj[i];
-	          results1.push(JSONUtils.parse(value, model_type));
-	        }
-	        return results1;
-	      })();
-	    }
-	    result = {};
-	    for (key in obj) {
-	      value = obj[key];
-	      result[key] = JSONUtils.parseField(value, model_type, key);
-	    }
-	    return result;
-	  };
-
-	  JSONUtils.parseQuery = function(query) {
-	    var json, key, value;
-	    json = {};
-	    for (key in query) {
-	      value = query[key];
-	      json[key] = value;
-	      if (_.isString(value) && value.length) {
-	        try {
-	          value = JSON.parse(value);
-	        } catch (_error) {}
-	        json[key] = JSONUtils.parseDates(value);
-	      }
-	    }
-	    return json;
-	  };
-
-	  JSONUtils.querify = function(json) {
-	    var key, query, value;
-	    query = {};
-	    for (key in json) {
-	      value = json[key];
-	      query[key] = JSON.stringify(value);
-	    }
-	    return query;
-	  };
-
-	  JSONUtils.toQuery = function(json) {
-	    return console.log("JSONUtils.toQuery has been deprecated. Use JSONUtils.querify instead");
-	  };
-
-	  JSONUtils.renderTemplate = function(models, template, options, callback) {
-	    var fn, i, len, model, queue, results;
-	    if (arguments.length === 3) {
-	      callback = options;
-	      options = {};
-	    }
-	    if (!_.isArray(models)) {
-	      if (!models) {
-	        return callback(null, null);
-	      }
-	      if (_.isString(template)) {
-	        return JSONUtils.renderKey(models, template, options, callback);
-	      }
-	      if (_.isArray(template)) {
-	        return JSONUtils.renderKeys(models, template, options, callback);
-	      }
-	      if (_.isFunction(template)) {
-	        return template(models, options, callback);
-	      }
-	      return JSONUtils.renderDSL(models, template, options, callback);
-	    } else {
-	      results = [];
-	      queue = new Queue(1);
-	      fn = function(model) {
-	        return queue.defer(function(callback) {
-	          return JSONUtils.renderTemplate(model, template, options, function(err, related_json) {
-	            if (err) {
-	              return callback(err);
-	            }
-	            results.push(related_json);
-	            return callback();
-	          });
-	        });
-	      };
-	      for (i = 0, len = models.length; i < len; i++) {
-	        model = models[i];
-	        fn(model);
-	      }
-	      return queue.await(function(err) {
-	        return callback(err, err ? void 0 : results);
-	      });
-	    }
-	  };
-
-	  JSONUtils.renderDSL = function(model, dsl, options, callback) {
-	    var args, fn, key, queue, result;
-	    if (arguments.length === 3) {
-	      callback = options;
-	      options = {};
-	    }
-	    queue = new Queue();
-	    result = {};
-	    fn = function(key, args) {
-	      return queue.defer(function(callback) {
-	        var field, fn_args, query, relation, template;
-	        field = args.key || key;
-	        if (relation = model.relation(field)) {
-	          if (args.query) {
-	            query = args.query;
-	            template = args.template;
-	          } else if (args.$count) {
-	            query = _.clone(args);
-	            delete query.key;
-	          } else if (_.isFunction(args)) {
-	            template = args;
-	          } else if (args.template) {
-	            if (_.isObject(args.template) && !_.isFunction(args.template)) {
-	              query = args.template;
-	            } else {
-	              template = args.template;
-	              query = _.clone(args);
-	              delete query.key;
-	              delete query.template;
-	              if (_.size(query) === 0) {
-	                query = null;
-	              }
-	            }
-	          } else {
-	            template = _.clone(args);
-	            delete template.key;
-	          }
-	          if (template) {
-	            if (query) {
-	              return relation.cursor(model, field, query).toModels(function(err, models) {
-	                if (err) {
-	                  return callback(err);
-	                }
-	                return JSONUtils.renderTemplate(models, template, options, function(err, json) {
-	                  result[key] = json;
-	                  return callback(err);
-	                });
-	              });
-	            } else {
-	              return model.get(field, function(err, related_model) {
-	                if (err) {
-	                  return callback(err);
-	                }
-	                return JSONUtils.renderTemplate(related_model, template, options, function(err, json) {
-	                  result[key] = json;
-	                  return callback(err);
-	                });
-	              });
-	            }
-	          } else {
-	            return relation.cursor(model, field, query).toJSON(function(err, json) {
-	              result[key] = json;
-	              return callback(err);
-	            });
-	          }
-	        } else {
-	          if (key.length > 1 && key[key.length - 1] === '_') {
-	            key = key.slice(0, +(key.length - 2) + 1 || 9e9);
-	          }
-	          if (key === '$select') {
-	            if (_.isString(args)) {
-	              return JSONUtils.renderKey(model, args, options, function(err, json) {
-	                result[args] = json;
-	                return callback(err);
-	              });
-	            } else {
-	              return JSONUtils.renderKeys(model, args, options, function(err, json) {
-	                _.extend(result, json);
-	                return callback(err);
-	              });
-	            }
-	          } else if (_.isString(args)) {
-	            return JSONUtils.renderKey(model, args, options, function(err, json) {
-	              result[key] = json;
-	              return callback(err);
-	            });
-	          } else if (_.isFunction(args)) {
-	            return args(model, options, function(err, json) {
-	              result[key] = json;
-	              return callback(err);
-	            });
-	          } else if (_.isString(args.method)) {
-	            fn_args = _.isArray(args.args) ? args.args.slice() : (args.args ? [args.args] : []);
-	            fn_args.push(function(err, json) {
-	              result[key] = json;
-	              return callback(err);
-	            });
-	            return model[args.method].apply(model, fn_args);
-	          } else {
-	            console.trace("Unknown DSL action: " + key + ": ", args);
-	            return callback(new Error("Unknown DSL action: " + key + ": ", args));
-	          }
-	        }
-	      });
-	    };
-	    for (key in dsl) {
-	      args = dsl[key];
-	      fn(key, args);
-	    }
-	    return queue.await(function(err) {
-	      return callback(err, err ? void 0 : result);
-	    });
-	  };
-
-	  JSONUtils.renderKeys = function(model, keys, options, callback) {
-	    var fn, i, key, len, queue, result;
-	    if (arguments.length === 3) {
-	      callback = options;
-	      options = {};
-	    }
-	    result = {};
-	    queue = new Queue();
-	    fn = function(key) {
-	      return queue.defer(function(callback) {
-	        return JSONUtils.renderKey(model, key, options, function(err, value) {
-	          if (err) {
-	            return callback(err);
-	          }
-	          result[key] = value;
-	          return callback();
-	        });
-	      });
-	    };
-	    for (i = 0, len = keys.length; i < len; i++) {
-	      key = keys[i];
-	      fn(key);
-	    }
-	    return queue.await(function(err) {
-	      return callback(err, err ? void 0 : result);
-	    });
-	  };
-
-	  JSONUtils.renderKey = function(model, key, options, callback) {
-	    if (arguments.length === 3) {
-	      callback = options;
-	      options = {};
-	    }
-	    return model.get(key, function(err, value) {
-	      var item;
-	      if (err) {
-	        return callback(err);
-	      }
-	      if (model.relation(key)) {
-	        if (_.isArray(value)) {
-	          return callback(null, (function() {
-	            var i, len, results1;
-	            results1 = [];
-	            for (i = 0, len = value.length; i < len; i++) {
-	              item = value[i];
-	              results1.push(item.toJSON());
-	            }
-	            return results1;
-	          })());
-	        }
-	        if (value && value.toJSON) {
-	          return callback(null, value = value.toJSON());
-	        }
-	      }
-	      return callback(null, value);
-	    });
-	  };
-
-	  JSONUtils.renderRelated = function(models, attribute_name, template, options, callback) {
-	    var fn, i, len, model, queue, results;
-	    if (arguments.length === 4) {
-	      callback = options;
-	      options = {};
-	    }
-	    if (!_.isArray(models)) {
-	      return models.get(attribute_name, function(err, related_models) {
-	        if (err) {
-	          callback(err);
-	        }
-	        return JSONUtils.renderTemplate(related_models, template, options, callback);
-	      });
-	    } else {
-	      results = [];
-	      queue = new Queue();
-	      fn = function(model) {
-	        return queue.defer(function(callback) {
-	          return model.get(attribute_name, function(err, related_models) {
-	            if (err) {
-	              callback(err);
-	            }
-	            return JSONUtils.renderTemplate(related_models, template, options, function(err, related_json) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              results.push(related_json);
-	              return callback();
-	            });
-	          });
-	        });
-	      };
-	      for (i = 0, len = models.length; i < len; i++) {
-	        model = models[i];
-	        fn(model);
-	      }
-	      return queue.await(function(err) {
-	        return callback(err, err ? void 0 : results);
-	      });
-	    }
-	  };
-
-	  JSONUtils.deepClone = function(obj, depth) {
-	    var clone, key;
-	    if (!obj || (typeof obj !== 'object')) {
-	      return obj;
-	    }
-	    if (_.isString(obj)) {
-	      return String.prototype.slice.call(obj);
-	    }
-	    if (_.isDate(obj)) {
-	      return new Date(obj.getTime());
-	    }
-	    if (_.isFunction(obj.clone)) {
-	      return obj.clone();
-	    }
-	    if (_.isArray(obj)) {
-	      clone = Array.prototype.slice.call(obj);
-	    } else if (obj.constructor !== {}.constructor) {
-	      return obj;
-	    } else {
-	      clone = _.extend({}, obj);
-	    }
-	    if (!_.isUndefined(depth) && (depth > 0)) {
-	      for (key in clone) {
-	        clone[key] = JSONUtils.deepClone(clone[key], depth - 1);
-	      }
-	    }
-	    return clone;
-	  };
-
-	  return JSONUtils;
-
-	})();
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var DateUtils, UNITS_TO_MS, _;
-
-	_ = __webpack_require__(21);
-
-	UNITS_TO_MS = {
-	  milliseconds: {
-	    milliseconds: 1
-	  },
-	  seconds: {
-	    milliseconds: 1000
-	  },
-	  minutes: {
-	    milliseconds: 60 * 1000
-	  },
-	  hours: {
-	    milliseconds: 24 * 60 * 1000
-	  },
-	  days: {
-	    days: 1
-	  },
-	  weeks: {
-	    days: 7
-	  },
-	  months: {
-	    months: 1
-	  },
-	  years: {
-	    years: 1
-	  }
-	};
-
-	module.exports = DateUtils = (function() {
-	  function DateUtils() {}
-
-	  DateUtils.durationAsMilliseconds = function(count, units) {
-	    var lookup;
-	    if (!(lookup = UNITS_TO_MS[units])) {
-	      throw new Error("DateUtils.durationAsMilliseconds :Unrecognized units: " + units);
-	    }
-	    if (lookup.milliseconds) {
-	      return count * lookup.milliseconds;
-	    }
-	    if (lookup.days) {
-	      return count * 864e5 * lookup.days;
-	    }
-	    if (lookup.months) {
-	      return count * lookup.months * 2592e6;
-	    }
-	    if (lookup.years) {
-	      return count * lookup.years * 31536e6;
-	    }
-	  };
-
-	  DateUtils.isBefore = function(mv, tv) {
-	    return mv.getTime() < tv.getTime();
-	  };
-
-	  DateUtils.isAfter = function(mv, tv) {
-	    return mv.getTime() > tv.getTime();
-	  };
-
-	  return DateUtils;
-
-	})();
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var TestUtils;
-
-	module.exports = TestUtils = (function() {
-	  function TestUtils() {}
-
-	  TestUtils.optionSets = function() {
-	    return [
-	      {
-	        'cache': false,
-	        'embed': false,
-	        '$tags': '@no_cache @no_embed @quick'
-	      }, {
-	        'cache': true,
-	        'embed': false,
-	        '$tags': '@cache @no_embed'
-	      }, {
-	        'cache': false,
-	        'embed': true,
-	        '$tags': '@no_cache @embed'
-	      }, {
-	        'cache': true,
-	        'embed': true,
-	        '$tags': '@cache @embed'
-	      }
-	    ];
-	  };
-
-	  return TestUtils;
-
-	})();
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Queue,
-	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-	module.exports = Queue = (function() {
-	  function Queue(parallelism) {
-	    this.parallelism = parallelism;
-	    this._doneTask = bind(this._doneTask, this);
-	    this.parallelism || (this.parallelism = Infinity);
-	    this.tasks = [];
-	    this.running_count = 0;
-	    this.error = null;
-	    this.await_callback = null;
-	  }
-
-	  Queue.prototype.defer = function(callback) {
-	    this.tasks.push(callback);
-	    return this._runTasks();
-	  };
-
-	  Queue.prototype.await = function(callback) {
-	    if (this.await_callback) {
-	      throw new Error("Awaiting callback was added twice: " + callback);
-	    }
-	    this.await_callback = callback;
-	    if (this.error || !(this.tasks.length + this.running_count)) {
-	      return this._callAwaiting();
-	    }
-	  };
-
-	  Queue.prototype._doneTask = function(err) {
-	    this.running_count--;
-	    this.error || (this.error = err);
-	    return this._runTasks();
-	  };
-
-	  Queue.prototype._runTasks = function() {
-	    var current;
-	    if (this.error || !(this.tasks.length + this.running_count)) {
-	      return this._callAwaiting();
-	    }
-	    while (this.running_count < this.parallelism) {
-	      if (!this.tasks.length) {
-	        return;
-	      }
-	      current = this.tasks.shift();
-	      this.running_count++;
-	      current(this._doneTask);
-	    }
-	  };
-
-	  Queue.prototype._callAwaiting = function() {
-	    if (this.await_called || !this.await_callback) {
-	      return;
-	    }
-	    this.await_called = true;
-	    return this.await_callback(this.error);
-	  };
-
-	  return Queue;
-
-	})();
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var BackboneORM, DatabaseURL, SUPPORTED_KEYS, URL, _;
-
-	_ = __webpack_require__(21);
-
-	URL = __webpack_require__(19);
-
-	BackboneORM = __webpack_require__(5);
-
-	SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href'];
-
-	module.exports = DatabaseURL = (function() {
-	  function DatabaseURL(url, parse_query_string, slashes_denote_host) {
-	    var database, database_parts, databases, databases_string, host, i, j, k, key, len, len1, len2, parts, path_paths, ref, start_parts, start_url, url_parts;
-	    url_parts = URL.parse(url, parse_query_string, slashes_denote_host);
-	    parts = url_parts.pathname.split(',');
-	    if (parts.length > 1) {
-	      start_parts = _.pick(url_parts, 'protocol', 'auth', 'slashes');
-	      start_parts.host = '{1}';
-	      start_parts.pathname = '{2}';
-	      start_url = URL.format(start_parts);
-	      start_url = start_url.replace('{1}/{2}', '');
-	      path_paths = url_parts.pathname.split('/');
-	      url_parts.pathname = "/" + path_paths[path_paths.length - 2] + "/" + path_paths[path_paths.length - 1];
-	      databases_string = url.replace(start_url, '');
-	      databases_string = databases_string.substring(0, databases_string.indexOf(url_parts.pathname));
-	      databases = databases_string.split(',');
-	      ref = ['host', 'hostname', 'port'];
-	      for (i = 0, len = ref.length; i < len; i++) {
-	        key = ref[i];
-	        delete url_parts[key];
-	      }
-	      this.hosts = [];
-	      for (j = 0, len1 = databases.length; j < len1; j++) {
-	        database = databases[j];
-	        host = database.split(':');
-	        this.hosts.push(host.length === 1 ? {
-	          host: host[0],
-	          hostname: host[0]
-	        } : {
-	          host: host[0],
-	          hostname: host[0] + ":" + host[1],
-	          port: host[1]
-	        });
-	      }
-	    }
-	    database_parts = _.compact(url_parts.pathname.split('/'));
-	    this.table = database_parts.pop();
-	    this.database = database_parts.join('/');
-	    for (k = 0, len2 = SUPPORTED_KEYS.length; k < len2; k++) {
-	      key = SUPPORTED_KEYS[k];
-	      if (url_parts.hasOwnProperty(key)) {
-	        this[key] = url_parts[key];
-	      }
-	    }
-	  }
-
-	  DatabaseURL.prototype.format = function(options) {
-	    var host_strings, url, url_parts;
-	    if (options == null) {
-	      options = {};
-	    }
-	    url_parts = _.pick(this, SUPPORTED_KEYS);
-	    url_parts.pathname = '';
-	    if (this.hosts) {
-	      host_strings = _.map(this.hosts, function(host) {
-	        return "" + host.host + (host.port ? ':' + host.port : '');
-	      });
-	      url_parts.pathname += host_strings.join(',');
-	      url_parts.host = "{1}";
-	    }
-	    if (this.database) {
-	      url_parts.pathname += "/" + this.database;
-	    }
-	    if (this.table && !options.exclude_table) {
-	      url_parts.pathname += "/" + this.table;
-	    }
-	    if (options.exclude_search || options.exclude_query) {
-	      delete url_parts.search;
-	      delete url_parts.query;
-	    }
-	    url = URL.format(url_parts);
-	    if (this.hosts) {
-	      url = url.replace("{1}/" + url_parts.pathname, url_parts.pathname);
-	    }
-	    return url;
-	  };
-
-	  DatabaseURL.prototype.parseAuth = function() {
-	    var auth_parts, result;
-	    if (!this.auth) {
-	      return null;
-	    }
-	    auth_parts = this.auth.split(':');
-	    result = {
-	      user: auth_parts[0]
-	    };
-	    result.password = auth_parts.length > 1 ? auth_parts[1] : null;
-	    return result;
-	  };
-
-	  DatabaseURL.prototype.modelName = function() {
-	    if (this.table) {
-	      return BackboneORM.naming_conventions.modelName(this.table, false);
-	    } else {
-	      return null;
-	    }
-	  };
-
-	  return DatabaseURL;
-
-	})();
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var LRU, MemoryStore, _,
-	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-	_ = __webpack_require__(21);
-
-	LRU = __webpack_require__(1);
-
-	module.exports = MemoryStore = (function() {
-	  function MemoryStore(options) {
-	    var max_age;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.forEach = bind(this.forEach, this);
-	    this.reset = bind(this.reset, this);
-	    this.destroy = bind(this.destroy, this);
-	    this.get = bind(this.get, this);
-	    this.set = bind(this.set, this);
-	    if (max_age = options.max_age) {
-	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
-	    }
-	    this.cache = new LRU(options);
-	  }
-
-	  MemoryStore.prototype.set = function(key, value, callback) {
-	    if (value._orm_never_cache) {
-	      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
-	    }
-	    this.cache.set(key, value);
-	    if (typeof callback === "function") {
-	      callback(null, value);
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.get = function(key, callback) {
-	    var value;
-	    value = this.cache.get(key);
-	    if (typeof callback === "function") {
-	      callback(null, value);
-	    }
-	    return value;
-	  };
-
-	  MemoryStore.prototype.destroy = function(key, callback) {
-	    this.cache.del(key);
-	    if (typeof callback === "function") {
-	      callback();
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.del = MemoryStore.prototype.destroy;
-
-	  MemoryStore.prototype.reset = function(callback) {
-	    this.cache.reset();
-	    if (typeof callback === "function") {
-	      callback();
-	    }
-	    return this;
-	  };
-
-	  MemoryStore.prototype.forEach = function(callback) {
-	    return this.cache.forEach(callback);
-	  };
-
-	  return MemoryStore;
-
-	})();
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var CURSOR_KEYS, Cursor, JSONUtils, Utils, _,
-	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-	_ = __webpack_require__(21);
-
-	Utils = __webpack_require__(8);
-
-	JSONUtils = __webpack_require__(9);
-
-	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or'];
-
-	module.exports = Cursor = (function() {
-	  function Cursor(query, options) {
-	    this.relatedModelTypesInQuery = bind(this.relatedModelTypesInQuery, this);
-	    var i, key, len, parsed_query, ref, value;
-	    for (key in options) {
-	      value = options[key];
-	      this[key] = value;
-	    }
-	    parsed_query = Cursor.parseQuery(query, this.model_type);
-	    this._find = parsed_query.find;
-	    this._cursor = parsed_query.cursor;
-	    ref = ['$whitelist', '$select', '$values', '$unique'];
-	    for (i = 0, len = ref.length; i < len; i++) {
-	      key = ref[i];
-	      if (this._cursor[key] && !_.isArray(this._cursor[key])) {
-	        this._cursor[key] = [this._cursor[key]];
-	      }
-	    }
-	  }
-
-	  Cursor.validateQuery = function(query, memo, model_type) {
-	    var full_key, key, results, value;
-	    results = [];
-	    for (key in query) {
-	      value = query[key];
-	      if (!(_.isUndefined(value) || _.isObject(value))) {
-	        continue;
-	      }
-	      full_key = memo ? memo + "." + key : key;
-	      if (_.isUndefined(value)) {
-	        throw new Error("Unexpected undefined for query key '" + full_key + "' on " + (model_type != null ? model_type.model_name : void 0));
-	      }
-	      if (_.isObject(value)) {
-	        results.push(Cursor.validateQuery(value, full_key, model_type));
-	      } else {
-	        results.push(void 0);
-	      }
-	    }
-	    return results;
-	  };
-
-	  Cursor.parseQuery = function(query, model_type) {
-	    var e, key, parsed_query, value;
-	    if (!query) {
-	      return {
-	        find: {},
-	        cursor: {}
-	      };
-	    } else if (!_.isObject(query)) {
-	      return {
-	        find: {
-	          id: query
-	        },
-	        cursor: {
-	          $one: true
-	        }
-	      };
-	    } else if (query.find || query.cursor) {
-	      return {
-	        find: query.find || {},
-	        cursor: query.cursor || {}
-	      };
-	    } else {
-	      try {
-	        Cursor.validateQuery(query, null, model_type);
-	      } catch (_error) {
-	        e = _error;
-	        throw new Error("Error: " + e + ". Query: ", query);
-	      }
-	      parsed_query = {
-	        find: {},
-	        cursor: {}
-	      };
-	      for (key in query) {
-	        value = query[key];
-	        if (key[0] !== '$') {
-	          parsed_query.find[key] = value;
-	        } else {
-	          parsed_query.cursor[key] = value;
-	        }
-	      }
-	      return parsed_query;
-	    }
-	  };
-
-	  Cursor.prototype.offset = function(offset) {
-	    this._cursor.$offset = offset;
-	    return this;
-	  };
-
-	  Cursor.prototype.limit = function(limit) {
-	    this._cursor.$limit = limit;
-	    return this;
-	  };
-
-	  Cursor.prototype.sort = function(sort) {
-	    this._cursor.$sort = sort;
-	    return this;
-	  };
-
-	  Cursor.prototype.whiteList = function(args) {
-	    var keys;
-	    keys = _.flatten(arguments);
-	    this._cursor.$whitelist = this._cursor.$whitelist ? _.intersection(this._cursor.$whitelist, keys) : keys;
-	    return this;
-	  };
-
-	  Cursor.prototype.select = function(args) {
-	    var keys;
-	    keys = _.flatten(arguments);
-	    this._cursor.$select = this._cursor.$select ? _.intersection(this._cursor.$select, keys) : keys;
-	    return this;
-	  };
-
-	  Cursor.prototype.include = function(args) {
-	    var keys;
-	    keys = _.flatten(arguments);
-	    this._cursor.$include = this._cursor.$include ? _.intersection(this._cursor.$include, keys) : keys;
-	    return this;
-	  };
-
-	  Cursor.prototype.values = function(args) {
-	    var keys;
-	    keys = _.flatten(arguments);
-	    this._cursor.$values = this._cursor.$values ? _.intersection(this._cursor.$values, keys) : keys;
-	    return this;
-	  };
-
-	  Cursor.prototype.unique = function(args) {
-	    var keys;
-	    keys = _.flatten(arguments);
-	    this._cursor.$unique = this._cursor.$unique ? _.intersection(this._cursor.$unique, keys) : keys;
-	    return this;
-	  };
-
-	  Cursor.prototype.ids = function() {
-	    this._cursor.$values = ['id'];
-	    return this;
-	  };
-
-	  Cursor.prototype.count = function(callback) {
-	    return this.execWithCursorQuery('$count', 'toJSON', callback);
-	  };
-
-	  Cursor.prototype.exists = function(callback) {
-	    return this.execWithCursorQuery('$exists', 'toJSON', callback);
-	  };
-
-	  Cursor.prototype.toModel = function(callback) {
-	    return this.execWithCursorQuery('$one', 'toModels', callback);
-	  };
-
-	  Cursor.prototype.toModels = function(callback) {
-	    if (this._cursor.$values) {
-	      return callback(new Error("Cannot call toModels on cursor with values for model " + this.model_type.model_name + ". Values: " + (JSONUtils.stringify(this._cursor.$values))));
-	    }
-	    return this.toJSON((function(_this) {
-	      return function(err, json) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        if (_this._cursor.$one && !json) {
-	          return callback(null, null);
-	        }
-	        if (!_.isArray(json)) {
-	          json = [json];
-	        }
-	        return _this.prepareIncludes(json, function(err, json) {
-	          var can_cache, item, model, models;
-	          if (can_cache = !(_this._cursor.$select || _this._cursor.$whitelist)) {
-	            models = (function() {
-	              var i, len, results;
-	              results = [];
-	              for (i = 0, len = json.length; i < len; i++) {
-	                item = json[i];
-	                results.push(Utils.updateOrNew(item, this.model_type));
-	              }
-	              return results;
-	            }).call(_this);
-	          } else {
-	            models = (function() {
-	              var i, len, results;
-	              results = [];
-	              for (i = 0, len = json.length; i < len; i++) {
-	                item = json[i];
-	                results.push((model = new this.model_type(this.model_type.prototype.parse(item)), model.setPartial(true), model));
-	              }
-	              return results;
-	            }).call(_this);
-	          }
-	          return callback(null, _this._cursor.$one ? models[0] : models);
-	        });
-	      };
-	    })(this));
-	  };
-
-	  Cursor.prototype.toJSON = function(callback) {
-	    var model_types, parsed_query;
-	    parsed_query = _.extend({}, _.pick(this._cursor, CURSOR_KEYS), this._find);
-	    model_types = this.relatedModelTypesInQuery();
-	    return this.queryToJSON(callback);
-	  };
-
-	  Cursor.prototype.queryToJSON = function(callback) {
-	    throw new Error('toJSON must be implemented by a concrete cursor for a Backbone Sync type');
-	  };
-
-	  Cursor.prototype.hasCursorQuery = function(key) {
-	    return this._cursor[key] || (this._cursor[key] === '');
-	  };
-
-	  Cursor.prototype.execWithCursorQuery = function(key, method, callback) {
-	    var value;
-	    value = this._cursor[key];
-	    this._cursor[key] = true;
-	    return this[method]((function(_this) {
-	      return function(err, json) {
-	        if (_.isUndefined(value)) {
-	          delete _this._cursor[key];
-	        } else {
-	          _this._cursor[key] = value;
-	        }
-	        return callback(err, json);
-	      };
-	    })(this));
-	  };
-
-	  Cursor.prototype.relatedModelTypesInQuery = function() {
-	    var i, key, len, ref, ref1, ref2, related_fields, related_model_types, relation, relation_key, reverse_relation, value;
-	    related_fields = [];
-	    related_model_types = [];
-	    ref = this._find;
-	    for (key in ref) {
-	      value = ref[key];
-	      if (key.indexOf('.') > 0) {
-	        ref1 = key.split('.'), relation_key = ref1[0], key = ref1[1];
-	        related_fields.push(relation_key);
-	      } else if ((reverse_relation = this.model_type.reverseRelation(key)) && reverse_relation.join_table) {
-	        related_model_types.push(reverse_relation.model_type);
-	        related_model_types.push(reverse_relation.join_table);
-	      }
-	    }
-	    if ((ref2 = this._cursor) != null ? ref2.$include : void 0) {
-	      related_fields = related_fields.concat(this._cursor.$include);
-	    }
-	    for (i = 0, len = related_fields.length; i < len; i++) {
-	      relation_key = related_fields[i];
-	      if (relation = this.model_type.relation(relation_key)) {
-	        related_model_types.push(relation.reverse_model_type);
-	        if (relation.join_table) {
-	          related_model_types.push(relation.join_table);
-	        }
-	      }
-	    }
-	    return related_model_types;
-	  };
-
-	  Cursor.prototype.selectResults = function(json) {
-	    var $select, $values, item, key;
-	    if (this._cursor.$one) {
-	      json = json.slice(0, 1);
-	    }
-	    if (this._cursor.$values) {
-	      $values = this._cursor.$whitelist ? _.intersection(this._cursor.$values, this._cursor.$whitelist) : this._cursor.$values;
-	      if (this._cursor.$values.length === 1) {
-	        key = this._cursor.$values[0];
-	        json = $values.length ? (function() {
-	          var i, len, results;
-	          results = [];
-	          for (i = 0, len = json.length; i < len; i++) {
-	            item = json[i];
-	            results.push(item.hasOwnProperty(key) ? item[key] : null);
-	          }
-	          return results;
-	        })() : _.map(json, function() {
-	          return null;
-	        });
-	      } else {
-	        json = (function() {
-	          var i, len, results;
-	          results = [];
-	          for (i = 0, len = json.length; i < len; i++) {
-	            item = json[i];
-	            results.push((function() {
-	              var j, len1, results1;
-	              results1 = [];
-	              for (j = 0, len1 = $values.length; j < len1; j++) {
-	                key = $values[j];
-	                if (item.hasOwnProperty(key)) {
-	                  results1.push(item[key]);
-	                }
-	              }
-	              return results1;
-	            })());
-	          }
-	          return results;
-	        })();
-	      }
-	    } else if (this._cursor.$select) {
-	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
-	      json = (function() {
-	        var i, len, results;
-	        results = [];
-	        for (i = 0, len = json.length; i < len; i++) {
-	          item = json[i];
-	          results.push(_.pick(item, $select));
-	        }
-	        return results;
-	      })();
-	    } else if (this._cursor.$whitelist) {
-	      json = (function() {
-	        var i, len, results;
-	        results = [];
-	        for (i = 0, len = json.length; i < len; i++) {
-	          item = json[i];
-	          results.push(_.pick(item, this._cursor.$whitelist));
-	        }
-	        return results;
-	      }).call(this);
-	    }
-	    if (this.hasCursorQuery('$page')) {
-	      return json;
-	    }
-	    if (this._cursor.$one) {
-	      return json[0] || null;
-	    } else {
-	      return json;
-	    }
-	  };
-
-	  Cursor.prototype.selectFromModels = function(models, callback) {
-	    var $select, item, model;
-	    if (this._cursor.$select) {
-	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
-	      models = ((function() {
-	        var i, len, results;
-	        model = new this.model_type(_.pick(model.attributes, $select));
-	        model.setPartial(true);
-	        results = [];
-	        for (i = 0, len = models.length; i < len; i++) {
-	          item = models[i];
-	          results.push(model);
-	        }
-	        return results;
-	      }).call(this));
-	    } else if (this._cursor.$whitelist) {
-	      models = ((function() {
-	        var i, len, results;
-	        model = new this.model_type(_.pick(model.attributes, this._cursor.$whitelist));
-	        model.setPartial(true);
-	        results = [];
-	        for (i = 0, len = models.length; i < len; i++) {
-	          item = models[i];
-	          results.push(model);
-	        }
-	        return results;
-	      }).call(this));
-	    }
-	    return models;
-	  };
-
-	  Cursor.prototype.prepareIncludes = function(json, callback) {
-	    var findOrNew, i, include, item, j, len, len1, model_json, ref, related_json, relation, schema, shared_related_models;
-	    if (!_.isArray(this._cursor.$include) || _.isEmpty(this._cursor.$include)) {
-	      return callback(null, json);
-	    }
-	    schema = this.model_type.schema();
-	    shared_related_models = {};
-	    findOrNew = (function(_this) {
-	      return function(related_json, reverse_model_type) {
-	        var related_id;
-	        related_id = related_json[reverse_model_type.prototype.idAttribute];
-	        if (!shared_related_models[related_id]) {
-	          if (reverse_model_type.cache) {
-	            if (!(shared_related_models[related_id] = reverse_model_type.cache.get(related_id))) {
-	              reverse_model_type.cache.set(related_id, shared_related_models[related_id] = new reverse_model_type(related_json));
-	            }
-	          } else {
-	            shared_related_models[related_id] = new reverse_model_type(related_json);
-	          }
-	        }
-	        return shared_related_models[related_id];
-	      };
-	    })(this);
-	    ref = this._cursor.$include;
-	    for (i = 0, len = ref.length; i < len; i++) {
-	      include = ref[i];
-	      relation = schema.relation(include);
-	      shared_related_models = {};
-	      for (j = 0, len1 = json.length; j < len1; j++) {
-	        model_json = json[j];
-	        if (_.isArray(related_json = model_json[include])) {
-	          model_json[include] = (function() {
-	            var k, len2, results;
-	            results = [];
-	            for (k = 0, len2 = related_json.length; k < len2; k++) {
-	              item = related_json[k];
-	              results.push(findOrNew(item, relation.reverse_model_type));
-	            }
-	            return results;
-	          })();
-	        } else if (related_json) {
-	          model_json[include] = findOrNew(related_json, relation.reverse_model_type);
-	        }
-	      }
-	    }
-	    return callback(null, json);
-	  };
-
-	  return Cursor;
-
-	})();
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Many, One, RELATION_VARIANTS, Schema, Utils, _,
-	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-	  hasProp = {}.hasOwnProperty;
-
-	_ = __webpack_require__(21);
-
-	Backbone = __webpack_require__(2);
-
-	BackboneORM = __webpack_require__(5);
-
-	One = __webpack_require__(30);
-
-	Many = __webpack_require__(29);
-
-	DatabaseURL = __webpack_require__(13);
-
-	Utils = __webpack_require__(8);
-
-	JSONUtils = __webpack_require__(9);
-
-	RELATION_VARIANTS = {
-	  'hasOne': 'hasOne',
-	  'has_one': 'hasOne',
-	  'HasOne': 'hasOne',
-	  'belongsTo': 'belongsTo',
-	  'belongs_to': 'belongsTo',
-	  'BelongsTo': 'belongsTo',
-	  'hasMany': 'hasMany',
-	  'has_many': 'hasMany',
-	  'HasMany': 'hasMany'
-	};
-
-	module.exports = Schema = (function() {
-	  function Schema(model_type, type_overrides) {
-	    this.model_type = model_type;
-	    this.type_overrides = type_overrides != null ? type_overrides : {};
-	    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
-	    this.fields = {};
-	    this.relations = {};
-	    this.virtual_accessors = {};
-	    if (this.raw.id) {
-	      this._parseField('id', this.raw.id);
-	    }
-	  }
-
-	  Schema.prototype.initialize = function() {
-	    var info, key, ref, ref1, relation;
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    ref = this.raw;
-	    for (key in ref) {
-	      info = ref[key];
-	      this._parseField(key, info);
-	    }
-	    ref1 = this.relations;
-	    for (key in ref1) {
-	      relation = ref1[key];
-	      relation.initialize();
-	    }
-	  };
-
-	  Schema.prototype.type = function(key, type) {
-	    var base, index, other, ref, ref1, ref2, ref3;
-	    if (arguments.length === 2) {
-	      ((base = this.type_overrides)[key] || (base[key] = {}))['type'] = type;
-	      return this;
-	    }
-	    if ((index = key.indexOf('.')) >= 0) {
-	      other = key.substr(index + 1);
-	      key = key.substr(0, index);
-	    }
-	    if (!(type = ((ref = this.type_overrides[key]) != null ? ref.type : void 0) || ((ref1 = this.fields[key]) != null ? ref1.type : void 0) || ((ref2 = this.relation(key)) != null ? ref2.reverse_model_type : void 0) || ((ref3 = this.reverseRelation(key)) != null ? ref3.model_type : void 0))) {
-	      return;
-	    }
-	    if (this.virtual_accessors[key]) {
-	      if (other) {
-	        console.log("Unexpected other for virtual id key: " + key + "." + other);
-	        return;
-	      }
-	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
-	    }
-	    if (other) {
-	      return typeof type.schema === "function" ? type.schema().type(other) : void 0;
-	    } else {
-	      return type;
-	    }
-	  };
-
-	  Schema.prototype.idType = function(key) {
-	    var type;
-	    if (!key) {
-	      return this.type('id');
-	    }
-	    if (type = this.type(key)) {
-	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
-	    }
-	  };
-
-	  Schema.prototype.field = function(key) {
-	    return this.fields[key] || this.relation(key);
-	  };
-
-	  Schema.prototype.relation = function(key) {
-	    return this.relations[key] || this.virtual_accessors[key];
-	  };
-
-	  Schema.prototype.reverseRelation = function(reverse_key) {
-	    var key, ref, relation;
-	    ref = this.relations;
-	    for (key in ref) {
-	      relation = ref[key];
-	      if (relation.reverse_relation && (relation.reverse_relation.join_key === reverse_key)) {
-	        return relation.reverse_relation;
-	      }
-	    }
-	    return null;
-	  };
-
-	  Schema.prototype.columns = function() {
-	    var columns, key, ref, relation;
-	    columns = _.keys(this.fields);
-	    if (!_.find(columns, function(column) {
-	      return column === 'id';
-	    })) {
-	      columns.push('id');
-	    }
-	    ref = this.relations;
-	    for (key in ref) {
-	      relation = ref[key];
-	      if ((relation.type === 'belongsTo') && !relation.isVirtual() && !relation.isEmbedded()) {
-	        columns.push(relation.foreign_key);
-	      }
-	    }
-	    return columns;
-	  };
-
-	  Schema.prototype.joinTables = function() {
-	    var key, relation;
-	    return (function() {
-	      var ref, results;
-	      ref = this.relations;
-	      results = [];
-	      for (key in ref) {
-	        relation = ref[key];
-	        if (!relation.isVirtual() && relation.join_table) {
-	          results.push(relation.join_table);
-	        }
-	      }
-	      return results;
-	    }).call(this);
-	  };
-
-	  Schema.prototype.relatedModels = function() {
-	    var key, ref, related_model_types, relation;
-	    related_model_types = [];
-	    ref = this.relations;
-	    for (key in ref) {
-	      relation = ref[key];
-	      related_model_types.push(relation.reverse_model_type);
-	      if (relation.join_table) {
-	        related_model_types.push(relation.join_table);
-	      }
-	    }
-	    return related_model_types;
-	  };
-
-	  Schema.prototype.allColumns = function() {
-	    return this.columns();
-	  };
-
-	  Schema.prototype.allRelations = function() {
-	    return this.relatedModels();
-	  };
-
-	  Schema.prototype.generateBelongsTo = function(reverse_model_type) {
-	    var key, relation;
-	    key = BackboneORM.naming_conventions.attribute(reverse_model_type.model_name);
-	    if (relation = this.relations[key]) {
-	      return relation;
-	    }
-	    if (this.raw[key]) {
-	      relation = this._parseField(key, this.raw[key]);
-	      relation.initialize();
-	      return relation;
-	    }
-	    relation = this._parseField(key, this.raw[key] = [
-	      'belongsTo', reverse_model_type, {
-	        manual_fetch: true
-	      }
-	    ]);
-	    relation.initialize();
-	    return relation;
-	  };
-
-	  Schema.joinTableURL = function(relation) {
-	    var table_name1, table_name2;
-	    table_name1 = BackboneORM.naming_conventions.tableName(relation.model_type.model_name);
-	    table_name2 = BackboneORM.naming_conventions.tableName(relation.reverse_relation.model_type.model_name);
-	    if (table_name1.localeCompare(table_name2) < 0) {
-	      return table_name1 + "_" + table_name2;
-	    } else {
-	      return table_name2 + "_" + table_name1;
-	    }
-	  };
-
-	  Schema.prototype.generateJoinTable = function(relation) {
-	    var JoinTable, name, ref, schema, type, url;
-	    schema = {};
-	    schema[relation.join_key] = [
-	      type = relation.model_type.schema().type('id'), {
-	        indexed: true
-	      }
-	    ];
-	    schema[relation.reverse_relation.join_key] = [
-	      ((ref = relation.reverse_model_type) != null ? ref.schema().type('id') : void 0) || type, {
-	        indexed: true
-	      }
-	    ];
-	    url = Schema.joinTableURL(relation);
-	    name = BackboneORM.naming_conventions.modelName(url, true);
-	    try {
-	      JoinTable = (function(superClass) {
-	        extend(JoinTable, superClass);
-
-	        function JoinTable() {
-	          return JoinTable.__super__.constructor.apply(this, arguments);
-	        }
-
-	        JoinTable.prototype.model_name = name;
-
-	        JoinTable.prototype.urlRoot = ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
-	          exclude_table: true
-	        })) + "/" + url;
-
-	        JoinTable.prototype.schema = schema;
-
-	        JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
-
-	        return JoinTable;
-
-	      })(Backbone.Model);
-	    } catch (_error) {
-	      JoinTable = (function(superClass) {
-	        extend(JoinTable, superClass);
-
-	        function JoinTable() {
-	          return JoinTable.__super__.constructor.apply(this, arguments);
-	        }
-
-	        JoinTable.prototype.model_name = name;
-
-	        JoinTable.prototype.urlRoot = "/" + url;
-
-	        JoinTable.prototype.schema = schema;
-
-	        JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
-
-	        return JoinTable;
-
-	      })(Backbone.Model);
-	    }
-	    return JoinTable;
-	  };
-
-	  Schema.prototype._parseField = function(key, info) {
-	    var options, relation, type;
-	    options = this._fieldInfoToOptions(_.isFunction(info) ? info() : info);
-	    if (!options.type) {
-	      return this.fields[key] = options;
-	    }
-	    if (!(type = RELATION_VARIANTS[options.type])) {
-	      if (!_.isString(options.type)) {
-	        throw new Error("Unexpected type name is not a string: " + (JSONUtils.stringify(options)));
-	      }
-	      return this.fields[key] = options;
-	    }
-	    options.type = type;
-	    relation = this.relations[key] = type === 'hasMany' ? new Many(this.model_type, key, options) : new One(this.model_type, key, options);
-	    if (relation.virtual_id_accessor) {
-	      this.virtual_accessors[relation.virtual_id_accessor] = relation;
-	    }
-	    if (type === 'belongsTo') {
-	      this.virtual_accessors[relation.foreign_key] = relation;
-	    }
-	    return relation;
-	  };
-
-	  Schema.prototype._fieldInfoToOptions = function(options) {
-	    var result;
-	    if (_.isString(options)) {
-	      return {
-	        type: options
-	      };
-	    }
-	    if (!_.isArray(options)) {
-	      return options;
-	    }
-	    result = {};
-	    if (_.isString(options[0])) {
-	      result.type = options[0];
-	      options = options.slice(1);
-	      if (options.length === 0) {
-	        return result;
-	      }
-	    }
-	    if (_.isFunction(options[0])) {
-	      result.reverse_model_type = options[0];
-	      options = options.slice(1);
-	    }
-	    if (options.length > 1) {
-	      throw new Error("Unexpected field options array: " + (JSONUtils.stringify(options)));
-	    }
-	    if (options.length === 1) {
-	      _.extend(result, options[0]);
-	    }
-	    return result;
-	  };
-
-	  return Schema;
-
-	})();
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.9
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var MemoryStore;
-
-	MemoryStore = __webpack_require__(14);
-
-	module.exports = new MemoryStore({
-	  destroy: function(url, connection) {
-	    return connection.destroy();
-	  }
-	});
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, inflection;
-
-	inflection = __webpack_require__(22);
-
-	module.exports = BaseConvention = (function() {
-	  function BaseConvention() {}
-
-	  BaseConvention.modelName = function(table_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
-	  };
-
-	  BaseConvention.tableName = function(model_name) {
-	    return inflection.pluralize(inflection.underscore(model_name));
-	  };
-
-	  BaseConvention.foreignKey = function(model_name, plural) {
-	    if (plural) {
-	      return inflection.singularize(inflection.underscore(model_name)) + '_ids';
-	    } else {
-	      return inflection.underscore(model_name) + '_id';
-	    }
-	  };
-
-	  BaseConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
-	  };
-
-	  return BaseConvention;
-
-	})();
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	var punycode = { encode : function (s) { return s } };
-	var _ = __webpack_require__(21);
-	var shims = __webpack_require__(31);
-
-	exports.parse = urlParse;
-	exports.resolve = urlResolve;
-	exports.resolveObject = urlResolveObject;
-	exports.format = urlFormat;
-
-	exports.Url = Url;
-
-	function Url() {
-	  this.protocol = null;
-	  this.slashes = null;
-	  this.auth = null;
-	  this.host = null;
-	  this.port = null;
-	  this.hostname = null;
-	  this.hash = null;
-	  this.search = null;
-	  this.query = null;
-	  this.pathname = null;
-	  this.path = null;
-	  this.href = null;
-	}
-
-	// Reference: RFC 3986, RFC 1808, RFC 2396
-
-	// define these here so at least they only have to be
-	// compiled once on the first module load.
-	var protocolPattern = /^([a-z0-9.+-]+:)/i,
-	    portPattern = /:[0-9]*$/,
-
-	    // RFC 2396: characters reserved for delimiting URLs.
-	    // We actually just auto-escape these.
-	    delims = ['<', '>', '"', '`', ' ', '\r', '\n', '\t'],
-
-	    // RFC 2396: characters not allowed for various reasons.
-	    unwise = ['{', '}', '|', '\\', '^', '`'].concat(delims),
-
-	    // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
-	    autoEscape = ['\''].concat(unwise),
-	    // Characters that are never ever allowed in a hostname.
-	    // Note that any invalid chars are also handled, but these
-	    // are the ones that are *expected* to be seen, so we fast-path
-	    // them.
-	    nonHostChars = ['%', '/', '?', ';', '#'].concat(autoEscape),
-	    hostEndingChars = ['/', '?', '#'],
-	    hostnameMaxLen = 255,
-	    hostnamePartPattern = /^[a-z0-9A-Z_-]{0,63}$/,
-	    hostnamePartStart = /^([a-z0-9A-Z_-]{0,63})(.*)$/,
-	    // protocols that can allow "unsafe" and "unwise" chars.
-	    unsafeProtocol = {
-	      'javascript': true,
-	      'javascript:': true
-	    },
-	    // protocols that never have a hostname.
-	    hostlessProtocol = {
-	      'javascript': true,
-	      'javascript:': true
-	    },
-	    // protocols that always contain a // bit.
-	    slashedProtocol = {
-	      'http': true,
-	      'https': true,
-	      'ftp': true,
-	      'gopher': true,
-	      'file': true,
-	      'http:': true,
-	      'https:': true,
-	      'ftp:': true,
-	      'gopher:': true,
-	      'file:': true
-	    },
-	    querystring = __webpack_require__(20);
-
-	function urlParse(url, parseQueryString, slashesDenoteHost) {
-	  if (url && _.isObject(url) && url instanceof Url) return url;
-
-	  var u = new Url;
-	  u.parse(url, parseQueryString, slashesDenoteHost);
-	  return u;
-	}
-
-	Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
-	  if (!_.isString(url)) {
-	    throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
-	  }
-
-	  // Copy chrome, IE, opera backslash-handling behavior.
-	  // See: https://code.google.com/p/chromium/issues/detail?id=25916
-	  var hashSplit = url.split('#');
-	  hashSplit[0] = hashSplit[0].replace(/\\/g, '/');
-	  url = hashSplit.join('#');
-
-	  var rest = url;
-
-	  // trim before proceeding.
-	  // This is to support parse stuff like "  http://foo.com  \n"
-	  rest = rest.trim();
-
-	  var proto = protocolPattern.exec(rest);
-	  if (proto) {
-	    proto = proto[0];
-	    var lowerProto = proto.toLowerCase();
-	    this.protocol = lowerProto;
-	    rest = rest.substr(proto.length);
-	  }
-
-	  // figure out if it's got a host
-	  // user@server is *always* interpreted as a hostname, and url
-	  // resolution will treat //foo/bar as host=foo,path=bar because that's
-	  // how the browser resolves relative URLs.
-	  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
-	    var slashes = rest.substr(0, 2) === '//';
-	    if (slashes && !(proto && hostlessProtocol[proto])) {
-	      rest = rest.substr(2);
-	      this.slashes = true;
-	    }
-	  }
-
-	  if (!hostlessProtocol[proto] &&
-	      (slashes || (proto && !slashedProtocol[proto]))) {
-
-	    // there's a hostname.
-	    // the first instance of /, ?, ;, or # ends the host.
-	    //
-	    // If there is an @ in the hostname, then non-host chars *are* allowed
-	    // to the left of the last @ sign, unless some host-ending character
-	    // comes *before* the @-sign.
-	    // URLs are obnoxious.
-	    //
-	    // ex:
-	    // http://a@b@c/ => user:a@b host:c
-	    // http://a@b?@c => user:a host:c path:/?@c
-
-	    // v0.12 TODO(isaacs): This is not quite how Chrome does things.
-	    // Review our test case against browsers more comprehensively.
-
-	    // find the first instance of any hostEndingChars
-	    var hostEnd = -1;
-	    for (var i = 0; i < hostEndingChars.length; i++) {
-	      var hec = rest.indexOf(hostEndingChars[i]);
-	      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
-	        hostEnd = hec;
-	    }
-
-	    // at this point, either we have an explicit point where the
-	    // auth portion cannot go past, or the last @ char is the decider.
-	    var auth, atSign;
-	    if (hostEnd === -1) {
-	      // atSign can be anywhere.
-	      atSign = rest.lastIndexOf('@');
-	    } else {
-	      // atSign must be in auth portion.
-	      // http://a@b/c@d => host:b auth:a path:/c@d
-	      atSign = rest.lastIndexOf('@', hostEnd);
-	    }
-
-	    // Now we have a portion which is definitely the auth.
-	    // Pull that off.
-	    if (atSign !== -1) {
-	      auth = rest.slice(0, atSign);
-	      rest = rest.slice(atSign + 1);
-	      this.auth = decodeURIComponent(auth);
-	    }
-
-	    // the host is the remaining to the left of the first non-host char
-	    hostEnd = -1;
-	    for (var i = 0; i < nonHostChars.length; i++) {
-	      var hec = rest.indexOf(nonHostChars[i]);
-	      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
-	        hostEnd = hec;
-	    }
-	    // if we still have not hit it, then the entire thing is a host.
-	    if (hostEnd === -1)
-	      hostEnd = rest.length;
-
-	    this.host = rest.slice(0, hostEnd);
-	    rest = rest.slice(hostEnd);
-
-	    // pull out port.
-	    this.parseHost();
-
-	    // we've indicated that there is a hostname,
-	    // so even if it's empty, it has to be present.
-	    this.hostname = this.hostname || '';
-
-	    // if hostname begins with [ and ends with ]
-	    // assume that it's an IPv6 address.
-	    var ipv6Hostname = this.hostname[0] === '[' &&
-	        this.hostname[this.hostname.length - 1] === ']';
-
-	    // validate a little.
-	    if (!ipv6Hostname) {
-	      var hostparts = this.hostname.split(/\./);
-	      for (var i = 0, l = hostparts.length; i < l; i++) {
-	        var part = hostparts[i];
-	        if (!part) continue;
-	        if (!part.match(hostnamePartPattern)) {
-	          var newpart = '';
-	          for (var j = 0, k = part.length; j < k; j++) {
-	            if (part.charCodeAt(j) > 127) {
-	              // we replace non-ASCII char with a temporary placeholder
-	              // we need this to make sure size of hostname is not
-	              // broken by replacing non-ASCII by nothing
-	              newpart += 'x';
-	            } else {
-	              newpart += part[j];
-	            }
-	          }
-	          // we test again with ASCII char only
-	          if (!newpart.match(hostnamePartPattern)) {
-	            var validParts = hostparts.slice(0, i);
-	            var notHost = hostparts.slice(i + 1);
-	            var bit = part.match(hostnamePartStart);
-	            if (bit) {
-	              validParts.push(bit[1]);
-	              notHost.unshift(bit[2]);
-	            }
-	            if (notHost.length) {
-	              rest = '/' + notHost.join('.') + rest;
-	            }
-	            this.hostname = validParts.join('.');
-	            break;
-	          }
-	        }
-	      }
-	    }
-
-	    if (this.hostname.length > hostnameMaxLen) {
-	      this.hostname = '';
-	    } else {
-	      // hostnames are always lower case.
-	      this.hostname = this.hostname.toLowerCase();
-	    }
-
-	    if (!ipv6Hostname) {
-	      // IDNA Support: Returns a puny coded representation of "domain".
-	      // It only converts the part of the domain name that
-	      // has non ASCII characters. I.e. it dosent matter if
-	      // you call it with a domain that already is in ASCII.
-	      var domainArray = this.hostname.split('.');
-	      var newOut = [];
-	      for (var i = 0; i < domainArray.length; ++i) {
-	        var s = domainArray[i];
-	        newOut.push(s.match(/[^A-Za-z0-9_-]/) ?
-	            'xn--' + punycode.encode(s) : s);
-	      }
-	      this.hostname = newOut.join('.');
-	    }
-
-	    var p = this.port ? ':' + this.port : '';
-	    var h = this.hostname || '';
-	    this.host = h + p;
-	    this.href += this.host;
-
-	    // strip [ and ] from the hostname
-	    // the host field still retains them, though
-	    if (ipv6Hostname) {
-	      this.hostname = this.hostname.substr(1, this.hostname.length - 2);
-	      if (rest[0] !== '/') {
-	        rest = '/' + rest;
-	      }
-	    }
-	  }
-
-	  // now rest is set to the post-host stuff.
-	  // chop off any delim chars.
-	  if (!unsafeProtocol[lowerProto]) {
-
-	    // First, make 100% sure that any "autoEscape" chars get
-	    // escaped, even if encodeURIComponent doesn't think they
-	    // need to be.
-	    for (var i = 0, l = autoEscape.length; i < l; i++) {
-	      var ae = autoEscape[i];
-	      var esc = encodeURIComponent(ae);
-	      if (esc === ae) {
-	        esc = escape(ae);
-	      }
-	      rest = rest.split(ae).join(esc);
-	    }
-	  }
-
-
-	  // chop off from the tail first.
-	  var hash = rest.indexOf('#');
-	  if (hash !== -1) {
-	    // got a fragment string.
-	    this.hash = rest.substr(hash);
-	    rest = rest.slice(0, hash);
-	  }
-	  var qm = rest.indexOf('?');
-	  if (qm !== -1) {
-	    this.search = rest.substr(qm);
-	    this.query = rest.substr(qm + 1);
-	    if (parseQueryString) {
-	      this.query = querystring.parse(this.query);
-	    }
-	    rest = rest.slice(0, qm);
-	  } else if (parseQueryString) {
-	    // no query string, but parseQueryString still requested
-	    this.search = '';
-	    this.query = {};
-	  }
-	  if (rest) this.pathname = rest;
-	  if (slashedProtocol[lowerProto] &&
-	      this.hostname && !this.pathname) {
-	    this.pathname = '/';
-	  }
-
-	  //to support http.request
-	  if (this.pathname || this.search) {
-	    var p = this.pathname || '';
-	    var s = this.search || '';
-	    this.path = p + s;
-	  }
-
-	  // finally, reconstruct the href based on what has been validated.
-	  this.href = this.format();
-	  return this;
-	};
-
-	// format a parsed object into a url string
-	function urlFormat(obj) {
-	  // ensure it's an object, and not a string url.
-	  // If it's an obj, this is a no-op.
-	  // this way, you can call url_format() on strings
-	  // to clean up potentially wonky urls.
-	  if (_.isString(obj)) obj = urlParse(obj);
-	  if (!(obj instanceof Url)) return Url.prototype.format.call(obj);
-	  return obj.format();
-	}
-
-	Url.prototype.format = function() {
-	  var auth = this.auth || '';
-	  if (auth) {
-	    auth = encodeURIComponent(auth);
-	    auth = auth.replace(/%3A/i, ':');
-	    auth += '@';
-	  }
-
-	  var protocol = this.protocol || '',
-	      pathname = this.pathname || '',
-	      hash = this.hash || '',
-	      host = false,
-	      query = '';
-
-	  if (this.host) {
-	    host = auth + this.host;
-	  } else if (this.hostname) {
-	    host = auth + (this.hostname.indexOf(':') === -1 ?
-	        this.hostname :
-	        '[' + this.hostname + ']');
-	    if (this.port) {
-	      host += ':' + this.port;
-	    }
-	  }
-
-	  if (this.query &&
-	      _.isObject(this.query) &&
-	      Object.keys(this.query).length) {
-	    query = querystring.stringify(this.query);
-	  }
-
-	  var search = this.search || (query && ('?' + query)) || '';
-
-	  if (protocol && protocol.substr(-1) !== ':') protocol += ':';
-
-	  // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
-	  // unless they had them to begin with.
-	  if (this.slashes ||
-	      (!protocol || slashedProtocol[protocol]) && host !== false) {
-	    host = '//' + (host || '');
-	    if (pathname && pathname.charAt(0) !== '/') pathname = '/' + pathname;
-	  } else if (!host) {
-	    host = '';
-	  }
-
-	  if (hash && hash.charAt(0) !== '#') hash = '#' + hash;
-	  if (search && search.charAt(0) !== '?') search = '?' + search;
-
-	  pathname = pathname.replace(/[?#]/g, function(match) {
-	    return encodeURIComponent(match);
-	  });
-	  search = search.replace('#', '%23');
-
-	  return protocol + host + pathname + search + hash;
-	};
-
-	function urlResolve(source, relative) {
-	  return urlParse(source, false, true).resolve(relative);
-	}
-
-	Url.prototype.resolve = function(relative) {
-	  return this.resolveObject(urlParse(relative, false, true)).format();
-	};
-
-	function urlResolveObject(source, relative) {
-	  if (!source) return relative;
-	  return urlParse(source, false, true).resolveObject(relative);
-	}
-
-	Url.prototype.resolveObject = function(relative) {
-	  if (_.isString(relative)) {
-	    var rel = new Url();
-	    rel.parse(relative, false, true);
-	    relative = rel;
-	  }
-
-	  var result = new Url();
-	  Object.keys(this).forEach(function(k) {
-	    result[k] = this[k];
-	  }, this);
-
-	  // hash is always overridden, no matter what.
-	  // even href="" will remove it.
-	  result.hash = relative.hash;
-
-	  // if the relative url is empty, then there's nothing left to do here.
-	  if (relative.href === '') {
-	    result.href = result.format();
-	    return result;
-	  }
-
-	  // hrefs like //foo/bar always cut to the protocol.
-	  if (relative.slashes && !relative.protocol) {
-	    // take everything except the protocol from relative
-	    Object.keys(relative).forEach(function(k) {
-	      if (k !== 'protocol')
-	        result[k] = relative[k];
-	    });
-
-	    //urlParse appends trailing / to urls like http://www.example.com
-	    if (slashedProtocol[result.protocol] &&
-	        result.hostname && !result.pathname) {
-	      result.path = result.pathname = '/';
-	    }
-
-	    result.href = result.format();
-	    return result;
-	  }
-
-	  if (relative.protocol && relative.protocol !== result.protocol) {
-	    // if it's a known url protocol, then changing
-	    // the protocol does weird things
-	    // first, if it's not file:, then we MUST have a host,
-	    // and if there was a path
-	    // to begin with, then we MUST have a path.
-	    // if it is file:, then the host is dropped,
-	    // because that's known to be hostless.
-	    // anything else is assumed to be absolute.
-	    if (!slashedProtocol[relative.protocol]) {
-	      Object.keys(relative).forEach(function(k) {
-	        result[k] = relative[k];
-	      });
-	      result.href = result.format();
-	      return result;
-	    }
-
-	    result.protocol = relative.protocol;
-	    if (!relative.host && !hostlessProtocol[relative.protocol]) {
-	      var relPath = (relative.pathname || '').split('/');
-	      while (relPath.length && !(relative.host = relPath.shift()));
-	      if (!relative.host) relative.host = '';
-	      if (!relative.hostname) relative.hostname = '';
-	      if (relPath[0] !== '') relPath.unshift('');
-	      if (relPath.length < 2) relPath.unshift('');
-	      result.pathname = relPath.join('/');
-	    } else {
-	      result.pathname = relative.pathname;
-	    }
-	    result.search = relative.search;
-	    result.query = relative.query;
-	    result.host = relative.host || '';
-	    result.auth = relative.auth;
-	    result.hostname = relative.hostname || relative.host;
-	    result.port = relative.port;
-	    // to support http.request
-	    if (result.pathname || result.search) {
-	      var p = result.pathname || '';
-	      var s = result.search || '';
-	      result.path = p + s;
-	    }
-	    result.slashes = result.slashes || relative.slashes;
-	    result.href = result.format();
-	    return result;
-	  }
-
-	  var isSourceAbs = (result.pathname && result.pathname.charAt(0) === '/'),
-	      isRelAbs = (
-	          relative.host ||
-	          relative.pathname && relative.pathname.charAt(0) === '/'
-	      ),
-	      mustEndAbs = (isRelAbs || isSourceAbs ||
-	                    (result.host && relative.pathname)),
-	      removeAllDots = mustEndAbs,
-	      srcPath = result.pathname && result.pathname.split('/') || [],
-	      relPath = relative.pathname && relative.pathname.split('/') || [],
-	      psychotic = result.protocol && !slashedProtocol[result.protocol];
-
-	  // if the url is a non-slashed url, then relative
-	  // links like ../.. should be able
-	  // to crawl up to the hostname, as well.  This is strange.
-	  // result.protocol has already been set by now.
-	  // Later on, put the first path part into the host field.
-	  if (psychotic) {
-	    result.hostname = '';
-	    result.port = null;
-	    if (result.host) {
-	      if (srcPath[0] === '') srcPath[0] = result.host;
-	      else srcPath.unshift(result.host);
-	    }
-	    result.host = '';
-	    if (relative.protocol) {
-	      relative.hostname = null;
-	      relative.port = null;
-	      if (relative.host) {
-	        if (relPath[0] === '') relPath[0] = relative.host;
-	        else relPath.unshift(relative.host);
-	      }
-	      relative.host = null;
-	    }
-	    mustEndAbs = mustEndAbs && (relPath[0] === '' || srcPath[0] === '');
-	  }
-
-	  if (isRelAbs) {
-	    // it's absolute.
-	    result.host = (relative.host || relative.host === '') ?
-	                  relative.host : result.host;
-	    result.hostname = (relative.hostname || relative.hostname === '') ?
-	                      relative.hostname : result.hostname;
-	    result.search = relative.search;
-	    result.query = relative.query;
-	    srcPath = relPath;
-	    // fall through to the dot-handling below.
-	  } else if (relPath.length) {
-	    // it's relative
-	    // throw away the existing file, and take the new path instead.
-	    if (!srcPath) srcPath = [];
-	    srcPath.pop();
-	    srcPath = srcPath.concat(relPath);
-	    result.search = relative.search;
-	    result.query = relative.query;
-	  } else if (!(_.isNull(relative.search) || _.isUndefined(relative.search))) {
-	    // just pull out the search.
-	    // like href='?foo'.
-	    // Put this after the other two cases because it simplifies the booleans
-	    if (psychotic) {
-	      result.hostname = result.host = srcPath.shift();
-	      //occationaly the auth can get stuck only in host
-	      //this especialy happens in cases like
-	      //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
-	      var authInHost = result.host && result.host.indexOf('@') > 0 ?
-	                       result.host.split('@') : false;
-	      if (authInHost) {
-	        result.auth = authInHost.shift();
-	        result.host = result.hostname = authInHost.shift();
-	      }
-	    }
-	    result.search = relative.search;
-	    result.query = relative.query;
-	    //to support http.request
-	    if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
-	      result.path = (result.pathname ? result.pathname : '') +
-	                    (result.search ? result.search : '');
-	    }
-	    result.href = result.format();
-	    return result;
-	  }
-
-	  if (!srcPath.length) {
-	    // no path at all.  easy.
-	    // we've already handled the other stuff above.
-	    result.pathname = null;
-	    //to support http.request
-	    if (result.search) {
-	      result.path = '/' + result.search;
-	    } else {
-	      result.path = null;
-	    }
-	    result.href = result.format();
-	    return result;
-	  }
-
-	  // if a url ENDs in . or .., then it must get a trailing slash.
-	  // however, if it ends in anything else non-slashy,
-	  // then it must NOT get a trailing slash.
-	  var last = srcPath.slice(-1)[0];
-	  var hasTrailingSlash = (
-	      (result.host || relative.host) && (last === '.' || last === '..') ||
-	      last === '');
-
-	  // strip single dots, resolve double dots to parent dir
-	  // if the path tries to go above the root, `up` ends up > 0
-	  var up = 0;
-	  for (var i = srcPath.length; i >= 0; i--) {
-	    last = srcPath[i];
-	    if (last === '.') {
-	      srcPath.splice(i, 1);
-	    } else if (last === '..') {
-	      srcPath.splice(i, 1);
-	      up++;
-	    } else if (up) {
-	      srcPath.splice(i, 1);
-	      up--;
-	    }
-	  }
-
-	  // if the path is allowed to go above the root, restore leading ..s
-	  if (!mustEndAbs && !removeAllDots) {
-	    for (; up--; up) {
-	      srcPath.unshift('..');
-	    }
-	  }
-
-	  if (mustEndAbs && srcPath[0] !== '' &&
-	      (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {
-	    srcPath.unshift('');
-	  }
-
-	  if (hasTrailingSlash && (srcPath.join('/').substr(-1) !== '/')) {
-	    srcPath.push('');
-	  }
-
-	  var isAbsolute = srcPath[0] === '' ||
-	      (srcPath[0] && srcPath[0].charAt(0) === '/');
-
-	  // put the host back
-	  if (psychotic) {
-	    result.hostname = result.host = isAbsolute ? '' :
-	                                    srcPath.length ? srcPath.shift() : '';
-	    //occationaly the auth can get stuck only in host
-	    //this especialy happens in cases like
-	    //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
-	    var authInHost = result.host && result.host.indexOf('@') > 0 ?
-	                     result.host.split('@') : false;
-	    if (authInHost) {
-	      result.auth = authInHost.shift();
-	      result.host = result.hostname = authInHost.shift();
-	    }
-	  }
-
-	  mustEndAbs = mustEndAbs || (result.host && srcPath.length);
-
-	  if (mustEndAbs && !isAbsolute) {
-	    srcPath.unshift('');
-	  }
-
-	  if (!srcPath.length) {
-	    result.pathname = null;
-	    result.path = null;
-	  } else {
-	    result.pathname = srcPath.join('/');
-	  }
-
-	  //to support request.http
-	  if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
-	    result.path = (result.pathname ? result.pathname : '') +
-	                  (result.search ? result.search : '');
-	  }
-	  result.auth = relative.auth || result.auth;
-	  result.slashes = result.slashes || relative.slashes;
-	  result.href = result.format();
-	  return result;
-	};
-
-	Url.prototype.parseHost = function() {
-	  var host = this.host;
-	  var port = portPattern.exec(host);
-	  if (port) {
-	    port = port[0];
-	    if (port !== ':') {
-	      this.port = port.substr(1);
-	    }
-	    host = host.substr(0, host.length - port.length);
-	  }
-	  if (host) this.hostname = host;
-	};
-
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	// Query String Utilities
-
-	var QueryString = exports;
-	var _ = __webpack_require__(21);
-
-
-	// If obj.hasOwnProperty has been overridden, then calling
-	// obj.hasOwnProperty(prop) will break.
-	// See: https://github.com/joyent/node/issues/1707
-	function hasOwnProperty(obj, prop) {
-	  return Object.prototype.hasOwnProperty.call(obj, prop);
-	}
-
-
-	function charCode(c) {
-	  return c.charCodeAt(0);
-	}
-
-
-	// a safe fast alternative to decodeURIComponent
-	QueryString.unescapeBuffer = function(s, decodeSpaces) {
-	  var out = new Buffer(s.length);
-	  var state = 'CHAR'; // states: CHAR, HEX0, HEX1
-	  var n, m, hexchar;
-
-	  for (var inIndex = 0, outIndex = 0; inIndex <= s.length; inIndex++) {
-	    var c = s.charCodeAt(inIndex);
-	    switch (state) {
-	      case 'CHAR':
-	        switch (c) {
-	          case charCode('%'):
-	            n = 0;
-	            m = 0;
-	            state = 'HEX0';
-	            break;
-	          case charCode('+'):
-	            if (decodeSpaces) c = charCode(' ');
-	            // pass thru
-	          default:
-	            out[outIndex++] = c;
-	            break;
-	        }
-	        break;
-
-	      case 'HEX0':
-	        state = 'HEX1';
-	        hexchar = c;
-	        if (charCode('0') <= c && c <= charCode('9')) {
-	          n = c - charCode('0');
-	        } else if (charCode('a') <= c && c <= charCode('f')) {
-	          n = c - charCode('a') + 10;
-	        } else if (charCode('A') <= c && c <= charCode('F')) {
-	          n = c - charCode('A') + 10;
-	        } else {
-	          out[outIndex++] = charCode('%');
-	          out[outIndex++] = c;
-	          state = 'CHAR';
-	          break;
-	        }
-	        break;
-
-	      case 'HEX1':
-	        state = 'CHAR';
-	        if (charCode('0') <= c && c <= charCode('9')) {
-	          m = c - charCode('0');
-	        } else if (charCode('a') <= c && c <= charCode('f')) {
-	          m = c - charCode('a') + 10;
-	        } else if (charCode('A') <= c && c <= charCode('F')) {
-	          m = c - charCode('A') + 10;
-	        } else {
-	          out[outIndex++] = charCode('%');
-	          out[outIndex++] = hexchar;
-	          out[outIndex++] = c;
-	          break;
-	        }
-	        out[outIndex++] = 16 * n + m;
-	        break;
-	    }
-	  }
-
-	  // TODO support returning arbitrary buffers.
-
-	  return out.slice(0, outIndex - 1);
-	};
-
-
-	QueryString.unescape = function(s, decodeSpaces) {
-	  return QueryString.unescapeBuffer(s, decodeSpaces).toString();
-	};
-
-
-	QueryString.escape = function(str) {
-	  return encodeURIComponent(str);
-	};
-
-	var stringifyPrimitive = function(v) {
-	  if (_.isString(v))
-	    return v;
-	  if (_.isBoolean(v))
-	    return v ? 'true' : 'false';
-	  if (_.isNumber(v))
-	    return isFinite(v) ? v : '';
-	  return '';
-	};
-
-
-	QueryString.stringify = QueryString.encode = function(obj, sep, eq, options) {
-	  sep = sep || '&';
-	  eq = eq || '=';
-	  if (_.isNull(obj)) {
-	    obj = undefined;
-	  }
-
-	  var encode = QueryString.escape;
-	  if (options && typeof options.encodeURIComponent === 'function') {
-	    encode = options.encodeURIComponent;
-	  }
-
-	  if (_.isObject(obj)) {
-	    return Object.keys(obj).map(function(k) {
-	      var ks = encode(stringifyPrimitive(k)) + eq;
-	      if (_.isArray(obj[k])) {
-	        return obj[k].map(function(v) {
-	          return ks + encode(stringifyPrimitive(v));
-	        }).join(sep);
-	      } else {
-	        return ks + encode(stringifyPrimitive(obj[k]));
-	      }
-	    }).join(sep);
-	  }
-	  return '';
-	};
-
-	// Parse a key=val string.
-	QueryString.parse = QueryString.decode = function(qs, sep, eq, options) {
-	  sep = sep || '&';
-	  eq = eq || '=';
-	  var obj = {};
-
-	  if (!_.isString(qs) || qs.length === 0) {
-	    return obj;
-	  }
-
-	  var regexp = /\+/g;
-	  qs = qs.split(sep);
-
-	  var maxKeys = 1000;
-	  if (options && _.isNumber(options.maxKeys)) {
-	    maxKeys = options.maxKeys;
-	  }
-
-	  var len = qs.length;
-	  // maxKeys <= 0 means that we should not limit keys count
-	  if (maxKeys > 0 && len > maxKeys) {
-	    len = maxKeys;
-	  }
-
-	  var decode = decodeURIComponent;
-	  if (options && typeof options.decodeURIComponent === 'function') {
-	    decode = options.decodeURIComponent;
-	  }
-
-	  for (var i = 0; i < len; ++i) {
-	    var x = qs[i].replace(regexp, '%20'),
-	        idx = x.indexOf(eq),
-	        kstr, vstr, k, v;
-
-	    if (idx >= 0) {
-	      kstr = x.substr(0, idx);
-	      vstr = x.substr(idx + 1);
-	    } else {
-	      kstr = x;
-	      vstr = '';
-	    }
-
-	    try {
-	      k = decode(kstr);
-	      v = decode(vstr);
-	    } catch (e) {
-	      k = QueryString.unescape(kstr, true);
-	      v = QueryString.unescape(vstr, true);
-	    }
-
-	    if (!hasOwnProperty(obj, k)) {
-	      obj[k] = v;
-	    } else if (_.isArray(obj[k])) {
-	      obj[k].push(v);
-	    } else {
-	      obj[k] = [obj[k], v];
-	    }
-	  }
-
-	  return obj;
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_21__;
-
-/***/ },
-/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -4958,6 +1192,3705 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	if(typeof __WEBPACK_EXTERNAL_MODULE_3__ === 'undefined') {var e = new Error("Cannot find module \"stream\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Fabricator, Queue, _;
+
+	_ = __webpack_require__(22);
+
+	Queue = __webpack_require__(12);
+
+	module.exports = Fabricator = (function() {
+	  function Fabricator() {}
+
+	  Fabricator["new"] = function(model_type, count, attributes_info) {
+	    var attributes, key, results, value;
+	    results = [];
+	    while (count-- > 0) {
+	      attributes = {};
+	      for (key in attributes_info) {
+	        value = attributes_info[key];
+	        attributes[key] = _.isFunction(value) ? value() : value;
+	      }
+	      results.push(new model_type(attributes));
+	    }
+	    return results;
+	  };
+
+	  Fabricator.create = function(model_type, count, attributes_info, callback) {
+	    var fn, i, len, model, models, queue;
+	    models = Fabricator["new"](model_type, count, attributes_info);
+	    queue = new Queue();
+	    fn = function(model) {
+	      return queue.defer(function(callback) {
+	        return model.save(callback);
+	      });
+	    };
+	    for (i = 0, len = models.length; i < len; i++) {
+	      model = models[i];
+	      fn(model);
+	    }
+	    return queue.await(function(err) {
+	      return callback(err, models);
+	    });
+	  };
+
+	  Fabricator.value = function(value) {
+	    if (arguments.length === 0) {
+	      return void 0;
+	    }
+	    return function() {
+	      return value;
+	    };
+	  };
+
+	  Fabricator.uniqueId = function(prefix) {
+	    if (arguments.length === 0) {
+	      return _.uniqueId();
+	    }
+	    return function() {
+	      return _.uniqueId(prefix);
+	    };
+	  };
+
+	  Fabricator.uniqueString = Fabricator.uniqueId;
+
+	  Fabricator.date = function(start, step_ms) {
+	    var current_ms, now, ref;
+	    now = new Date();
+	    if (arguments.length === 0) {
+	      return now;
+	    }
+	    if (arguments.length === 1) {
+	      ref = [now, start], start = ref[0], step_ms = ref[1];
+	    }
+	    current_ms = start.getTime();
+	    return function() {
+	      var current;
+	      current = new Date(current_ms);
+	      current_ms += step_ms;
+	      return current;
+	    };
+	  };
+
+	  return Fabricator;
+
+	})();
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var ALL_CONVENTIONS, BackboneORM, _;
+
+	_ = __webpack_require__(22);
+
+	BackboneORM = __webpack_require__(5);
+
+	ALL_CONVENTIONS = {
+	  "default": __webpack_require__(23),
+	  underscore: __webpack_require__(23),
+	  camelize: __webpack_require__(24),
+	  classify: __webpack_require__(25)
+	};
+
+	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
+
+	BackboneORM.model_cache = new (__webpack_require__(26))();
+
+	module.exports = function(options) {
+	  var convention, key, results, value;
+	  if (options == null) {
+	    options = {};
+	  }
+	  results = [];
+	  for (key in options) {
+	    value = options[key];
+	    switch (key) {
+	      case 'model_cache':
+	        results.push(BackboneORM.model_cache.configure(options.model_cache));
+	        break;
+	      case 'naming_conventions':
+	        if (_.isString(value)) {
+	          if (convention = ALL_CONVENTIONS[value]) {
+	            BackboneORM.naming_conventions = convention;
+	            continue;
+	          }
+	          results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
+	        } else {
+	          results.push(BackboneORM.naming_conventions = value);
+	        }
+	        break;
+	      default:
+	        results.push(BackboneORM[key] = value);
+	    }
+	  }
+	  return results;
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+	_ = __webpack_require__(22);
+
+	BackboneORM = __webpack_require__(5);
+
+	Queue = __webpack_require__(12);
+
+	MemoryCursor = __webpack_require__(27);
+
+	Schema = __webpack_require__(16);
+
+	Utils = __webpack_require__(8);
+
+	JSONUtils = __webpack_require__(9);
+
+	DESTROY_BATCH_LIMIT = 2000;
+
+	CAPABILITIES = {
+	  embed: true,
+	  json: true,
+	  unique: true,
+	  manual_ids: true,
+	  dynamic: true,
+	  self_reference: true
+	};
+
+	MemorySync = (function() {
+	  function MemorySync(model_type1) {
+	    var base, ref;
+	    this.model_type = model_type1;
+	    this.deleteCB = bind(this.deleteCB, this);
+	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
+	    this.schema = new Schema(this.model_type);
+	    if (!((ref = this.schema.field('id')) != null ? ref.type : void 0)) {
+	      this.schema.type('id', 'Integer');
+	    }
+	    this.store = (base = this.model_type).store || (base.store = []);
+	    this.id = 0;
+	    this.id_attribute = this.model_type.prototype.idAttribute;
+	  }
+
+	  MemorySync.prototype.initialize = function() {
+	    var ref;
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    this.schema.initialize();
+	    if ((ref = this.schema.field('id')) != null ? ref.manual : void 0) {
+	      this.manual_id = true;
+	    }
+	    return this.id_type = this.schema.idType();
+	  };
+
+	  MemorySync.prototype.read = function(model, options) {
+	    var model_json;
+	    if (model.models) {
+	      return options.success((function() {
+	        var i, len, ref, results;
+	        ref = this.store;
+	        results = [];
+	        for (i = 0, len = ref.length; i < len; i++) {
+	          model_json = ref[i];
+	          results.push(JSONUtils.deepClone(model_json));
+	        }
+	        return results;
+	      }).call(this));
+	    } else {
+	      if (!(model_json = this.get(model.id))) {
+	        return options.error(new Error("Model not found with id: " + model.id));
+	      }
+	      return options.success(JSONUtils.deepClone(model_json));
+	    }
+	  };
+
+	  MemorySync.prototype.create = function(model, options) {
+	    var model_json;
+	    if (this.manual_id) {
+	      return options.error(new Error("Create should not be called for a manual id. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
+	    }
+	    model.set(this.id_attribute, this.id_type === 'String' ? "" + (++this.id) : ++this.id);
+	    this.store.splice(this.insertIndexOf(model.id), 0, model_json = model.toJSON());
+	    return options.success(JSONUtils.deepClone(model_json));
+	  };
+
+	  MemorySync.prototype.update = function(model, options) {
+	    var create, index, model_json;
+	    create = (index = this.insertIndexOf(model.id)) >= this.store.length || this.store[index].id !== model.id;
+	    if (!this.manual_id && create) {
+	      return options.error(new Error("Update cannot create a new model without manual option. Set an id before calling save. Model name: " + this.model_type.model_name + ". Model: " + (JSONUtils.stringify(model.toJSON()))));
+	    }
+	    model_json = model.toJSON();
+	    if (create) {
+	      this.store.splice(index, 0, model_json);
+	    } else {
+	      this.store[index] = model_json;
+	    }
+	    return options.success(JSONUtils.deepClone(model_json));
+	  };
+
+	  MemorySync.prototype["delete"] = function(model, options) {
+	    return this.deleteCB(model, (function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return options.error(err);
+	        } else {
+	          return options.success();
+	        }
+	      };
+	    })(this));
+	  };
+
+	  MemorySync.prototype.deleteCB = function(model, callback) {
+	    var index, model_json;
+	    if ((index = this.indexOf(model.id)) < 0) {
+	      return callback(new Error("Model not found. Type: " + this.model_type.model_name + ". Id: " + model.id));
+	    }
+	    model_json = this.store.splice(index, 1);
+	    return Utils.patchRemove(this.model_type, model, callback);
+	  };
+
+	  MemorySync.prototype.resetSchema = function(options, callback) {
+	    return this.destroy(callback);
+	  };
+
+	  MemorySync.prototype.cursor = function(query) {
+	    if (query == null) {
+	      query = {};
+	    }
+	    return new MemoryCursor(query, _.pick(this, ['model_type', 'store']));
+	  };
+
+	  MemorySync.prototype.destroy = function(query, callback) {
+	    var cursor, is_done, next, ref;
+	    if (arguments.length === 1) {
+	      ref = [{}, query], query = ref[0], callback = ref[1];
+	    }
+	    if (_.size(query) === 0) {
+	      return Utils.popEach(this.store, ((function(_this) {
+	        return function(model_json, callback) {
+	          return Utils.patchRemove(_this.model_type, model_json, callback);
+	        };
+	      })(this)), callback);
+	    } else {
+	      is_done = false;
+	      cursor = this.model_type.cursor(query).limit(DESTROY_BATCH_LIMIT);
+	      next = (function(_this) {
+	        return function() {
+	          return cursor.toJSON(function(err, models_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (models_json.length === 0) {
+	              return callback();
+	            }
+	            is_done = models_json.length < DESTROY_BATCH_LIMIT;
+	            return Utils.each(models_json, _this.deleteCB, function(err) {
+	              if (err || is_done) {
+	                return callback(err);
+	              } else {
+	                return next();
+	              }
+	            });
+	          });
+	        };
+	      })(this);
+	      return next();
+	    }
+	  };
+
+	  MemorySync.prototype.get = function(id) {
+	    var index, model;
+	    if ((index = _.sortedIndex(this.store, {
+	      id: id
+	    }, this.id_attribute)) >= this.store.length || (model = this.store[index]).id !== id) {
+	      return null;
+	    } else {
+	      return model;
+	    }
+	  };
+
+	  MemorySync.prototype.indexOf = function(id) {
+	    var index;
+	    if ((index = _.sortedIndex(this.store, {
+	      id: id
+	    }, this.id_attribute)) >= this.store.length || this.store[index].id !== id) {
+	      return -1;
+	    } else {
+	      return index;
+	    }
+	  };
+
+	  MemorySync.prototype.insertIndexOf = function(id) {
+	    return _.sortedIndex(this.store, {
+	      id: id
+	    }, this.id_attribute);
+	  };
+
+	  return MemorySync;
+
+	})();
+
+	module.exports = function(type) {
+	  var model_type, sync, sync_fn;
+	  if (Utils.isCollection(new type())) {
+	    model_type = Utils.configureCollectionModelType(type, module.exports);
+	    return type.prototype.sync = model_type.prototype.sync;
+	  }
+	  sync = new MemorySync(type);
+	  type.prototype.sync = sync_fn = function(method, model, options) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    sync.initialize();
+	    if (method === 'createSync') {
+	      return module.exports.apply(null, Array.prototype.slice.call(arguments, 1));
+	    }
+	    if (method === 'sync') {
+	      return sync;
+	    }
+	    if (method === 'isRemote') {
+	      return false;
+	    }
+	    if (method === 'schema') {
+	      return sync.schema;
+	    }
+	    if (method === 'tableName') {
+	      return void 0;
+	    }
+	    if (sync[method]) {
+	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+	    } else {
+	      return void 0;
+	    }
+	  };
+	  Utils.configureModelType(type);
+	  return BackboneORM.model_cache.configureSync(type, sync_fn);
+	};
+
+	module.exports.Sync = MemorySync;
+
+	module.exports.Cursor = MemoryCursor;
+
+	module.exports.capabilities = function(url) {
+	  return CAPABILITIES;
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, BackboneORM, DatabaseURL, IterationUtils, JSONUtils, Queue, URL, Utils, _, modelExtensions,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+
+	URL = __webpack_require__(19);
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(22);
+
+	BackboneORM = __webpack_require__(5);
+
+	DatabaseURL = __webpack_require__(13);
+
+	Queue = __webpack_require__(12);
+
+	JSONUtils = __webpack_require__(9);
+
+	IterationUtils = __webpack_require__(28);
+
+	modelExtensions = null;
+
+	module.exports = Utils = (function() {
+	  function Utils() {}
+
+	  Utils.resetSchemas = function(model_types, options, callback) {
+	    var failed_schemas, i, len, model_type, ref;
+	    if (arguments.length === 2) {
+	      ref = [{}, options], options = ref[0], callback = ref[1];
+	    }
+	    for (i = 0, len = model_types.length; i < len; i++) {
+	      model_type = model_types[i];
+	      model_type.schema();
+	    }
+	    failed_schemas = [];
+	    return Utils.each(model_types, (function(model_type, callback) {
+	      return model_type.resetSchema(options, function(err) {
+	        if (err) {
+	          failed_schemas.push(model_type.model_name);
+	          console.log("Error when dropping schema for " + model_type.model_name + ". " + err);
+	        }
+	        return callback();
+	      });
+	    }), function(err) {
+	      if (options.verbose) {
+	        console.log((model_types.length - failed_schemas.length) + " schemas dropped.");
+	      }
+	      BackboneORM.model_cache.reset();
+	      if (failed_schemas.length) {
+	        return callback(new Error("Failed to migrate schemas: " + (failed_schemas.join(', '))));
+	      }
+	      return callback();
+	    });
+	  };
+
+	  Utils.bbCallback = function(callback) {
+	    return {
+	      success: (function(model, resp, options) {
+	        return callback(null, model, resp, options);
+	      }),
+	      error: (function(model, resp, options) {
+	        return callback(resp || new Error('Backbone call failed'), model, resp, options);
+	      })
+	    };
+	  };
+
+	  Utils.wrapOptions = function(options, callback) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    if (_.isFunction(options)) {
+	      options = Utils.bbCallback(options);
+	    }
+	    return _.defaults(Utils.bbCallback(function(err, model, resp, modified_options) {
+	      return callback(err, model, resp, options);
+	    }), options);
+	  };
+
+	  Utils.isModel = function(obj) {
+	    return obj && obj.attributes && ((obj instanceof Backbone.Model) || (obj.parse && obj.fetch));
+	  };
+
+	  Utils.isCollection = function(obj) {
+	    return obj && obj.models && ((obj instanceof Backbone.Collection) || (obj.reset && obj.fetch));
+	  };
+
+	  Utils.get = function(obj, key, default_value) {
+	    if (!obj._orm || !obj._orm.hasOwnProperty(key)) {
+	      return default_value;
+	    } else {
+	      return obj._orm[key];
+	    }
+	  };
+
+	  Utils.set = function(obj, key, value) {
+	    return (obj._orm || (obj._orm = {}))[key] = value;
+	  };
+
+	  Utils.orSet = function(obj, key, value) {
+	    if (!(obj._orm || (obj._orm = {})).hasOwnProperty(key)) {
+	      obj._orm[key] = value;
+	    }
+	    return obj._orm[key];
+	  };
+
+	  Utils.unset = function(obj, key) {
+	    return delete (obj._orm || (obj._orm = {}))[key];
+	  };
+
+	  Utils.findOrGenerateModelName = function(model_type) {
+	    var model_name, url;
+	    if (model_type.prototype.model_name) {
+	      return model_type.prototype.model_name;
+	    }
+	    if (url = _.result(new model_type, 'url')) {
+	      if (model_name = (new DatabaseURL(url)).modelName()) {
+	        return model_name;
+	      }
+	    }
+	    if (model_type.name) {
+	      return model_type.name;
+	    }
+	    throw "Could not find or generate model name for " + model_type;
+	  };
+
+	  Utils.configureCollectionModelType = function(type, sync) {
+	    var ORMModel, modelURL, model_type;
+	    modelURL = function() {
+	      var url, url_parts;
+	      url = _.result(this.collection || type.prototype, 'url');
+	      if (!this.isNew()) {
+	        url_parts = URL.parse(url);
+	        url_parts.pathname = url_parts.pathname + "/encodeURIComponent(@id)";
+	        url = URL.format(url_parts);
+	      }
+	      return url;
+	    };
+	    model_type = type.prototype.model;
+	    if (!model_type || (model_type === Backbone.Model)) {
+	      ORMModel = (function(superClass) {
+	        extend(ORMModel, superClass);
+
+	        function ORMModel() {
+	          return ORMModel.__super__.constructor.apply(this, arguments);
+	        }
+
+	        ORMModel.prototype.url = modelURL;
+
+	        ORMModel.prototype.schema = type.prototype.schema;
+
+	        ORMModel.prototype.sync = sync(ORMModel);
+
+	        return ORMModel;
+
+	      })(Backbone.Model);
+	      return type.prototype.model = ORMModel;
+	    } else if (model_type.prototype.sync === Backbone.Model.prototype.sync) {
+	      model_type.prototype.url = modelURL;
+	      model_type.prototype.schema = type.prototype.schema;
+	      model_type.prototype.sync = sync(model_type);
+	    }
+	    return model_type;
+	  };
+
+	  Utils.configureModelType = function(type) {
+	    modelExtensions || (modelExtensions = __webpack_require__(29));
+	    return modelExtensions(type);
+	  };
+
+	  Utils.patchRemove = function(model_type, model, callback) {
+	    var fn, key, queue, ref, relation, schema;
+	    if (!(schema = model_type.schema())) {
+	      return callback();
+	    }
+	    queue = new Queue(1);
+	    ref = schema.relations;
+	    fn = function(relation) {
+	      return queue.defer(function(callback) {
+	        return relation.patchRemove(model, callback);
+	      });
+	    };
+	    for (key in ref) {
+	      relation = ref[key];
+	      fn(relation);
+	    }
+	    return queue.await(callback);
+	  };
+
+	  Utils.patchRemoveByJSON = function(model_type, model_json, callback) {
+	    return Utils.patchRemove(model_type, model_json, callback);
+	  };
+
+	  Utils.presaveBelongsToRelationships = function(model, callback) {
+	    var fn, i, key, len, queue, ref, related_model, related_models, relation, schema, value;
+	    if (!model.schema) {
+	      return callback();
+	    }
+	    queue = new Queue(1);
+	    schema = model.schema();
+	    ref = schema.relations;
+	    for (key in ref) {
+	      relation = ref[key];
+	      if (relation.type !== 'belongsTo' || relation.isVirtual() || !(value = model.get(key))) {
+	        continue;
+	      }
+	      related_models = value.models ? value.models : [value];
+	      fn = (function(_this) {
+	        return function(related_model) {
+	          return queue.defer(function(callback) {
+	            return related_model.save(callback);
+	          });
+	        };
+	      })(this);
+	      for (i = 0, len = related_models.length; i < len; i++) {
+	        related_model = related_models[i];
+	        if (related_model.id) {
+	          continue;
+	        }
+	        fn(related_model);
+	      }
+	    }
+	    return queue.await(callback);
+	  };
+
+	  Utils.dataId = function(data) {
+	    if (_.isObject(data)) {
+	      return data.id;
+	    } else {
+	      return data;
+	    }
+	  };
+
+	  Utils.dataIsSameModel = function(data1, data2) {
+	    if (Utils.dataId(data1) || Utils.dataId(data2)) {
+	      return Utils.dataId(data1) === Utils.dataId(data2);
+	    }
+	    return _.isEqual(data1, data2);
+	  };
+
+	  Utils.dataToModel = function(data, model_type) {
+	    var attributes, item, model;
+	    if (!data) {
+	      return null;
+	    }
+	    if (_.isArray(data)) {
+	      return (function() {
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = data.length; i < len; i++) {
+	          item = data[i];
+	          results.push(Utils.dataToModel(item, model_type));
+	        }
+	        return results;
+	      })();
+	    }
+	    if (Utils.isModel(data)) {
+	      model = data;
+	    } else if (Utils.dataId(data) !== data) {
+	      model = new model_type(model_type.prototype.parse(data));
+	    } else {
+	      (attributes = {})[model_type.prototype.idAttribute] = data;
+	      model = new model_type(attributes);
+	      model.setLoaded(false);
+	    }
+	    return model;
+	  };
+
+	  Utils.updateModel = function(model, data) {
+	    if (!data || (model === data) || data._orm_needs_load) {
+	      return model;
+	    }
+	    if (Utils.isModel(data)) {
+	      data = data.toJSON();
+	    }
+	    if (Utils.dataId(data) !== data) {
+	      model.setLoaded(true);
+	      model.set(data);
+	    }
+	    return model;
+	  };
+
+	  Utils.updateOrNew = function(data, model_type) {
+	    var cache, id, model;
+	    if ((cache = model_type.cache) && (id = Utils.dataId(data))) {
+	      if (model = cache.get(id)) {
+	        Utils.updateModel(model, data);
+	      }
+	    }
+	    if (!model) {
+	      model = Utils.isModel(data) ? data : Utils.dataToModel(data, model_type);
+	      if (model && cache) {
+	        cache.set(model.id, model);
+	      }
+	    }
+	    return model;
+	  };
+
+	  Utils.modelJSONSave = function(model_json, model_type, callback) {
+	    var JSONModel, url_root;
+	    model_type._orm || (model_type._orm = {});
+	    if (!model_type._orm.model_type_json) {
+	      try {
+	        url_root = _.result(new model_type, 'url');
+	      } catch (_error) {}
+	      model_type._orm.model_type_json = JSONModel = (function(superClass) {
+	        extend(JSONModel, superClass);
+
+	        function JSONModel() {
+	          return JSONModel.__super__.constructor.apply(this, arguments);
+	        }
+
+	        JSONModel.prototype._orm_never_cache = true;
+
+	        JSONModel.prototype.urlRoot = function() {
+	          return url_root;
+	        };
+
+	        return JSONModel;
+
+	      })(Backbone.Model);
+	    }
+	    if (model_type.prototype.whitelist) {
+	      model_json = _.pick(model_json, model_type.prototype.whitelist);
+	    }
+	    return model_type.prototype.sync('update', new model_type._orm.model_type_json(model_json), Utils.bbCallback(callback));
+	  };
+
+	  Utils.each = IterationUtils.each;
+
+	  Utils.eachC = function(array, callback, iterator) {
+	    return IterationUtils.each(array, iterator, callback);
+	  };
+
+	  Utils.popEach = IterationUtils.popEach;
+
+	  Utils.popEachC = function(array, callback, iterator) {
+	    return IterationUtils.popEach(array, iterator, callback);
+	  };
+
+	  Utils.isSorted = function(models, fields) {
+	    var i, last_model, len, model;
+	    fields = _.uniq(fields);
+	    for (i = 0, len = models.length; i < len; i++) {
+	      model = models[i];
+	      if (last_model && this.fieldCompare(last_model, model, fields) === 1) {
+	        return false;
+	      }
+	      last_model = model;
+	    }
+	    return true;
+	  };
+
+	  Utils.fieldCompare = function(model, other_model, fields) {
+	    var desc, field;
+	    field = fields[0];
+	    if (_.isArray(field)) {
+	      field = field[0];
+	    }
+	    if (field.charAt(0) === '-') {
+	      field = field.substr(1);
+	      desc = true;
+	    }
+	    if (model.get(field) === other_model.get(field)) {
+	      if (fields.length > 1) {
+	        return this.fieldCompare(model, other_model, fields.splice(1));
+	      } else {
+	        return 0;
+	      }
+	    }
+	    if (desc) {
+	      if (model.get(field) < other_model.get(field)) {
+	        return 1;
+	      } else {
+	        return -1;
+	      }
+	    } else {
+	      if (model.get(field) > other_model.get(field)) {
+	        return 1;
+	      } else {
+	        return -1;
+	      }
+	    }
+	  };
+
+	  Utils.jsonFieldCompare = function(model, other_model, fields) {
+	    var desc, field;
+	    field = fields[0];
+	    if (_.isArray(field)) {
+	      field = field[0];
+	    }
+	    if (field.charAt(0) === '-') {
+	      field = field.substr(1);
+	      desc = true;
+	    }
+	    if (model[field] === other_model[field]) {
+	      if (fields.length > 1) {
+	        return this.jsonFieldCompare(model, other_model, fields.splice(1));
+	      } else {
+	        return 0;
+	      }
+	    }
+	    if (desc) {
+	      if (JSONUtils.stringify(model[field]) < JSONUtils.stringify(other_model[field])) {
+	        return 1;
+	      } else {
+	        return -1;
+	      }
+	    } else {
+	      if (JSONUtils.stringify(model[field]) > JSONUtils.stringify(other_model[field])) {
+	        return 1;
+	      } else {
+	        return -1;
+	      }
+	    }
+	  };
+
+	  return Utils;
+
+	})();
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var IterationUtils, JSONUtils, Queue, _;
+
+	_ = __webpack_require__(22);
+
+	Queue = __webpack_require__(12);
+
+	IterationUtils = __webpack_require__(28);
+
+	module.exports = JSONUtils = (function() {
+	  function JSONUtils() {}
+
+	  JSONUtils.stringify = function(json) {
+	    var err;
+	    try {
+	      return JSON.stringify(json);
+	    } catch (_error) {
+	      err = _error;
+	      return 'Failed to stringify';
+	    }
+	  };
+
+	  JSONUtils.parseDates = function(json) {
+	    var date, key, value;
+	    if (_.isString(json)) {
+	      if ((json.length >= 20) && json[json.length - 1] === 'Z' && !_.isNaN((date = new Date(json)).getTime())) {
+	        return date;
+	      }
+	    } else if (_.isObject(json) || _.isArray(json)) {
+	      for (key in json) {
+	        value = json[key];
+	        json[key] = JSONUtils.parseDates(value);
+	      }
+	    }
+	    return json;
+	  };
+
+	  JSONUtils.parseField = function(value, model_type, key) {
+	    var integer_value;
+	    if ((model_type != null ? model_type.schema().idType(key) : void 0) !== 'Integer') {
+	      return JSONUtils.parseDates(value);
+	    }
+	    if (!_.isNaN(integer_value = +value)) {
+	      return integer_value;
+	    }
+	    console.log("Warning: failed to convert key: " + key + " value: " + value + " to integer. Model: " + model_type.model_name);
+	    return value;
+	  };
+
+	  JSONUtils.parse = function(obj, model_type) {
+	    var key, result, value;
+	    if (!_.isObject(obj)) {
+	      return JSONUtils.parseDates(obj);
+	    }
+	    if (_.isArray(obj)) {
+	      return (function() {
+	        var i, len, results1;
+	        results1 = [];
+	        for (i = 0, len = obj.length; i < len; i++) {
+	          value = obj[i];
+	          results1.push(JSONUtils.parse(value, model_type));
+	        }
+	        return results1;
+	      })();
+	    }
+	    result = {};
+	    for (key in obj) {
+	      value = obj[key];
+	      result[key] = JSONUtils.parseField(value, model_type, key);
+	    }
+	    return result;
+	  };
+
+	  JSONUtils.parseQuery = function(query) {
+	    var json, key, value;
+	    json = {};
+	    for (key in query) {
+	      value = query[key];
+	      json[key] = value;
+	      if (_.isString(value) && value.length) {
+	        try {
+	          value = JSON.parse(value);
+	        } catch (_error) {}
+	        json[key] = JSONUtils.parseDates(value);
+	      }
+	    }
+	    return json;
+	  };
+
+	  JSONUtils.querify = function(json) {
+	    var key, query, value;
+	    query = {};
+	    for (key in json) {
+	      value = json[key];
+	      query[key] = JSON.stringify(value);
+	    }
+	    return query;
+	  };
+
+	  JSONUtils.toQuery = function(json) {
+	    return console.log("JSONUtils.toQuery has been deprecated. Use JSONUtils.querify instead");
+	  };
+
+	  JSONUtils.renderTemplate = function(models, template, options, callback) {
+	    var results;
+	    if (arguments.length === 3) {
+	      callback = options;
+	      options = {};
+	    }
+	    if (!_.isArray(models)) {
+	      if (!models) {
+	        return callback(null, null);
+	      }
+	      if (_.isString(template)) {
+	        return JSONUtils.renderKey(models, template, options, callback);
+	      }
+	      if (_.isArray(template)) {
+	        return JSONUtils.renderKeys(models, template, options, callback);
+	      }
+	      if (_.isFunction(template)) {
+	        return template(models, options, callback);
+	      }
+	      return JSONUtils.renderDSL(models, template, options, callback);
+	    } else {
+	      results = [];
+	      return IterationUtils.each(models, ((function(_this) {
+	        return function(model, callback) {
+	          return JSONUtils.renderTemplate(model, template, options, function(err, related_json) {
+	            err || results.push(related_json);
+	            return callback(err);
+	          });
+	        };
+	      })(this)), function(err) {
+	        if (err) {
+	          return callback(err);
+	        } else {
+	          return callback(null, results);
+	        }
+	      });
+	    }
+	  };
+
+	  JSONUtils.renderDSL = function(model, dsl, options, callback) {
+	    var args, fn, key, queue, result;
+	    if (arguments.length === 3) {
+	      callback = options;
+	      options = {};
+	    }
+	    queue = new Queue();
+	    result = {};
+	    fn = function(key, args) {
+	      return queue.defer(function(callback) {
+	        var field, fn_args, query, relation, template;
+	        field = args.key || key;
+	        if (relation = model.relation(field)) {
+	          if (args.query) {
+	            query = args.query;
+	            template = args.template;
+	          } else if (args.$count) {
+	            query = _.clone(args);
+	            delete query.key;
+	          } else if (_.isFunction(args)) {
+	            template = args;
+	          } else if (args.template) {
+	            if (_.isObject(args.template) && !_.isFunction(args.template)) {
+	              query = args.template;
+	            } else {
+	              template = args.template;
+	              query = _.clone(args);
+	              delete query.key;
+	              delete query.template;
+	              if (_.size(query) === 0) {
+	                query = null;
+	              }
+	            }
+	          } else {
+	            template = _.clone(args);
+	            delete template.key;
+	          }
+	          if (template) {
+	            if (query) {
+	              return relation.cursor(model, field, query).toModels(function(err, models) {
+	                if (err) {
+	                  return callback(err);
+	                }
+	                return JSONUtils.renderTemplate(models, template, options, function(err, json) {
+	                  result[key] = json;
+	                  return callback(err);
+	                });
+	              });
+	            } else {
+	              return model.get(field, function(err, related_model) {
+	                if (err) {
+	                  return callback(err);
+	                }
+	                return JSONUtils.renderTemplate(related_model, template, options, function(err, json) {
+	                  result[key] = json;
+	                  return callback(err);
+	                });
+	              });
+	            }
+	          } else {
+	            return relation.cursor(model, field, query).toJSON(function(err, json) {
+	              result[key] = json;
+	              return callback(err);
+	            });
+	          }
+	        } else {
+	          if (key.length > 1 && key[key.length - 1] === '_') {
+	            key = key.slice(0, +(key.length - 2) + 1 || 9e9);
+	          }
+	          if (key === '$select') {
+	            if (_.isString(args)) {
+	              return JSONUtils.renderKey(model, args, options, function(err, json) {
+	                result[args] = json;
+	                return callback(err);
+	              });
+	            } else {
+	              return JSONUtils.renderKeys(model, args, options, function(err, json) {
+	                _.extend(result, json);
+	                return callback(err);
+	              });
+	            }
+	          } else if (_.isString(args)) {
+	            return JSONUtils.renderKey(model, args, options, function(err, json) {
+	              result[key] = json;
+	              return callback(err);
+	            });
+	          } else if (_.isFunction(args)) {
+	            return args(model, options, function(err, json) {
+	              result[key] = json;
+	              return callback(err);
+	            });
+	          } else if (_.isString(args.method)) {
+	            fn_args = _.isArray(args.args) ? args.args.slice() : (args.args ? [args.args] : []);
+	            fn_args.push(function(err, json) {
+	              result[key] = json;
+	              return callback(err);
+	            });
+	            return model[args.method].apply(model, fn_args);
+	          } else {
+	            console.trace("Unknown DSL action: " + key + ": ", args);
+	            return callback(new Error("Unknown DSL action: " + key + ": ", args));
+	          }
+	        }
+	      });
+	    };
+	    for (key in dsl) {
+	      args = dsl[key];
+	      fn(key, args);
+	    }
+	    return queue.await(function(err) {
+	      return callback(err, err ? void 0 : result);
+	    });
+	  };
+
+	  JSONUtils.renderKeys = function(model, keys, options, callback) {
+	    var fn, i, key, len, queue, result;
+	    if (arguments.length === 3) {
+	      callback = options;
+	      options = {};
+	    }
+	    result = {};
+	    queue = new Queue();
+	    fn = function(key) {
+	      return queue.defer(function(callback) {
+	        return JSONUtils.renderKey(model, key, options, function(err, value) {
+	          if (err) {
+	            return callback(err);
+	          }
+	          result[key] = value;
+	          return callback();
+	        });
+	      });
+	    };
+	    for (i = 0, len = keys.length; i < len; i++) {
+	      key = keys[i];
+	      fn(key);
+	    }
+	    return queue.await(function(err) {
+	      return callback(err, err ? void 0 : result);
+	    });
+	  };
+
+	  JSONUtils.renderKey = function(model, key, options, callback) {
+	    if (arguments.length === 3) {
+	      callback = options;
+	      options = {};
+	    }
+	    return model.get(key, function(err, value) {
+	      var item;
+	      if (err) {
+	        return callback(err);
+	      }
+	      if (model.relation(key)) {
+	        if (_.isArray(value)) {
+	          return callback(null, (function() {
+	            var i, len, results1;
+	            results1 = [];
+	            for (i = 0, len = value.length; i < len; i++) {
+	              item = value[i];
+	              results1.push(item.toJSON());
+	            }
+	            return results1;
+	          })());
+	        }
+	        if (value && value.toJSON) {
+	          return callback(null, value = value.toJSON());
+	        }
+	      }
+	      return callback(null, value);
+	    });
+	  };
+
+	  JSONUtils.renderRelated = function(models, attribute_name, template, options, callback) {
+	    var fn, i, len, model, queue, results;
+	    if (arguments.length === 4) {
+	      callback = options;
+	      options = {};
+	    }
+	    if (!_.isArray(models)) {
+	      return models.get(attribute_name, function(err, related_models) {
+	        if (err) {
+	          callback(err);
+	        }
+	        return JSONUtils.renderTemplate(related_models, template, options, callback);
+	      });
+	    } else {
+	      results = [];
+	      queue = new Queue();
+	      fn = function(model) {
+	        return queue.defer(function(callback) {
+	          return model.get(attribute_name, function(err, related_models) {
+	            if (err) {
+	              callback(err);
+	            }
+	            return JSONUtils.renderTemplate(related_models, template, options, function(err, related_json) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              results.push(related_json);
+	              return callback();
+	            });
+	          });
+	        });
+	      };
+	      for (i = 0, len = models.length; i < len; i++) {
+	        model = models[i];
+	        fn(model);
+	      }
+	      return queue.await(function(err) {
+	        return callback(err, err ? void 0 : results);
+	      });
+	    }
+	  };
+
+	  JSONUtils.deepClone = function(obj, depth) {
+	    var clone, key;
+	    if (!obj || (typeof obj !== 'object')) {
+	      return obj;
+	    }
+	    if (_.isString(obj)) {
+	      return String.prototype.slice.call(obj);
+	    }
+	    if (_.isDate(obj)) {
+	      return new Date(obj.getTime());
+	    }
+	    if (_.isFunction(obj.clone)) {
+	      return obj.clone();
+	    }
+	    if (_.isArray(obj)) {
+	      clone = Array.prototype.slice.call(obj);
+	    } else if (obj.constructor !== {}.constructor) {
+	      return obj;
+	    } else {
+	      clone = _.extend({}, obj);
+	    }
+	    if (!_.isUndefined(depth) && (depth > 0)) {
+	      for (key in clone) {
+	        clone[key] = JSONUtils.deepClone(clone[key], depth - 1);
+	      }
+	    }
+	    return clone;
+	  };
+
+	  return JSONUtils;
+
+	})();
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var DateUtils, UNITS_TO_MS, _;
+
+	_ = __webpack_require__(22);
+
+	UNITS_TO_MS = {
+	  milliseconds: {
+	    milliseconds: 1
+	  },
+	  seconds: {
+	    milliseconds: 1000
+	  },
+	  minutes: {
+	    milliseconds: 60 * 1000
+	  },
+	  hours: {
+	    milliseconds: 24 * 60 * 1000
+	  },
+	  days: {
+	    days: 1
+	  },
+	  weeks: {
+	    days: 7
+	  },
+	  months: {
+	    months: 1
+	  },
+	  years: {
+	    years: 1
+	  }
+	};
+
+	module.exports = DateUtils = (function() {
+	  function DateUtils() {}
+
+	  DateUtils.durationAsMilliseconds = function(count, units) {
+	    var lookup;
+	    if (!(lookup = UNITS_TO_MS[units])) {
+	      throw new Error("DateUtils.durationAsMilliseconds :Unrecognized units: " + units);
+	    }
+	    if (lookup.milliseconds) {
+	      return count * lookup.milliseconds;
+	    }
+	    if (lookup.days) {
+	      return count * 864e5 * lookup.days;
+	    }
+	    if (lookup.months) {
+	      return count * lookup.months * 2592e6;
+	    }
+	    if (lookup.years) {
+	      return count * lookup.years * 31536e6;
+	    }
+	  };
+
+	  DateUtils.isBefore = function(mv, tv) {
+	    return mv.getTime() < tv.getTime();
+	  };
+
+	  DateUtils.isAfter = function(mv, tv) {
+	    return mv.getTime() > tv.getTime();
+	  };
+
+	  return DateUtils;
+
+	})();
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var TestUtils;
+
+	module.exports = TestUtils = (function() {
+	  function TestUtils() {}
+
+	  TestUtils.optionSets = function() {
+	    return [
+	      {
+	        'cache': false,
+	        'embed': false,
+	        '$tags': '@no_cache @no_embed @quick'
+	      }, {
+	        'cache': true,
+	        'embed': false,
+	        '$tags': '@cache @no_embed'
+	      }, {
+	        'cache': false,
+	        'embed': true,
+	        '$tags': '@no_cache @embed'
+	      }, {
+	        'cache': true,
+	        'embed': true,
+	        '$tags': '@cache @embed'
+	      }
+	    ];
+	  };
+
+	  return TestUtils;
+
+	})();
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Queue,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+	module.exports = Queue = (function() {
+	  function Queue(parallelism) {
+	    this.parallelism = parallelism;
+	    this._doneTask = bind(this._doneTask, this);
+	    this.parallelism || (this.parallelism = Infinity);
+	    this.tasks = [];
+	    this.running_count = 0;
+	    this.error = null;
+	    this.await_callback = null;
+	  }
+
+	  Queue.prototype.defer = function(callback) {
+	    this.tasks.push(callback);
+	    return this._runTasks();
+	  };
+
+	  Queue.prototype.await = function(callback) {
+	    if (this.await_callback) {
+	      throw new Error("Awaiting callback was added twice: " + callback);
+	    }
+	    this.await_callback = callback;
+	    if (this.error || !(this.tasks.length + this.running_count)) {
+	      return this._callAwaiting();
+	    }
+	  };
+
+	  Queue.prototype._doneTask = function(err) {
+	    this.running_count--;
+	    this.error || (this.error = err);
+	    return this._runTasks();
+	  };
+
+	  Queue.prototype._runTasks = function() {
+	    var current;
+	    if (this.error || !(this.tasks.length + this.running_count)) {
+	      return this._callAwaiting();
+	    }
+	    while (this.running_count < this.parallelism) {
+	      if (!this.tasks.length) {
+	        return;
+	      }
+	      current = this.tasks.shift();
+	      this.running_count++;
+	      current(this._doneTask);
+	    }
+	  };
+
+	  Queue.prototype._callAwaiting = function() {
+	    if (this.await_called || !this.await_callback) {
+	      return;
+	    }
+	    this.await_called = true;
+	    return this.await_callback(this.error);
+	  };
+
+	  return Queue;
+
+	})();
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var BackboneORM, DatabaseURL, SUPPORTED_KEYS, URL, _;
+
+	_ = __webpack_require__(22);
+
+	URL = __webpack_require__(19);
+
+	BackboneORM = __webpack_require__(5);
+
+	SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href'];
+
+	module.exports = DatabaseURL = (function() {
+	  function DatabaseURL(url, parse_query_string, slashes_denote_host) {
+	    var database, database_parts, databases, databases_string, host, i, j, k, key, len, len1, len2, parts, path_paths, ref, start_parts, start_url, url_parts;
+	    url_parts = URL.parse(url, parse_query_string, slashes_denote_host);
+	    parts = url_parts.pathname.split(',');
+	    if (parts.length > 1) {
+	      start_parts = _.pick(url_parts, 'protocol', 'auth', 'slashes');
+	      start_parts.host = '{1}';
+	      start_parts.pathname = '{2}';
+	      start_url = URL.format(start_parts);
+	      start_url = start_url.replace('{1}/{2}', '');
+	      path_paths = url_parts.pathname.split('/');
+	      url_parts.pathname = "/" + path_paths[path_paths.length - 2] + "/" + path_paths[path_paths.length - 1];
+	      databases_string = url.replace(start_url, '');
+	      databases_string = databases_string.substring(0, databases_string.indexOf(url_parts.pathname));
+	      databases = databases_string.split(',');
+	      ref = ['host', 'hostname', 'port'];
+	      for (i = 0, len = ref.length; i < len; i++) {
+	        key = ref[i];
+	        delete url_parts[key];
+	      }
+	      this.hosts = [];
+	      for (j = 0, len1 = databases.length; j < len1; j++) {
+	        database = databases[j];
+	        host = database.split(':');
+	        this.hosts.push(host.length === 1 ? {
+	          host: host[0],
+	          hostname: host[0]
+	        } : {
+	          host: host[0],
+	          hostname: host[0] + ":" + host[1],
+	          port: host[1]
+	        });
+	      }
+	    }
+	    database_parts = _.compact(url_parts.pathname.split('/'));
+	    this.table = database_parts.pop();
+	    this.database = database_parts.join('/');
+	    for (k = 0, len2 = SUPPORTED_KEYS.length; k < len2; k++) {
+	      key = SUPPORTED_KEYS[k];
+	      if (url_parts.hasOwnProperty(key)) {
+	        this[key] = url_parts[key];
+	      }
+	    }
+	  }
+
+	  DatabaseURL.prototype.format = function(options) {
+	    var host_strings, url, url_parts;
+	    if (options == null) {
+	      options = {};
+	    }
+	    url_parts = _.pick(this, SUPPORTED_KEYS);
+	    url_parts.pathname = '';
+	    if (this.hosts) {
+	      host_strings = _.map(this.hosts, function(host) {
+	        return "" + host.host + (host.port ? ':' + host.port : '');
+	      });
+	      url_parts.pathname += host_strings.join(',');
+	      url_parts.host = "{1}";
+	    }
+	    if (this.database) {
+	      url_parts.pathname += "/" + this.database;
+	    }
+	    if (this.table && !options.exclude_table) {
+	      url_parts.pathname += "/" + this.table;
+	    }
+	    if (options.exclude_search || options.exclude_query) {
+	      delete url_parts.search;
+	      delete url_parts.query;
+	    }
+	    url = URL.format(url_parts);
+	    if (this.hosts) {
+	      url = url.replace("{1}/" + url_parts.pathname, url_parts.pathname);
+	    }
+	    return url;
+	  };
+
+	  DatabaseURL.prototype.parseAuth = function() {
+	    var auth_parts, result;
+	    if (!this.auth) {
+	      return null;
+	    }
+	    auth_parts = this.auth.split(':');
+	    result = {
+	      user: auth_parts[0]
+	    };
+	    result.password = auth_parts.length > 1 ? auth_parts[1] : null;
+	    return result;
+	  };
+
+	  DatabaseURL.prototype.modelName = function() {
+	    if (this.table) {
+	      return BackboneORM.naming_conventions.modelName(this.table, false);
+	    } else {
+	      return null;
+	    }
+	  };
+
+	  return DatabaseURL;
+
+	})();
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var LRU, MemoryStore, _,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+	_ = __webpack_require__(22);
+
+	LRU = __webpack_require__(21);
+
+	module.exports = MemoryStore = (function() {
+	  function MemoryStore(options) {
+	    var max_age;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.forEach = bind(this.forEach, this);
+	    this.reset = bind(this.reset, this);
+	    this.destroy = bind(this.destroy, this);
+	    this.get = bind(this.get, this);
+	    this.set = bind(this.set, this);
+	    if (max_age = options.max_age) {
+	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
+	    }
+	    this.cache = new LRU(options);
+	  }
+
+	  MemoryStore.prototype.set = function(key, value, callback) {
+	    if (value._orm_never_cache) {
+	      return (typeof callback === "function" ? callback(null, value) : void 0) || this;
+	    }
+	    this.cache.set(key, value);
+	    if (typeof callback === "function") {
+	      callback(null, value);
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.get = function(key, callback) {
+	    var value;
+	    value = this.cache.get(key);
+	    if (typeof callback === "function") {
+	      callback(null, value);
+	    }
+	    return value;
+	  };
+
+	  MemoryStore.prototype.destroy = function(key, callback) {
+	    this.cache.del(key);
+	    if (typeof callback === "function") {
+	      callback();
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.del = MemoryStore.prototype.destroy;
+
+	  MemoryStore.prototype.reset = function(callback) {
+	    this.cache.reset();
+	    if (typeof callback === "function") {
+	      callback();
+	    }
+	    return this;
+	  };
+
+	  MemoryStore.prototype.forEach = function(callback) {
+	    return this.cache.forEach(callback);
+	  };
+
+	  return MemoryStore;
+
+	})();
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var CURSOR_KEYS, Cursor, JSONUtils, Utils, _,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+	_ = __webpack_require__(22);
+
+	Utils = __webpack_require__(8);
+
+	JSONUtils = __webpack_require__(9);
+
+	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or'];
+
+	module.exports = Cursor = (function() {
+	  function Cursor(query, options) {
+	    this.relatedModelTypesInQuery = bind(this.relatedModelTypesInQuery, this);
+	    var i, key, len, parsed_query, ref, value;
+	    for (key in options) {
+	      value = options[key];
+	      this[key] = value;
+	    }
+	    parsed_query = Cursor.parseQuery(query, this.model_type);
+	    this._find = parsed_query.find;
+	    this._cursor = parsed_query.cursor;
+	    ref = ['$whitelist', '$select', '$values', '$unique'];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      key = ref[i];
+	      if (this._cursor[key] && !_.isArray(this._cursor[key])) {
+	        this._cursor[key] = [this._cursor[key]];
+	      }
+	    }
+	  }
+
+	  Cursor.validateQuery = function(query, memo, model_type) {
+	    var full_key, key, results, value;
+	    results = [];
+	    for (key in query) {
+	      value = query[key];
+	      if (!(_.isUndefined(value) || _.isObject(value))) {
+	        continue;
+	      }
+	      full_key = memo ? memo + "." + key : key;
+	      if (_.isUndefined(value)) {
+	        throw new Error("Unexpected undefined for query key '" + full_key + "' on " + (model_type != null ? model_type.model_name : void 0));
+	      }
+	      if (_.isObject(value)) {
+	        results.push(Cursor.validateQuery(value, full_key, model_type));
+	      } else {
+	        results.push(void 0);
+	      }
+	    }
+	    return results;
+	  };
+
+	  Cursor.parseQuery = function(query, model_type) {
+	    var e, key, parsed_query, value;
+	    if (!query) {
+	      return {
+	        find: {},
+	        cursor: {}
+	      };
+	    } else if (!_.isObject(query)) {
+	      return {
+	        find: {
+	          id: query
+	        },
+	        cursor: {
+	          $one: true
+	        }
+	      };
+	    } else if (query.find || query.cursor) {
+	      return {
+	        find: query.find || {},
+	        cursor: query.cursor || {}
+	      };
+	    } else {
+	      try {
+	        Cursor.validateQuery(query, null, model_type);
+	      } catch (_error) {
+	        e = _error;
+	        throw new Error("Error: " + e + ". Query: ", query);
+	      }
+	      parsed_query = {
+	        find: {},
+	        cursor: {}
+	      };
+	      for (key in query) {
+	        value = query[key];
+	        if (key[0] !== '$') {
+	          parsed_query.find[key] = value;
+	        } else {
+	          parsed_query.cursor[key] = value;
+	        }
+	      }
+	      return parsed_query;
+	    }
+	  };
+
+	  Cursor.prototype.offset = function(offset) {
+	    this._cursor.$offset = offset;
+	    return this;
+	  };
+
+	  Cursor.prototype.limit = function(limit) {
+	    this._cursor.$limit = limit;
+	    return this;
+	  };
+
+	  Cursor.prototype.sort = function(sort) {
+	    this._cursor.$sort = sort;
+	    return this;
+	  };
+
+	  Cursor.prototype.whiteList = function(args) {
+	    var keys;
+	    keys = _.flatten(arguments);
+	    this._cursor.$whitelist = this._cursor.$whitelist ? _.intersection(this._cursor.$whitelist, keys) : keys;
+	    return this;
+	  };
+
+	  Cursor.prototype.select = function(args) {
+	    var keys;
+	    keys = _.flatten(arguments);
+	    this._cursor.$select = this._cursor.$select ? _.intersection(this._cursor.$select, keys) : keys;
+	    return this;
+	  };
+
+	  Cursor.prototype.include = function(args) {
+	    var keys;
+	    keys = _.flatten(arguments);
+	    this._cursor.$include = this._cursor.$include ? _.intersection(this._cursor.$include, keys) : keys;
+	    return this;
+	  };
+
+	  Cursor.prototype.values = function(args) {
+	    var keys;
+	    keys = _.flatten(arguments);
+	    this._cursor.$values = this._cursor.$values ? _.intersection(this._cursor.$values, keys) : keys;
+	    return this;
+	  };
+
+	  Cursor.prototype.unique = function(args) {
+	    var keys;
+	    keys = _.flatten(arguments);
+	    this._cursor.$unique = this._cursor.$unique ? _.intersection(this._cursor.$unique, keys) : keys;
+	    return this;
+	  };
+
+	  Cursor.prototype.ids = function() {
+	    this._cursor.$values = ['id'];
+	    return this;
+	  };
+
+	  Cursor.prototype.count = function(callback) {
+	    return this.execWithCursorQuery('$count', 'toJSON', callback);
+	  };
+
+	  Cursor.prototype.exists = function(callback) {
+	    return this.execWithCursorQuery('$exists', 'toJSON', callback);
+	  };
+
+	  Cursor.prototype.toModel = function(callback) {
+	    return this.execWithCursorQuery('$one', 'toModels', callback);
+	  };
+
+	  Cursor.prototype.toModels = function(callback) {
+	    if (this._cursor.$values) {
+	      return callback(new Error("Cannot call toModels on cursor with values for model " + this.model_type.model_name + ". Values: " + (JSONUtils.stringify(this._cursor.$values))));
+	    }
+	    return this.toJSON((function(_this) {
+	      return function(err, json) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        if (_this._cursor.$one && !json) {
+	          return callback(null, null);
+	        }
+	        if (!_.isArray(json)) {
+	          json = [json];
+	        }
+	        return _this.prepareIncludes(json, function(err, json) {
+	          var can_cache, item, model, models;
+	          if (can_cache = !(_this._cursor.$select || _this._cursor.$whitelist)) {
+	            models = (function() {
+	              var i, len, results;
+	              results = [];
+	              for (i = 0, len = json.length; i < len; i++) {
+	                item = json[i];
+	                results.push(Utils.updateOrNew(item, this.model_type));
+	              }
+	              return results;
+	            }).call(_this);
+	          } else {
+	            models = (function() {
+	              var i, len, results;
+	              results = [];
+	              for (i = 0, len = json.length; i < len; i++) {
+	                item = json[i];
+	                results.push((model = new this.model_type(this.model_type.prototype.parse(item)), model.setPartial(true), model));
+	              }
+	              return results;
+	            }).call(_this);
+	          }
+	          return callback(null, _this._cursor.$one ? models[0] : models);
+	        });
+	      };
+	    })(this));
+	  };
+
+	  Cursor.prototype.toJSON = function(callback) {
+	    var model_types, parsed_query;
+	    parsed_query = _.extend({}, _.pick(this._cursor, CURSOR_KEYS), this._find);
+	    model_types = this.relatedModelTypesInQuery();
+	    return this.queryToJSON(callback);
+	  };
+
+	  Cursor.prototype.queryToJSON = function(callback) {
+	    throw new Error('toJSON must be implemented by a concrete cursor for a Backbone Sync type');
+	  };
+
+	  Cursor.prototype.hasCursorQuery = function(key) {
+	    return this._cursor[key] || (this._cursor[key] === '');
+	  };
+
+	  Cursor.prototype.execWithCursorQuery = function(key, method, callback) {
+	    var value;
+	    value = this._cursor[key];
+	    this._cursor[key] = true;
+	    return this[method]((function(_this) {
+	      return function(err, json) {
+	        if (_.isUndefined(value)) {
+	          delete _this._cursor[key];
+	        } else {
+	          _this._cursor[key] = value;
+	        }
+	        return callback(err, json);
+	      };
+	    })(this));
+	  };
+
+	  Cursor.prototype.relatedModelTypesInQuery = function() {
+	    var i, key, len, ref, ref1, ref2, related_fields, related_model_types, relation, relation_key, reverse_relation, value;
+	    related_fields = [];
+	    related_model_types = [];
+	    ref = this._find;
+	    for (key in ref) {
+	      value = ref[key];
+	      if (key.indexOf('.') > 0) {
+	        ref1 = key.split('.'), relation_key = ref1[0], key = ref1[1];
+	        related_fields.push(relation_key);
+	      } else if ((reverse_relation = this.model_type.reverseRelation(key)) && reverse_relation.join_table) {
+	        related_model_types.push(reverse_relation.model_type);
+	        related_model_types.push(reverse_relation.join_table);
+	      }
+	    }
+	    if ((ref2 = this._cursor) != null ? ref2.$include : void 0) {
+	      related_fields = related_fields.concat(this._cursor.$include);
+	    }
+	    for (i = 0, len = related_fields.length; i < len; i++) {
+	      relation_key = related_fields[i];
+	      if (relation = this.model_type.relation(relation_key)) {
+	        related_model_types.push(relation.reverse_model_type);
+	        if (relation.join_table) {
+	          related_model_types.push(relation.join_table);
+	        }
+	      }
+	    }
+	    return related_model_types;
+	  };
+
+	  Cursor.prototype.selectResults = function(json) {
+	    var $select, $values, item, key;
+	    if (this._cursor.$one) {
+	      json = json.slice(0, 1);
+	    }
+	    if (this._cursor.$values) {
+	      $values = this._cursor.$whitelist ? _.intersection(this._cursor.$values, this._cursor.$whitelist) : this._cursor.$values;
+	      if (this._cursor.$values.length === 1) {
+	        key = this._cursor.$values[0];
+	        json = $values.length ? (function() {
+	          var i, len, results;
+	          results = [];
+	          for (i = 0, len = json.length; i < len; i++) {
+	            item = json[i];
+	            results.push(item.hasOwnProperty(key) ? item[key] : null);
+	          }
+	          return results;
+	        })() : _.map(json, function() {
+	          return null;
+	        });
+	      } else {
+	        json = (function() {
+	          var i, len, results;
+	          results = [];
+	          for (i = 0, len = json.length; i < len; i++) {
+	            item = json[i];
+	            results.push((function() {
+	              var j, len1, results1;
+	              results1 = [];
+	              for (j = 0, len1 = $values.length; j < len1; j++) {
+	                key = $values[j];
+	                if (item.hasOwnProperty(key)) {
+	                  results1.push(item[key]);
+	                }
+	              }
+	              return results1;
+	            })());
+	          }
+	          return results;
+	        })();
+	      }
+	    } else if (this._cursor.$select) {
+	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
+	      json = (function() {
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = json.length; i < len; i++) {
+	          item = json[i];
+	          results.push(_.pick(item, $select));
+	        }
+	        return results;
+	      })();
+	    } else if (this._cursor.$whitelist) {
+	      json = (function() {
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = json.length; i < len; i++) {
+	          item = json[i];
+	          results.push(_.pick(item, this._cursor.$whitelist));
+	        }
+	        return results;
+	      }).call(this);
+	    }
+	    if (this.hasCursorQuery('$page')) {
+	      return json;
+	    }
+	    if (this._cursor.$one) {
+	      return json[0] || null;
+	    } else {
+	      return json;
+	    }
+	  };
+
+	  Cursor.prototype.selectFromModels = function(models, callback) {
+	    var $select, item, model;
+	    if (this._cursor.$select) {
+	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
+	      models = ((function() {
+	        var i, len, results;
+	        model = new this.model_type(_.pick(model.attributes, $select));
+	        model.setPartial(true);
+	        results = [];
+	        for (i = 0, len = models.length; i < len; i++) {
+	          item = models[i];
+	          results.push(model);
+	        }
+	        return results;
+	      }).call(this));
+	    } else if (this._cursor.$whitelist) {
+	      models = ((function() {
+	        var i, len, results;
+	        model = new this.model_type(_.pick(model.attributes, this._cursor.$whitelist));
+	        model.setPartial(true);
+	        results = [];
+	        for (i = 0, len = models.length; i < len; i++) {
+	          item = models[i];
+	          results.push(model);
+	        }
+	        return results;
+	      }).call(this));
+	    }
+	    return models;
+	  };
+
+	  Cursor.prototype.prepareIncludes = function(json, callback) {
+	    var findOrNew, i, include, item, j, len, len1, model_json, ref, related_json, relation, schema, shared_related_models;
+	    if (!_.isArray(this._cursor.$include) || _.isEmpty(this._cursor.$include)) {
+	      return callback(null, json);
+	    }
+	    schema = this.model_type.schema();
+	    shared_related_models = {};
+	    findOrNew = (function(_this) {
+	      return function(related_json, reverse_model_type) {
+	        var related_id;
+	        related_id = related_json[reverse_model_type.prototype.idAttribute];
+	        if (!shared_related_models[related_id]) {
+	          if (reverse_model_type.cache) {
+	            if (!(shared_related_models[related_id] = reverse_model_type.cache.get(related_id))) {
+	              reverse_model_type.cache.set(related_id, shared_related_models[related_id] = new reverse_model_type(related_json));
+	            }
+	          } else {
+	            shared_related_models[related_id] = new reverse_model_type(related_json);
+	          }
+	        }
+	        return shared_related_models[related_id];
+	      };
+	    })(this);
+	    ref = this._cursor.$include;
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      include = ref[i];
+	      relation = schema.relation(include);
+	      shared_related_models = {};
+	      for (j = 0, len1 = json.length; j < len1; j++) {
+	        model_json = json[j];
+	        if (_.isArray(related_json = model_json[include])) {
+	          model_json[include] = (function() {
+	            var k, len2, results;
+	            results = [];
+	            for (k = 0, len2 = related_json.length; k < len2; k++) {
+	              item = related_json[k];
+	              results.push(findOrNew(item, relation.reverse_model_type));
+	            }
+	            return results;
+	          })();
+	        } else if (related_json) {
+	          model_json[include] = findOrNew(related_json, relation.reverse_model_type);
+	        }
+	      }
+	    }
+	    return callback(null, json);
+	  };
+
+	  return Cursor;
+
+	})();
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Many, One, RELATION_VARIANTS, Schema, Utils, _,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+
+	_ = __webpack_require__(22);
+
+	Backbone = __webpack_require__(2);
+
+	BackboneORM = __webpack_require__(5);
+
+	One = __webpack_require__(31);
+
+	Many = __webpack_require__(30);
+
+	DatabaseURL = __webpack_require__(13);
+
+	Utils = __webpack_require__(8);
+
+	JSONUtils = __webpack_require__(9);
+
+	RELATION_VARIANTS = {
+	  'hasOne': 'hasOne',
+	  'has_one': 'hasOne',
+	  'HasOne': 'hasOne',
+	  'belongsTo': 'belongsTo',
+	  'belongs_to': 'belongsTo',
+	  'BelongsTo': 'belongsTo',
+	  'hasMany': 'hasMany',
+	  'has_many': 'hasMany',
+	  'HasMany': 'hasMany'
+	};
+
+	module.exports = Schema = (function() {
+	  function Schema(model_type, type_overrides) {
+	    this.model_type = model_type;
+	    this.type_overrides = type_overrides != null ? type_overrides : {};
+	    this.raw = _.clone(_.result(new this.model_type(), 'schema') || {});
+	    this.fields = {};
+	    this.relations = {};
+	    this.virtual_accessors = {};
+	    if (this.raw.id) {
+	      this._parseField('id', this.raw.id);
+	    }
+	  }
+
+	  Schema.prototype.initialize = function() {
+	    var info, key, ref, ref1, relation;
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    ref = this.raw;
+	    for (key in ref) {
+	      info = ref[key];
+	      this._parseField(key, info);
+	    }
+	    ref1 = this.relations;
+	    for (key in ref1) {
+	      relation = ref1[key];
+	      relation.initialize();
+	    }
+	  };
+
+	  Schema.prototype.type = function(key, type) {
+	    var base, index, other, ref, ref1, ref2, ref3;
+	    if (arguments.length === 2) {
+	      ((base = this.type_overrides)[key] || (base[key] = {}))['type'] = type;
+	      return this;
+	    }
+	    if ((index = key.indexOf('.')) >= 0) {
+	      other = key.substr(index + 1);
+	      key = key.substr(0, index);
+	    }
+	    if (!(type = ((ref = this.type_overrides[key]) != null ? ref.type : void 0) || ((ref1 = this.fields[key]) != null ? ref1.type : void 0) || ((ref2 = this.relation(key)) != null ? ref2.reverse_model_type : void 0) || ((ref3 = this.reverseRelation(key)) != null ? ref3.model_type : void 0))) {
+	      return;
+	    }
+	    if (this.virtual_accessors[key]) {
+	      if (other) {
+	        console.log("Unexpected other for virtual id key: " + key + "." + other);
+	        return;
+	      }
+	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
+	    }
+	    if (other) {
+	      return typeof type.schema === "function" ? type.schema().type(other) : void 0;
+	    } else {
+	      return type;
+	    }
+	  };
+
+	  Schema.prototype.idType = function(key) {
+	    var type;
+	    if (!key) {
+	      return this.type('id');
+	    }
+	    if (type = this.type(key)) {
+	      return (typeof type.schema === "function" ? type.schema().type('id') : void 0) || type;
+	    }
+	  };
+
+	  Schema.prototype.field = function(key) {
+	    return this.fields[key] || this.relation(key);
+	  };
+
+	  Schema.prototype.relation = function(key) {
+	    return this.relations[key] || this.virtual_accessors[key];
+	  };
+
+	  Schema.prototype.reverseRelation = function(reverse_key) {
+	    var key, ref, relation;
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
+	      if (relation.reverse_relation && (relation.reverse_relation.join_key === reverse_key)) {
+	        return relation.reverse_relation;
+	      }
+	    }
+	    return null;
+	  };
+
+	  Schema.prototype.columns = function() {
+	    var columns, key, ref, relation;
+	    columns = _.keys(this.fields);
+	    if (!_.find(columns, function(column) {
+	      return column === 'id';
+	    })) {
+	      columns.push('id');
+	    }
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
+	      if ((relation.type === 'belongsTo') && !relation.isVirtual() && !relation.isEmbedded()) {
+	        columns.push(relation.foreign_key);
+	      }
+	    }
+	    return columns;
+	  };
+
+	  Schema.prototype.joinTables = function() {
+	    var key, relation;
+	    return (function() {
+	      var ref, results;
+	      ref = this.relations;
+	      results = [];
+	      for (key in ref) {
+	        relation = ref[key];
+	        if (!relation.isVirtual() && relation.join_table) {
+	          results.push(relation.join_table);
+	        }
+	      }
+	      return results;
+	    }).call(this);
+	  };
+
+	  Schema.prototype.relatedModels = function() {
+	    var key, ref, related_model_types, relation;
+	    related_model_types = [];
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
+	      related_model_types.push(relation.reverse_model_type);
+	      if (relation.join_table) {
+	        related_model_types.push(relation.join_table);
+	      }
+	    }
+	    return related_model_types;
+	  };
+
+	  Schema.prototype.allColumns = function() {
+	    return this.columns();
+	  };
+
+	  Schema.prototype.allRelations = function() {
+	    return this.relatedModels();
+	  };
+
+	  Schema.prototype.generateBelongsTo = function(reverse_model_type) {
+	    var key, relation;
+	    key = BackboneORM.naming_conventions.attribute(reverse_model_type.model_name);
+	    if (relation = this.relations[key]) {
+	      return relation;
+	    }
+	    if (this.raw[key]) {
+	      relation = this._parseField(key, this.raw[key]);
+	      relation.initialize();
+	      return relation;
+	    }
+	    relation = this._parseField(key, this.raw[key] = [
+	      'belongsTo', reverse_model_type, {
+	        manual_fetch: true
+	      }
+	    ]);
+	    relation.initialize();
+	    return relation;
+	  };
+
+	  Schema.joinTableURL = function(relation) {
+	    var table_name1, table_name2;
+	    table_name1 = BackboneORM.naming_conventions.tableName(relation.model_type.model_name);
+	    table_name2 = BackboneORM.naming_conventions.tableName(relation.reverse_relation.model_type.model_name);
+	    if (table_name1.localeCompare(table_name2) < 0) {
+	      return table_name1 + "_" + table_name2;
+	    } else {
+	      return table_name2 + "_" + table_name1;
+	    }
+	  };
+
+	  Schema.prototype.generateJoinTable = function(relation) {
+	    var JoinTable, name, ref, schema, type, url;
+	    schema = {};
+	    schema[relation.join_key] = [
+	      type = relation.model_type.schema().type('id'), {
+	        indexed: true
+	      }
+	    ];
+	    schema[relation.reverse_relation.join_key] = [
+	      ((ref = relation.reverse_model_type) != null ? ref.schema().type('id') : void 0) || type, {
+	        indexed: true
+	      }
+	    ];
+	    url = Schema.joinTableURL(relation);
+	    name = BackboneORM.naming_conventions.modelName(url, true);
+	    try {
+	      JoinTable = (function(superClass) {
+	        extend(JoinTable, superClass);
+
+	        function JoinTable() {
+	          return JoinTable.__super__.constructor.apply(this, arguments);
+	        }
+
+	        JoinTable.prototype.model_name = name;
+
+	        JoinTable.prototype.urlRoot = ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
+	          exclude_table: true
+	        })) + "/" + url;
+
+	        JoinTable.prototype.schema = schema;
+
+	        JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
+
+	        return JoinTable;
+
+	      })(Backbone.Model);
+	    } catch (_error) {
+	      JoinTable = (function(superClass) {
+	        extend(JoinTable, superClass);
+
+	        function JoinTable() {
+	          return JoinTable.__super__.constructor.apply(this, arguments);
+	        }
+
+	        JoinTable.prototype.model_name = name;
+
+	        JoinTable.prototype.urlRoot = "/" + url;
+
+	        JoinTable.prototype.schema = schema;
+
+	        JoinTable.prototype.sync = relation.model_type.createSync(JoinTable);
+
+	        return JoinTable;
+
+	      })(Backbone.Model);
+	    }
+	    return JoinTable;
+	  };
+
+	  Schema.prototype._parseField = function(key, info) {
+	    var options, relation, type;
+	    options = this._fieldInfoToOptions(_.isFunction(info) ? info() : info);
+	    if (!options.type) {
+	      return this.fields[key] = options;
+	    }
+	    if (!(type = RELATION_VARIANTS[options.type])) {
+	      if (!_.isString(options.type)) {
+	        throw new Error("Unexpected type name is not a string: " + (JSONUtils.stringify(options)));
+	      }
+	      return this.fields[key] = options;
+	    }
+	    options.type = type;
+	    relation = this.relations[key] = type === 'hasMany' ? new Many(this.model_type, key, options) : new One(this.model_type, key, options);
+	    if (relation.virtual_id_accessor) {
+	      this.virtual_accessors[relation.virtual_id_accessor] = relation;
+	    }
+	    if (type === 'belongsTo') {
+	      this.virtual_accessors[relation.foreign_key] = relation;
+	    }
+	    return relation;
+	  };
+
+	  Schema.prototype._fieldInfoToOptions = function(options) {
+	    var result;
+	    if (_.isString(options)) {
+	      return {
+	        type: options
+	      };
+	    }
+	    if (!_.isArray(options)) {
+	      return options;
+	    }
+	    result = {};
+	    if (_.isString(options[0])) {
+	      result.type = options[0];
+	      options = options.slice(1);
+	      if (options.length === 0) {
+	        return result;
+	      }
+	    }
+	    if (_.isFunction(options[0])) {
+	      result.reverse_model_type = options[0];
+	      options = options.slice(1);
+	    }
+	    if (options.length > 1) {
+	      throw new Error("Unexpected field options array: " + (JSONUtils.stringify(options)));
+	    }
+	    if (options.length === 1) {
+	      _.extend(result, options[0]);
+	    }
+	    return result;
+	  };
+
+	  return Schema;
+
+	})();
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var MemoryStore;
+
+	MemoryStore = __webpack_require__(14);
+
+	module.exports = new MemoryStore({
+	  destroy: function(url, connection) {
+	    return connection.destroy();
+	  }
+	});
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, inflection;
+
+	inflection = __webpack_require__(1);
+
+	module.exports = BaseConvention = (function() {
+	  function BaseConvention() {}
+
+	  BaseConvention.modelName = function(table_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.classify(table_name));
+	  };
+
+	  BaseConvention.tableName = function(model_name) {
+	    return inflection.pluralize(inflection.underscore(model_name));
+	  };
+
+	  BaseConvention.foreignKey = function(model_name, plural) {
+	    if (plural) {
+	      return inflection.singularize(inflection.underscore(model_name)) + '_ids';
+	    } else {
+	      return inflection.underscore(model_name) + '_id';
+	    }
+	  };
+
+	  BaseConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  };
+
+	  return BaseConvention;
+
+	})();
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	var punycode = { encode : function (s) { return s } };
+	var _ = __webpack_require__(22);
+	var shims = __webpack_require__(32);
+
+	exports.parse = urlParse;
+	exports.resolve = urlResolve;
+	exports.resolveObject = urlResolveObject;
+	exports.format = urlFormat;
+
+	exports.Url = Url;
+
+	function Url() {
+	  this.protocol = null;
+	  this.slashes = null;
+	  this.auth = null;
+	  this.host = null;
+	  this.port = null;
+	  this.hostname = null;
+	  this.hash = null;
+	  this.search = null;
+	  this.query = null;
+	  this.pathname = null;
+	  this.path = null;
+	  this.href = null;
+	}
+
+	// Reference: RFC 3986, RFC 1808, RFC 2396
+
+	// define these here so at least they only have to be
+	// compiled once on the first module load.
+	var protocolPattern = /^([a-z0-9.+-]+:)/i,
+	    portPattern = /:[0-9]*$/,
+
+	    // RFC 2396: characters reserved for delimiting URLs.
+	    // We actually just auto-escape these.
+	    delims = ['<', '>', '"', '`', ' ', '\r', '\n', '\t'],
+
+	    // RFC 2396: characters not allowed for various reasons.
+	    unwise = ['{', '}', '|', '\\', '^', '`'].concat(delims),
+
+	    // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
+	    autoEscape = ['\''].concat(unwise),
+	    // Characters that are never ever allowed in a hostname.
+	    // Note that any invalid chars are also handled, but these
+	    // are the ones that are *expected* to be seen, so we fast-path
+	    // them.
+	    nonHostChars = ['%', '/', '?', ';', '#'].concat(autoEscape),
+	    hostEndingChars = ['/', '?', '#'],
+	    hostnameMaxLen = 255,
+	    hostnamePartPattern = /^[a-z0-9A-Z_-]{0,63}$/,
+	    hostnamePartStart = /^([a-z0-9A-Z_-]{0,63})(.*)$/,
+	    // protocols that can allow "unsafe" and "unwise" chars.
+	    unsafeProtocol = {
+	      'javascript': true,
+	      'javascript:': true
+	    },
+	    // protocols that never have a hostname.
+	    hostlessProtocol = {
+	      'javascript': true,
+	      'javascript:': true
+	    },
+	    // protocols that always contain a // bit.
+	    slashedProtocol = {
+	      'http': true,
+	      'https': true,
+	      'ftp': true,
+	      'gopher': true,
+	      'file': true,
+	      'http:': true,
+	      'https:': true,
+	      'ftp:': true,
+	      'gopher:': true,
+	      'file:': true
+	    },
+	    querystring = __webpack_require__(20);
+
+	function urlParse(url, parseQueryString, slashesDenoteHost) {
+	  if (url && _.isObject(url) && url instanceof Url) return url;
+
+	  var u = new Url;
+	  u.parse(url, parseQueryString, slashesDenoteHost);
+	  return u;
+	}
+
+	Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
+	  if (!_.isString(url)) {
+	    throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
+	  }
+
+	  // Copy chrome, IE, opera backslash-handling behavior.
+	  // See: https://code.google.com/p/chromium/issues/detail?id=25916
+	  var hashSplit = url.split('#');
+	  hashSplit[0] = hashSplit[0].replace(/\\/g, '/');
+	  url = hashSplit.join('#');
+
+	  var rest = url;
+
+	  // trim before proceeding.
+	  // This is to support parse stuff like "  http://foo.com  \n"
+	  rest = rest.trim();
+
+	  var proto = protocolPattern.exec(rest);
+	  if (proto) {
+	    proto = proto[0];
+	    var lowerProto = proto.toLowerCase();
+	    this.protocol = lowerProto;
+	    rest = rest.substr(proto.length);
+	  }
+
+	  // figure out if it's got a host
+	  // user@server is *always* interpreted as a hostname, and url
+	  // resolution will treat //foo/bar as host=foo,path=bar because that's
+	  // how the browser resolves relative URLs.
+	  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
+	    var slashes = rest.substr(0, 2) === '//';
+	    if (slashes && !(proto && hostlessProtocol[proto])) {
+	      rest = rest.substr(2);
+	      this.slashes = true;
+	    }
+	  }
+
+	  if (!hostlessProtocol[proto] &&
+	      (slashes || (proto && !slashedProtocol[proto]))) {
+
+	    // there's a hostname.
+	    // the first instance of /, ?, ;, or # ends the host.
+	    //
+	    // If there is an @ in the hostname, then non-host chars *are* allowed
+	    // to the left of the last @ sign, unless some host-ending character
+	    // comes *before* the @-sign.
+	    // URLs are obnoxious.
+	    //
+	    // ex:
+	    // http://a@b@c/ => user:a@b host:c
+	    // http://a@b?@c => user:a host:c path:/?@c
+
+	    // v0.12 TODO(isaacs): This is not quite how Chrome does things.
+	    // Review our test case against browsers more comprehensively.
+
+	    // find the first instance of any hostEndingChars
+	    var hostEnd = -1;
+	    for (var i = 0; i < hostEndingChars.length; i++) {
+	      var hec = rest.indexOf(hostEndingChars[i]);
+	      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
+	        hostEnd = hec;
+	    }
+
+	    // at this point, either we have an explicit point where the
+	    // auth portion cannot go past, or the last @ char is the decider.
+	    var auth, atSign;
+	    if (hostEnd === -1) {
+	      // atSign can be anywhere.
+	      atSign = rest.lastIndexOf('@');
+	    } else {
+	      // atSign must be in auth portion.
+	      // http://a@b/c@d => host:b auth:a path:/c@d
+	      atSign = rest.lastIndexOf('@', hostEnd);
+	    }
+
+	    // Now we have a portion which is definitely the auth.
+	    // Pull that off.
+	    if (atSign !== -1) {
+	      auth = rest.slice(0, atSign);
+	      rest = rest.slice(atSign + 1);
+	      this.auth = decodeURIComponent(auth);
+	    }
+
+	    // the host is the remaining to the left of the first non-host char
+	    hostEnd = -1;
+	    for (var i = 0; i < nonHostChars.length; i++) {
+	      var hec = rest.indexOf(nonHostChars[i]);
+	      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
+	        hostEnd = hec;
+	    }
+	    // if we still have not hit it, then the entire thing is a host.
+	    if (hostEnd === -1)
+	      hostEnd = rest.length;
+
+	    this.host = rest.slice(0, hostEnd);
+	    rest = rest.slice(hostEnd);
+
+	    // pull out port.
+	    this.parseHost();
+
+	    // we've indicated that there is a hostname,
+	    // so even if it's empty, it has to be present.
+	    this.hostname = this.hostname || '';
+
+	    // if hostname begins with [ and ends with ]
+	    // assume that it's an IPv6 address.
+	    var ipv6Hostname = this.hostname[0] === '[' &&
+	        this.hostname[this.hostname.length - 1] === ']';
+
+	    // validate a little.
+	    if (!ipv6Hostname) {
+	      var hostparts = this.hostname.split(/\./);
+	      for (var i = 0, l = hostparts.length; i < l; i++) {
+	        var part = hostparts[i];
+	        if (!part) continue;
+	        if (!part.match(hostnamePartPattern)) {
+	          var newpart = '';
+	          for (var j = 0, k = part.length; j < k; j++) {
+	            if (part.charCodeAt(j) > 127) {
+	              // we replace non-ASCII char with a temporary placeholder
+	              // we need this to make sure size of hostname is not
+	              // broken by replacing non-ASCII by nothing
+	              newpart += 'x';
+	            } else {
+	              newpart += part[j];
+	            }
+	          }
+	          // we test again with ASCII char only
+	          if (!newpart.match(hostnamePartPattern)) {
+	            var validParts = hostparts.slice(0, i);
+	            var notHost = hostparts.slice(i + 1);
+	            var bit = part.match(hostnamePartStart);
+	            if (bit) {
+	              validParts.push(bit[1]);
+	              notHost.unshift(bit[2]);
+	            }
+	            if (notHost.length) {
+	              rest = '/' + notHost.join('.') + rest;
+	            }
+	            this.hostname = validParts.join('.');
+	            break;
+	          }
+	        }
+	      }
+	    }
+
+	    if (this.hostname.length > hostnameMaxLen) {
+	      this.hostname = '';
+	    } else {
+	      // hostnames are always lower case.
+	      this.hostname = this.hostname.toLowerCase();
+	    }
+
+	    if (!ipv6Hostname) {
+	      // IDNA Support: Returns a puny coded representation of "domain".
+	      // It only converts the part of the domain name that
+	      // has non ASCII characters. I.e. it dosent matter if
+	      // you call it with a domain that already is in ASCII.
+	      var domainArray = this.hostname.split('.');
+	      var newOut = [];
+	      for (var i = 0; i < domainArray.length; ++i) {
+	        var s = domainArray[i];
+	        newOut.push(s.match(/[^A-Za-z0-9_-]/) ?
+	            'xn--' + punycode.encode(s) : s);
+	      }
+	      this.hostname = newOut.join('.');
+	    }
+
+	    var p = this.port ? ':' + this.port : '';
+	    var h = this.hostname || '';
+	    this.host = h + p;
+	    this.href += this.host;
+
+	    // strip [ and ] from the hostname
+	    // the host field still retains them, though
+	    if (ipv6Hostname) {
+	      this.hostname = this.hostname.substr(1, this.hostname.length - 2);
+	      if (rest[0] !== '/') {
+	        rest = '/' + rest;
+	      }
+	    }
+	  }
+
+	  // now rest is set to the post-host stuff.
+	  // chop off any delim chars.
+	  if (!unsafeProtocol[lowerProto]) {
+
+	    // First, make 100% sure that any "autoEscape" chars get
+	    // escaped, even if encodeURIComponent doesn't think they
+	    // need to be.
+	    for (var i = 0, l = autoEscape.length; i < l; i++) {
+	      var ae = autoEscape[i];
+	      var esc = encodeURIComponent(ae);
+	      if (esc === ae) {
+	        esc = escape(ae);
+	      }
+	      rest = rest.split(ae).join(esc);
+	    }
+	  }
+
+
+	  // chop off from the tail first.
+	  var hash = rest.indexOf('#');
+	  if (hash !== -1) {
+	    // got a fragment string.
+	    this.hash = rest.substr(hash);
+	    rest = rest.slice(0, hash);
+	  }
+	  var qm = rest.indexOf('?');
+	  if (qm !== -1) {
+	    this.search = rest.substr(qm);
+	    this.query = rest.substr(qm + 1);
+	    if (parseQueryString) {
+	      this.query = querystring.parse(this.query);
+	    }
+	    rest = rest.slice(0, qm);
+	  } else if (parseQueryString) {
+	    // no query string, but parseQueryString still requested
+	    this.search = '';
+	    this.query = {};
+	  }
+	  if (rest) this.pathname = rest;
+	  if (slashedProtocol[lowerProto] &&
+	      this.hostname && !this.pathname) {
+	    this.pathname = '/';
+	  }
+
+	  //to support http.request
+	  if (this.pathname || this.search) {
+	    var p = this.pathname || '';
+	    var s = this.search || '';
+	    this.path = p + s;
+	  }
+
+	  // finally, reconstruct the href based on what has been validated.
+	  this.href = this.format();
+	  return this;
+	};
+
+	// format a parsed object into a url string
+	function urlFormat(obj) {
+	  // ensure it's an object, and not a string url.
+	  // If it's an obj, this is a no-op.
+	  // this way, you can call url_format() on strings
+	  // to clean up potentially wonky urls.
+	  if (_.isString(obj)) obj = urlParse(obj);
+	  if (!(obj instanceof Url)) return Url.prototype.format.call(obj);
+	  return obj.format();
+	}
+
+	Url.prototype.format = function() {
+	  var auth = this.auth || '';
+	  if (auth) {
+	    auth = encodeURIComponent(auth);
+	    auth = auth.replace(/%3A/i, ':');
+	    auth += '@';
+	  }
+
+	  var protocol = this.protocol || '',
+	      pathname = this.pathname || '',
+	      hash = this.hash || '',
+	      host = false,
+	      query = '';
+
+	  if (this.host) {
+	    host = auth + this.host;
+	  } else if (this.hostname) {
+	    host = auth + (this.hostname.indexOf(':') === -1 ?
+	        this.hostname :
+	        '[' + this.hostname + ']');
+	    if (this.port) {
+	      host += ':' + this.port;
+	    }
+	  }
+
+	  if (this.query &&
+	      _.isObject(this.query) &&
+	      Object.keys(this.query).length) {
+	    query = querystring.stringify(this.query);
+	  }
+
+	  var search = this.search || (query && ('?' + query)) || '';
+
+	  if (protocol && protocol.substr(-1) !== ':') protocol += ':';
+
+	  // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
+	  // unless they had them to begin with.
+	  if (this.slashes ||
+	      (!protocol || slashedProtocol[protocol]) && host !== false) {
+	    host = '//' + (host || '');
+	    if (pathname && pathname.charAt(0) !== '/') pathname = '/' + pathname;
+	  } else if (!host) {
+	    host = '';
+	  }
+
+	  if (hash && hash.charAt(0) !== '#') hash = '#' + hash;
+	  if (search && search.charAt(0) !== '?') search = '?' + search;
+
+	  pathname = pathname.replace(/[?#]/g, function(match) {
+	    return encodeURIComponent(match);
+	  });
+	  search = search.replace('#', '%23');
+
+	  return protocol + host + pathname + search + hash;
+	};
+
+	function urlResolve(source, relative) {
+	  return urlParse(source, false, true).resolve(relative);
+	}
+
+	Url.prototype.resolve = function(relative) {
+	  return this.resolveObject(urlParse(relative, false, true)).format();
+	};
+
+	function urlResolveObject(source, relative) {
+	  if (!source) return relative;
+	  return urlParse(source, false, true).resolveObject(relative);
+	}
+
+	Url.prototype.resolveObject = function(relative) {
+	  if (_.isString(relative)) {
+	    var rel = new Url();
+	    rel.parse(relative, false, true);
+	    relative = rel;
+	  }
+
+	  var result = new Url();
+	  Object.keys(this).forEach(function(k) {
+	    result[k] = this[k];
+	  }, this);
+
+	  // hash is always overridden, no matter what.
+	  // even href="" will remove it.
+	  result.hash = relative.hash;
+
+	  // if the relative url is empty, then there's nothing left to do here.
+	  if (relative.href === '') {
+	    result.href = result.format();
+	    return result;
+	  }
+
+	  // hrefs like //foo/bar always cut to the protocol.
+	  if (relative.slashes && !relative.protocol) {
+	    // take everything except the protocol from relative
+	    Object.keys(relative).forEach(function(k) {
+	      if (k !== 'protocol')
+	        result[k] = relative[k];
+	    });
+
+	    //urlParse appends trailing / to urls like http://www.example.com
+	    if (slashedProtocol[result.protocol] &&
+	        result.hostname && !result.pathname) {
+	      result.path = result.pathname = '/';
+	    }
+
+	    result.href = result.format();
+	    return result;
+	  }
+
+	  if (relative.protocol && relative.protocol !== result.protocol) {
+	    // if it's a known url protocol, then changing
+	    // the protocol does weird things
+	    // first, if it's not file:, then we MUST have a host,
+	    // and if there was a path
+	    // to begin with, then we MUST have a path.
+	    // if it is file:, then the host is dropped,
+	    // because that's known to be hostless.
+	    // anything else is assumed to be absolute.
+	    if (!slashedProtocol[relative.protocol]) {
+	      Object.keys(relative).forEach(function(k) {
+	        result[k] = relative[k];
+	      });
+	      result.href = result.format();
+	      return result;
+	    }
+
+	    result.protocol = relative.protocol;
+	    if (!relative.host && !hostlessProtocol[relative.protocol]) {
+	      var relPath = (relative.pathname || '').split('/');
+	      while (relPath.length && !(relative.host = relPath.shift()));
+	      if (!relative.host) relative.host = '';
+	      if (!relative.hostname) relative.hostname = '';
+	      if (relPath[0] !== '') relPath.unshift('');
+	      if (relPath.length < 2) relPath.unshift('');
+	      result.pathname = relPath.join('/');
+	    } else {
+	      result.pathname = relative.pathname;
+	    }
+	    result.search = relative.search;
+	    result.query = relative.query;
+	    result.host = relative.host || '';
+	    result.auth = relative.auth;
+	    result.hostname = relative.hostname || relative.host;
+	    result.port = relative.port;
+	    // to support http.request
+	    if (result.pathname || result.search) {
+	      var p = result.pathname || '';
+	      var s = result.search || '';
+	      result.path = p + s;
+	    }
+	    result.slashes = result.slashes || relative.slashes;
+	    result.href = result.format();
+	    return result;
+	  }
+
+	  var isSourceAbs = (result.pathname && result.pathname.charAt(0) === '/'),
+	      isRelAbs = (
+	          relative.host ||
+	          relative.pathname && relative.pathname.charAt(0) === '/'
+	      ),
+	      mustEndAbs = (isRelAbs || isSourceAbs ||
+	                    (result.host && relative.pathname)),
+	      removeAllDots = mustEndAbs,
+	      srcPath = result.pathname && result.pathname.split('/') || [],
+	      relPath = relative.pathname && relative.pathname.split('/') || [],
+	      psychotic = result.protocol && !slashedProtocol[result.protocol];
+
+	  // if the url is a non-slashed url, then relative
+	  // links like ../.. should be able
+	  // to crawl up to the hostname, as well.  This is strange.
+	  // result.protocol has already been set by now.
+	  // Later on, put the first path part into the host field.
+	  if (psychotic) {
+	    result.hostname = '';
+	    result.port = null;
+	    if (result.host) {
+	      if (srcPath[0] === '') srcPath[0] = result.host;
+	      else srcPath.unshift(result.host);
+	    }
+	    result.host = '';
+	    if (relative.protocol) {
+	      relative.hostname = null;
+	      relative.port = null;
+	      if (relative.host) {
+	        if (relPath[0] === '') relPath[0] = relative.host;
+	        else relPath.unshift(relative.host);
+	      }
+	      relative.host = null;
+	    }
+	    mustEndAbs = mustEndAbs && (relPath[0] === '' || srcPath[0] === '');
+	  }
+
+	  if (isRelAbs) {
+	    // it's absolute.
+	    result.host = (relative.host || relative.host === '') ?
+	                  relative.host : result.host;
+	    result.hostname = (relative.hostname || relative.hostname === '') ?
+	                      relative.hostname : result.hostname;
+	    result.search = relative.search;
+	    result.query = relative.query;
+	    srcPath = relPath;
+	    // fall through to the dot-handling below.
+	  } else if (relPath.length) {
+	    // it's relative
+	    // throw away the existing file, and take the new path instead.
+	    if (!srcPath) srcPath = [];
+	    srcPath.pop();
+	    srcPath = srcPath.concat(relPath);
+	    result.search = relative.search;
+	    result.query = relative.query;
+	  } else if (!(_.isNull(relative.search) || _.isUndefined(relative.search))) {
+	    // just pull out the search.
+	    // like href='?foo'.
+	    // Put this after the other two cases because it simplifies the booleans
+	    if (psychotic) {
+	      result.hostname = result.host = srcPath.shift();
+	      //occationaly the auth can get stuck only in host
+	      //this especialy happens in cases like
+	      //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+	      var authInHost = result.host && result.host.indexOf('@') > 0 ?
+	                       result.host.split('@') : false;
+	      if (authInHost) {
+	        result.auth = authInHost.shift();
+	        result.host = result.hostname = authInHost.shift();
+	      }
+	    }
+	    result.search = relative.search;
+	    result.query = relative.query;
+	    //to support http.request
+	    if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
+	      result.path = (result.pathname ? result.pathname : '') +
+	                    (result.search ? result.search : '');
+	    }
+	    result.href = result.format();
+	    return result;
+	  }
+
+	  if (!srcPath.length) {
+	    // no path at all.  easy.
+	    // we've already handled the other stuff above.
+	    result.pathname = null;
+	    //to support http.request
+	    if (result.search) {
+	      result.path = '/' + result.search;
+	    } else {
+	      result.path = null;
+	    }
+	    result.href = result.format();
+	    return result;
+	  }
+
+	  // if a url ENDs in . or .., then it must get a trailing slash.
+	  // however, if it ends in anything else non-slashy,
+	  // then it must NOT get a trailing slash.
+	  var last = srcPath.slice(-1)[0];
+	  var hasTrailingSlash = (
+	      (result.host || relative.host) && (last === '.' || last === '..') ||
+	      last === '');
+
+	  // strip single dots, resolve double dots to parent dir
+	  // if the path tries to go above the root, `up` ends up > 0
+	  var up = 0;
+	  for (var i = srcPath.length; i >= 0; i--) {
+	    last = srcPath[i];
+	    if (last === '.') {
+	      srcPath.splice(i, 1);
+	    } else if (last === '..') {
+	      srcPath.splice(i, 1);
+	      up++;
+	    } else if (up) {
+	      srcPath.splice(i, 1);
+	      up--;
+	    }
+	  }
+
+	  // if the path is allowed to go above the root, restore leading ..s
+	  if (!mustEndAbs && !removeAllDots) {
+	    for (; up--; up) {
+	      srcPath.unshift('..');
+	    }
+	  }
+
+	  if (mustEndAbs && srcPath[0] !== '' &&
+	      (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {
+	    srcPath.unshift('');
+	  }
+
+	  if (hasTrailingSlash && (srcPath.join('/').substr(-1) !== '/')) {
+	    srcPath.push('');
+	  }
+
+	  var isAbsolute = srcPath[0] === '' ||
+	      (srcPath[0] && srcPath[0].charAt(0) === '/');
+
+	  // put the host back
+	  if (psychotic) {
+	    result.hostname = result.host = isAbsolute ? '' :
+	                                    srcPath.length ? srcPath.shift() : '';
+	    //occationaly the auth can get stuck only in host
+	    //this especialy happens in cases like
+	    //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+	    var authInHost = result.host && result.host.indexOf('@') > 0 ?
+	                     result.host.split('@') : false;
+	    if (authInHost) {
+	      result.auth = authInHost.shift();
+	      result.host = result.hostname = authInHost.shift();
+	    }
+	  }
+
+	  mustEndAbs = mustEndAbs || (result.host && srcPath.length);
+
+	  if (mustEndAbs && !isAbsolute) {
+	    srcPath.unshift('');
+	  }
+
+	  if (!srcPath.length) {
+	    result.pathname = null;
+	    result.path = null;
+	  } else {
+	    result.pathname = srcPath.join('/');
+	  }
+
+	  //to support request.http
+	  if (!_.isNull(result.pathname) || !_.isNull(result.search)) {
+	    result.path = (result.pathname ? result.pathname : '') +
+	                  (result.search ? result.search : '');
+	  }
+	  result.auth = relative.auth || result.auth;
+	  result.slashes = result.slashes || relative.slashes;
+	  result.href = result.format();
+	  return result;
+	};
+
+	Url.prototype.parseHost = function() {
+	  var host = this.host;
+	  var port = portPattern.exec(host);
+	  if (port) {
+	    port = port[0];
+	    if (port !== ':') {
+	      this.port = port.substr(1);
+	    }
+	    host = host.substr(0, host.length - port.length);
+	  }
+	  if (host) this.hostname = host;
+	};
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	// Query String Utilities
+
+	var QueryString = exports;
+	var _ = __webpack_require__(22);
+
+
+	// If obj.hasOwnProperty has been overridden, then calling
+	// obj.hasOwnProperty(prop) will break.
+	// See: https://github.com/joyent/node/issues/1707
+	function hasOwnProperty(obj, prop) {
+	  return Object.prototype.hasOwnProperty.call(obj, prop);
+	}
+
+
+	function charCode(c) {
+	  return c.charCodeAt(0);
+	}
+
+
+	// a safe fast alternative to decodeURIComponent
+	QueryString.unescapeBuffer = function(s, decodeSpaces) {
+	  var out = new Buffer(s.length);
+	  var state = 'CHAR'; // states: CHAR, HEX0, HEX1
+	  var n, m, hexchar;
+
+	  for (var inIndex = 0, outIndex = 0; inIndex <= s.length; inIndex++) {
+	    var c = s.charCodeAt(inIndex);
+	    switch (state) {
+	      case 'CHAR':
+	        switch (c) {
+	          case charCode('%'):
+	            n = 0;
+	            m = 0;
+	            state = 'HEX0';
+	            break;
+	          case charCode('+'):
+	            if (decodeSpaces) c = charCode(' ');
+	            // pass thru
+	          default:
+	            out[outIndex++] = c;
+	            break;
+	        }
+	        break;
+
+	      case 'HEX0':
+	        state = 'HEX1';
+	        hexchar = c;
+	        if (charCode('0') <= c && c <= charCode('9')) {
+	          n = c - charCode('0');
+	        } else if (charCode('a') <= c && c <= charCode('f')) {
+	          n = c - charCode('a') + 10;
+	        } else if (charCode('A') <= c && c <= charCode('F')) {
+	          n = c - charCode('A') + 10;
+	        } else {
+	          out[outIndex++] = charCode('%');
+	          out[outIndex++] = c;
+	          state = 'CHAR';
+	          break;
+	        }
+	        break;
+
+	      case 'HEX1':
+	        state = 'CHAR';
+	        if (charCode('0') <= c && c <= charCode('9')) {
+	          m = c - charCode('0');
+	        } else if (charCode('a') <= c && c <= charCode('f')) {
+	          m = c - charCode('a') + 10;
+	        } else if (charCode('A') <= c && c <= charCode('F')) {
+	          m = c - charCode('A') + 10;
+	        } else {
+	          out[outIndex++] = charCode('%');
+	          out[outIndex++] = hexchar;
+	          out[outIndex++] = c;
+	          break;
+	        }
+	        out[outIndex++] = 16 * n + m;
+	        break;
+	    }
+	  }
+
+	  // TODO support returning arbitrary buffers.
+
+	  return out.slice(0, outIndex - 1);
+	};
+
+
+	QueryString.unescape = function(s, decodeSpaces) {
+	  return QueryString.unescapeBuffer(s, decodeSpaces).toString();
+	};
+
+
+	QueryString.escape = function(str) {
+	  return encodeURIComponent(str);
+	};
+
+	var stringifyPrimitive = function(v) {
+	  if (_.isString(v))
+	    return v;
+	  if (_.isBoolean(v))
+	    return v ? 'true' : 'false';
+	  if (_.isNumber(v))
+	    return isFinite(v) ? v : '';
+	  return '';
+	};
+
+
+	QueryString.stringify = QueryString.encode = function(obj, sep, eq, options) {
+	  sep = sep || '&';
+	  eq = eq || '=';
+	  if (_.isNull(obj)) {
+	    obj = undefined;
+	  }
+
+	  var encode = QueryString.escape;
+	  if (options && typeof options.encodeURIComponent === 'function') {
+	    encode = options.encodeURIComponent;
+	  }
+
+	  if (_.isObject(obj)) {
+	    return Object.keys(obj).map(function(k) {
+	      var ks = encode(stringifyPrimitive(k)) + eq;
+	      if (_.isArray(obj[k])) {
+	        return obj[k].map(function(v) {
+	          return ks + encode(stringifyPrimitive(v));
+	        }).join(sep);
+	      } else {
+	        return ks + encode(stringifyPrimitive(obj[k]));
+	      }
+	    }).join(sep);
+	  }
+	  return '';
+	};
+
+	// Parse a key=val string.
+	QueryString.parse = QueryString.decode = function(qs, sep, eq, options) {
+	  sep = sep || '&';
+	  eq = eq || '=';
+	  var obj = {};
+
+	  if (!_.isString(qs) || qs.length === 0) {
+	    return obj;
+	  }
+
+	  var regexp = /\+/g;
+	  qs = qs.split(sep);
+
+	  var maxKeys = 1000;
+	  if (options && _.isNumber(options.maxKeys)) {
+	    maxKeys = options.maxKeys;
+	  }
+
+	  var len = qs.length;
+	  // maxKeys <= 0 means that we should not limit keys count
+	  if (maxKeys > 0 && len > maxKeys) {
+	    len = maxKeys;
+	  }
+
+	  var decode = decodeURIComponent;
+	  if (options && typeof options.decodeURIComponent === 'function') {
+	    decode = options.decodeURIComponent;
+	  }
+
+	  for (var i = 0; i < len; ++i) {
+	    var x = qs[i].replace(regexp, '%20'),
+	        idx = x.indexOf(eq),
+	        kstr, vstr, k, v;
+
+	    if (idx >= 0) {
+	      kstr = x.substr(0, idx);
+	      vstr = x.substr(idx + 1);
+	    } else {
+	      kstr = x;
+	      vstr = '';
+	    }
+
+	    try {
+	      k = decode(kstr);
+	      v = decode(vstr);
+	    } catch (e) {
+	      k = QueryString.unescape(kstr, true);
+	      v = QueryString.unescape(vstr, true);
+	    }
+
+	    if (!hasOwnProperty(obj, k)) {
+	      obj[k] = v;
+	    } else if (_.isArray(obj[k])) {
+	      obj[k].push(v);
+	    } else {
+	      obj[k] = [obj[k], v];
+	    }
+	  }
+
+	  return obj;
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	;(function () { // closure for web browsers
+
+	if (typeof module === 'object' && module.exports) {
+	  module.exports = LRUCache
+	} else {
+	  // just set the global for non-node platforms.
+	  this.LRUCache = LRUCache
+	}
+
+	function hOP (obj, key) {
+	  return Object.prototype.hasOwnProperty.call(obj, key)
+	}
+
+	function naiveLength () { return 1 }
+
+	function LRUCache (options) {
+	  if (!(this instanceof LRUCache))
+	    return new LRUCache(options)
+
+	  if (typeof options === 'number')
+	    options = { max: options }
+
+	  if (!options)
+	    options = {}
+
+	  this._max = options.max
+	  // Kind of weird to have a default max of Infinity, but oh well.
+	  if (!this._max || !(typeof this._max === "number") || this._max <= 0 )
+	    this._max = Infinity
+
+	  this._lengthCalculator = options.length || naiveLength
+	  if (typeof this._lengthCalculator !== "function")
+	    this._lengthCalculator = naiveLength
+
+	  this._allowStale = options.stale || false
+	  this._maxAge = options.maxAge || null
+	  this._dispose = options.dispose
+	  this.reset()
+	}
+
+	// resize the cache when the max changes.
+	Object.defineProperty(LRUCache.prototype, "max",
+	  { set : function (mL) {
+	      if (!mL || !(typeof mL === "number") || mL <= 0 ) mL = Infinity
+	      this._max = mL
+	      if (this._length > this._max) trim(this)
+	    }
+	  , get : function () { return this._max }
+	  , enumerable : true
+	  })
+
+	// resize the cache when the lengthCalculator changes.
+	Object.defineProperty(LRUCache.prototype, "lengthCalculator",
+	  { set : function (lC) {
+	      if (typeof lC !== "function") {
+	        this._lengthCalculator = naiveLength
+	        this._length = this._itemCount
+	        for (var key in this._cache) {
+	          this._cache[key].length = 1
+	        }
+	      } else {
+	        this._lengthCalculator = lC
+	        this._length = 0
+	        for (var key in this._cache) {
+	          this._cache[key].length = this._lengthCalculator(this._cache[key].value)
+	          this._length += this._cache[key].length
+	        }
+	      }
+
+	      if (this._length > this._max) trim(this)
+	    }
+	  , get : function () { return this._lengthCalculator }
+	  , enumerable : true
+	  })
+
+	Object.defineProperty(LRUCache.prototype, "length",
+	  { get : function () { return this._length }
+	  , enumerable : true
+	  })
+
+
+	Object.defineProperty(LRUCache.prototype, "itemCount",
+	  { get : function () { return this._itemCount }
+	  , enumerable : true
+	  })
+
+	LRUCache.prototype.forEach = function (fn, thisp) {
+	  thisp = thisp || this
+	  var i = 0
+	  var itemCount = this._itemCount
+
+	  for (var k = this._mru - 1; k >= 0 && i < itemCount; k--) if (this._lruList[k]) {
+	    i++
+	    var hit = this._lruList[k]
+	    if (isStale(this, hit)) {
+	      del(this, hit)
+	      if (!this._allowStale) hit = undefined
+	    }
+	    if (hit) {
+	      fn.call(thisp, hit.value, hit.key, this)
+	    }
+	  }
+	}
+
+	LRUCache.prototype.keys = function () {
+	  var keys = new Array(this._itemCount)
+	  var i = 0
+	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
+	    var hit = this._lruList[k]
+	    keys[i++] = hit.key
+	  }
+	  return keys
+	}
+
+	LRUCache.prototype.values = function () {
+	  var values = new Array(this._itemCount)
+	  var i = 0
+	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
+	    var hit = this._lruList[k]
+	    values[i++] = hit.value
+	  }
+	  return values
+	}
+
+	LRUCache.prototype.reset = function () {
+	  if (this._dispose && this._cache) {
+	    for (var k in this._cache) {
+	      this._dispose(k, this._cache[k].value)
+	    }
+	  }
+
+	  this._cache = Object.create(null) // hash of items by key
+	  this._lruList = Object.create(null) // list of items in order of use recency
+	  this._mru = 0 // most recently used
+	  this._lru = 0 // least recently used
+	  this._length = 0 // number of items in the list
+	  this._itemCount = 0
+	}
+
+	// Provided for debugging/dev purposes only. No promises whatsoever that
+	// this API stays stable.
+	LRUCache.prototype.dump = function () {
+	  return this._cache
+	}
+
+	LRUCache.prototype.dumpLru = function () {
+	  return this._lruList
+	}
+
+	LRUCache.prototype.set = function (key, value, maxAge) {
+	  maxAge = maxAge || this._maxAge
+	  var now = maxAge ? Date.now() : 0
+
+	  if (hOP(this._cache, key)) {
+	    // dispose of the old one before overwriting
+	    if (this._dispose)
+	      this._dispose(key, this._cache[key].value)
+
+	    this._cache[key].now = now
+	    this._cache[key].maxAge = maxAge
+	    this._cache[key].value = value
+	    this.get(key)
+	    return true
+	  }
+
+	  var len = this._lengthCalculator(value)
+	  var hit = new Entry(key, value, this._mru++, len, now, maxAge)
+
+	  // oversized objects fall out of cache automatically.
+	  if (hit.length > this._max) {
+	    if (this._dispose) this._dispose(key, value)
+	    return false
+	  }
+
+	  this._length += hit.length
+	  this._lruList[hit.lu] = this._cache[key] = hit
+	  this._itemCount ++
+
+	  if (this._length > this._max)
+	    trim(this)
+
+	  return true
+	}
+
+	LRUCache.prototype.has = function (key) {
+	  if (!hOP(this._cache, key)) return false
+	  var hit = this._cache[key]
+	  if (isStale(this, hit)) {
+	    return false
+	  }
+	  return true
+	}
+
+	LRUCache.prototype.get = function (key) {
+	  return get(this, key, true)
+	}
+
+	LRUCache.prototype.peek = function (key) {
+	  return get(this, key, false)
+	}
+
+	LRUCache.prototype.pop = function () {
+	  var hit = this._lruList[this._lru]
+	  del(this, hit)
+	  return hit || null
+	}
+
+	LRUCache.prototype.del = function (key) {
+	  del(this, this._cache[key])
+	}
+
+	function get (self, key, doUse) {
+	  var hit = self._cache[key]
+	  if (hit) {
+	    if (isStale(self, hit)) {
+	      del(self, hit)
+	      if (!self._allowStale) hit = undefined
+	    } else {
+	      if (doUse) use(self, hit)
+	    }
+	    if (hit) hit = hit.value
+	  }
+	  return hit
+	}
+
+	function isStale(self, hit) {
+	  if (!hit || (!hit.maxAge && !self._maxAge)) return false
+	  var stale = false;
+	  var diff = Date.now() - hit.now
+	  if (hit.maxAge) {
+	    stale = diff > hit.maxAge
+	  } else {
+	    stale = self._maxAge && (diff > self._maxAge)
+	  }
+	  return stale;
+	}
+
+	function use (self, hit) {
+	  shiftLU(self, hit)
+	  hit.lu = self._mru ++
+	  self._lruList[hit.lu] = hit
+	}
+
+	function trim (self) {
+	  while (self._lru < self._mru && self._length > self._max)
+	    del(self, self._lruList[self._lru])
+	}
+
+	function shiftLU (self, hit) {
+	  delete self._lruList[ hit.lu ]
+	  while (self._lru < self._mru && !self._lruList[self._lru]) self._lru ++
+	}
+
+	function del (self, hit) {
+	  if (hit) {
+	    if (self._dispose) self._dispose(hit.key, hit.value)
+	    self._length -= hit.length
+	    self._itemCount --
+	    delete self._cache[ hit.key ]
+	    shiftLU(self, hit)
+	  }
+	}
+
+	// classy, since V8 prefers predictable objects.
+	function Entry (key, value, lu, length, now, maxAge) {
+	  this.key = key
+	  this.value = value
+	  this.lu = lu
+	  this.length = length
+	  this.now = now
+	  if (maxAge) this.maxAge = maxAge
+	}
+
+	})()
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_22__;
+
+/***/ },
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -4965,7 +4898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	inflection = __webpack_require__(22);
+	inflection = __webpack_require__(1);
 
 	BaseConvention = __webpack_require__(18);
 
@@ -4993,7 +4926,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	inflection = __webpack_require__(22);
+	inflection = __webpack_require__(1);
 
 	BaseConvention = __webpack_require__(18);
 
@@ -5021,7 +4954,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	inflection = __webpack_require__(22);
+	inflection = __webpack_require__(1);
 
 	BaseConvention = __webpack_require__(18);
 
@@ -5057,7 +4990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Queue = __webpack_require__(12);
 
@@ -5099,7 +5032,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
 	      return sync_fn;
 	    }
-	    return (__webpack_require__(33))(model_type, sync_fn);
+	    return (__webpack_require__(34))(model_type, sync_fn);
 	  };
 
 	  ModelCache.prototype.reset = function() {
@@ -5157,12 +5090,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, _, mergeQuery, valueToArray,
+	var Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, _, mergeQuery, valueToArray,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty,
 	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Queue = __webpack_require__(12);
 
@@ -5173,8 +5106,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	DateUtils = __webpack_require__(10);
 
 	Cursor = __webpack_require__(15);
-
-	BATCH_COUNT = 500;
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
@@ -5281,7 +5212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	              return callback();
 	            } else {
-	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
+	              return Utils.each(_this.store, (function(model_json, callback) {
 	                var find_keys, next, ref3, ref4, values;
 	                if (exists && json.length) {
 	                  return callback(null, true);
@@ -5314,7 +5245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
 	                };
 	                return next(null, true);
-	              });
+	              }), callback);
 	            }
 	          } else {
 	            if (_this._cursor.$ids) {
@@ -5642,6 +5573,146 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(process) {
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var IterationUtils, Queue, SPLIT, _, safeStackCall;
+
+	_ = __webpack_require__(22);
+
+	Queue = __webpack_require__(12);
+
+	SPLIT = true;
+
+	safeStackCall = (function(_this) {
+	  return function(fn, callback) {
+	    var caller;
+	    caller = new Queue();
+	    caller.defer(function(callback) {
+	      return fn(callback);
+	    });
+	    return caller.await(callback);
+	  };
+	})(this);
+
+	module.exports = IterationUtils = (function() {
+	  function IterationUtils() {}
+
+	  IterationUtils.MAX_ITERATION_COUNT = 500;
+
+	  IterationUtils.nextTick = (typeof process !== "undefined" && process !== null ? process.nextTick : void 0) || _.defer;
+
+	  IterationUtils.each = function(array, iterator, callback) {
+	    var count, fn1, i, index, queue, ref, ref1, start_index;
+	    if (!(count = array.length)) {
+	      return callback();
+	    }
+	    index = 0;
+	    if (SPLIT) {
+	      queue = new Queue(1);
+	      fn1 = function(start_index) {
+	        return queue.defer(function(callback) {
+	          var iteration_end, next;
+	          iteration_end = Math.min(start_index + IterationUtils.MAX_ITERATION_COUNT, count);
+	          next = (function(_this) {
+	            return function(err) {
+	              if (err || (index >= iteration_end)) {
+	                return callback(err);
+	              }
+	              return iterator(array[index++], next);
+	            };
+	          })(this);
+	          return next();
+	        });
+	      };
+	      for (start_index = i = 0, ref = count, ref1 = IterationUtils.MAX_ITERATION_COUNT; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
+	        fn1(start_index);
+	      }
+	      return queue.await(callback);
+	    } else {
+	      return safeStackCall((function(callback) {
+	        var iterate;
+	        iterate = function() {
+	          return iterator(array[index++], function(err) {
+	            if (err || (index >= count)) {
+	              return callback(err);
+	            }
+	            if (index && (index % IterationUtils.MAX_ITERATION_COUNT === 0)) {
+	              return IterationUtils.nextTick(iterate);
+	            } else {
+	              return iterate();
+	            }
+	          });
+	        };
+	        return iterate();
+	      }), callback);
+	    }
+	  };
+
+	  IterationUtils.popEach = function(array, iterator, callback) {
+	    var count, fn1, i, index, queue, ref, ref1, start_index;
+	    if (!(count = array.length)) {
+	      return callback();
+	    }
+	    index = 0;
+	    if (SPLIT) {
+	      queue = new Queue(1);
+	      fn1 = function(start_index) {
+	        return queue.defer(function(callback) {
+	          var iteration_end, next;
+	          iteration_end = Math.min(start_index + IterationUtils.MAX_ITERATION_COUNT, count);
+	          next = (function(_this) {
+	            return function(err) {
+	              if (err || (index >= iteration_end) || (array.length === 0)) {
+	                return callback(err);
+	              }
+	              index++;
+	              return iterator(array.pop(), next);
+	            };
+	          })(this);
+	          return next();
+	        });
+	      };
+	      for (start_index = i = 0, ref = count, ref1 = IterationUtils.MAX_ITERATION_COUNT; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
+	        fn1(start_index);
+	      }
+	      return queue.await(callback);
+	    } else {
+	      return safeStackCall((function(callback) {
+	        var iterate;
+	        iterate = function() {
+	          index++;
+	          return iterator(array.pop(), function(err) {
+	            if (err || (index >= count) || (array.length === 0)) {
+	              return callback(err);
+	            }
+	            if (index && (index % IterationUtils.MAX_ITERATION_COUNT === 0)) {
+	              return IterationUtils.nextTick(iterate);
+	            } else {
+	              return iterate();
+	            }
+	          });
+	        };
+	        return iterate();
+	      }), callback);
+	    }
+	  };
+
+	  return IterationUtils;
+
+	})();
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(40)))
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
 	  backbone-orm.js 0.7.9
@@ -5652,7 +5723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Backbone, DatabaseURL, ModelStream, Queue, Utils, _, modelEach, modelInterval;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Backbone = __webpack_require__(2);
 
@@ -5662,13 +5733,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	DatabaseURL = __webpack_require__(13);
 
-	ModelStream = __webpack_require__(34);
+	ModelStream = __webpack_require__(35);
 
-	modelEach = __webpack_require__(35);
+	modelEach = __webpack_require__(36);
 
-	modelInterval = __webpack_require__(36);
+	modelInterval = __webpack_require__(37);
 
-	__webpack_require__(37);
+	__webpack_require__(38);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, _findOrClone, fn, key, overrides, results;
@@ -5932,13 +6003,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return function(callback) {
 	        if (_this.isLoaded()) {
 	          return callback();
+	        } else {
+	          return _this.fetch(callback);
 	        }
-	        return _this.fetch(callback);
 	      };
 	    })(this));
 	    queue.defer((function(_this) {
 	      return function(callback) {
-	        var fn1, i, key, keys, len, relations_queue;
+	        var keys;
 	        keys = _.keys(Utils.orSet(_this, 'needs_load', {}));
 	        if (relations && !_.isArray(relations)) {
 	          relations = [relations];
@@ -5946,17 +6018,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (_.isArray(relations)) {
 	          keys = _.intersection(keys, relations);
 	        }
-	        relations_queue = new Queue();
-	        fn1 = function(key) {
-	          return relations_queue.defer(function(callback) {
-	            return _this.get(key, callback);
-	          });
-	        };
-	        for (i = 0, len = keys.length; i < len; i++) {
-	          key = keys[i];
-	          fn1(key);
-	        }
-	        return relations_queue.await(callback);
+	        return Utils.each(keys, (function(key, callback) {
+	          return _this.get(key, callback);
+	        }), callback);
 	      };
 	    })(this));
 	    return queue.await(callback);
@@ -6363,7 +6427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -6380,7 +6444,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	BackboneORM = __webpack_require__(5);
 
@@ -6619,7 +6683,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchAdd = function(model, relateds, callback) {
-	    var collection, fn, i, item, j, len, len1, query, queue, related, related_id, related_ids, related_model;
+	    var collection, i, item, len, query, related, related_ids, related_model;
 	    if (!model.id) {
 	      return callback(new Error("Many.patchAdd: model has null id for: " + this.key));
 	    }
@@ -6659,55 +6723,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	    if (this.join_table) {
-	      queue = new Queue(1);
-	      fn = (function(_this) {
-	        return function(related_id) {
-	          return queue.defer(function(callback) {
-	            var add, query;
-	            if (!related_id) {
-	              return callback(new Error("Many.patchAdd: cannot add an new model. Please save first."));
-	            }
-	            add = function(callback) {
-	              var attributes;
-	              (attributes = {})[_this.foreign_key] = model.id;
-	              attributes[_this.reverse_relation.foreign_key] = related_id;
-	              return _this.join_table.exists(attributes, function(err, exists) {
-	                if (err) {
-	                  return callback(err);
-	                }
-	                if (exists) {
-	                  return callback(new Error("Join already exists: " + (JSON.stringify(attributes))));
-	                }
-	                return new _this.join_table(attributes).save(callback);
-	              });
-	            };
-	            if (_this.reverse_relation.type === 'hasMany') {
-	              return add(callback);
-	            }
-	            (query = {
-	              $one: true
-	            })[_this.reverse_relation.foreign_key] = related_id;
-	            return _this.join_table.cursor(query).toJSON(function(err, join_table_json) {
+	      return Utils.each(related_ids, ((function(_this) {
+	        return function(related_id, callback) {
+	          var add, query;
+	          if (!related_id) {
+	            return callback(new Error("Many.patchAdd: cannot add an new model. Please save first."));
+	          }
+	          add = function(callback) {
+	            var attributes;
+	            (attributes = {})[_this.foreign_key] = model.id;
+	            attributes[_this.reverse_relation.foreign_key] = related_id;
+	            return _this.join_table.exists(attributes, function(err, exists) {
 	              if (err) {
 	                return callback(err);
 	              }
-	              if (!join_table_json) {
-	                return add(callback);
+	              if (exists) {
+	                return callback(new Error("Join already exists: " + (JSON.stringify(attributes))));
 	              }
-	              if (join_table_json[_this.foreign_key] === model.id) {
-	                return callback();
-	              }
-	              join_table_json[_this.foreign_key] = model.id;
-	              return Utils.modelJSONSave(join_table_json, _this.join_table, callback);
+	              return new _this.join_table(attributes).save(callback);
 	            });
+	          };
+	          if (_this.reverse_relation.type === 'hasMany') {
+	            return add(callback);
+	          }
+	          (query = {
+	            $one: true
+	          })[_this.reverse_relation.foreign_key] = related_id;
+	          return _this.join_table.cursor(query).toJSON(function(err, join_table_json) {
+	            if (err) {
+	              return callback(err);
+	            }
+	            if (!join_table_json) {
+	              return add(callback);
+	            }
+	            if (join_table_json[_this.foreign_key] === model.id) {
+	              return callback();
+	            }
+	            join_table_json[_this.foreign_key] = model.id;
+	            return Utils.modelJSONSave(join_table_json, _this.join_table, callback);
 	          });
 	        };
-	      })(this);
-	      for (j = 0, len1 = related_ids.length; j < len1; j++) {
-	        related_id = related_ids[j];
-	        fn(related_id);
-	      }
-	      return queue.await(callback);
+	      })(this)), callback);
 	    } else {
 	      query = {
 	        id: {
@@ -6716,19 +6772,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	        return function(err, related_jsons) {
-	          var fn1, k, len2, related_json;
-	          queue = new Queue(1);
-	          fn1 = function(related_json) {
-	            return queue.defer(function(callback) {
-	              related_json[_this.reverse_relation.foreign_key] = model.id;
-	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	            });
-	          };
-	          for (k = 0, len2 = related_jsons.length; k < len2; k++) {
-	            related_json = related_jsons[k];
-	            fn1(related_json);
-	          }
-	          return queue.await(callback);
+	          return Utils.each(related_jsons, (function(related_json, callback) {
+	            related_json[_this.reverse_relation.foreign_key] = model.id;
+	            return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	          }), callback);
 	        };
 	      })(this));
 	    }
@@ -6797,22 +6844,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        (query = {})[this.reverse_relation.foreign_key] = model.id;
 	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	          return function(err, json) {
-	            var fn, j, len1, queue, related_json;
 	            if (err) {
 	              return callback(err);
 	            }
-	            queue = new Queue(1);
-	            fn = function(related_json) {
-	              return queue.defer(function(callback) {
-	                related_json[_this.reverse_relation.foreign_key] = null;
-	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	              });
-	            };
-	            for (j = 0, len1 = json.length; j < len1; j++) {
-	              related_json = json[j];
-	              fn(related_json);
-	            }
-	            return queue.await(callback);
+	            return Utils.each(json, (function(related_json, callback) {
+	              related_json[_this.reverse_relation.foreign_key] = null;
+	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	            }), callback);
 	          };
 	        })(this));
 	      }
@@ -6882,25 +6920,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	        return function(err, json) {
-	          var fn, l, len3, queue, related_json;
 	          if (err) {
 	            return callback(err);
 	          }
-	          queue = new Queue(1);
-	          fn = function(related_json) {
-	            return queue.defer(function(callback) {
-	              if (related_json[_this.reverse_relation.foreign_key] !== model.id) {
-	                return callback();
-	              }
-	              related_json[_this.reverse_relation.foreign_key] = null;
-	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	            });
-	          };
-	          for (l = 0, len3 = json.length; l < len3; l++) {
-	            related_json = json[l];
-	            fn(related_json);
-	          }
-	          return queue.await(callback);
+	          return Utils.each(json, (function(related_json, callback) {
+	            if (related_json[_this.reverse_relation.foreign_key] !== model.id) {
+	              return callback();
+	            }
+	            related_json[_this.reverse_relation.foreign_key] = null;
+	            return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
+	          }), callback);
 	        };
 	      })(this));
 	    }
@@ -7024,11 +7053,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(39));
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7043,7 +7072,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Backbone = __webpack_require__(2);
 
@@ -7543,11 +7572,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(39));
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//
@@ -7587,7 +7616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {/*!
@@ -7597,9 +7626,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @license  MIT
 	 */
 
-	var base64 = __webpack_require__(42)
-	var ieee754 = __webpack_require__(40)
-	var isArray = __webpack_require__(41)
+	var base64 = __webpack_require__(44)
+	var ieee754 = __webpack_require__(42)
+	var isArray = __webpack_require__(43)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -9005,10 +9034,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9021,9 +9050,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, _, bbCallback;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
-	CacheCursor = __webpack_require__(39);
+	CacheCursor = __webpack_require__(41);
 
 	Schema = __webpack_require__(16);
 
@@ -9177,7 +9206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9238,7 +9267,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9251,7 +9280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Cursor, Queue, _;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Queue = __webpack_require__(12);
 
@@ -9315,7 +9344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9328,7 +9357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var DateUtils, INTERVAL_TYPES, JSONUtils, Queue, Utils, _;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Queue = __webpack_require__(12);
 
@@ -9482,7 +9511,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9495,7 +9524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Backbone, Utils, _, collection_type, fn, key, overrides;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Backbone = __webpack_require__(2);
 
@@ -9552,7 +9581,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9565,7 +9594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Backbone, BackboneORM, Queue, Relation, Utils, _;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	Backbone = __webpack_require__(2);
 
@@ -9626,7 +9655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return this.cursor(model, this.key).toJSON((function(_this) {
 	      return function(err, json) {
-	        var added_id, added_ids, changes, fn, fn1, fn2, i, j, k, len, len1, len2, queue, ref, related_id, related_ids, related_json, related_model, test;
+	        var added_ids, changes, queue, related_ids, test;
 	        if (err) {
 	          return callback(err);
 	        }
@@ -9672,38 +9701,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return _this.join_table.destroy(query, callback);
 	            });
 	          } else {
-	            ref = changes.removed;
-	            fn = function(related_json) {
-	              return queue.defer(function(callback) {
+	            queue.defer(function(callback) {
+	              return Utils.each(changes.removed, (function(related_json, callback) {
 	                related_json[_this.reverse_relation.foreign_key] = null;
 	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
-	              });
-	            };
-	            for (i = 0, len = ref.length; i < len; i++) {
-	              related_json = ref[i];
-	              fn(related_json);
-	            }
+	              }), callback);
+	            });
 	          }
 	        }
 	        if (added_ids.length) {
 	          if (_this.join_table) {
-	            fn1 = function(related_id) {
-	              return queue.defer(function(callback) {
+	            queue.defer(function(callback) {
+	              return Utils.each(added_ids, (function(related_id, callback) {
 	                var attributes, join;
 	                attributes = {};
 	                attributes[_this.foreign_key] = model.id;
 	                attributes[_this.reverse_relation.foreign_key] = related_id;
 	                join = new _this.join_table(attributes);
 	                return join.save(callback);
-	              });
-	            };
-	            for (j = 0, len1 = added_ids.length; j < len1; j++) {
-	              related_id = added_ids[j];
-	              fn1(related_id);
-	            }
+	              }), callback);
+	            });
 	          } else {
-	            fn2 = function(related_model) {
-	              return queue.defer(function(callback) {
+	            queue.defer(function(callback) {
+	              return Utils.each(added_ids, (function(added_id, callback) {
+	                var related_model;
+	                related_model = _.find(related_models, function(test) {
+	                  return test.id === added_id;
+	                });
+	                if (!_this.reverse_relation._hasChanged(related_model)) {
+	                  return callback();
+	                }
 	                return related_model.save(function(err, saved_model) {
 	                  var cache;
 	                  if (!err && (cache = _this.reverse_model_type.cache)) {
@@ -9711,18 +9738,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  }
 	                  return callback(err);
 	                });
-	              });
-	            };
-	            for (k = 0, len2 = added_ids.length; k < len2; k++) {
-	              added_id = added_ids[k];
-	              related_model = _.find(related_models, function(test) {
-	                return test.id === added_id;
-	              });
-	              if (!_this.reverse_relation._hasChanged(related_model)) {
-	                continue;
-	              }
-	              fn2(related_model);
-	            }
+	              }), callback);
+	            });
 	          }
 	        }
 	        return queue.await(callback);
@@ -9736,7 +9753,103 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// shim for using process in browser
+
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            currentQueue[queueIndex].run();
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (!draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	// TODO(shtylman)
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9751,7 +9864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	_ = __webpack_require__(21);
+	_ = __webpack_require__(22);
 
 	module.exports = CacheCursor = (function(superClass) {
 	  extend(CacheCursor, superClass);
@@ -9770,7 +9883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -9860,7 +9973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9899,7 +10012,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
