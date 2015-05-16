@@ -201,9 +201,6 @@ module.exports = class Utils
     model_json = _.pick(model_json, model_type::whitelist) if model_type::whitelist
     model_type::sync 'update', new model_type._orm.model_type_json(model_json), Utils.bbCallback callback
 
-  # @nodoc
-  @nextTick: process?.nextTick or _.defer
-
   ##############################
   # Iterating
   ##############################
