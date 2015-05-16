@@ -16,7 +16,6 @@ Utils = require './lib/utils'
 JSONUtils = require './lib/json_utils'
 
 DESTROY_BATCH_LIMIT = 2000
-BATCH_COUNT = 500 # TO LIMIT STACK DEPTH
 
 CAPABILITIES = {embed: true, json: true, unique: true, manual_ids: true, dynamic: true, self_reference: true}
 
@@ -102,18 +101,16 @@ class MemorySync
     [query, callback] = [{}, query] if arguments.length is 1
 
     if _.size(query) is 0
-      Utils.popEachC @store, BATCH_COUNT, callback, (model_json, callback) => Utils.patchRemove(@model_type, model_json, callback)
+      Utils.popEach @store, ((model_json, callback) => Utils.patchRemove(@model_type, model_json, callback)), callback
     else
       is_done = false
       cursor = @model_type.cursor(query).limit(DESTROY_BATCH_LIMIT)
-      next = (err) =>
-        return callback(err) if err or is_done
-
+      next = =>
         cursor.toJSON (err, models_json) =>
           return callback(err) if err
           return callback() if models_json.length is 0
           is_done = models_json.length < DESTROY_BATCH_LIMIT
-          Utils.each models_json, BATCH_COUNT, @deleteCB, next
+          Utils.each models_json, @deleteCB, (err) -> if err or is_done then callback(err) else next()
       next()
 
   ###################################

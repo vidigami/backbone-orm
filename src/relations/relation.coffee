@@ -62,34 +62,35 @@ module.exports = class Relation
             query[@reverse_relation.join_key] = {$in: (related_json[@reverse_model_type::idAttribute] for related_json in changes.removed)}
             @join_table.destroy query, callback
         else
-          # TODO: optimize using each update
-          for related_json in changes.removed
-            do (related_json) => queue.defer (callback) =>
+          queue.defer (callback) =>
+            Utils.each changes.removed, ((related_json, callback) =>
               related_json[@reverse_relation.foreign_key] = null
               Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+            ), callback
 
       # create new
       if added_ids.length
         if @join_table
-          # TODO: optimize through each create
-          for related_id in added_ids
-            do (related_id) => queue.defer (callback) =>
+          queue.defer (callback) =>
+            Utils.each added_ids, ((related_id, callback) =>
               attributes = {}
               attributes[@foreign_key] = model.id
               attributes[@reverse_relation.foreign_key] = related_id
               # console.log "Creating join for: #{@model_type.model_name} join: #{JSONUtils.stringify(attributes)}"
               join = new @join_table(attributes)
               join.save callback
+            ), callback
 
         else
           # add new, if they have changed
-          for added_id in added_ids
-            related_model = _.find(related_models, (test) -> test.id is added_id)
-            continue if not @reverse_relation._hasChanged(related_model) # related has not changed
+          queue.defer (callback) =>
+            Utils.each added_ids, ((added_id, callback) =>
+              related_model = _.find(related_models, (test) -> test.id is added_id)
 
-            do (related_model) => queue.defer (callback) =>
+              return callback() unless @reverse_relation._hasChanged(related_model) # related has not changed
               related_model.save (err, saved_model) =>
                 cache.set(saved_model.id, saved_model) if not err and cache = @reverse_model_type.cache
                 callback(err)
+            ), callback
 
       queue.await callback

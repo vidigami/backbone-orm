@@ -155,45 +155,39 @@ module.exports = class Many extends (require './relation')
 
     # patch in store
     if @join_table
-      queue = new Queue(1)
+      Utils.each related_ids, ((related_id, callback) =>
+        return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
 
-      for related_id in related_ids
-        do (related_id) => queue.defer (callback) =>
-          return callback(new Error "Many.patchAdd: cannot add an new model. Please save first.") unless related_id
-
-          add = (callback) =>
-            (attributes = {})[@foreign_key] = model.id
-            attributes[@reverse_relation.foreign_key] = related_id
-            @join_table.exists attributes, (err, exists) =>
-              return callback(err) if err
-              return callback(new Error "Join already exists: #{JSON.stringify(attributes)}") if exists
-              new @join_table(attributes).save callback
-
-          # just create another entry
-          return add(callback) if @reverse_relation.type is 'hasMany'
-
-          # check for changes
-          (query = {$one: true})[@reverse_relation.foreign_key] = related_id
-          return @join_table.cursor(query).toJSON (err, join_table_json) =>
+        add = (callback) =>
+          (attributes = {})[@foreign_key] = model.id
+          attributes[@reverse_relation.foreign_key] = related_id
+          @join_table.exists attributes, (err, exists) =>
             return callback(err) if err
-            return add(callback) unless join_table_json # create a new join table entry
-            return callback() if join_table_json[@foreign_key] is model.id # already related
+            return callback(new Error "Join already exists: #{JSON.stringify(attributes)}") if exists
+            new @join_table(attributes).save callback
 
-            # update existing relationship
-            join_table_json[@foreign_key] = model.id
-            Utils.modelJSONSave(join_table_json, @join_table, callback)
+        # just create another entry
+        return add(callback) if @reverse_relation.type is 'hasMany'
 
-      queue.await callback
+        # check for changes
+        (query = {$one: true})[@reverse_relation.foreign_key] = related_id
+        return @join_table.cursor(query).toJSON (err, join_table_json) =>
+          return callback(err) if err
+          return add(callback) unless join_table_json # create a new join table entry
+          return callback() if join_table_json[@foreign_key] is model.id # already related
+
+          # update existing relationship
+          join_table_json[@foreign_key] = model.id
+          Utils.modelJSONSave(join_table_json, @join_table, callback)
+      ), callback
 
     else
       query = {id: $in: related_ids}
       @reverse_model_type.cursor(query).toJSON (err, related_jsons) =>
-        queue = new Queue(1)
-        for related_json in related_jsons
-          do (related_json) => queue.defer (callback) =>
-            related_json[@reverse_relation.foreign_key] = model.id
-            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
-        queue.await callback
+        Utils.each related_jsons, ((related_json, callback) =>
+          related_json[@reverse_relation.foreign_key] = model.id
+          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        ), callback
 
   patchRemove: (model, relateds, callback) ->
     [relateds, callback] = [null, relateds] if arguments.length is 2
@@ -239,12 +233,10 @@ module.exports = class Many extends (require './relation')
           return callback(err) if err
 
           # clear reverses
-          queue = new Queue(1)
-          for related_json in json
-            do (related_json) => queue.defer (callback) =>
-              related_json[@reverse_relation.foreign_key] = null
-              Utils.modelJSONSave(related_json, @reverse_model_type, callback)
-          queue.await callback
+          Utils.each json, ((related_json, callback) =>
+            related_json[@reverse_relation.foreign_key] = null
+            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+          ), callback
       return
 
     # REMOVE SOME
@@ -285,13 +277,11 @@ module.exports = class Many extends (require './relation')
         return callback(err) if err
 
         # clear reverses
-        queue = new Queue(1)
-        for related_json in json
-          do (related_json) => queue.defer (callback) =>
-            return callback() unless related_json[@reverse_relation.foreign_key] is model.id
-            related_json[@reverse_relation.foreign_key] = null
-            Utils.modelJSONSave(related_json, @reverse_model_type, callback)
-        queue.await callback
+        Utils.each json, ((related_json, callback) =>
+          return callback() unless related_json[@reverse_relation.foreign_key] is model.id
+          related_json[@reverse_relation.foreign_key] = null
+          Utils.modelJSONSave(related_json, @reverse_model_type, callback)
+        ), callback
 
   cursor: (model, key, query) ->
     json = if Utils.isModel(model) then model.attributes else model

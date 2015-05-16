@@ -215,18 +215,12 @@ module.exports = (model_type) ->
     [relations, callback] = [null, relations] if arguments.length is 1
 
     queue = new Queue(1)
-    queue.defer (callback) =>
-      return callback() if @isLoaded()
-      @fetch(callback)
+    queue.defer (callback) => if @isLoaded() then callback() else @fetch(callback)
     queue.defer (callback) =>
       keys = _.keys(Utils.orSet(@, 'needs_load', {}))
       relations = [relations] if relations and not _.isArray(relations)
       keys = _.intersection(keys, relations) if _.isArray(relations)
-
-      relations_queue = new Queue()
-      for key in keys
-        do (key) => relations_queue.defer (callback) => @get(key, callback)
-      relations_queue.await callback
+      Utils.each keys, ((key, callback) => @get(key, callback)), callback
 
     queue.await callback
 
@@ -239,6 +233,7 @@ module.exports = (model_type) ->
     if arguments.length is 1
       callback = key
       schema = model_type.schema()
+
       queue = new Queue(1)
       for key, relation of schema.relations
         do (relation) => queue.defer (callback) => relation.patchRemove(@, callback)

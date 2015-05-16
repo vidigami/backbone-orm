@@ -14,8 +14,6 @@ JSONUtils = require './lib/json_utils'
 DateUtils = require './lib/date_utils'
 Cursor = require './lib/cursor'
 
-BATCH_COUNT = 500 # TO LIMIT STACK DEPTH
-
 IS_MATCH_FNS =
   $ne: (mv, tv) -> return not _.isEqual(mv, tv)
 
@@ -77,7 +75,7 @@ module.exports = class MemoryCursor extends Cursor
           else
             # console.log "\nmodel: #{@model_type.model_name} find_query: #{JSONUtils.stringify(find_query)} @store: #{JSONUtils.stringify(@store)}"
 
-            Utils.eachC @store, BATCH_COUNT, callback, (model_json, callback) =>
+            Utils.each @store, ((model_json, callback) =>
               return callback(null, true) if exists and json.length # exists only needs one result
               (return callback() for key, values of ins when model_json[key] not in values) if ins_size
               (return callback() for key, values of nins when model_json[key] in values) if nins_size
@@ -90,6 +88,7 @@ module.exports = class MemoryCursor extends Cursor
                 # check next key
                 @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
               next(null, true) # start checking
+            ), callback
 
         else
           # filter by ids

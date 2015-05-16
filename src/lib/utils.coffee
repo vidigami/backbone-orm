@@ -16,7 +16,11 @@ Queue = require './queue'
 JSONUtils = require './json_utils'
 modelExtensions = null
 
+SPLIT = false
+
 module.exports = class Utils
+  @MAX_ITERATION_COUNT: 500
+
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
 
@@ -24,14 +28,13 @@ module.exports = class Utils
     model_type.schema() for model_type in model_types
 
     failed_schemas = []
-    queue = new Queue(1)
-    for model_type in model_types
-      do (model_type) -> queue.defer (callback) -> model_type.resetSchema options, (err) ->
+    Utils.each model_types, ((model_type, callback) ->
+      model_type.resetSchema options, (err) ->
         if err
           failed_schemas.push(model_type.model_name)
           console.log "Error when dropping schema for #{model_type.model_name}. #{err}"
         callback()
-    queue.await (err) ->
+    ), (err) ->
       console.log "#{model_types.length - failed_schemas.length} schemas dropped." if options.verbose
 
       BackboneORM.model_cache.reset()
@@ -201,45 +204,81 @@ module.exports = class Utils
     model_json = _.pick(model_json, model_type::whitelist) if model_type::whitelist
     model_type::sync 'update', new model_type._orm.model_type_json(model_json), Utils.bbCallback callback
 
+  # @nodoc
+  @nextTick: process?.nextTick or _.defer
+
+  # @nodoc
+  @safeStackCall: (fn, callback) =>
+    caller = new Queue()
+    caller.defer (callback) -> fn(callback)
+    caller.await callback
+
   ##############################
   # Iterating
   ##############################
 
   # @nodoc
-  @each: (array, limit, iterator, callback) =>
+  @each: (array, iterator, callback) =>
     return callback() unless count = array.length
     index = 0
-    queue = new Queue(1)
-    for start_index in [0..count] by limit
-      do (start_index) => queue.defer (callback) ->
-        iteration_end = Math.min(start_index+limit, count)
-        next = (err, done) =>
-          return callback(err) if err
-          return callback() if done or (index >= iteration_end)
-          iterator(array[index++], next)
-        next()
-    queue.await callback
+
+    if SPLIT
+      queue = new Queue(1)
+      for start_index in [0..count] by Utils.MAX_ITERATION_COUNT
+        do (start_index) => queue.defer (callback) ->
+          # console.log 'SPLIT each'
+
+          iteration_end = Math.min(start_index+Utils.MAX_ITERATION_COUNT, count)
+          next = (err, done) =>
+            console.log 'each', index if false
+
+            return callback(err) if err or done or (index >= iteration_end)
+            iterator(array[index++], next)
+          next()
+      queue.await callback
+    else
+      Utils.safeStackCall ((callback) ->
+        iterate = -> iterator array[index], (err, done) ->
+          # console.log 'each', index, array[index] if aid is '4015'
+
+          return callback(err) if err or done or (++index >= count)
+          if index and (index % Utils.MAX_ITERATION_COUNT is 0) then Utils.nextTick(iterate) else iterate()
+
+        iterate()
+      ), callback
 
   # @nodoc
-  @eachC: (array, limit, iterator, callback) => Utils.each(array, limit, callback, iterator)
+  @eachC: (array, callback, iterator) => Utils.each(array, iterator, callback)
 
   # @nodoc
-  @popEach: (array, limit, iterator, callback) =>
+  @popEach: (array, iterator, callback) =>
     return callback() unless count = array.length
     index = 0
-    queue = new Queue(1)
-    for start_index in [0..count] by limit
-      do (start_index) => queue.defer (callback) ->
-        iteration_end = Math.min(start_index+limit, count)
-        next = (err, done) =>
-          return callback(err) if err
-          return callback() if done or (index >= iteration_end) or (array.length is 0)
-          index++; iterator(array.pop(), next)
-        next()
-    queue.await callback
+
+    if SPLIT
+      queue = new Queue(1)
+      for start_index in [0..count] by Utils.MAX_ITERATION_COUNT
+        do (start_index) => queue.defer (callback) ->
+          # console.log 'SPLIT popEach'
+
+          iteration_end = Math.min(start_index+Utils.MAX_ITERATION_COUNT, count)
+          next = (err, done) =>
+            console.log 'popEach', index if false
+
+            return callback(err) if err or done or (index >= iteration_end) or (array.length is 0)
+            index++; iterator(array.pop(), next)
+          next()
+      queue.await callback
+    else
+      Utils.safeStackCall ((callback) ->
+        iterate = -> iterator array.pop(), (err, done) ->
+          return callback(err) if err or done or (++index >= count) or (array.length is 0)
+          if index and (index % Utils.MAX_ITERATION_COUNT is 0) then Utils.nextTick(iterate) else iterate()
+        iterate()
+      ), callback
 
   # @nodoc
-  @popEachC: (array, limit, iterator, callback) => Utils.popEach(array, limit, callback, iterator)
+  @popEachC: (array, callback, iterator) => Utils.popEach(array, iterator, callback)
 
   ##############################
   # Sorting

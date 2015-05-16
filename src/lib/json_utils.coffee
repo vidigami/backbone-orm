@@ -115,15 +115,11 @@ module.exports = class JSONUtils
     # many
     else
       results = []
+
       # Render in series to preserve order - a better way would be nice
-      queue = new Queue(1)
-      for model in models
-        do (model) -> queue.defer (callback) ->
-          JSONUtils.renderTemplate model, template, options, (err, related_json) ->
-            return callback(err) if err
-            results.push(related_json)
-            callback()
-      queue.await (err) -> callback(err, if err then undefined else results)
+      Utils.each models, ((model, callback) =>
+        JSONUtils.renderTemplate model, template, options, (err, related_json) -> err or results.push(related_json); callback(err)
+      ), (err) -> if err then callback(err) else callback(null, results)
 
   # @private
   @renderDSL = (model, dsl, options, callback) ->
