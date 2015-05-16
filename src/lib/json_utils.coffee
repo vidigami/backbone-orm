@@ -8,6 +8,7 @@
 
 _ = require 'underscore'
 Queue = require './queue'
+IterationUtils = require './iteration_utils'
 
 module.exports = class JSONUtils
 
@@ -117,7 +118,7 @@ module.exports = class JSONUtils
       results = []
 
       # Render in series to preserve order - a better way would be nice
-      Utils.each models, ((model, callback) =>
+      IterationUtils.each models, ((model, callback) =>
         JSONUtils.renderTemplate model, template, options, (err, related_json) -> err or results.push(related_json); callback(err)
       ), (err) -> if err then callback(err) else callback(null, results)
 

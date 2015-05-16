@@ -14,13 +14,10 @@ BackboneORM = require '../core'
 DatabaseURL = require './database_url'
 Queue = require './queue'
 JSONUtils = require './json_utils'
+IterationUtils = require './iteration_utils'
 modelExtensions = null
 
-SPLIT = false
-
 module.exports = class Utils
-  @MAX_ITERATION_COUNT: 500
-
   @resetSchemas: (model_types, options, callback) ->
     [options, callback] = [{}, options] if arguments.length is 2
 
@@ -207,78 +204,21 @@ module.exports = class Utils
   # @nodoc
   @nextTick: process?.nextTick or _.defer
 
-  # @nodoc
-  @safeStackCall: (fn, callback) =>
-    caller = new Queue()
-    caller.defer (callback) -> fn(callback)
-    caller.await callback
-
   ##############################
   # Iterating
   ##############################
 
   # @nodoc
-  @each: (array, iterator, callback) =>
-    return callback() unless count = array.length
-    index = 0
-
-    if SPLIT
-      queue = new Queue(1)
-      for start_index in [0..count] by Utils.MAX_ITERATION_COUNT
-        do (start_index) => queue.defer (callback) ->
-          # console.log 'SPLIT each'
-
-          iteration_end = Math.min(start_index+Utils.MAX_ITERATION_COUNT, count)
-          next = (err, done) =>
-            console.log 'each', index if false
-
-            return callback(err) if err or done or (index >= iteration_end)
-            iterator(array[index++], next)
-          next()
-      queue.await callback
-    else
-      Utils.safeStackCall ((callback) ->
-        iterate = -> iterator array[index], (err, done) ->
-          # console.log 'each', index, array[index] if aid is '4015'
-
-          return callback(err) if err or done or (++index >= count)
-          if index and (index % Utils.MAX_ITERATION_COUNT is 0) then Utils.nextTick(iterate) else iterate()
-
-        iterate()
-      ), callback
+  @each: IterationUtils.each
 
   # @nodoc
-  @eachC: (array, callback, iterator) => Utils.each(array, iterator, callback)
+  @eachC: (array, callback, iterator) => IterationUtils.each(array, iterator, callback)
 
   # @nodoc
-  @popEach: (array, iterator, callback) =>
-    return callback() unless count = array.length
-    index = 0
-
-    if SPLIT
-      queue = new Queue(1)
-      for start_index in [0..count] by Utils.MAX_ITERATION_COUNT
-        do (start_index) => queue.defer (callback) ->
-          # console.log 'SPLIT popEach'
-
-          iteration_end = Math.min(start_index+Utils.MAX_ITERATION_COUNT, count)
-          next = (err, done) =>
-            console.log 'popEach', index if false
-
-            return callback(err) if err or done or (index >= iteration_end) or (array.length is 0)
-            index++; iterator(array.pop(), next)
-          next()
-      queue.await callback
-    else
-      Utils.safeStackCall ((callback) ->
-        iterate = -> iterator array.pop(), (err, done) ->
-          return callback(err) if err or done or (++index >= count) or (array.length is 0)
-          if index and (index % Utils.MAX_ITERATION_COUNT is 0) then Utils.nextTick(iterate) else iterate()
-        iterate()
-      ), callback
+  @popEach: IterationUtils.popEach
 
   # @nodoc
-  @popEachC: (array, callback, iterator) => Utils.popEach(array, iterator, callback)
+  @popEachC: (array, callback, iterator) => IterationUtils.popEach(array, iterator, callback)
 
   ##############################
   # Sorting
