@@ -1,5 +1,5 @@
 /*
-  backbone-orm.js 0.7.8
+  backbone-orm.js 0.7.9
   Copyright (c) 2013-2015 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -7,54 +7,54 @@
 */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
+		module.exports = factory(require("backbone"), require("underscore"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["underscore", "backbone"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
-			return factory(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, root["stream"]);
+		define(["backbone", "underscore"], function webpackLoadOptionalExternalModuleAmd(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__) {
+			return factory(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__, root["stream"]);
 		});
 	else if(typeof exports === 'object')
-		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
+		exports["BackboneORM"] = factory(require("backbone"), require("underscore"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
-		root["BackboneORM"] = factory(root["_"], root["Backbone"], root["stream"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
+		root["BackboneORM"] = factory(root["Backbone"], root["_"], root["stream"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -65,30 +65,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, BackboneORM, publish, _;
+	var Backbone, BackboneORM, _, publish;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	module.exports = BackboneORM = __webpack_require__(4);
+	module.exports = BackboneORM = __webpack_require__(5);
 
 	publish = {
-	  configure: __webpack_require__(5),
-	  sync: __webpack_require__(6),
-	  Utils: __webpack_require__(7),
-	  JSONUtils: __webpack_require__(8),
-	  DateUtils: __webpack_require__(9),
-	  TestUtils: __webpack_require__(10),
-	  Queue: __webpack_require__(11),
-	  DatabaseURL: __webpack_require__(12),
-	  Fabricator: __webpack_require__(13),
+	  configure: __webpack_require__(6),
+	  sync: __webpack_require__(7),
+	  Utils: __webpack_require__(8),
+	  JSONUtils: __webpack_require__(9),
+	  DateUtils: __webpack_require__(10),
+	  TestUtils: __webpack_require__(11),
+	  Queue: __webpack_require__(12),
+	  DatabaseURL: __webpack_require__(13),
+	  Fabricator: __webpack_require__(4),
 	  MemoryStore: __webpack_require__(14),
 	  Cursor: __webpack_require__(15),
 	  Schema: __webpack_require__(16),
@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  backbone: Backbone,
 	  url: __webpack_require__(19),
 	  querystring: __webpack_require__(20),
-	  'lru-cache': __webpack_require__(21),
+	  'lru-cache': __webpack_require__(1),
 	  inflection: __webpack_require__(22)
 	};
 
@@ -118,7 +118,281 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+	;(function () { // closure for web browsers
+
+	if (typeof module === 'object' && module.exports) {
+	  module.exports = LRUCache
+	} else {
+	  // just set the global for non-node platforms.
+	  this.LRUCache = LRUCache
+	}
+
+	function hOP (obj, key) {
+	  return Object.prototype.hasOwnProperty.call(obj, key)
+	}
+
+	function naiveLength () { return 1 }
+
+	function LRUCache (options) {
+	  if (!(this instanceof LRUCache))
+	    return new LRUCache(options)
+
+	  if (typeof options === 'number')
+	    options = { max: options }
+
+	  if (!options)
+	    options = {}
+
+	  this._max = options.max
+	  // Kind of weird to have a default max of Infinity, but oh well.
+	  if (!this._max || !(typeof this._max === "number") || this._max <= 0 )
+	    this._max = Infinity
+
+	  this._lengthCalculator = options.length || naiveLength
+	  if (typeof this._lengthCalculator !== "function")
+	    this._lengthCalculator = naiveLength
+
+	  this._allowStale = options.stale || false
+	  this._maxAge = options.maxAge || null
+	  this._dispose = options.dispose
+	  this.reset()
+	}
+
+	// resize the cache when the max changes.
+	Object.defineProperty(LRUCache.prototype, "max",
+	  { set : function (mL) {
+	      if (!mL || !(typeof mL === "number") || mL <= 0 ) mL = Infinity
+	      this._max = mL
+	      if (this._length > this._max) trim(this)
+	    }
+	  , get : function () { return this._max }
+	  , enumerable : true
+	  })
+
+	// resize the cache when the lengthCalculator changes.
+	Object.defineProperty(LRUCache.prototype, "lengthCalculator",
+	  { set : function (lC) {
+	      if (typeof lC !== "function") {
+	        this._lengthCalculator = naiveLength
+	        this._length = this._itemCount
+	        for (var key in this._cache) {
+	          this._cache[key].length = 1
+	        }
+	      } else {
+	        this._lengthCalculator = lC
+	        this._length = 0
+	        for (var key in this._cache) {
+	          this._cache[key].length = this._lengthCalculator(this._cache[key].value)
+	          this._length += this._cache[key].length
+	        }
+	      }
+
+	      if (this._length > this._max) trim(this)
+	    }
+	  , get : function () { return this._lengthCalculator }
+	  , enumerable : true
+	  })
+
+	Object.defineProperty(LRUCache.prototype, "length",
+	  { get : function () { return this._length }
+	  , enumerable : true
+	  })
+
+
+	Object.defineProperty(LRUCache.prototype, "itemCount",
+	  { get : function () { return this._itemCount }
+	  , enumerable : true
+	  })
+
+	LRUCache.prototype.forEach = function (fn, thisp) {
+	  thisp = thisp || this
+	  var i = 0
+	  var itemCount = this._itemCount
+
+	  for (var k = this._mru - 1; k >= 0 && i < itemCount; k--) if (this._lruList[k]) {
+	    i++
+	    var hit = this._lruList[k]
+	    if (isStale(this, hit)) {
+	      del(this, hit)
+	      if (!this._allowStale) hit = undefined
+	    }
+	    if (hit) {
+	      fn.call(thisp, hit.value, hit.key, this)
+	    }
+	  }
+	}
+
+	LRUCache.prototype.keys = function () {
+	  var keys = new Array(this._itemCount)
+	  var i = 0
+	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
+	    var hit = this._lruList[k]
+	    keys[i++] = hit.key
+	  }
+	  return keys
+	}
+
+	LRUCache.prototype.values = function () {
+	  var values = new Array(this._itemCount)
+	  var i = 0
+	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
+	    var hit = this._lruList[k]
+	    values[i++] = hit.value
+	  }
+	  return values
+	}
+
+	LRUCache.prototype.reset = function () {
+	  if (this._dispose && this._cache) {
+	    for (var k in this._cache) {
+	      this._dispose(k, this._cache[k].value)
+	    }
+	  }
+
+	  this._cache = Object.create(null) // hash of items by key
+	  this._lruList = Object.create(null) // list of items in order of use recency
+	  this._mru = 0 // most recently used
+	  this._lru = 0 // least recently used
+	  this._length = 0 // number of items in the list
+	  this._itemCount = 0
+	}
+
+	// Provided for debugging/dev purposes only. No promises whatsoever that
+	// this API stays stable.
+	LRUCache.prototype.dump = function () {
+	  return this._cache
+	}
+
+	LRUCache.prototype.dumpLru = function () {
+	  return this._lruList
+	}
+
+	LRUCache.prototype.set = function (key, value, maxAge) {
+	  maxAge = maxAge || this._maxAge
+	  var now = maxAge ? Date.now() : 0
+
+	  if (hOP(this._cache, key)) {
+	    // dispose of the old one before overwriting
+	    if (this._dispose)
+	      this._dispose(key, this._cache[key].value)
+
+	    this._cache[key].now = now
+	    this._cache[key].maxAge = maxAge
+	    this._cache[key].value = value
+	    this.get(key)
+	    return true
+	  }
+
+	  var len = this._lengthCalculator(value)
+	  var hit = new Entry(key, value, this._mru++, len, now, maxAge)
+
+	  // oversized objects fall out of cache automatically.
+	  if (hit.length > this._max) {
+	    if (this._dispose) this._dispose(key, value)
+	    return false
+	  }
+
+	  this._length += hit.length
+	  this._lruList[hit.lu] = this._cache[key] = hit
+	  this._itemCount ++
+
+	  if (this._length > this._max)
+	    trim(this)
+
+	  return true
+	}
+
+	LRUCache.prototype.has = function (key) {
+	  if (!hOP(this._cache, key)) return false
+	  var hit = this._cache[key]
+	  if (isStale(this, hit)) {
+	    return false
+	  }
+	  return true
+	}
+
+	LRUCache.prototype.get = function (key) {
+	  return get(this, key, true)
+	}
+
+	LRUCache.prototype.peek = function (key) {
+	  return get(this, key, false)
+	}
+
+	LRUCache.prototype.pop = function () {
+	  var hit = this._lruList[this._lru]
+	  del(this, hit)
+	  return hit || null
+	}
+
+	LRUCache.prototype.del = function (key) {
+	  del(this, this._cache[key])
+	}
+
+	function get (self, key, doUse) {
+	  var hit = self._cache[key]
+	  if (hit) {
+	    if (isStale(self, hit)) {
+	      del(self, hit)
+	      if (!self._allowStale) hit = undefined
+	    } else {
+	      if (doUse) use(self, hit)
+	    }
+	    if (hit) hit = hit.value
+	  }
+	  return hit
+	}
+
+	function isStale(self, hit) {
+	  if (!hit || (!hit.maxAge && !self._maxAge)) return false
+	  var stale = false;
+	  var diff = Date.now() - hit.now
+	  if (hit.maxAge) {
+	    stale = diff > hit.maxAge
+	  } else {
+	    stale = self._maxAge && (diff > self._maxAge)
+	  }
+	  return stale;
+	}
+
+	function use (self, hit) {
+	  shiftLU(self, hit)
+	  hit.lu = self._mru ++
+	  self._lruList[hit.lu] = hit
+	}
+
+	function trim (self) {
+	  while (self._lru < self._mru && self._length > self._max)
+	    del(self, self._lruList[self._lru])
+	}
+
+	function shiftLU (self, hit) {
+	  delete self._lruList[ hit.lu ]
+	  while (self._lru < self._mru && !self._lruList[self._lru]) self._lru ++
+	}
+
+	function del (self, hit) {
+	  if (hit) {
+	    if (self._dispose) self._dispose(hit.key, hit.value)
+	    self._length -= hit.length
+	    self._itemCount --
+	    delete self._cache[ hit.key ]
+	    shiftLU(self, hit)
+	  }
+	}
+
+	// classy, since V8 prefers predictable objects.
+	function Entry (key, value, lu, length, now, maxAge) {
+	  this.key = key
+	  this.value = value
+	  this.lu = lu
+	  this.length = length
+	  this.now = now
+	  if (maxAge) this.maxAge = maxAge
+	}
+
+	})()
+
 
 /***/ },
 /* 2 */
@@ -137,41 +411,129 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {};
+	var Fabricator, Queue, _;
+
+	_ = __webpack_require__(21);
+
+	Queue = __webpack_require__(12);
+
+	module.exports = Fabricator = (function() {
+	  function Fabricator() {}
+
+	  Fabricator["new"] = function(model_type, count, attributes_info) {
+	    var attributes, key, results, value;
+	    results = [];
+	    while (count-- > 0) {
+	      attributes = {};
+	      for (key in attributes_info) {
+	        value = attributes_info[key];
+	        attributes[key] = _.isFunction(value) ? value() : value;
+	      }
+	      results.push(new model_type(attributes));
+	    }
+	    return results;
+	  };
+
+	  Fabricator.create = function(model_type, count, attributes_info, callback) {
+	    var fn, i, len, model, models, queue;
+	    models = Fabricator["new"](model_type, count, attributes_info);
+	    queue = new Queue();
+	    fn = function(model) {
+	      return queue.defer(function(callback) {
+	        return model.save(callback);
+	      });
+	    };
+	    for (i = 0, len = models.length; i < len; i++) {
+	      model = models[i];
+	      fn(model);
+	    }
+	    return queue.await(function(err) {
+	      return callback(err, models);
+	    });
+	  };
+
+	  Fabricator.value = function(value) {
+	    if (arguments.length === 0) {
+	      return void 0;
+	    }
+	    return function() {
+	      return value;
+	    };
+	  };
+
+	  Fabricator.uniqueId = function(prefix) {
+	    if (arguments.length === 0) {
+	      return _.uniqueId();
+	    }
+	    return function() {
+	      return _.uniqueId(prefix);
+	    };
+	  };
+
+	  Fabricator.uniqueString = Fabricator.uniqueId;
+
+	  Fabricator.date = function(start, step_ms) {
+	    var current_ms, now, ref;
+	    now = new Date();
+	    if (arguments.length === 0) {
+	      return now;
+	    }
+	    if (arguments.length === 1) {
+	      ref = [now, start], start = ref[0], step_ms = ref[1];
+	    }
+	    current_ms = start.getTime();
+	    return function() {
+	      var current;
+	      current = new Date(current_ms);
+	      current_ms += step_ms;
+	      return current;
+	    };
+	  };
+
+	  return Fabricator;
+
+	})();
 
 
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = {};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var ALL_CONVENTIONS, BackboneORM, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
 	ALL_CONVENTIONS = {
-	  "default": __webpack_require__(23),
-	  underscore: __webpack_require__(23),
-	  camelize: __webpack_require__(24),
-	  classify: __webpack_require__(25)
+	  "default": __webpack_require__(26),
+	  underscore: __webpack_require__(26),
+	  camelize: __webpack_require__(27),
+	  classify: __webpack_require__(28)
 	};
 
 	BackboneORM.naming_conventions = ALL_CONVENTIONS["default"];
 
-	BackboneORM.model_cache = new (__webpack_require__(26))();
+	BackboneORM.model_cache = new (__webpack_require__(29))();
 
 	module.exports = function(options) {
-	  var convention, key, value, _results;
+	  var convention, key, results, value;
 	  if (options == null) {
 	    options = {};
 	  }
-	  _results = [];
+	  results = [];
 	  for (key in options) {
 	    value = options[key];
 	    switch (key) {
 	      case 'model_cache':
-	        _results.push(BackboneORM.model_cache.configure(options.model_cache));
+	        results.push(BackboneORM.model_cache.configure(options.model_cache));
 	        break;
 	      case 'naming_conventions':
 	        if (_.isString(value)) {
@@ -179,47 +541,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	            BackboneORM.naming_conventions = convention;
 	            continue;
 	          }
-	          _results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
+	          results.push(console.log("BackboneORM configure: could not find naming_conventions: " + value + ". Available: " + (_.keys(ALL_CONVENTIONS).join(', '))));
 	        } else {
-	          _results.push(BackboneORM.naming_conventions = value);
+	          results.push(BackboneORM.naming_conventions = value);
 	        }
 	        break;
 	      default:
-	        _results.push(BackboneORM[key] = value);
+	        results.push(BackboneORM[key] = value);
 	    }
 	  }
-	  return _results;
+	  return results;
 	};
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var BATCH_COUNT, BackboneORM, CAPABILITIES, DESTROY_BATCH_LIMIT, JSONUtils, MemoryCursor, MemorySync, Queue, Schema, Utils, _,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	MemoryCursor = __webpack_require__(28);
+	MemoryCursor = __webpack_require__(23);
 
 	Schema = __webpack_require__(16);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
 	DESTROY_BATCH_LIMIT = 2000;
 
@@ -235,28 +597,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	MemorySync = (function() {
-	  function MemorySync(model_type) {
-	    var _base, _ref;
-	    this.model_type = model_type;
-	    this.deleteCB = __bind(this.deleteCB, this);
+	  function MemorySync(model_type1) {
+	    var base, ref;
+	    this.model_type = model_type1;
+	    this.deleteCB = bind(this.deleteCB, this);
 	    this.model_type.model_name = Utils.findOrGenerateModelName(this.model_type);
 	    this.schema = new Schema(this.model_type);
-	    if (!((_ref = this.schema.field('id')) != null ? _ref.type : void 0)) {
+	    if (!((ref = this.schema.field('id')) != null ? ref.type : void 0)) {
 	      this.schema.type('id', 'Integer');
 	    }
-	    this.store = (_base = this.model_type).store || (_base.store = []);
+	    this.store = (base = this.model_type).store || (base.store = []);
 	    this.id = 0;
 	    this.id_attribute = this.model_type.prototype.idAttribute;
 	  }
 
 	  MemorySync.prototype.initialize = function() {
-	    var _ref;
+	    var ref;
 	    if (this.is_initialized) {
 	      return;
 	    }
 	    this.is_initialized = true;
 	    this.schema.initialize();
-	    if ((_ref = this.schema.field('id')) != null ? _ref.manual : void 0) {
+	    if ((ref = this.schema.field('id')) != null ? ref.manual : void 0) {
 	      this.manual_id = true;
 	    }
 	    return this.id_type = this.schema.idType();
@@ -266,14 +628,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var model_json;
 	    if (model.models) {
 	      return options.success((function() {
-	        var _i, _len, _ref, _results;
-	        _ref = this.store;
-	        _results = [];
-	        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	          model_json = _ref[_i];
-	          _results.push(JSONUtils.deepClone(model_json));
+	        var i, len, ref, results;
+	        ref = this.store;
+	        results = [];
+	        for (i = 0, len = ref.length; i < len; i++) {
+	          model_json = ref[i];
+	          results.push(JSONUtils.deepClone(model_json));
 	        }
-	        return _results;
+	        return results;
 	      }).call(this));
 	    } else {
 	      if (!(model_json = this.get(model.id))) {
@@ -341,9 +703,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  MemorySync.prototype.destroy = function(query, callback) {
-	    var cursor, is_done, next, _ref;
+	    var cursor, is_done, next, ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    if (_.size(query) === 0) {
 	      return Utils.popEachC(this.store, BATCH_COUNT, callback, (function(_this) {
@@ -454,34 +816,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Queue, URL, Utils, modelExtensions, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Queue, URL, Utils, _, modelExtensions,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
 	URL = __webpack_require__(19);
 
 	Backbone = __webpack_require__(2);
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	DatabaseURL = __webpack_require__(12);
+	DatabaseURL = __webpack_require__(13);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
 	modelExtensions = null;
 
@@ -489,17 +851,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function Utils() {}
 
 	  Utils.resetSchemas = function(model_types, options, callback) {
-	    var failed_schemas, model_type, queue, _fn, _i, _j, _len, _len1, _ref;
+	    var failed_schemas, fn, i, j, len, len1, model_type, queue, ref;
 	    if (arguments.length === 2) {
-	      _ref = [{}, options], options = _ref[0], callback = _ref[1];
+	      ref = [{}, options], options = ref[0], callback = ref[1];
 	    }
-	    for (_i = 0, _len = model_types.length; _i < _len; _i++) {
-	      model_type = model_types[_i];
+	    for (i = 0, len = model_types.length; i < len; i++) {
+	      model_type = model_types[i];
 	      model_type.schema();
 	    }
 	    failed_schemas = [];
 	    queue = new Queue(1);
-	    _fn = function(model_type) {
+	    fn = function(model_type) {
 	      return queue.defer(function(callback) {
 	        return model_type.resetSchema(options, function(err) {
 	          if (err) {
@@ -510,13 +872,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      });
 	    };
-	    for (_j = 0, _len1 = model_types.length; _j < _len1; _j++) {
-	      model_type = model_types[_j];
-	      _fn(model_type);
+	    for (j = 0, len1 = model_types.length; j < len1; j++) {
+	      model_type = model_types[j];
+	      fn(model_type);
 	    }
 	    return queue.await(function(err) {
 	      if (options.verbose) {
-	        console.log("" + (model_types.length - failed_schemas.length) + " schemas dropped.");
+	        console.log((model_types.length - failed_schemas.length) + " schemas dropped.");
 	      }
 	      BackboneORM.model_cache.reset();
 	      if (failed_schemas.length) {
@@ -603,15 +965,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      url = _.result(this.collection || type.prototype, 'url');
 	      if (!this.isNew()) {
 	        url_parts = URL.parse(url);
-	        url_parts.pathname = "" + url_parts.pathname + "/encodeURIComponent(@id)";
+	        url_parts.pathname = url_parts.pathname + "/encodeURIComponent(@id)";
 	        url = URL.format(url_parts);
 	      }
 	      return url;
 	    };
 	    model_type = type.prototype.model;
 	    if (!model_type || (model_type === Backbone.Model)) {
-	      ORMModel = (function(_super) {
-	        __extends(ORMModel, _super);
+	      ORMModel = (function(superClass) {
+	        extend(ORMModel, superClass);
 
 	        function ORMModel() {
 	          return ORMModel.__super__.constructor.apply(this, arguments);
@@ -636,25 +998,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.configureModelType = function(type) {
-	    modelExtensions || (modelExtensions = __webpack_require__(27));
+	    modelExtensions || (modelExtensions = __webpack_require__(24));
 	    return modelExtensions(type);
 	  };
 
 	  Utils.patchRemove = function(model_type, model, callback) {
-	    var key, queue, relation, schema, _fn, _ref;
+	    var fn, key, queue, ref, relation, schema;
 	    if (!(schema = model_type.schema())) {
 	      return callback();
 	    }
 	    queue = new Queue(1);
-	    _ref = schema.relations;
-	    _fn = function(relation) {
+	    ref = schema.relations;
+	    fn = function(relation) {
 	      return queue.defer(function(callback) {
 	        return relation.patchRemove(model, callback);
 	      });
 	    };
-	    for (key in _ref) {
-	      relation = _ref[key];
-	      _fn(relation);
+	    for (key in ref) {
+	      relation = ref[key];
+	      fn(relation);
 	    }
 	    return queue.await(callback);
 	  };
@@ -664,32 +1026,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.presaveBelongsToRelationships = function(model, callback) {
-	    var key, queue, related_model, related_models, relation, schema, value, _fn, _i, _len, _ref;
+	    var fn, i, key, len, queue, ref, related_model, related_models, relation, schema, value;
 	    if (!model.schema) {
 	      return callback();
 	    }
 	    queue = new Queue(1);
 	    schema = model.schema();
-	    _ref = schema.relations;
-	    for (key in _ref) {
-	      relation = _ref[key];
+	    ref = schema.relations;
+	    for (key in ref) {
+	      relation = ref[key];
 	      if (relation.type !== 'belongsTo' || relation.isVirtual() || !(value = model.get(key))) {
 	        continue;
 	      }
 	      related_models = value.models ? value.models : [value];
-	      _fn = (function(_this) {
+	      fn = (function(_this) {
 	        return function(related_model) {
 	          return queue.defer(function(callback) {
 	            return related_model.save(callback);
 	          });
 	        };
 	      })(this);
-	      for (_i = 0, _len = related_models.length; _i < _len; _i++) {
-	        related_model = related_models[_i];
+	      for (i = 0, len = related_models.length; i < len; i++) {
+	        related_model = related_models[i];
 	        if (related_model.id) {
 	          continue;
 	        }
-	        _fn(related_model);
+	        fn(related_model);
 	      }
 	    }
 	    return queue.await(callback);
@@ -717,13 +1079,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (_.isArray(data)) {
 	      return (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = data.length; _i < _len; _i++) {
-	          item = data[_i];
-	          _results.push(Utils.dataToModel(item, model_type));
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = data.length; i < len; i++) {
+	          item = data[i];
+	          results.push(Utils.dataToModel(item, model_type));
 	        }
-	        return _results;
+	        return results;
 	      })();
 	    }
 	    if (Utils.isModel(data)) {
@@ -775,8 +1137,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      try {
 	        url_root = _.result(new model_type, 'url');
 	      } catch (_error) {}
-	      model_type._orm.model_type_json = JSONModel = (function(_super) {
-	        __extends(JSONModel, _super);
+	      model_type._orm.model_type_json = JSONModel = (function(superClass) {
+	        extend(JSONModel, superClass);
 
 	        function JSONModel() {
 	          return JSONModel.__super__.constructor.apply(this, arguments);
@@ -799,13 +1161,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.each = function(array, limit, iterator, callback) {
-	    var count, index, queue, start_index, _fn, _i;
+	    var count, fn, i, index, queue, ref, ref1, start_index;
 	    if (!(count = array.length)) {
 	      return callback();
 	    }
 	    index = 0;
 	    queue = new Queue(1);
-	    _fn = function(start_index) {
+	    fn = function(start_index) {
 	      return queue.defer(function(callback) {
 	        var iteration_end, next;
 	        iteration_end = Math.min(start_index + limit, count);
@@ -823,8 +1185,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0; limit > 0 ? _i <= count : _i >= count; start_index = _i += limit) {
-	      _fn(start_index);
+	    for (start_index = i = 0, ref = count, ref1 = limit; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
+	      fn(start_index);
 	    }
 	    return queue.await(callback);
 	  };
@@ -834,13 +1196,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.popEach = function(array, limit, iterator, callback) {
-	    var count, index, queue, start_index, _fn, _i;
+	    var count, fn, i, index, queue, ref, ref1, start_index;
 	    if (!(count = array.length)) {
 	      return callback();
 	    }
 	    index = 0;
 	    queue = new Queue(1);
-	    _fn = function(start_index) {
+	    fn = function(start_index) {
 	      return queue.defer(function(callback) {
 	        var iteration_end, next;
 	        iteration_end = Math.min(start_index + limit, count);
@@ -859,8 +1221,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return next();
 	      });
 	    };
-	    for (start_index = _i = 0; limit > 0 ? _i <= count : _i >= count; start_index = _i += limit) {
-	      _fn(start_index);
+	    for (start_index = i = 0, ref = count, ref1 = limit; ref1 > 0 ? i <= ref : i >= ref; start_index = i += ref1) {
+	      fn(start_index);
 	    }
 	    return queue.await(callback);
 	  };
@@ -870,10 +1232,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.isSorted = function(models, fields) {
-	    var last_model, model, _i, _len;
+	    var i, last_model, len, model;
 	    fields = _.uniq(fields);
-	    for (_i = 0, _len = models.length; _i < _len; _i++) {
-	      model = models[_i];
+	    for (i = 0, len = models.length; i < len; i++) {
+	      model = models[i];
 	      if (last_model && this.fieldCompare(last_model, model, fields) === 1) {
 	        return false;
 	      }
@@ -952,12 +1314,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -965,9 +1327,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var JSONUtils, Queue, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
 	module.exports = JSONUtils = (function() {
 	  function JSONUtils() {}
@@ -1016,13 +1378,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (_.isArray(obj)) {
 	      return (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = obj.length; _i < _len; _i++) {
-	          value = obj[_i];
-	          _results.push(JSONUtils.parse(value, model_type));
+	        var i, len, results1;
+	        results1 = [];
+	        for (i = 0, len = obj.length; i < len; i++) {
+	          value = obj[i];
+	          results1.push(JSONUtils.parse(value, model_type));
 	        }
-	        return _results;
+	        return results1;
 	      })();
 	    }
 	    result = {};
@@ -1064,7 +1426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.renderTemplate = function(models, template, options, callback) {
-	    var model, queue, results, _fn, _i, _len;
+	    var fn, i, len, model, queue, results;
 	    if (arguments.length === 3) {
 	      callback = options;
 	      options = {};
@@ -1086,7 +1448,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      results = [];
 	      queue = new Queue(1);
-	      _fn = function(model) {
+	      fn = function(model) {
 	        return queue.defer(function(callback) {
 	          return JSONUtils.renderTemplate(model, template, options, function(err, related_json) {
 	            if (err) {
@@ -1097,9 +1459,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        });
 	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
-	        _fn(model);
+	      for (i = 0, len = models.length; i < len; i++) {
+	        model = models[i];
+	        fn(model);
 	      }
 	      return queue.await(function(err) {
 	        return callback(err, err ? void 0 : results);
@@ -1108,14 +1470,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.renderDSL = function(model, dsl, options, callback) {
-	    var args, key, queue, result, _fn;
+	    var args, fn, key, queue, result;
 	    if (arguments.length === 3) {
 	      callback = options;
 	      options = {};
 	    }
 	    queue = new Queue();
 	    result = {};
-	    _fn = function(key, args) {
+	    fn = function(key, args) {
 	      return queue.defer(function(callback) {
 	        var field, fn_args, query, relation, template;
 	        field = args.key || key;
@@ -1214,7 +1576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    for (key in dsl) {
 	      args = dsl[key];
-	      _fn(key, args);
+	      fn(key, args);
 	    }
 	    return queue.await(function(err) {
 	      return callback(err, err ? void 0 : result);
@@ -1222,14 +1584,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.renderKeys = function(model, keys, options, callback) {
-	    var key, queue, result, _fn, _i, _len;
+	    var fn, i, key, len, queue, result;
 	    if (arguments.length === 3) {
 	      callback = options;
 	      options = {};
 	    }
 	    result = {};
 	    queue = new Queue();
-	    _fn = function(key) {
+	    fn = function(key) {
 	      return queue.defer(function(callback) {
 	        return JSONUtils.renderKey(model, key, options, function(err, value) {
 	          if (err) {
@@ -1240,9 +1602,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      });
 	    };
-	    for (_i = 0, _len = keys.length; _i < _len; _i++) {
-	      key = keys[_i];
-	      _fn(key);
+	    for (i = 0, len = keys.length; i < len; i++) {
+	      key = keys[i];
+	      fn(key);
 	    }
 	    return queue.await(function(err) {
 	      return callback(err, err ? void 0 : result);
@@ -1262,13 +1624,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (model.relation(key)) {
 	        if (_.isArray(value)) {
 	          return callback(null, (function() {
-	            var _i, _len, _results;
-	            _results = [];
-	            for (_i = 0, _len = value.length; _i < _len; _i++) {
-	              item = value[_i];
-	              _results.push(item.toJSON());
+	            var i, len, results1;
+	            results1 = [];
+	            for (i = 0, len = value.length; i < len; i++) {
+	              item = value[i];
+	              results1.push(item.toJSON());
 	            }
-	            return _results;
+	            return results1;
 	          })());
 	        }
 	        if (value && value.toJSON) {
@@ -1280,7 +1642,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  JSONUtils.renderRelated = function(models, attribute_name, template, options, callback) {
-	    var model, queue, results, _fn, _i, _len;
+	    var fn, i, len, model, queue, results;
 	    if (arguments.length === 4) {
 	      callback = options;
 	      options = {};
@@ -1295,7 +1657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      results = [];
 	      queue = new Queue();
-	      _fn = function(model) {
+	      fn = function(model) {
 	        return queue.defer(function(callback) {
 	          return model.get(attribute_name, function(err, related_models) {
 	            if (err) {
@@ -1311,9 +1673,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        });
 	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
-	        _fn(model);
+	      for (i = 0, len = models.length; i < len; i++) {
+	        model = models[i];
+	        fn(model);
 	      }
 	      return queue.await(function(err) {
 	        return callback(err, err ? void 0 : results);
@@ -1356,12 +1718,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1369,7 +1731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var DateUtils, UNITS_TO_MS, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	UNITS_TO_MS = {
 	  milliseconds: {
@@ -1434,7 +1796,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var TestUtils;
@@ -1470,24 +1832,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Queue,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 	module.exports = Queue = (function() {
 	  function Queue(parallelism) {
 	    this.parallelism = parallelism;
-	    this._doneTask = __bind(this._doneTask, this);
+	    this._doneTask = bind(this._doneTask, this);
 	    this.parallelism || (this.parallelism = Infinity);
 	    this.tasks = [];
 	    this.running_count = 0;
@@ -1545,12 +1907,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1558,17 +1920,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var BackboneORM, DatabaseURL, SUPPORTED_KEYS, URL, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	URL = __webpack_require__(19);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
 	SUPPORTED_KEYS = ['protocol', 'slashes', 'auth', 'host', 'hostname', 'port', 'search', 'query', 'hash', 'href'];
 
 	module.exports = DatabaseURL = (function() {
 	  function DatabaseURL(url, parse_query_string, slashes_denote_host) {
-	    var database, database_parts, databases, databases_string, host, key, parts, path_paths, start_parts, start_url, url_parts, _i, _j, _k, _len, _len1, _len2, _ref;
+	    var database, database_parts, databases, databases_string, host, i, j, k, key, len, len1, len2, parts, path_paths, ref, start_parts, start_url, url_parts;
 	    url_parts = URL.parse(url, parse_query_string, slashes_denote_host);
 	    parts = url_parts.pathname.split(',');
 	    if (parts.length > 1) {
@@ -1582,21 +1944,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      databases_string = url.replace(start_url, '');
 	      databases_string = databases_string.substring(0, databases_string.indexOf(url_parts.pathname));
 	      databases = databases_string.split(',');
-	      _ref = ['host', 'hostname', 'port'];
-	      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	        key = _ref[_i];
+	      ref = ['host', 'hostname', 'port'];
+	      for (i = 0, len = ref.length; i < len; i++) {
+	        key = ref[i];
 	        delete url_parts[key];
 	      }
 	      this.hosts = [];
-	      for (_j = 0, _len1 = databases.length; _j < _len1; _j++) {
-	        database = databases[_j];
+	      for (j = 0, len1 = databases.length; j < len1; j++) {
+	        database = databases[j];
 	        host = database.split(':');
 	        this.hosts.push(host.length === 1 ? {
 	          host: host[0],
 	          hostname: host[0]
 	        } : {
 	          host: host[0],
-	          hostname: "" + host[0] + ":" + host[1],
+	          hostname: host[0] + ":" + host[1],
 	          port: host[1]
 	        });
 	      }
@@ -1604,8 +1966,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    database_parts = _.compact(url_parts.pathname.split('/'));
 	    this.table = database_parts.pop();
 	    this.database = database_parts.join('/');
-	    for (_k = 0, _len2 = SUPPORTED_KEYS.length; _k < _len2; _k++) {
-	      key = SUPPORTED_KEYS[_k];
+	    for (k = 0, len2 = SUPPORTED_KEYS.length; k < len2; k++) {
+	      key = SUPPORTED_KEYS[k];
 	      if (url_parts.hasOwnProperty(key)) {
 	        this[key] = url_parts[key];
 	      }
@@ -1670,111 +2032,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Fabricator, Queue, _;
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	module.exports = Fabricator = (function() {
-	  function Fabricator() {}
-
-	  Fabricator["new"] = function(model_type, count, attributes_info) {
-	    var attributes, key, results, value;
-	    results = [];
-	    while (count-- > 0) {
-	      attributes = {};
-	      for (key in attributes_info) {
-	        value = attributes_info[key];
-	        attributes[key] = _.isFunction(value) ? value() : value;
-	      }
-	      results.push(new model_type(attributes));
-	    }
-	    return results;
-	  };
-
-	  Fabricator.create = function(model_type, count, attributes_info, callback) {
-	    var model, models, queue, _fn, _i, _len;
-	    models = Fabricator["new"](model_type, count, attributes_info);
-	    queue = new Queue();
-	    _fn = function(model) {
-	      return queue.defer(function(callback) {
-	        return model.save(callback);
-	      });
-	    };
-	    for (_i = 0, _len = models.length; _i < _len; _i++) {
-	      model = models[_i];
-	      _fn(model);
-	    }
-	    return queue.await(function(err) {
-	      return callback(err, models);
-	    });
-	  };
-
-	  Fabricator.value = function(value) {
-	    if (arguments.length === 0) {
-	      return void 0;
-	    }
-	    return function() {
-	      return value;
-	    };
-	  };
-
-	  Fabricator.uniqueId = function(prefix) {
-	    if (arguments.length === 0) {
-	      return _.uniqueId();
-	    }
-	    return function() {
-	      return _.uniqueId(prefix);
-	    };
-	  };
-
-	  Fabricator.uniqueString = Fabricator.uniqueId;
-
-	  Fabricator.date = function(start, step_ms) {
-	    var current_ms, now, _ref;
-	    now = new Date();
-	    if (arguments.length === 0) {
-	      return now;
-	    }
-	    if (arguments.length === 1) {
-	      _ref = [now, start], start = _ref[0], step_ms = _ref[1];
-	    }
-	    current_ms = start.getTime();
-	    return function() {
-	      var current;
-	      current = new Date(current_ms);
-	      current_ms += step_ms;
-	      return current;
-	    };
-	  };
-
-	  return Fabricator;
-
-	})();
-
-
-/***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var LRU, MemoryStore, _,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	LRU = __webpack_require__(21);
+	LRU = __webpack_require__(1);
 
 	module.exports = MemoryStore = (function() {
 	  function MemoryStore(options) {
@@ -1782,11 +2056,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options == null) {
 	      options = {};
 	    }
-	    this.forEach = __bind(this.forEach, this);
-	    this.reset = __bind(this.reset, this);
-	    this.destroy = __bind(this.destroy, this);
-	    this.get = __bind(this.get, this);
-	    this.set = __bind(this.set, this);
+	    this.forEach = bind(this.forEach, this);
+	    this.reset = bind(this.reset, this);
+	    this.destroy = bind(this.destroy, this);
+	    this.get = bind(this.get, this);
+	    this.set = bind(this.set, this);
 	    if (max_age = options.max_age) {
 	      (options = _.omit(options, 'max_age'))['maxAge'] = max_age;
 	    }
@@ -1846,27 +2120,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var CURSOR_KEYS, Cursor, JSONUtils, Utils, _,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
 	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or'];
 
 	module.exports = Cursor = (function() {
 	  function Cursor(query, options) {
-	    this.relatedModelTypesInQuery = __bind(this.relatedModelTypesInQuery, this);
-	    var key, parsed_query, value, _i, _len, _ref;
+	    this.relatedModelTypesInQuery = bind(this.relatedModelTypesInQuery, this);
+	    var i, key, len, parsed_query, ref, value;
 	    for (key in options) {
 	      value = options[key];
 	      this[key] = value;
@@ -1874,9 +2148,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parsed_query = Cursor.parseQuery(query, this.model_type);
 	    this._find = parsed_query.find;
 	    this._cursor = parsed_query.cursor;
-	    _ref = ['$whitelist', '$select', '$values', '$unique'];
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      key = _ref[_i];
+	    ref = ['$whitelist', '$select', '$values', '$unique'];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      key = ref[i];
 	      if (this._cursor[key] && !_.isArray(this._cursor[key])) {
 	        this._cursor[key] = [this._cursor[key]];
 	      }
@@ -1884,24 +2158,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  Cursor.validateQuery = function(query, memo, model_type) {
-	    var full_key, key, value, _results;
-	    _results = [];
+	    var full_key, key, results, value;
+	    results = [];
 	    for (key in query) {
 	      value = query[key];
 	      if (!(_.isUndefined(value) || _.isObject(value))) {
 	        continue;
 	      }
-	      full_key = memo ? "" + memo + "." + key : key;
+	      full_key = memo ? memo + "." + key : key;
 	      if (_.isUndefined(value)) {
 	        throw new Error("Unexpected undefined for query key '" + full_key + "' on " + (model_type != null ? model_type.model_name : void 0));
 	      }
 	      if (_.isObject(value)) {
-	        _results.push(Cursor.validateQuery(value, full_key, model_type));
+	        results.push(Cursor.validateQuery(value, full_key, model_type));
 	      } else {
-	        _results.push(void 0);
+	        results.push(void 0);
 	      }
 	    }
-	    return _results;
+	    return results;
 	  };
 
 	  Cursor.parseQuery = function(query, model_type) {
@@ -2034,23 +2308,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var can_cache, item, model, models;
 	          if (can_cache = !(_this._cursor.$select || _this._cursor.$whitelist)) {
 	            models = (function() {
-	              var _i, _len, _results;
-	              _results = [];
-	              for (_i = 0, _len = json.length; _i < _len; _i++) {
-	                item = json[_i];
-	                _results.push(Utils.updateOrNew(item, this.model_type));
+	              var i, len, results;
+	              results = [];
+	              for (i = 0, len = json.length; i < len; i++) {
+	                item = json[i];
+	                results.push(Utils.updateOrNew(item, this.model_type));
 	              }
-	              return _results;
+	              return results;
 	            }).call(_this);
 	          } else {
 	            models = (function() {
-	              var _i, _len, _results;
-	              _results = [];
-	              for (_i = 0, _len = json.length; _i < _len; _i++) {
-	                item = json[_i];
-	                _results.push((model = new this.model_type(this.model_type.prototype.parse(item)), model.setPartial(true), model));
+	              var i, len, results;
+	              results = [];
+	              for (i = 0, len = json.length; i < len; i++) {
+	                item = json[i];
+	                results.push((model = new this.model_type(this.model_type.prototype.parse(item)), model.setPartial(true), model));
 	              }
-	              return _results;
+	              return results;
 	            }).call(_this);
 	          }
 	          return callback(null, _this._cursor.$one ? models[0] : models);
@@ -2091,25 +2365,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Cursor.prototype.relatedModelTypesInQuery = function() {
-	    var key, related_fields, related_model_types, relation, relation_key, reverse_relation, value, _i, _len, _ref, _ref1, _ref2;
+	    var i, key, len, ref, ref1, ref2, related_fields, related_model_types, relation, relation_key, reverse_relation, value;
 	    related_fields = [];
 	    related_model_types = [];
-	    _ref = this._find;
-	    for (key in _ref) {
-	      value = _ref[key];
+	    ref = this._find;
+	    for (key in ref) {
+	      value = ref[key];
 	      if (key.indexOf('.') > 0) {
-	        _ref1 = key.split('.'), relation_key = _ref1[0], key = _ref1[1];
+	        ref1 = key.split('.'), relation_key = ref1[0], key = ref1[1];
 	        related_fields.push(relation_key);
 	      } else if ((reverse_relation = this.model_type.reverseRelation(key)) && reverse_relation.join_table) {
 	        related_model_types.push(reverse_relation.model_type);
 	        related_model_types.push(reverse_relation.join_table);
 	      }
 	    }
-	    if ((_ref2 = this._cursor) != null ? _ref2.$include : void 0) {
+	    if ((ref2 = this._cursor) != null ? ref2.$include : void 0) {
 	      related_fields = related_fields.concat(this._cursor.$include);
 	    }
-	    for (_i = 0, _len = related_fields.length; _i < _len; _i++) {
-	      relation_key = related_fields[_i];
+	    for (i = 0, len = related_fields.length; i < len; i++) {
+	      relation_key = related_fields[i];
 	      if (relation = this.model_type.relation(relation_key)) {
 	        related_model_types.push(relation.reverse_model_type);
 	        if (relation.join_table) {
@@ -2130,57 +2404,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this._cursor.$values.length === 1) {
 	        key = this._cursor.$values[0];
 	        json = $values.length ? (function() {
-	          var _i, _len, _results;
-	          _results = [];
-	          for (_i = 0, _len = json.length; _i < _len; _i++) {
-	            item = json[_i];
-	            _results.push(item.hasOwnProperty(key) ? item[key] : null);
+	          var i, len, results;
+	          results = [];
+	          for (i = 0, len = json.length; i < len; i++) {
+	            item = json[i];
+	            results.push(item.hasOwnProperty(key) ? item[key] : null);
 	          }
-	          return _results;
+	          return results;
 	        })() : _.map(json, function() {
 	          return null;
 	        });
 	      } else {
 	        json = (function() {
-	          var _i, _len, _results;
-	          _results = [];
-	          for (_i = 0, _len = json.length; _i < _len; _i++) {
-	            item = json[_i];
-	            _results.push((function() {
-	              var _j, _len1, _results1;
-	              _results1 = [];
-	              for (_j = 0, _len1 = $values.length; _j < _len1; _j++) {
-	                key = $values[_j];
+	          var i, len, results;
+	          results = [];
+	          for (i = 0, len = json.length; i < len; i++) {
+	            item = json[i];
+	            results.push((function() {
+	              var j, len1, results1;
+	              results1 = [];
+	              for (j = 0, len1 = $values.length; j < len1; j++) {
+	                key = $values[j];
 	                if (item.hasOwnProperty(key)) {
-	                  _results1.push(item[key]);
+	                  results1.push(item[key]);
 	                }
 	              }
-	              return _results1;
+	              return results1;
 	            })());
 	          }
-	          return _results;
+	          return results;
 	        })();
 	      }
 	    } else if (this._cursor.$select) {
 	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
 	      json = (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = json.length; _i < _len; _i++) {
-	          item = json[_i];
-	          _results.push(_.pick(item, $select));
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = json.length; i < len; i++) {
+	          item = json[i];
+	          results.push(_.pick(item, $select));
 	        }
-	        return _results;
+	        return results;
 	      })();
 	    } else if (this._cursor.$whitelist) {
 	      json = (function() {
-	        var _i, _len, _results;
-	        _results = [];
-	        for (_i = 0, _len = json.length; _i < _len; _i++) {
-	          item = json[_i];
-	          _results.push(_.pick(item, this._cursor.$whitelist));
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = json.length; i < len; i++) {
+	          item = json[i];
+	          results.push(_.pick(item, this._cursor.$whitelist));
 	        }
-	        return _results;
+	        return results;
 	      }).call(this);
 	    }
 	    if (this.hasCursorQuery('$page')) {
@@ -2198,34 +2472,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._cursor.$select) {
 	      $select = this._cursor.$whitelist ? _.intersection(this._cursor.$select, this._cursor.$whitelist) : this._cursor.$select;
 	      models = ((function() {
-	        var _i, _len, _results;
+	        var i, len, results;
 	        model = new this.model_type(_.pick(model.attributes, $select));
 	        model.setPartial(true);
-	        _results = [];
-	        for (_i = 0, _len = models.length; _i < _len; _i++) {
-	          item = models[_i];
-	          _results.push(model);
+	        results = [];
+	        for (i = 0, len = models.length; i < len; i++) {
+	          item = models[i];
+	          results.push(model);
 	        }
-	        return _results;
+	        return results;
 	      }).call(this));
 	    } else if (this._cursor.$whitelist) {
 	      models = ((function() {
-	        var _i, _len, _results;
+	        var i, len, results;
 	        model = new this.model_type(_.pick(model.attributes, this._cursor.$whitelist));
 	        model.setPartial(true);
-	        _results = [];
-	        for (_i = 0, _len = models.length; _i < _len; _i++) {
-	          item = models[_i];
-	          _results.push(model);
+	        results = [];
+	        for (i = 0, len = models.length; i < len; i++) {
+	          item = models[i];
+	          results.push(model);
 	        }
-	        return _results;
+	        return results;
 	      }).call(this));
 	    }
 	    return models;
 	  };
 
 	  Cursor.prototype.prepareIncludes = function(json, callback) {
-	    var findOrNew, include, item, model_json, related_json, relation, schema, shared_related_models, _i, _j, _len, _len1, _ref;
+	    var findOrNew, i, include, item, j, len, len1, model_json, ref, related_json, relation, schema, shared_related_models;
 	    if (!_.isArray(this._cursor.$include) || _.isEmpty(this._cursor.$include)) {
 	      return callback(null, json);
 	    }
@@ -2247,22 +2521,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return shared_related_models[related_id];
 	      };
 	    })(this);
-	    _ref = this._cursor.$include;
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      include = _ref[_i];
+	    ref = this._cursor.$include;
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      include = ref[i];
 	      relation = schema.relation(include);
 	      shared_related_models = {};
-	      for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
-	        model_json = json[_j];
+	      for (j = 0, len1 = json.length; j < len1; j++) {
+	        model_json = json[j];
 	        if (_.isArray(related_json = model_json[include])) {
 	          model_json[include] = (function() {
-	            var _k, _len2, _results;
-	            _results = [];
-	            for (_k = 0, _len2 = related_json.length; _k < _len2; _k++) {
-	              item = related_json[_k];
-	              _results.push(findOrNew(item, relation.reverse_model_type));
+	            var k, len2, results;
+	            results = [];
+	            for (k = 0, len2 = related_json.length; k < len2; k++) {
+	              item = related_json[k];
+	              results.push(findOrNew(item, relation.reverse_model_type));
 	            }
-	            return _results;
+	            return results;
 	          })();
 	        } else if (related_json) {
 	          model_json[include] = findOrNew(related_json, relation.reverse_model_type);
@@ -2283,31 +2557,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, DatabaseURL, JSONUtils, Many, One, RELATION_VARIANTS, Schema, Utils, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	One = __webpack_require__(29);
+	One = __webpack_require__(25);
 
 	Many = __webpack_require__(30);
 
-	DatabaseURL = __webpack_require__(12);
+	DatabaseURL = __webpack_require__(13);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
 	RELATION_VARIANTS = {
 	  'hasOne': 'hasOne',
@@ -2335,34 +2609,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  Schema.prototype.initialize = function() {
-	    var info, key, relation, _ref, _ref1;
+	    var info, key, ref, ref1, relation;
 	    if (this.is_initialized) {
 	      return;
 	    }
 	    this.is_initialized = true;
-	    _ref = this.raw;
-	    for (key in _ref) {
-	      info = _ref[key];
+	    ref = this.raw;
+	    for (key in ref) {
+	      info = ref[key];
 	      this._parseField(key, info);
 	    }
-	    _ref1 = this.relations;
-	    for (key in _ref1) {
-	      relation = _ref1[key];
+	    ref1 = this.relations;
+	    for (key in ref1) {
+	      relation = ref1[key];
 	      relation.initialize();
 	    }
 	  };
 
 	  Schema.prototype.type = function(key, type) {
-	    var index, other, _base, _ref, _ref1, _ref2, _ref3;
+	    var base, index, other, ref, ref1, ref2, ref3;
 	    if (arguments.length === 2) {
-	      ((_base = this.type_overrides)[key] || (_base[key] = {}))['type'] = type;
+	      ((base = this.type_overrides)[key] || (base[key] = {}))['type'] = type;
 	      return this;
 	    }
 	    if ((index = key.indexOf('.')) >= 0) {
 	      other = key.substr(index + 1);
 	      key = key.substr(0, index);
 	    }
-	    if (!(type = ((_ref = this.type_overrides[key]) != null ? _ref.type : void 0) || ((_ref1 = this.fields[key]) != null ? _ref1.type : void 0) || ((_ref2 = this.relation(key)) != null ? _ref2.reverse_model_type : void 0) || ((_ref3 = this.reverseRelation(key)) != null ? _ref3.model_type : void 0))) {
+	    if (!(type = ((ref = this.type_overrides[key]) != null ? ref.type : void 0) || ((ref1 = this.fields[key]) != null ? ref1.type : void 0) || ((ref2 = this.relation(key)) != null ? ref2.reverse_model_type : void 0) || ((ref3 = this.reverseRelation(key)) != null ? ref3.model_type : void 0))) {
 	      return;
 	    }
 	    if (this.virtual_accessors[key]) {
@@ -2398,10 +2672,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.reverseRelation = function(reverse_key) {
-	    var key, relation, _ref;
-	    _ref = this.relations;
-	    for (key in _ref) {
-	      relation = _ref[key];
+	    var key, ref, relation;
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
 	      if (relation.reverse_relation && (relation.reverse_relation.join_key === reverse_key)) {
 	        return relation.reverse_relation;
 	      }
@@ -2410,16 +2684,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Schema.prototype.columns = function() {
-	    var columns, key, relation, _ref;
+	    var columns, key, ref, relation;
 	    columns = _.keys(this.fields);
 	    if (!_.find(columns, function(column) {
 	      return column === 'id';
 	    })) {
 	      columns.push('id');
 	    }
-	    _ref = this.relations;
-	    for (key in _ref) {
-	      relation = _ref[key];
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
 	      if ((relation.type === 'belongsTo') && !relation.isVirtual() && !relation.isEmbedded()) {
 	        columns.push(relation.foreign_key);
 	      }
@@ -2430,25 +2704,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Schema.prototype.joinTables = function() {
 	    var key, relation;
 	    return (function() {
-	      var _ref, _results;
-	      _ref = this.relations;
-	      _results = [];
-	      for (key in _ref) {
-	        relation = _ref[key];
+	      var ref, results;
+	      ref = this.relations;
+	      results = [];
+	      for (key in ref) {
+	        relation = ref[key];
 	        if (!relation.isVirtual() && relation.join_table) {
-	          _results.push(relation.join_table);
+	          results.push(relation.join_table);
 	        }
 	      }
-	      return _results;
+	      return results;
 	    }).call(this);
 	  };
 
 	  Schema.prototype.relatedModels = function() {
-	    var key, related_model_types, relation, _ref;
+	    var key, ref, related_model_types, relation;
 	    related_model_types = [];
-	    _ref = this.relations;
-	    for (key in _ref) {
-	      relation = _ref[key];
+	    ref = this.relations;
+	    for (key in ref) {
+	      relation = ref[key];
 	      related_model_types.push(relation.reverse_model_type);
 	      if (relation.join_table) {
 	        related_model_types.push(relation.join_table);
@@ -2490,14 +2764,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    table_name1 = BackboneORM.naming_conventions.tableName(relation.model_type.model_name);
 	    table_name2 = BackboneORM.naming_conventions.tableName(relation.reverse_relation.model_type.model_name);
 	    if (table_name1.localeCompare(table_name2) < 0) {
-	      return "" + table_name1 + "_" + table_name2;
+	      return table_name1 + "_" + table_name2;
 	    } else {
-	      return "" + table_name2 + "_" + table_name1;
+	      return table_name2 + "_" + table_name1;
 	    }
 	  };
 
 	  Schema.prototype.generateJoinTable = function(relation) {
-	    var JoinTable, name, schema, type, url, _ref;
+	    var JoinTable, name, ref, schema, type, url;
 	    schema = {};
 	    schema[relation.join_key] = [
 	      type = relation.model_type.schema().type('id'), {
@@ -2505,15 +2779,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    ];
 	    schema[relation.reverse_relation.join_key] = [
-	      ((_ref = relation.reverse_model_type) != null ? _ref.schema().type('id') : void 0) || type, {
+	      ((ref = relation.reverse_model_type) != null ? ref.schema().type('id') : void 0) || type, {
 	        indexed: true
 	      }
 	    ];
 	    url = Schema.joinTableURL(relation);
 	    name = BackboneORM.naming_conventions.modelName(url, true);
 	    try {
-	      JoinTable = (function(_super) {
-	        __extends(JoinTable, _super);
+	      JoinTable = (function(superClass) {
+	        extend(JoinTable, superClass);
 
 	        function JoinTable() {
 	          return JoinTable.__super__.constructor.apply(this, arguments);
@@ -2521,7 +2795,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        JoinTable.prototype.model_name = name;
 
-	        JoinTable.prototype.urlRoot = "" + ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
+	        JoinTable.prototype.urlRoot = ((new DatabaseURL(_.result(new relation.model_type, 'url'))).format({
 	          exclude_table: true
 	        })) + "/" + url;
 
@@ -2533,8 +2807,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      })(Backbone.Model);
 	    } catch (_error) {
-	      JoinTable = (function(_super) {
-	        __extends(JoinTable, _super);
+	      JoinTable = (function(superClass) {
+	        extend(JoinTable, superClass);
 
 	        function JoinTable() {
 	          return JoinTable.__super__.constructor.apply(this, arguments);
@@ -2620,7 +2894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2699,7 +2973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	var punycode = { encode : function (s) { return s } };
-	var _ = __webpack_require__(1);
+	var _ = __webpack_require__(21);
 	var shims = __webpack_require__(31);
 
 	exports.parse = urlParse;
@@ -3407,7 +3681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Query String Utilities
 
 	var QueryString = exports;
-	var _ = __webpack_require__(1);
+	var _ = __webpack_require__(21);
 
 
 	// If obj.hasOwnProperty has been overridden, then calling
@@ -3604,259 +3878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	;(function () { // closure for web browsers
-
-	if (typeof module === 'object' && module.exports) {
-	  module.exports = LRUCache
-	} else {
-	  // just set the global for non-node platforms.
-	  this.LRUCache = LRUCache
-	}
-
-	function hOP (obj, key) {
-	  return Object.prototype.hasOwnProperty.call(obj, key)
-	}
-
-	function naiveLength () { return 1 }
-
-	function LRUCache (options) {
-	  if (!(this instanceof LRUCache))
-	    return new LRUCache(options)
-
-	  if (typeof options === 'number')
-	    options = { max: options }
-
-	  if (!options)
-	    options = {}
-
-	  this._max = options.max
-	  // Kind of weird to have a default max of Infinity, but oh well.
-	  if (!this._max || !(typeof this._max === "number") || this._max <= 0 )
-	    this._max = Infinity
-
-	  this._lengthCalculator = options.length || naiveLength
-	  if (typeof this._lengthCalculator !== "function")
-	    this._lengthCalculator = naiveLength
-
-	  this._allowStale = options.stale || false
-	  this._maxAge = options.maxAge || null
-	  this._dispose = options.dispose
-	  this.reset()
-	}
-
-	// resize the cache when the max changes.
-	Object.defineProperty(LRUCache.prototype, "max",
-	  { set : function (mL) {
-	      if (!mL || !(typeof mL === "number") || mL <= 0 ) mL = Infinity
-	      this._max = mL
-	      if (this._length > this._max) trim(this)
-	    }
-	  , get : function () { return this._max }
-	  , enumerable : true
-	  })
-
-	// resize the cache when the lengthCalculator changes.
-	Object.defineProperty(LRUCache.prototype, "lengthCalculator",
-	  { set : function (lC) {
-	      if (typeof lC !== "function") {
-	        this._lengthCalculator = naiveLength
-	        this._length = this._itemCount
-	        for (var key in this._cache) {
-	          this._cache[key].length = 1
-	        }
-	      } else {
-	        this._lengthCalculator = lC
-	        this._length = 0
-	        for (var key in this._cache) {
-	          this._cache[key].length = this._lengthCalculator(this._cache[key].value)
-	          this._length += this._cache[key].length
-	        }
-	      }
-
-	      if (this._length > this._max) trim(this)
-	    }
-	  , get : function () { return this._lengthCalculator }
-	  , enumerable : true
-	  })
-
-	Object.defineProperty(LRUCache.prototype, "length",
-	  { get : function () { return this._length }
-	  , enumerable : true
-	  })
-
-
-	Object.defineProperty(LRUCache.prototype, "itemCount",
-	  { get : function () { return this._itemCount }
-	  , enumerable : true
-	  })
-
-	LRUCache.prototype.forEach = function (fn, thisp) {
-	  thisp = thisp || this
-	  var i = 0;
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    i++
-	    var hit = this._lruList[k]
-	    if (this._maxAge && (Date.now() - hit.now > this._maxAge)) {
-	      del(this, hit)
-	      if (!this._allowStale) hit = undefined
-	    }
-	    if (hit) {
-	      fn.call(thisp, hit.value, hit.key, this)
-	    }
-	  }
-	}
-
-	LRUCache.prototype.keys = function () {
-	  var keys = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    keys[i++] = hit.key
-	  }
-	  return keys
-	}
-
-	LRUCache.prototype.values = function () {
-	  var values = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    values[i++] = hit.value
-	  }
-	  return values
-	}
-
-	LRUCache.prototype.reset = function () {
-	  if (this._dispose && this._cache) {
-	    for (var k in this._cache) {
-	      this._dispose(k, this._cache[k].value)
-	    }
-	  }
-
-	  this._cache = Object.create(null) // hash of items by key
-	  this._lruList = Object.create(null) // list of items in order of use recency
-	  this._mru = 0 // most recently used
-	  this._lru = 0 // least recently used
-	  this._length = 0 // number of items in the list
-	  this._itemCount = 0
-	}
-
-	// Provided for debugging/dev purposes only. No promises whatsoever that
-	// this API stays stable.
-	LRUCache.prototype.dump = function () {
-	  return this._cache
-	}
-
-	LRUCache.prototype.dumpLru = function () {
-	  return this._lruList
-	}
-
-	LRUCache.prototype.set = function (key, value) {
-	  if (hOP(this._cache, key)) {
-	    // dispose of the old one before overwriting
-	    if (this._dispose) this._dispose(key, this._cache[key].value)
-	    if (this._maxAge) this._cache[key].now = Date.now()
-	    this._cache[key].value = value
-	    this.get(key)
-	    return true
-	  }
-
-	  var len = this._lengthCalculator(value)
-	  var age = this._maxAge ? Date.now() : 0
-	  var hit = new Entry(key, value, this._mru++, len, age)
-
-	  // oversized objects fall out of cache automatically.
-	  if (hit.length > this._max) {
-	    if (this._dispose) this._dispose(key, value)
-	    return false
-	  }
-
-	  this._length += hit.length
-	  this._lruList[hit.lu] = this._cache[key] = hit
-	  this._itemCount ++
-
-	  if (this._length > this._max) trim(this)
-	  return true
-	}
-
-	LRUCache.prototype.has = function (key) {
-	  if (!hOP(this._cache, key)) return false
-	  var hit = this._cache[key]
-	  if (this._maxAge && (Date.now() - hit.now > this._maxAge)) {
-	    return false
-	  }
-	  return true
-	}
-
-	LRUCache.prototype.get = function (key) {
-	  return get(this, key, true)
-	}
-
-	LRUCache.prototype.peek = function (key) {
-	  return get(this, key, false)
-	}
-
-	LRUCache.prototype.pop = function () {
-	  var hit = this._lruList[this._lru]
-	  del(this, hit)
-	  return hit || null
-	}
-
-	LRUCache.prototype.del = function (key) {
-	  del(this, this._cache[key])
-	}
-
-	function get (self, key, doUse) {
-	  var hit = self._cache[key]
-	  if (hit) {
-	    if (self._maxAge && (Date.now() - hit.now > self._maxAge)) {
-	      del(self, hit)
-	      if (!self._allowStale) hit = undefined
-	    } else {
-	      if (doUse) use(self, hit)
-	    }
-	    if (hit) hit = hit.value
-	  }
-	  return hit
-	}
-
-	function use (self, hit) {
-	  shiftLU(self, hit)
-	  hit.lu = self._mru ++
-	  self._lruList[hit.lu] = hit
-	}
-
-	function trim (self) {
-	  while (self._lru < self._mru && self._length > self._max)
-	    del(self, self._lruList[self._lru])
-	}
-
-	function shiftLU (self, hit) {
-	  delete self._lruList[ hit.lu ]
-	  while (self._lru < self._mru && !self._lruList[self._lru]) self._lru ++
-	}
-
-	function del (self, hit) {
-	  if (hit) {
-	    if (self._dispose) self._dispose(hit.key, hit.value)
-	    self._length -= hit.length
-	    self._itemCount --
-	    delete self._cache[ hit.key ]
-	    shiftLU(self, hit)
-	  }
-	}
-
-	// classy, since V8 prefers predictable objects.
-	function Entry (key, value, lu, length, now) {
-	  this.key = key
-	  this.value = value
-	  this.lu = lu
-	  this.length = length
-	  this.now = now
-	}
-
-	})()
-
+	module.exports = __WEBPACK_EXTERNAL_MODULE_21__;
 
 /***/ },
 /* 22 */
@@ -4211,47 +4233,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var regex = {
 	    plural : {
-	      men       : new RegExp( '^(m)en$'    , 'gi' ),
-	      people    : new RegExp( '(pe)ople$'  , 'gi' ),
-	      children  : new RegExp( '(child)ren$', 'gi' ),
-	      tia       : new RegExp( '([ti])a$'   , 'gi' ),
+	      men       : new RegExp( '^(m|wom)en$'             , 'gi' ),
+	      people    : new RegExp( '(pe)ople$'               , 'gi' ),
+	      children  : new RegExp( '(child)ren$'             , 'gi' ),
+	      tia       : new RegExp( '([ti])a$'                , 'gi' ),
 	      analyses  : new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ),
-	      hives     : new RegExp( '(hi|ti)ves$'       , 'gi' ),
-	      curves    : new RegExp( '(curve)s$'         , 'gi' ),
-	      lrves     : new RegExp( '([lr])ves$'        , 'gi' ),
-	      foves     : new RegExp( '([^fo])ves$'       , 'gi' ),
-	      movies    : new RegExp( '(m)ovies$'         , 'gi' ),
-	      aeiouyies : new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),
-	      series    : new RegExp( '(s)eries$'         , 'gi' ),
-	      xes       : new RegExp( '(x|ch|ss|sh)es$'   , 'gi' ),
-	      mice      : new RegExp( '([m|l])ice$'       , 'gi' ),
-	      buses     : new RegExp( '(bus)es$'          , 'gi' ),
-	      oes       : new RegExp( '(o)es$'            , 'gi' ),
-	      shoes     : new RegExp( '(shoe)s$'          , 'gi' ),
-	      crises    : new RegExp( '(cris|ax|test)es$' , 'gi' ),
-	      octopi    : new RegExp( '(octop|vir)i$'     , 'gi' ),
-	      aliases   : new RegExp( '(alias|status)es$' , 'gi' ),
-	      summonses : new RegExp( '^(summons)es$'     , 'gi' ),
-	      oxen      : new RegExp( '^(ox)en'           , 'gi' ),
-	      matrices  : new RegExp( '(matr)ices$'       , 'gi' ),
-	      vertices  : new RegExp( '(vert|ind)ices$'   , 'gi' ),
-	      feet      : new RegExp( '^feet$'            , 'gi' ),
-	      teeth     : new RegExp( '^teeth$'           , 'gi' ),
-	      geese     : new RegExp( '^geese$'           , 'gi' ),
-	      quizzes   : new RegExp( '(quiz)zes$'        , 'gi' ),
-	      whereases : new RegExp( '^(whereas)es$'     , 'gi' ),
-	      ss        : new RegExp( 'ss$'               , 'gi' ),
-	      s         : new RegExp( 's$'                , 'gi' )
+	      hives     : new RegExp( '(hi|ti)ves$'             , 'gi' ),
+	      curves    : new RegExp( '(curve)s$'               , 'gi' ),
+	      lrves     : new RegExp( '([lr])ves$'              , 'gi' ),
+	      foves     : new RegExp( '([^fo])ves$'             , 'gi' ),
+	      movies    : new RegExp( '(m)ovies$'               , 'gi' ),
+	      aeiouyies : new RegExp( '([^aeiouy]|qu)ies$'      , 'gi' ),
+	      series    : new RegExp( '(s)eries$'               , 'gi' ),
+	      xes       : new RegExp( '(x|ch|ss|sh)es$'         , 'gi' ),
+	      mice      : new RegExp( '([m|l])ice$'             , 'gi' ),
+	      buses     : new RegExp( '(bus)es$'                , 'gi' ),
+	      oes       : new RegExp( '(o)es$'                  , 'gi' ),
+	      shoes     : new RegExp( '(shoe)s$'                , 'gi' ),
+	      crises    : new RegExp( '(cris|ax|test)es$'       , 'gi' ),
+	      octopi    : new RegExp( '(octop|vir)i$'           , 'gi' ),
+	      aliases   : new RegExp( '(alias|canvas|status)es$', 'gi' ),
+	      summonses : new RegExp( '^(summons)es$'           , 'gi' ),
+	      oxen      : new RegExp( '^(ox)en'                 , 'gi' ),
+	      matrices  : new RegExp( '(matr)ices$'             , 'gi' ),
+	      vertices  : new RegExp( '(vert|ind)ices$'         , 'gi' ),
+	      feet      : new RegExp( '^feet$'                  , 'gi' ),
+	      teeth     : new RegExp( '^teeth$'                 , 'gi' ),
+	      geese     : new RegExp( '^geese$'                 , 'gi' ),
+	      quizzes   : new RegExp( '(quiz)zes$'              , 'gi' ),
+	      whereases : new RegExp( '^(whereas)es$'           , 'gi' ),
+	      ss        : new RegExp( 'ss$'                     , 'gi' ),
+	      s         : new RegExp( 's$'                      , 'gi' )
 	    },
 
 	    singular : {
-	      man     : new RegExp( '^(m)an$'               , 'gi' ),
+	      man     : new RegExp( '^(m|wom)an$'           , 'gi' ),
 	      person  : new RegExp( '(pe)rson$'             , 'gi' ),
 	      child   : new RegExp( '(child)$'              , 'gi' ),
 	      ox      : new RegExp( '^(ox)$'                , 'gi' ),
 	      axis    : new RegExp( '(ax|test)is$'          , 'gi' ),
 	      octopus : new RegExp( '(octop|vir)us$'        , 'gi' ),
-	      alias   : new RegExp( '(alias|status)$'       , 'gi' ),
+	      alias   : new RegExp( '(alias|status|canvas)$', 'gi' ),
 	      summons : new RegExp( '^(summons)$'           , 'gi' ),
 	      bus     : new RegExp( '(bu)s$'                , 'gi' ),
 	      buffalo : new RegExp( '(buffal|tomat|potat)o$', 'gi' ),
@@ -4322,9 +4344,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ regex.singular.ffe    , '$1$2ves' ],
 	    [ regex.singular.hive   , '$1ves' ],
 	    [ regex.singular.aeiouyy, '$1ies' ],
-	    [ regex.singular.x      , '$1es' ],
 	    [ regex.singular.matrix , '$1ices' ],
 	    [ regex.singular.vertex , '$1ices' ],
+	    [ regex.singular.x      , '$1es' ],
 	    [ regex.singular.mouse  , '$1ice' ],
 	    [ regex.singular.foot   , 'feet' ],
 	    [ regex.singular.tooth  , 'teeth' ],
@@ -4929,7 +4951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.5.3';
+	  inflector.version = '1.7.1';
 
 	  return inflector;
 	}));
@@ -4939,224 +4961,529 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseConvention, UnderscoreConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, _, mergeQuery, valueToArray,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty,
+	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-	inflection = __webpack_require__(22);
+	_ = __webpack_require__(21);
 
-	BaseConvention = __webpack_require__(18);
+	Queue = __webpack_require__(12);
 
-	module.exports = UnderscoreConvention = (function(_super) {
-	  __extends(UnderscoreConvention, _super);
+	Utils = __webpack_require__(8);
 
-	  function UnderscoreConvention() {
-	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
+	JSONUtils = __webpack_require__(9);
+
+	DateUtils = __webpack_require__(10);
+
+	Cursor = __webpack_require__(15);
+
+	BATCH_COUNT = 500;
+
+	IS_MATCH_FNS = {
+	  $ne: function(mv, tv) {
+	    return !_.isEqual(mv, tv);
+	  },
+	  $lt: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    return (_.isDate(tv) ? DateUtils.isBefore(mv, tv) : mv < tv);
+	  },
+	  $lte: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    if (_.isDate(tv)) {
+	      return !DateUtils.isAfter(mv, tv);
+	    } else {
+	      return mv <= tv;
+	    }
+	  },
+	  $gt: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    return (_.isDate(tv) ? DateUtils.isAfter(mv, tv) : mv > tv);
+	  },
+	  $gte: function(mv, tv) {
+	    if (_.isNull(tv)) {
+	      throw Error('Cannot compare to null');
+	    }
+	    if (_.isDate(tv)) {
+	      return !DateUtils.isBefore(mv, tv);
+	    } else {
+	      return mv >= tv;
+	    }
+	  },
+	  $exists: function(mv, tv) {
+	    if (!tv) {
+	      return _.isUndefined(mv);
+	    } else {
+	      return !_.isUndefined(mv);
+	    }
+	  }
+	};
+
+	IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS);
+
+	valueToArray = function(value) {
+	  return (_.isArray(value) ? value : (_.isNull(value) ? [] : (value.$in ? value.$in : [value])));
+	};
+
+	mergeQuery = function(query, key, value) {
+	  return query[key] = query.hasOwnProperty(key) ? {
+	    $in: _.intersection(valueToArray(query[key]), valueToArray(value))
+	  } : value;
+	};
+
+	module.exports = MemoryCursor = (function(superClass) {
+	  extend(MemoryCursor, superClass);
+
+	  function MemoryCursor() {
+	    return MemoryCursor.__super__.constructor.apply(this, arguments);
 	  }
 
-	  UnderscoreConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  MemoryCursor.prototype.queryToJSON = function(callback) {
+	    var exists;
+	    if (this.hasCursorQuery('$zero')) {
+	      return callback(null, this.hasCursorQuery('$one') ? null : []);
+	    }
+	    exists = this.hasCursorQuery('$exists');
+	    return this.buildFindQuery((function(_this) {
+	      return function(err, find_query) {
+	        var json, keys, queue;
+	        if (err) {
+	          return callback(err);
+	        }
+	        json = [];
+	        keys = _.keys(find_query);
+	        queue = new Queue(1);
+	        queue.defer(function(callback) {
+	          var i, ins, ins_size, key, len, model_json, nins, nins_size, ref, ref1, ref2, value;
+	          ref = [{}, {}], ins = ref[0], nins = ref[1];
+	          for (key in find_query) {
+	            value = find_query[key];
+	            if (value != null ? value.$in : void 0) {
+	              delete find_query[key];
+	              ins[key] = value.$in;
+	            }
+	            if (value != null ? value.$nin : void 0) {
+	              delete find_query[key];
+	              nins[key] = value.$nin;
+	            }
+	          }
+	          ref1 = [_.size(ins), _.size(nins)], ins_size = ref1[0], nins_size = ref1[1];
+	          if (keys.length || ins_size || nins_size) {
+	            if (_this._cursor.$ids) {
+	              ref2 = _this.store;
+	              for (i = 0, len = ref2.length; i < len; i++) {
+	                model_json = ref2[i];
+	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
+	                  json.push(JSONUtils.deepClone(model_json));
+	                }
+	              }
+	              return callback();
+	            } else {
+	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
+	                var find_keys, next, ref3, ref4, values;
+	                if (exists && json.length) {
+	                  return callback(null, true);
+	                }
+	                if (ins_size) {
+	                  for (key in ins) {
+	                    values = ins[key];
+	                    if (ref3 = model_json[key], indexOf.call(values, ref3) < 0) {
+	                      return callback();
+	                    }
+	                  }
+	                }
+	                if (nins_size) {
+	                  for (key in nins) {
+	                    values = nins[key];
+	                    if (ref4 = model_json[key], indexOf.call(values, ref4) >= 0) {
+	                      return callback();
+	                    }
+	                  }
+	                }
+	                find_keys = _.keys(find_query);
+	                next = function(err, is_match) {
+	                  if (err || !is_match) {
+	                    return callback(err);
+	                  }
+	                  if (find_keys.length === 0) {
+	                    json.push(JSONUtils.deepClone(model_json));
+	                    return callback();
+	                  }
+	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
+	                };
+	                return next(null, true);
+	              });
+	            }
+	          } else {
+	            if (_this._cursor.$ids) {
+	              json = (function() {
+	                var j, len1, ref3, results;
+	                ref3 = this.store;
+	                results = [];
+	                for (j = 0, len1 = ref3.length; j < len1; j++) {
+	                  model_json = ref3[j];
+	                  if (_.contains(this._cursor.$ids, model_json.id)) {
+	                    results.push(JSONUtils.deepClone(model_json));
+	                  }
+	                }
+	                return results;
+	              }).call(_this);
+	            } else {
+	              json = (function() {
+	                var j, len1, ref3, results;
+	                ref3 = this.store;
+	                results = [];
+	                for (j = 0, len1 = ref3.length; j < len1; j++) {
+	                  model_json = ref3[j];
+	                  results.push(JSONUtils.deepClone(model_json));
+	                }
+	                return results;
+	              }).call(_this);
+	            }
+	            return callback();
+	          }
+	        });
+	        if (!exists) {
+	          queue.defer(function(callback) {
+	            var $sort_fields, field, i, j, key, len, len1, model_json, number, ref, unique_json, unique_keys;
+	            if (_this._cursor.$sort) {
+	              $sort_fields = _.isArray(_this._cursor.$sort) ? _this._cursor.$sort : [_this._cursor.$sort];
+	              json.sort(function(model, next_model) {
+	                return Utils.jsonFieldCompare(model, next_model, $sort_fields);
+	              });
+	            }
+	            if (_this._cursor.$unique) {
+	              unique_json = [];
+	              unique_keys = {};
+	              for (i = 0, len = json.length; i < len; i++) {
+	                model_json = json[i];
+	                key = '';
+	                ref = _this._cursor.$unique;
+	                for (j = 0, len1 = ref.length; j < len1; j++) {
+	                  field = ref[j];
+	                  if (model_json.hasOwnProperty(field)) {
+	                    key += field + ":" + (JSON.stringify(model_json[field]));
+	                  }
+	                }
+	                if (unique_keys[key]) {
+	                  continue;
+	                }
+	                unique_keys[key] = true;
+	                unique_json.push(model_json);
+	              }
+	              json = unique_json;
+	            }
+	            if (_this._cursor.$offset) {
+	              number = json.length - _this._cursor.$offset;
+	              if (number < 0) {
+	                number = 0;
+	              }
+	              json = number ? json.slice(_this._cursor.$offset, _this._cursor.$offset + number) : [];
+	            }
+	            if (_this._cursor.$one) {
+	              json = json.slice(0, 1);
+	            } else if (_this._cursor.$limit) {
+	              json = json.splice(0, Math.min(json.length, _this._cursor.$limit));
+	            }
+	            return callback();
+	          });
+	          queue.defer(function(callback) {
+	            return _this.fetchIncludes(json, callback);
+	          });
+	        }
+	        queue.await(function() {
+	          var count_cursor;
+	          if (_this.hasCursorQuery('$count')) {
+	            return callback(null, (_.isArray(json) ? json.length : (json ? 1 : 0)));
+	          }
+	          if (exists) {
+	            return callback(null, (_.isArray(json) ? !!json.length : json));
+	          }
+	          if (_this.hasCursorQuery('$page')) {
+	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
+	            return count_cursor.count(function(err, count) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              return callback(null, {
+	                offset: _this._cursor.$offset || 0,
+	                total_rows: count,
+	                rows: _this.selectResults(json)
+	              });
+	            });
+	          } else {
+	            return callback(null, _this.selectResults(json));
+	          }
+	        });
+	      };
+	    })(this));
 	  };
 
-	  return UnderscoreConvention;
+	  MemoryCursor.prototype.buildFindQuery = function(callback) {
+	    var find_query, fn, key, queue, ref, ref1, relation_key, reverse_relation, value, value_key;
+	    queue = new Queue();
+	    find_query = {};
+	    ref = this._find;
+	    fn = (function(_this) {
+	      return function(relation_key, value_key, value) {
+	        return queue.defer(function(callback) {
+	          var related_query, relation;
+	          if (!(relation = _this.model_type.relation(relation_key))) {
+	            mergeQuery(find_query, key, value);
+	            return callback();
+	          }
+	          if (!relation.join_table && (value_key === 'id')) {
+	            mergeQuery(find_query, relation.foreign_key, value);
+	            return callback();
+	          } else if (relation.join_table || (relation.type === 'belongsTo')) {
+	            (related_query = {
+	              $values: 'id'
+	            })[value_key] = value;
+	            return relation.reverse_relation.model_type.cursor(related_query).toJSON(function(err, related_ids) {
+	              var join_query;
+	              if (err) {
+	                return callback(err);
+	              }
+	              if (relation.join_table) {
+	                (join_query = {})[relation.reverse_relation.join_key] = {
+	                  $in: related_ids
+	                };
+	                join_query.$values = relation.foreign_key;
+	                return relation.join_table.cursor(join_query).toJSON(function(err, model_ids) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, 'id', {
+	                    $in: model_ids
+	                  });
+	                  return callback();
+	                });
+	              } else {
+	                mergeQuery(find_query, relation.foreign_key, {
+	                  $in: related_ids
+	                });
+	                return callback();
+	              }
+	            });
+	          } else {
+	            (related_query = {})[value_key] = value;
+	            related_query.$values = relation.foreign_key;
+	            return relation.reverse_model_type.cursor(related_query).toJSON(function(err, model_ids) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              mergeQuery(find_query, 'id', {
+	                $in: model_ids
+	              });
+	              return callback();
+	            });
+	          }
+	        });
+	      };
+	    })(this);
+	    for (key in ref) {
+	      value = ref[key];
+	      if (key.indexOf('.') < 0) {
+	        if (!(reverse_relation = this.model_type.reverseRelation(key))) {
+	          mergeQuery(find_query, key, value);
+	          continue;
+	        }
+	        if (!reverse_relation.embed && !reverse_relation.join_table) {
+	          mergeQuery(find_query, key, value);
+	          continue;
+	        }
+	        (function(_this) {
+	          return (function(key, value, reverse_relation) {
+	            return queue.defer(function(callback) {
+	              var related_query;
+	              if (reverse_relation.embed) {
+	                throw Error("Embedded find is not yet supported. @_find: " + (JSONUtils.stringify(_this._find)));
+	                (related_query = {}).id = value;
+	                return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, '_json', _.map(models_json, function(test) {
+	                    return test[reverse_relation.key];
+	                  }));
+	                  return callback();
+	                });
+	              } else {
+	                (related_query = {})[key] = value;
+	                related_query.$values = reverse_relation.reverse_relation.join_key;
+	                return reverse_relation.join_table.cursor(related_query).toJSON(function(err, model_ids) {
+	                  if (err) {
+	                    return callback(err);
+	                  }
+	                  mergeQuery(find_query, 'id', {
+	                    $in: model_ids
+	                  });
+	                  return callback();
+	                });
+	              }
+	            });
+	          });
+	        })(this)(key, value, reverse_relation);
+	        continue;
+	      }
+	      ref1 = key.split('.'), relation_key = ref1[0], value_key = ref1[1];
+	      if (this.model_type.relationIsEmbedded(relation_key)) {
+	        mergeQuery(find_query, key, value);
+	        continue;
+	      }
+	      fn(relation_key, value_key, value);
+	    }
+	    return queue.await((function(_this) {
+	      return function(err) {
+	        return callback(err, find_query);
+	      };
+	    })(this));
+	  };
 
-	})(BaseConvention);
+	  MemoryCursor.prototype.fetchIncludes = function(json, callback) {
+	    var fn, i, include_keys, j, key, len, len1, load_queue, model_json, relation;
+	    if (!this._cursor.$include) {
+	      return callback();
+	    }
+	    load_queue = new Queue(1);
+	    include_keys = _.isArray(this._cursor.$include) ? this._cursor.$include : [this._cursor.$include];
+	    for (i = 0, len = include_keys.length; i < len; i++) {
+	      key = include_keys[i];
+	      if (this.model_type.relationIsEmbedded(key)) {
+	        continue;
+	      }
+	      if (!(relation = this.model_type.relation(key))) {
+	        return callback(new Error("Included relation '" + key + "' is not a relation"));
+	      }
+	      fn = (function(_this) {
+	        return function(key, model_json) {
+	          return load_queue.defer(function(callback) {
+	            return relation.cursor(model_json, key).toJSON(function(err, related_json) {
+	              if (err) {
+	                return callback(err);
+	              }
+	              delete model_json[relation.foriegn_key];
+	              model_json[key] = related_json;
+	              return callback();
+	            });
+	          });
+	        };
+	      })(this);
+	      for (j = 0, len1 = json.length; j < len1; j++) {
+	        model_json = json[j];
+	        fn(key, model_json);
+	      }
+	    }
+	    return load_queue.await(callback);
+	  };
+
+	  MemoryCursor.prototype._valueIsMatch = function(find_query, key_path, model_json, callback) {
+	    var key_components, model_type, next;
+	    key_components = key_path.split('.');
+	    model_type = this.model_type;
+	    next = (function(_this) {
+	      return function(err, models_json) {
+	        var find_value, i, is_match, j, key, len, len1, model_value, operator, relation, was_handled;
+	        if (err) {
+	          return callback(err);
+	        }
+	        key = key_components.shift();
+	        if (key === 'id') {
+	          key = model_type.prototype.idAttribute;
+	        }
+	        if (!key_components.length) {
+	          was_handled = false;
+	          find_value = find_query[key_path];
+	          if (!_.isArray(models_json)) {
+	            models_json = [models_json];
+	          }
+	          for (i = 0, len = models_json.length; i < len; i++) {
+	            model_json = models_json[i];
+	            model_value = model_json[key];
+	            if (_.isObject(find_value)) {
+	              for (j = 0, len1 = IS_MATCH_OPERATORS.length; j < len1; j++) {
+	                operator = IS_MATCH_OPERATORS[j];
+	                if (!(find_value.hasOwnProperty(operator))) {
+	                  continue;
+	                }
+	                was_handled = true;
+	                if (!(is_match = IS_MATCH_FNS[operator](model_value, find_value[operator]))) {
+	                  break;
+	                }
+	              }
+	            }
+	            if (was_handled) {
+	              if (is_match) {
+	                return callback(null, is_match);
+	              }
+	            } else if (is_match = _.isEqual(model_value, find_value)) {
+	              return callback(null, is_match);
+	            }
+	          }
+	          return callback(null, false);
+	        }
+	        if ((relation = model_type.relation(key)) && !relation.embed) {
+	          return relation.cursor(model_json, key).toJSON(next);
+	        }
+	        return next(null, model_json[key]);
+	      };
+	    })(this);
+	    return next(null, model_json);
+	  };
+
+	  return MemoryCursor;
+
+	})(Cursor);
 
 
 /***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseConvention, CamelizeConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(22);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = CamelizeConvention = (function(_super) {
-	  __extends(CamelizeConvention, _super);
-
-	  function CamelizeConvention() {
-	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  CamelizeConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
-	  };
-
-	  return CamelizeConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BaseConvention, ClassifyConvention, inflection,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-	inflection = __webpack_require__(22);
-
-	BaseConvention = __webpack_require__(18);
-
-	module.exports = ClassifyConvention = (function(_super) {
-	  __extends(ClassifyConvention, _super);
-
-	  function ClassifyConvention() {
-	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
-	  }
-
-	  ClassifyConvention.attribute = function(model_name, plural) {
-	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
-	  };
-
-	  return ClassifyConvention;
-
-	})(BaseConvention);
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, MemoryStore, ModelCache, Queue, _;
+	var Backbone, DatabaseURL, ModelStream, Queue, Utils, _, modelEach, modelInterval;
+
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	_ = __webpack_require__(1);
+	Queue = __webpack_require__(12);
 
-	Queue = __webpack_require__(11);
+	Utils = __webpack_require__(8);
 
-	MemoryStore = __webpack_require__(14);
+	DatabaseURL = __webpack_require__(13);
 
-	module.exports = ModelCache = (function() {
-	  function ModelCache() {
-	    this.enabled = false;
-	    this.caches = {};
-	    this.options = {
-	      modelTypes: {}
-	    };
-	    this.verbose = false;
-	  }
+	ModelStream = __webpack_require__(33);
 
-	  ModelCache.prototype.configure = function(options) {
-	    var key, value, value_key, value_value, values, _base;
-	    if (options == null) {
-	      options = {};
-	    }
-	    this.enabled = options.enabled;
-	    for (key in options) {
-	      value = options[key];
-	      if (_.isObject(value)) {
-	        (_base = this.options)[key] || (_base[key] = {});
-	        values = this.options[key];
-	        for (value_key in value) {
-	          value_value = value[value_key];
-	          values[value_key] = value_value;
-	        }
-	      } else {
-	        this.options[key] = value;
-	      }
-	    }
-	    return this.reset();
-	  };
+	modelEach = __webpack_require__(34);
 
-	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
-	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
-	      return sync_fn;
-	    }
-	    return (__webpack_require__(33))(model_type, sync_fn);
-	  };
+	modelInterval = __webpack_require__(35);
 
-	  ModelCache.prototype.reset = function() {
-	    var key, value, _ref, _results;
-	    _ref = this.caches;
-	    _results = [];
-	    for (key in _ref) {
-	      value = _ref[key];
-	      _results.push(this.createCache(value.model_type));
-	    }
-	    return _results;
-	  };
-
-	  ModelCache.prototype.createCache = function(model_type) {
-	    var cache_info, cuid, model_name, options;
-	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
-	      throw new Error("Missing model name for cache");
-	    }
-	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
-	    if (cache_info = this.caches[cuid]) {
-	      delete this.caches[cuid];
-	      cache_info.cache.reset();
-	      cache_info.model_type.cache = null;
-	    }
-	    if (!this.enabled) {
-	      return null;
-	    }
-	    if (!(options = this.options.modelTypes[model_name])) {
-	      if (!(this.options.store || this.options.max || this.options.max_age)) {
-	        return null;
-	      }
-	      options = this.options;
-	    }
-	    cache_info = this.caches[cuid] = {
-	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
-	      model_type: model_type
-	    };
-	    return model_type.cache = cache_info.cache;
-	  };
-
-	  return ModelCache;
-
-	})();
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var Backbone, DatabaseURL, ModelStream, Queue, Utils, modelEach, modelInterval, _;
-
-	_ = __webpack_require__(1);
-
-	Backbone = __webpack_require__(2);
-
-	Queue = __webpack_require__(11);
-
-	Utils = __webpack_require__(7);
-
-	DatabaseURL = __webpack_require__(12);
-
-	ModelStream = __webpack_require__(34);
-
-	modelEach = __webpack_require__(35);
-
-	modelInterval = __webpack_require__(36);
-
-	__webpack_require__(37);
+	__webpack_require__(36);
 
 	module.exports = function(model_type) {
-	  var BackboneModelExtensions, fn, key, overrides, _findOrClone, _results;
+	  var BackboneModelExtensions, _findOrClone, fn, key, overrides, results;
 	  BackboneModelExtensions = (function() {
 	    function BackboneModelExtensions() {}
 
@@ -5167,9 +5494,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return model_type.prototype.sync('createSync', target_model_type);
 	  };
 	  model_type.resetSchema = function(options, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, options], options = _ref[0], callback = _ref[1];
+	      ref = [{}, options], options = ref[0], callback = ref[1];
 	    }
 	    return model_type.prototype.sync('resetSchema', options, callback);
 	  };
@@ -5180,9 +5507,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return model_type.prototype.sync('cursor', query);
 	  };
 	  model_type.destroy = function(query, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    if (!_.isObject(query)) {
 	      query = {
@@ -5195,16 +5522,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return model_type.prototype.sync('db');
 	  };
 	  model_type.exists = function(query, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    return model_type.prototype.sync('cursor', query).exists(callback);
 	  };
 	  model_type.count = function(query, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    return model_type.prototype.sync('cursor', query).count(callback);
 	  };
@@ -5212,16 +5539,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return model_type.prototype.sync('cursor', {}).toModels(callback);
 	  };
 	  model_type.find = function(query, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    return model_type.prototype.sync('cursor', query).toModels(callback);
 	  };
 	  model_type.findOne = function(query, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 1) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
 	    query = _.isObject(query) ? _.extend({
 	      $one: true
@@ -5250,14 +5577,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 	  model_type.findOneNearestDate = function(date, options, query, callback) {
-	    var functions, key, _ref, _ref1;
+	    var functions, key, ref, ref1;
 	    if (!(key = options.key)) {
 	      throw new Error("Missing options key");
 	    }
 	    if (arguments.length === 2) {
-	      _ref = [{}, query], query = _ref[0], callback = _ref[1];
+	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    } else if (arguments.length === 3) {
-	      _ref1 = [new Date(), {}, query], options = _ref1[0], query = _ref1[1], callback = _ref1[2];
+	      ref1 = [new Date(), {}, query], options = ref1[0], query = ref1[1], callback = ref1[2];
 	    } else {
 	      query = _.clone(query);
 	    }
@@ -5293,16 +5620,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 	  model_type.each = function(query, iterator, callback) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 2) {
-	      _ref = [{}, query, iterator], query = _ref[0], iterator = _ref[1], callback = _ref[2];
+	      ref = [{}, query, iterator], query = ref[0], iterator = ref[1], callback = ref[2];
 	    }
 	    return modelEach(model_type, query, iterator, callback);
 	  };
 	  model_type.eachC = function(query, callback, iterator) {
-	    var _ref;
+	    var ref;
 	    if (arguments.length === 2) {
-	      _ref = [{}, query, callback], query = _ref[0], callback = _ref[1], iterator = _ref[2];
+	      ref = [{}, query, callback], query = ref[0], callback = ref[1], iterator = ref[2];
 	    }
 	    return modelEach(model_type, query, iterator, callback);
 	  };
@@ -5364,9 +5691,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return !Utils.orSet(this, 'needs_load', {})[key];
 	  };
 	  model_type.prototype.setLoaded = function(key, is_loaded) {
-	    var needs_load, _ref;
+	    var needs_load, ref;
 	    if (arguments.length === 1) {
-	      _ref = ['__model__', key], key = _ref[0], is_loaded = _ref[1];
+	      ref = ['__model__', key], key = ref[0], is_loaded = ref[1];
 	    }
 	    needs_load = Utils.orSet(this, 'needs_load', {});
 	    if (is_loaded && Utils.get(this, 'is_initialized')) {
@@ -5408,9 +5735,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 	  model_type.prototype.fetchRelated = function(relations, callback) {
-	    var queue, _ref;
+	    var queue, ref;
 	    if (arguments.length === 1) {
-	      _ref = [null, relations], relations = _ref[0], callback = _ref[1];
+	      ref = [null, relations], relations = ref[0], callback = ref[1];
 	    }
 	    queue = new Queue(1);
 	    queue.defer((function(_this) {
@@ -5423,7 +5750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    })(this));
 	    queue.defer((function(_this) {
 	      return function(callback) {
-	        var key, keys, relations_queue, _fn, _i, _len;
+	        var fn1, i, key, keys, len, relations_queue;
 	        keys = _.keys(Utils.orSet(_this, 'needs_load', {}));
 	        if (relations && !_.isArray(relations)) {
 	          relations = [relations];
@@ -5432,14 +5759,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	          keys = _.intersection(keys, relations);
 	        }
 	        relations_queue = new Queue();
-	        _fn = function(key) {
+	        fn1 = function(key) {
 	          return relations_queue.defer(function(callback) {
 	            return _this.get(key, callback);
 	          });
 	        };
-	        for (_i = 0, _len = keys.length; _i < _len; _i++) {
-	          key = keys[_i];
-	          _fn(key);
+	        for (i = 0, len = keys.length; i < len; i++) {
+	          key = keys[i];
+	          fn1(key);
 	        }
 	        return relations_queue.await(callback);
 	      };
@@ -5457,22 +5784,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return relation.patchAdd(this, relateds, callback);
 	  };
 	  model_type.prototype.patchRemove = function(key, relateds, callback) {
-	    var queue, relation, schema, _fn, _ref;
+	    var fn1, queue, ref, relation, schema;
 	    if (arguments.length === 1) {
 	      callback = key;
 	      schema = model_type.schema();
 	      queue = new Queue(1);
-	      _ref = schema.relations;
-	      _fn = (function(_this) {
+	      ref = schema.relations;
+	      fn1 = (function(_this) {
 	        return function(relation) {
 	          return queue.defer(function(callback) {
 	            return relation.patchRemove(_this, callback);
 	          });
 	        };
 	      })(this);
-	      for (key in _ref) {
-	        relation = _ref[key];
-	        _fn(relation);
+	      for (key in ref) {
+	        relation = ref[key];
+	        fn1(relation);
 	      }
 	      return queue.await(callback);
 	    } else {
@@ -5501,15 +5828,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (schema && (relation = schema.relation(key))) {
 	      return relation.cursor(this, key, query);
 	    } else {
-	      throw new Error("" + schema.model_name + "::cursor: Unexpected key: " + key + " is not a relation");
+	      throw new Error(schema.model_name + "::cursor: Unexpected key: " + key + " is not a relation");
 	    }
 	  };
 	  _findOrClone = function(model, options) {
-	    var cache, clone, _base, _name;
+	    var base, cache, clone, name;
 	    if (model.isNew() || !model.modelName) {
 	      return model.clone(options);
 	    }
-	    cache = (_base = options._cache)[_name = model.modelName()] || (_base[_name] = {});
+	    cache = (base = options._cache)[name = model.modelName()] || (base[name] = {});
 	    if (!(clone = cache[model.id])) {
 	      clone = model.clone(options);
 	      if (model.isLoaded()) {
@@ -5520,11 +5847,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	  overrides = {
 	    initialize: function(attributes) {
-	      var key, needs_load, relation, schema, value, _ref;
+	      var key, needs_load, ref, relation, schema, value;
 	      if (model_type.schema && (schema = model_type.schema())) {
-	        _ref = schema.relations;
-	        for (key in _ref) {
-	          relation = _ref[key];
+	        ref = schema.relations;
+	        for (key in ref) {
+	          relation = ref[key];
 	          relation.initializeModel(this);
 	        }
 	        needs_load = Utils.orSet(this, 'needs_load', {});
@@ -5615,7 +5942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return value;
 	    },
 	    toJSON: function(options) {
-	      var json, key, keys, relation, schema, value, _base, _i, _len;
+	      var base, i, json, key, keys, len, relation, schema, value;
 	      if (options == null) {
 	        options = {};
 	      }
@@ -5626,12 +5953,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this._orm.json > 0) {
 	        return this.id;
 	      }
-	      (_base = this._orm).json || (_base.json = 0);
+	      (base = this._orm).json || (base.json = 0);
 	      this._orm.json++;
 	      json = {};
 	      keys = options.keys || this.whitelist || _.keys(this.attributes);
-	      for (_i = 0, _len = keys.length; _i < _len; _i++) {
-	        key = keys[_i];
+	      for (i = 0, len = keys.length; i < len; i++) {
+	        key = keys[i];
 	        value = this.attributes[key];
 	        if (schema && (relation = schema.relation(key))) {
 	          relation.appendJSON(json, this);
@@ -5653,7 +5980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return json;
 	    },
 	    save: function(key, value, options) {
-	      var attributes, callback, _base;
+	      var attributes, base, callback;
 	      if (_.isFunction(callback = arguments[arguments.length - 1])) {
 	        switch (arguments.length) {
 	          case 1:
@@ -5693,7 +6020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return typeof options.error === "function" ? options.error(this, new Error("Model is in a save loop: " + model_type.model_name)) : void 0;
 	      }
-	      (_base = this._orm).save || (_base.save = 0);
+	      (base = this._orm).save || (base.save = 0);
 	      this._orm.save++;
 	      this.set(attributes, options);
 	      attributes = {};
@@ -5703,7 +6030,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return typeof options.error === "function" ? options.error(_this, err) : void 0;
 	          }
 	          return model_type.prototype._orm_original_fns.save.call(_this, attributes, Utils.wrapOptions(options, function(err, model, resp, options) {
-	            var queue, relation, schema, _fn, _ref;
+	            var fn1, queue, ref, relation, schema;
 	            Utils.unset(_this, 'unsets');
 	            --_this._orm.save;
 	            if (err) {
@@ -5712,15 +6039,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            queue = new Queue(1);
 	            if (model_type.schema) {
 	              schema = model_type.schema();
-	              _ref = schema.relations;
-	              _fn = function(relation) {
+	              ref = schema.relations;
+	              fn1 = function(relation) {
 	                return queue.defer(function(callback) {
 	                  return relation.save(_this, callback);
 	                });
 	              };
-	              for (key in _ref) {
-	                relation = _ref[key];
-	                _fn(relation);
+	              for (key in ref) {
+	                relation = ref[key];
+	                fn1(relation);
 	              }
 	            }
 	            return queue.await(function(err) {
@@ -5738,7 +6065,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      })(this));
 	    },
 	    destroy: function(options) {
-	      var cache, callback, schema, _base;
+	      var base, cache, callback, schema;
 	      if (_.isFunction(callback = arguments[arguments.length - 1])) {
 	        switch (arguments.length) {
 	          case 1:
@@ -5758,7 +6085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this._orm.destroy > 0) {
 	        throw new Error("Model is in a destroy loop: " + model_type.model_name);
 	      }
-	      (_base = this._orm).destroy || (_base.destroy = 0);
+	      (base = this._orm).destroy || (base.destroy = 0);
 	      this._orm.destroy++;
 	      return model_type.prototype._orm_original_fns.destroy.call(this, Utils.wrapOptions(options, (function(_this) {
 	        return function(err, model, resp, options) {
@@ -5776,13 +6103,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      })(this)));
 	    },
 	    clone: function(options) {
-	      var cache, clone, key, keys, model, value, _base, _base1, _i, _len, _name, _ref;
+	      var base, base1, cache, clone, i, key, keys, len, model, name, ref, value;
 	      if (!model_type.schema) {
 	        return model_type.prototype._orm_original_fns.clone.apply(this, arguments);
 	      }
 	      options || (options = {});
 	      options._cache || (options._cache = {});
-	      cache = (_base = options._cache)[_name = this.modelName()] || (_base[_name] = {});
+	      cache = (base = options._cache)[name = this.modelName()] || (base[name] = {});
 	      this._orm || (this._orm = {});
 	      if (this._orm.clone > 0) {
 	        if (this.id) {
@@ -5791,7 +6118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return model_type.prototype._orm_original_fns.clone.apply(this, arguments);
 	        }
 	      }
-	      (_base1 = this._orm).clone || (_base1.clone = 0);
+	      (base1 = this._orm).clone || (base1.clone = 0);
 	      this._orm.clone++;
 	      if (this.id) {
 	        if (!(clone = cache[this.id])) {
@@ -5807,22 +6134,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        clone.id = this.attributes.id;
 	      }
 	      keys = options.keys || _.keys(this.attributes);
-	      for (_i = 0, _len = keys.length; _i < _len; _i++) {
-	        key = keys[_i];
+	      for (i = 0, len = keys.length; i < len; i++) {
+	        key = keys[i];
 	        value = this.attributes[key];
 	        if (Utils.isCollection(value)) {
-	          if (!((_ref = clone.attributes[key]) != null ? _ref.values : void 0)) {
+	          if (!((ref = clone.attributes[key]) != null ? ref.values : void 0)) {
 	            clone.attributes[key] = new value.constructor();
 	          }
 	          clone.attributes[key].reset((function() {
-	            var _j, _len1, _ref1, _results;
-	            _ref1 = value.models;
-	            _results = [];
-	            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-	              model = _ref1[_j];
-	              _results.push(_findOrClone(model, options));
+	            var j, len1, ref1, results;
+	            ref1 = value.models;
+	            results = [];
+	            for (j = 0, len1 = ref1.length; j < len1; j++) {
+	              model = ref1[j];
+	              results.push(_findOrClone(model, options));
 	            }
-	            return _results;
+	            return results;
 	          })());
 	        } else if (Utils.isModel(value)) {
 	          clone.attributes[key] = _findOrClone(value, options);
@@ -5836,543 +6163,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	  if (!model_type.prototype._orm_original_fns) {
 	    model_type.prototype._orm_original_fns = {};
-	    _results = [];
+	    results = [];
 	    for (key in overrides) {
 	      fn = overrides[key];
 	      model_type.prototype._orm_original_fns[key] = model_type.prototype[key];
-	      _results.push(model_type.prototype[key] = fn);
+	      results.push(model_type.prototype[key] = fn);
 	    }
-	    return _results;
+	    return results;
 	  }
 	};
 
 
 /***/ },
-/* 28 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var BATCH_COUNT, Cursor, DateUtils, IS_MATCH_FNS, IS_MATCH_OPERATORS, JSONUtils, MemoryCursor, Queue, Utils, mergeQuery, valueToArray, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-	  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-	_ = __webpack_require__(1);
-
-	Queue = __webpack_require__(11);
-
-	Utils = __webpack_require__(7);
-
-	JSONUtils = __webpack_require__(8);
-
-	DateUtils = __webpack_require__(9);
-
-	Cursor = __webpack_require__(15);
-
-	BATCH_COUNT = 500;
-
-	IS_MATCH_FNS = {
-	  $ne: function(mv, tv) {
-	    return !_.isEqual(mv, tv);
-	  },
-	  $lt: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    return (_.isDate(tv) ? DateUtils.isBefore(mv, tv) : mv < tv);
-	  },
-	  $lte: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    if (_.isDate(tv)) {
-	      return !DateUtils.isAfter(mv, tv);
-	    } else {
-	      return mv <= tv;
-	    }
-	  },
-	  $gt: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    return (_.isDate(tv) ? DateUtils.isAfter(mv, tv) : mv > tv);
-	  },
-	  $gte: function(mv, tv) {
-	    if (_.isNull(tv)) {
-	      throw Error('Cannot compare to null');
-	    }
-	    if (_.isDate(tv)) {
-	      return !DateUtils.isBefore(mv, tv);
-	    } else {
-	      return mv >= tv;
-	    }
-	  },
-	  $exists: function(mv, tv) {
-	    if (!tv) {
-	      return _.isUndefined(mv);
-	    } else {
-	      return !_.isUndefined(mv);
-	    }
-	  }
-	};
-
-	IS_MATCH_OPERATORS = _.keys(IS_MATCH_FNS);
-
-	valueToArray = function(value) {
-	  return (_.isArray(value) ? value : (_.isNull(value) ? [] : (value.$in ? value.$in : [value])));
-	};
-
-	mergeQuery = function(query, key, value) {
-	  return query[key] = query.hasOwnProperty(key) ? {
-	    $in: _.intersection(valueToArray(query[key]), valueToArray(value))
-	  } : value;
-	};
-
-	module.exports = MemoryCursor = (function(_super) {
-	  __extends(MemoryCursor, _super);
-
-	  function MemoryCursor() {
-	    return MemoryCursor.__super__.constructor.apply(this, arguments);
-	  }
-
-	  MemoryCursor.prototype.queryToJSON = function(callback) {
-	    var exists;
-	    if (this.hasCursorQuery('$zero')) {
-	      return callback(null, this.hasCursorQuery('$one') ? null : []);
-	    }
-	    exists = this.hasCursorQuery('$exists');
-	    return this.buildFindQuery((function(_this) {
-	      return function(err, find_query) {
-	        var json, keys, queue;
-	        if (err) {
-	          return callback(err);
-	        }
-	        json = [];
-	        keys = _.keys(find_query);
-	        queue = new Queue(1);
-	        queue.defer(function(callback) {
-	          var ins, ins_size, key, model_json, nins, nins_size, value, _i, _len, _ref, _ref1, _ref2;
-	          _ref = [{}, {}], ins = _ref[0], nins = _ref[1];
-	          for (key in find_query) {
-	            value = find_query[key];
-	            if (value != null ? value.$in : void 0) {
-	              delete find_query[key];
-	              ins[key] = value.$in;
-	            }
-	            if (value != null ? value.$nin : void 0) {
-	              delete find_query[key];
-	              nins[key] = value.$nin;
-	            }
-	          }
-	          _ref1 = [_.size(ins), _.size(nins)], ins_size = _ref1[0], nins_size = _ref1[1];
-	          if (keys.length || ins_size || nins_size) {
-	            if (_this._cursor.$ids) {
-	              _ref2 = _this.store;
-	              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-	                model_json = _ref2[_i];
-	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
-	                  json.push(JSONUtils.deepClone(model_json));
-	                }
-	              }
-	              return callback();
-	            } else {
-	              return Utils.eachC(_this.store, BATCH_COUNT, callback, function(model_json, callback) {
-	                var find_keys, next, values, _ref3, _ref4;
-	                if (exists && json.length) {
-	                  return callback(null, true);
-	                }
-	                if (ins_size) {
-	                  for (key in ins) {
-	                    values = ins[key];
-	                    if (_ref3 = model_json[key], __indexOf.call(values, _ref3) < 0) {
-	                      return callback();
-	                    }
-	                  }
-	                }
-	                if (nins_size) {
-	                  for (key in nins) {
-	                    values = nins[key];
-	                    if (_ref4 = model_json[key], __indexOf.call(values, _ref4) >= 0) {
-	                      return callback();
-	                    }
-	                  }
-	                }
-	                find_keys = _.keys(find_query);
-	                next = function(err, is_match) {
-	                  if (err || !is_match) {
-	                    return callback(err);
-	                  }
-	                  if (find_keys.length === 0) {
-	                    json.push(JSONUtils.deepClone(model_json));
-	                    return callback();
-	                  }
-	                  return _this._valueIsMatch(find_query, find_keys.pop(), model_json, next);
-	                };
-	                return next(null, true);
-	              });
-	            }
-	          } else {
-	            if (_this._cursor.$ids) {
-	              json = (function() {
-	                var _j, _len1, _ref3, _results;
-	                _ref3 = this.store;
-	                _results = [];
-	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-	                  model_json = _ref3[_j];
-	                  if (_.contains(this._cursor.$ids, model_json.id)) {
-	                    _results.push(JSONUtils.deepClone(model_json));
-	                  }
-	                }
-	                return _results;
-	              }).call(_this);
-	            } else {
-	              json = (function() {
-	                var _j, _len1, _ref3, _results;
-	                _ref3 = this.store;
-	                _results = [];
-	                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-	                  model_json = _ref3[_j];
-	                  _results.push(JSONUtils.deepClone(model_json));
-	                }
-	                return _results;
-	              }).call(_this);
-	            }
-	            return callback();
-	          }
-	        });
-	        if (!exists) {
-	          queue.defer(function(callback) {
-	            var $sort_fields, field, key, model_json, number, unique_json, unique_keys, _i, _j, _len, _len1, _ref;
-	            if (_this._cursor.$sort) {
-	              $sort_fields = _.isArray(_this._cursor.$sort) ? _this._cursor.$sort : [_this._cursor.$sort];
-	              json.sort(function(model, next_model) {
-	                return Utils.jsonFieldCompare(model, next_model, $sort_fields);
-	              });
-	            }
-	            if (_this._cursor.$unique) {
-	              unique_json = [];
-	              unique_keys = {};
-	              for (_i = 0, _len = json.length; _i < _len; _i++) {
-	                model_json = json[_i];
-	                key = '';
-	                _ref = _this._cursor.$unique;
-	                for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-	                  field = _ref[_j];
-	                  if (model_json.hasOwnProperty(field)) {
-	                    key += "" + field + ":" + (JSON.stringify(model_json[field]));
-	                  }
-	                }
-	                if (unique_keys[key]) {
-	                  continue;
-	                }
-	                unique_keys[key] = true;
-	                unique_json.push(model_json);
-	              }
-	              json = unique_json;
-	            }
-	            if (_this._cursor.$offset) {
-	              number = json.length - _this._cursor.$offset;
-	              if (number < 0) {
-	                number = 0;
-	              }
-	              json = number ? json.slice(_this._cursor.$offset, _this._cursor.$offset + number) : [];
-	            }
-	            if (_this._cursor.$one) {
-	              json = json.slice(0, 1);
-	            } else if (_this._cursor.$limit) {
-	              json = json.splice(0, Math.min(json.length, _this._cursor.$limit));
-	            }
-	            return callback();
-	          });
-	          queue.defer(function(callback) {
-	            return _this.fetchIncludes(json, callback);
-	          });
-	        }
-	        queue.await(function() {
-	          var count_cursor;
-	          if (_this.hasCursorQuery('$count')) {
-	            return callback(null, (_.isArray(json) ? json.length : (json ? 1 : 0)));
-	          }
-	          if (exists) {
-	            return callback(null, (_.isArray(json) ? !!json.length : json));
-	          }
-	          if (_this.hasCursorQuery('$page')) {
-	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
-	            return count_cursor.count(function(err, count) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              return callback(null, {
-	                offset: _this._cursor.$offset || 0,
-	                total_rows: count,
-	                rows: _this.selectResults(json)
-	              });
-	            });
-	          } else {
-	            return callback(null, _this.selectResults(json));
-	          }
-	        });
-	      };
-	    })(this));
-	  };
-
-	  MemoryCursor.prototype.buildFindQuery = function(callback) {
-	    var find_query, key, queue, relation_key, reverse_relation, value, value_key, _fn, _ref, _ref1;
-	    queue = new Queue();
-	    find_query = {};
-	    _ref = this._find;
-	    _fn = (function(_this) {
-	      return function(relation_key, value_key, value) {
-	        return queue.defer(function(callback) {
-	          var related_query, relation;
-	          if (!(relation = _this.model_type.relation(relation_key))) {
-	            mergeQuery(find_query, key, value);
-	            return callback();
-	          }
-	          if (!relation.join_table && (value_key === 'id')) {
-	            mergeQuery(find_query, relation.foreign_key, value);
-	            return callback();
-	          } else if (relation.join_table || (relation.type === 'belongsTo')) {
-	            (related_query = {
-	              $values: 'id'
-	            })[value_key] = value;
-	            return relation.reverse_relation.model_type.cursor(related_query).toJSON(function(err, related_ids) {
-	              var join_query;
-	              if (err) {
-	                return callback(err);
-	              }
-	              if (relation.join_table) {
-	                (join_query = {})[relation.reverse_relation.join_key] = {
-	                  $in: related_ids
-	                };
-	                join_query.$values = relation.foreign_key;
-	                return relation.join_table.cursor(join_query).toJSON(function(err, model_ids) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, 'id', {
-	                    $in: model_ids
-	                  });
-	                  return callback();
-	                });
-	              } else {
-	                mergeQuery(find_query, relation.foreign_key, {
-	                  $in: related_ids
-	                });
-	                return callback();
-	              }
-	            });
-	          } else {
-	            (related_query = {})[value_key] = value;
-	            related_query.$values = relation.foreign_key;
-	            return relation.reverse_model_type.cursor(related_query).toJSON(function(err, model_ids) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              mergeQuery(find_query, 'id', {
-	                $in: model_ids
-	              });
-	              return callback();
-	            });
-	          }
-	        });
-	      };
-	    })(this);
-	    for (key in _ref) {
-	      value = _ref[key];
-	      if (key.indexOf('.') < 0) {
-	        if (!(reverse_relation = this.model_type.reverseRelation(key))) {
-	          mergeQuery(find_query, key, value);
-	          continue;
-	        }
-	        if (!reverse_relation.embed && !reverse_relation.join_table) {
-	          mergeQuery(find_query, key, value);
-	          continue;
-	        }
-	        (function(_this) {
-	          return (function(key, value, reverse_relation) {
-	            return queue.defer(function(callback) {
-	              var related_query;
-	              if (reverse_relation.embed) {
-	                throw Error("Embedded find is not yet supported. @_find: " + (JSONUtils.stringify(_this._find)));
-	                (related_query = {}).id = value;
-	                return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, '_json', _.map(models_json, function(test) {
-	                    return test[reverse_relation.key];
-	                  }));
-	                  return callback();
-	                });
-	              } else {
-	                (related_query = {})[key] = value;
-	                related_query.$values = reverse_relation.reverse_relation.join_key;
-	                return reverse_relation.join_table.cursor(related_query).toJSON(function(err, model_ids) {
-	                  if (err) {
-	                    return callback(err);
-	                  }
-	                  mergeQuery(find_query, 'id', {
-	                    $in: model_ids
-	                  });
-	                  return callback();
-	                });
-	              }
-	            });
-	          });
-	        })(this)(key, value, reverse_relation);
-	        continue;
-	      }
-	      _ref1 = key.split('.'), relation_key = _ref1[0], value_key = _ref1[1];
-	      if (this.model_type.relationIsEmbedded(relation_key)) {
-	        mergeQuery(find_query, key, value);
-	        continue;
-	      }
-	      _fn(relation_key, value_key, value);
-	    }
-	    return queue.await((function(_this) {
-	      return function(err) {
-	        return callback(err, find_query);
-	      };
-	    })(this));
-	  };
-
-	  MemoryCursor.prototype.fetchIncludes = function(json, callback) {
-	    var include_keys, key, load_queue, model_json, relation, _fn, _i, _j, _len, _len1;
-	    if (!this._cursor.$include) {
-	      return callback();
-	    }
-	    load_queue = new Queue(1);
-	    include_keys = _.isArray(this._cursor.$include) ? this._cursor.$include : [this._cursor.$include];
-	    for (_i = 0, _len = include_keys.length; _i < _len; _i++) {
-	      key = include_keys[_i];
-	      if (this.model_type.relationIsEmbedded(key)) {
-	        continue;
-	      }
-	      if (!(relation = this.model_type.relation(key))) {
-	        return callback(new Error("Included relation '" + key + "' is not a relation"));
-	      }
-	      _fn = (function(_this) {
-	        return function(key, model_json) {
-	          return load_queue.defer(function(callback) {
-	            return relation.cursor(model_json, key).toJSON(function(err, related_json) {
-	              if (err) {
-	                return callback(err);
-	              }
-	              delete model_json[relation.foriegn_key];
-	              model_json[key] = related_json;
-	              return callback();
-	            });
-	          });
-	        };
-	      })(this);
-	      for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
-	        model_json = json[_j];
-	        _fn(key, model_json);
-	      }
-	    }
-	    return load_queue.await(callback);
-	  };
-
-	  MemoryCursor.prototype._valueIsMatch = function(find_query, key_path, model_json, callback) {
-	    var key_components, model_type, next;
-	    key_components = key_path.split('.');
-	    model_type = this.model_type;
-	    next = (function(_this) {
-	      return function(err, models_json) {
-	        var find_value, is_match, key, model_value, operator, relation, was_handled, _i, _j, _len, _len1;
-	        if (err) {
-	          return callback(err);
-	        }
-	        key = key_components.shift();
-	        if (key === 'id') {
-	          key = model_type.prototype.idAttribute;
-	        }
-	        if (!key_components.length) {
-	          was_handled = false;
-	          find_value = find_query[key_path];
-	          if (!_.isArray(models_json)) {
-	            models_json = [models_json];
-	          }
-	          for (_i = 0, _len = models_json.length; _i < _len; _i++) {
-	            model_json = models_json[_i];
-	            model_value = model_json[key];
-	            if (_.isObject(find_value)) {
-	              for (_j = 0, _len1 = IS_MATCH_OPERATORS.length; _j < _len1; _j++) {
-	                operator = IS_MATCH_OPERATORS[_j];
-	                if (!(find_value.hasOwnProperty(operator))) {
-	                  continue;
-	                }
-	                was_handled = true;
-	                if (!(is_match = IS_MATCH_FNS[operator](model_value, find_value[operator]))) {
-	                  break;
-	                }
-	              }
-	            }
-	            if (was_handled) {
-	              if (is_match) {
-	                return callback(null, is_match);
-	              }
-	            } else if (is_match = _.isEqual(model_value, find_value)) {
-	              return callback(null, is_match);
-	            }
-	          }
-	          return callback(null, false);
-	        }
-	        if ((relation = model_type.relation(key)) && !relation.embed) {
-	          return relation.cursor(model_json, key).toJSON(next);
-	        }
-	        return next(null, model_json[key]);
-	      };
-	    })(this);
-	    return next(null, model_json);
-	  };
-
-	  return MemoryCursor;
-
-	})(Cursor);
-
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, One, Queue, Utils, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	module.exports = One = (function(_super) {
-	  __extends(One, _super);
+	module.exports = One = (function(superClass) {
+	  extend(One, superClass);
 
-	  function One(model_type, key, options) {
-	    var value;
+	  function One(model_type, key1, options) {
+	    var key, value;
 	    this.model_type = model_type;
-	    this.key = key;
+	    this.key = key1;
 	    for (key in options) {
 	      value = options[key];
 	      this[key] = value;
@@ -6387,7 +6221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  One.prototype.initialize = function() {
-	    var _ref, _ref1, _ref2;
+	    var ref, ref1, ref2;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
@@ -6395,7 +6229,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.embed) {
 	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
-	    return (_ref = this.reverse_model_type) != null ? _ref.schema().type(this.foreign_key, ((_ref1 = this.model_type) != null ? (_ref2 = _ref1.schema()) != null ? _ref2.type('id') : void 0 : void 0) || this.model_type) : void 0;
+	    return (ref = this.reverse_model_type) != null ? ref.schema().type(this.foreign_key, ((ref1 = this.model_type) != null ? (ref2 = ref1.schema()) != null ? ref2.type('id') : void 0 : void 0) || this.model_type) : void 0;
 	  };
 
 	  One.prototype.initializeModel = function(model) {
@@ -6602,9 +6436,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, json, related, related_ids, related_model, _i, _len, _ref, _ref1;
+	    var cache, i, json, len, ref, ref1, related, related_ids, related_model;
 	    if (arguments.length === 2) {
-	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
+	      ref = [null, relateds], relateds = ref[0], callback = ref[1];
 	    }
 	    if (!model.id) {
 	      return callback(new Error("One.patchRemove: model has null id for: " + this.key));
@@ -6623,7 +6457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	      if (related_model) {
-	        if (((_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0) === model.id) {
+	        if (((ref1 = related_model.get(this.foreign_key)) != null ? ref1.id : void 0) === model.id) {
 	          related_model.set(this.foreign_key, null);
 	        }
 	        if (cache = related_model.cache()) {
@@ -6675,8 +6509,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      relateds = [relateds];
 	    }
 	    if (related_model = model.get(this.key)) {
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
+	      for (i = 0, len = relateds.length; i < len; i++) {
+	        related = relateds[i];
 	        if (Utils.dataIsSameModel(related_model, related)) {
 	          model.set(this.key, null);
 	          break;
@@ -6684,13 +6518,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	    related_ids = (function() {
-	      var _j, _len1, _results;
-	      _results = [];
-	      for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
-	        related = relateds[_j];
-	        _results.push(Utils.dataId(related));
+	      var j, len1, results;
+	      results = [];
+	      for (j = 0, len1 = relateds.length; j < len1; j++) {
+	        related = relateds[j];
+	        results.push(Utils.dataId(related));
 	      }
-	      return _results;
+	      return results;
 	    })();
 	    if (this.embed) {
 	      return callback();
@@ -6754,13 +6588,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  One.prototype.cursor = function(model, key, query) {
-	    var _ref;
+	    var ref;
 	    query = _.extend({
 	      $one: true
 	    }, query || {});
 	    if (Utils.isModel(model)) {
 	      if (this.type === 'belongsTo') {
-	        if (!(query.id = (_ref = model.attributes[this.key]) != null ? _ref.id : void 0)) {
+	        if (!(query.id = (ref = model.attributes[this.key]) != null ? ref.id : void 0)) {
 	          query.$zero = true;
 	          delete query.id;
 	        }
@@ -6856,7 +6690,195 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(37));
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, UnderscoreConvention, inflection,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = UnderscoreConvention = (function(superClass) {
+	  extend(UnderscoreConvention, superClass);
+
+	  function UnderscoreConvention() {
+	    return UnderscoreConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  UnderscoreConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.underscore(model_name));
+	  };
+
+	  return UnderscoreConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, CamelizeConvention, inflection,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = CamelizeConvention = (function(superClass) {
+	  extend(CamelizeConvention, superClass);
+
+	  function CamelizeConvention() {
+	    return CamelizeConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  CamelizeConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, true));
+	  };
+
+	  return CamelizeConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseConvention, ClassifyConvention, inflection,
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+
+	inflection = __webpack_require__(22);
+
+	BaseConvention = __webpack_require__(18);
+
+	module.exports = ClassifyConvention = (function(superClass) {
+	  extend(ClassifyConvention, superClass);
+
+	  function ClassifyConvention() {
+	    return ClassifyConvention.__super__.constructor.apply(this, arguments);
+	  }
+
+	  ClassifyConvention.attribute = function(model_name, plural) {
+	    return inflection[plural ? 'pluralize' : 'singularize'](inflection.camelize(model_name, false));
+	  };
+
+	  return ClassifyConvention;
+
+	})(BaseConvention);
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var Backbone, MemoryStore, ModelCache, Queue, _;
+
+	Backbone = __webpack_require__(2);
+
+	_ = __webpack_require__(21);
+
+	Queue = __webpack_require__(12);
+
+	MemoryStore = __webpack_require__(14);
+
+	module.exports = ModelCache = (function() {
+	  function ModelCache() {
+	    this.enabled = false;
+	    this.caches = {};
+	    this.options = {
+	      modelTypes: {}
+	    };
+	    this.verbose = false;
+	  }
+
+	  ModelCache.prototype.configure = function(options) {
+	    var base, key, value, value_key, value_value, values;
+	    if (options == null) {
+	      options = {};
+	    }
+	    this.enabled = options.enabled;
+	    for (key in options) {
+	      value = options[key];
+	      if (_.isObject(value)) {
+	        (base = this.options)[key] || (base[key] = {});
+	        values = this.options[key];
+	        for (value_key in value) {
+	          value_value = value[value_key];
+	          values[value_key] = value_value;
+	        }
+	      } else {
+	        this.options[key] = value;
+	      }
+	    }
+	    return this.reset();
+	  };
+
+	  ModelCache.prototype.configureSync = function(model_type, sync_fn) {
+	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
+	      return sync_fn;
+	    }
+	    return (__webpack_require__(38))(model_type, sync_fn);
+	  };
+
+	  ModelCache.prototype.reset = function() {
+	    var key, ref, results, value;
+	    ref = this.caches;
+	    results = [];
+	    for (key in ref) {
+	      value = ref[key];
+	      results.push(this.createCache(value.model_type));
+	    }
+	    return results;
+	  };
+
+	  ModelCache.prototype.createCache = function(model_type) {
+	    var cache_info, cuid, model_name, options;
+	    if (!(model_name = model_type != null ? model_type.model_name : void 0)) {
+	      throw new Error("Missing model name for cache");
+	    }
+	    cuid = model_type.cuid || (model_type.cuid = _.uniqueId('cuid'));
+	    if (cache_info = this.caches[cuid]) {
+	      delete this.caches[cuid];
+	      cache_info.cache.reset();
+	      cache_info.model_type.cache = null;
+	    }
+	    if (!this.enabled) {
+	      return null;
+	    }
+	    if (!(options = this.options.modelTypes[model_name])) {
+	      if (!(this.options.store || this.options.max || this.options.max_age)) {
+	        return null;
+	      }
+	      options = this.options;
+	    }
+	    cache_info = this.caches[cuid] = {
+	      cache: (typeof options.store === "function" ? options.store() : void 0) || new MemoryStore(options),
+	      model_type: model_type
+	    };
+	    return model_type.cache = cache_info.cache;
+	  };
+
+	  return ModelCache;
+
+	})();
 
 
 /***/ },
@@ -6865,35 +6887,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var Backbone, BackboneORM, JSONUtils, Many, Queue, Utils, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
 	Backbone = __webpack_require__(2);
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
-	module.exports = Many = (function(_super) {
-	  __extends(Many, _super);
+	module.exports = Many = (function(superClass) {
+	  extend(Many, superClass);
 
-	  function Many(model_type, key, options) {
-	    var Collection, reverse_model_type, value;
+	  function Many(model_type, key1, options) {
+	    var Collection, key, reverse_model_type, value;
 	    this.model_type = model_type;
-	    this.key = key;
+	    this.key = key1;
 	    for (key in options) {
 	      value = options[key];
 	      this[key] = value;
@@ -6908,8 +6930,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._adding_ids = {};
 	    if (!this.collection_type) {
 	      reverse_model_type = this.reverse_model_type;
-	      Collection = (function(_super1) {
-	        __extends(Collection, _super1);
+	      Collection = (function(superClass1) {
+	        extend(Collection, superClass1);
 
 	        function Collection() {
 	          return Collection.__super__.constructor.apply(this, arguments);
@@ -6925,19 +6947,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  Many.prototype.initialize = function() {
-	    var _ref, _ref1, _ref2, _ref3;
+	    var ref, ref1, ref2, ref3;
 	    this.reverse_relation = this._findOrGenerateReverseRelation(this);
 	    if (this.embed && this.reverse_relation && this.reverse_relation.embed) {
 	      throw new Error("Both relationship directions cannot embed (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + "). Choose one or the other.");
 	    }
-	    if (((_ref = this.reverse_relation) != null ? _ref.type : void 0) === 'hasOne') {
+	    if (((ref = this.reverse_relation) != null ? ref.type : void 0) === 'hasOne') {
 	      throw new Error("The reverse of a hasMany relation should be `belongsTo`, not `hasOne` (" + this.model_type.model_name + " and " + this.reverse_model_type.model_name + ").");
 	    }
 	    if (this.embed) {
 	      this.model_type.schema().type('id', this.reverse_model_type.schema().type('id'));
 	    }
-	    if ((_ref1 = this.reverse_model_type) != null) {
-	      _ref1.schema().type(this.foreign_key, ((_ref2 = this.model_type) != null ? (_ref3 = _ref2.schema()) != null ? _ref3.type('id') : void 0 : void 0) || this.model_type);
+	    if ((ref1 = this.reverse_model_type) != null) {
+	      ref1.schema().type(this.foreign_key, ((ref2 = this.model_type) != null ? (ref3 = ref2.schema()) != null ? ref3.type('id') : void 0 : void 0) || this.model_type);
 	    }
 	    if (this.reverse_relation.type === 'hasMany') {
 	      return this.join_table = this.findOrGenerateJoinTable(this);
@@ -6957,7 +6979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.set = function(model, key, value, options) {
-	    var collection, item, model_ids, models, previous_models, related_model, _i, _len;
+	    var collection, i, item, len, model_ids, models, previous_models, related_model;
 	    if (!((key === this.key) || (key === this.virtual_id_accessor) || (key === this.foreign_key))) {
 	      throw new Error("Many.set: Unexpected key " + key + ". Expecting: " + this.key + " or " + this.virtual_id_accessor + " or " + this.foreign_key);
 	    }
@@ -6976,13 +6998,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return Utils.dataId(item) !== item;
 	    }));
 	    models = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = value.length; _i < _len; _i++) {
-	        item = value[_i];
-	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
+	      var i, len, results;
+	      results = [];
+	      for (i = 0, len = value.length; i < len; i++) {
+	        item = value[i];
+	        results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
 	      }
-	      return _results;
+	      return results;
 	    }).call(this);
 	    model.setLoaded(this.key, _.all(models, function(model) {
 	      return model.isLoaded();
@@ -6991,8 +7013,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    collection.reset(models);
 	    if (this.reverse_relation.type === 'belongsTo') {
 	      model_ids = _.pluck(models, 'id');
-	      for (_i = 0, _len = previous_models.length; _i < _len; _i++) {
-	        related_model = previous_models[_i];
+	      for (i = 0, len = previous_models.length; i < len; i++) {
+	        related_model = previous_models[i];
 	        if (!_.contains(model_ids, related_model.id)) {
 	          related_model.set(this.foreign_key, null);
 	        }
@@ -7009,15 +7031,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    collection = this._ensureCollection(model);
 	    returnValue = (function(_this) {
 	      return function() {
-	        var related_model, _i, _len, _ref, _results;
+	        var i, len, ref, related_model, results;
 	        if (key === _this.virtual_id_accessor) {
-	          _ref = collection.models;
-	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            related_model = _ref[_i];
-	            _results.push(related_model.id);
+	          ref = collection.models;
+	          results = [];
+	          for (i = 0, len = ref.length; i < len; i++) {
+	            related_model = ref[i];
+	            results.push(related_model.id);
 	          }
-	          return _results;
+	          return results;
 	        } else {
 	          return collection;
 	        }
@@ -7026,13 +7048,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (callback && !this.isVirtual() && !this.manual_fetch && !(is_loaded = model.isLoaded(this.key))) {
 	      this.cursor(model, this.key).toJSON((function(_this) {
 	        return function(err, json) {
-	          var cache, model_json, related_model, result, _i, _j, _len, _len1, _ref;
+	          var cache, i, j, len, len1, model_json, ref, related_model, result;
 	          if (err) {
 	            return callback(err);
 	          }
 	          model.setLoaded(_this.key, true);
-	          for (_i = 0, _len = json.length; _i < _len; _i++) {
-	            model_json = json[_i];
+	          for (i = 0, len = json.length; i < len; i++) {
+	            model_json = json[i];
 	            if (related_model = collection.get(model_json[_this.reverse_model_type.prototype.idAttribute])) {
 	              related_model.set(model_json);
 	            } else {
@@ -7040,9 +7062,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          }
 	          if (cache = _this.reverse_model_type.cache) {
-	            _ref = collection.models;
-	            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-	              related_model = _ref[_j];
+	            ref = collection.models;
+	            for (j = 0, len1 = ref.length; j < len1; j++) {
+	              related_model = ref[j];
 	              cache.set(related_model.id, related_model);
 	            }
 	          }
@@ -7116,7 +7138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchAdd = function(model, relateds, callback) {
-	    var collection, item, query, queue, related, related_id, related_ids, related_model, _fn, _i, _j, _len, _len1;
+	    var collection, fn, i, item, j, len, len1, query, queue, related, related_id, related_ids, related_model;
 	    if (!model.id) {
 	      return callback(new Error("Many.patchAdd: model has null id for: " + this.key));
 	    }
@@ -7128,27 +7150,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    collection = this._ensureCollection(model);
 	    relateds = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        item = relateds[_i];
-	        _results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
+	      var i, len, results;
+	      results = [];
+	      for (i = 0, len = relateds.length; i < len; i++) {
+	        item = relateds[i];
+	        results.push((related_model = collection.get(Utils.dataId(item))) ? Utils.updateModel(related_model, item) : Utils.updateOrNew(item, this.reverse_model_type));
 	      }
-	      return _results;
+	      return results;
 	    }).call(this);
 	    related_ids = (function() {
-	      var _i, _len, _results;
-	      _results = [];
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
-	        _results.push(Utils.dataId(related));
+	      var i, len, results;
+	      results = [];
+	      for (i = 0, len = relateds.length; i < len; i++) {
+	        related = relateds[i];
+	        results.push(Utils.dataId(related));
 	      }
-	      return _results;
+	      return results;
 	    })();
 	    collection.add(relateds);
 	    if (model.isLoaded(this.key)) {
-	      for (_i = 0, _len = relateds.length; _i < _len; _i++) {
-	        related = relateds[_i];
+	      for (i = 0, len = relateds.length; i < len; i++) {
+	        related = relateds[i];
 	        if (!related.isLoaded()) {
 	          model.setLoaded(this.key, false);
 	          break;
@@ -7157,7 +7179,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (this.join_table) {
 	      queue = new Queue(1);
-	      _fn = (function(_this) {
+	      fn = (function(_this) {
 	        return function(related_id) {
 	          return queue.defer(function(callback) {
 	            var add, query;
@@ -7200,9 +7222,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        };
 	      })(this);
-	      for (_j = 0, _len1 = related_ids.length; _j < _len1; _j++) {
-	        related_id = related_ids[_j];
-	        _fn(related_id);
+	      for (j = 0, len1 = related_ids.length; j < len1; j++) {
+	        related_id = related_ids[j];
+	        fn(related_id);
 	      }
 	      return queue.await(callback);
 	    } else {
@@ -7213,17 +7235,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	        return function(err, related_jsons) {
-	          var related_json, _fn1, _k, _len2;
+	          var fn1, k, len2, related_json;
 	          queue = new Queue(1);
-	          _fn1 = function(related_json) {
+	          fn1 = function(related_json) {
 	            return queue.defer(function(callback) {
 	              related_json[_this.reverse_relation.foreign_key] = model.id;
 	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
 	            });
 	          };
-	          for (_k = 0, _len2 = related_jsons.length; _k < _len2; _k++) {
-	            related_json = related_jsons[_k];
-	            _fn1(related_json);
+	          for (k = 0, len2 = related_jsons.length; k < len2; k++) {
+	            related_json = related_jsons[k];
+	            fn1(related_json);
 	          }
 	          return queue.await(callback);
 	        };
@@ -7232,9 +7254,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype.patchRemove = function(model, relateds, callback) {
-	    var cache, collection, json, query, related, related_ids, related_model, related_models, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+	    var cache, collection, i, j, json, k, len, len1, len2, query, ref, ref1, ref2, related, related_ids, related_model, related_models;
 	    if (arguments.length === 2) {
-	      _ref = [null, relateds], relateds = _ref[0], callback = _ref[1];
+	      ref = [null, relateds], relateds = ref[0], callback = ref[1];
 	    }
 	    if (!model.id) {
 	      return callback(new Error("Many.patchRemove: model has null id for: " + this.key));
@@ -7249,19 +7271,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        related_models = _.clone(collection.models);
 	      } else {
 	        related_models = (function() {
-	          var _i, _len, _ref1, _results;
-	          _ref1 = model[this.key] || [];
-	          _results = [];
-	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-	            json = _ref1[_i];
-	            _results.push(new this.reverse_model_type(json));
+	          var i, len, ref1, results;
+	          ref1 = model[this.key] || [];
+	          results = [];
+	          for (i = 0, len = ref1.length; i < len; i++) {
+	            json = ref1[i];
+	            results.push(new this.reverse_model_type(json));
 	          }
-	          return _results;
+	          return results;
 	        }).call(this);
 	      }
-	      for (_i = 0, _len = related_models.length; _i < _len; _i++) {
-	        related_model = related_models[_i];
-	        if (((_ref1 = related_model.get(this.foreign_key)) != null ? _ref1.id : void 0) === model.id) {
+	      for (i = 0, len = related_models.length; i < len; i++) {
+	        related_model = related_models[i];
+	        if (((ref1 = related_model.get(this.foreign_key)) != null ? ref1.id : void 0) === model.id) {
 	          related_model.set(this.foreign_key, null);
 	        }
 	        if (cache = related_model.cache()) {
@@ -7294,20 +7316,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        (query = {})[this.reverse_relation.foreign_key] = model.id;
 	        this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	          return function(err, json) {
-	            var queue, related_json, _fn, _j, _len1;
+	            var fn, j, len1, queue, related_json;
 	            if (err) {
 	              return callback(err);
 	            }
 	            queue = new Queue(1);
-	            _fn = function(related_json) {
+	            fn = function(related_json) {
 	              return queue.defer(function(callback) {
 	                related_json[_this.reverse_relation.foreign_key] = null;
 	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
 	              });
 	            };
-	            for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
-	              related_json = json[_j];
-	              _fn(related_json);
+	            for (j = 0, len1 = json.length; j < len1; j++) {
+	              related_json = json[j];
+	              fn(related_json);
 	            }
 	            return queue.await(callback);
 	          };
@@ -7322,11 +7344,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      relateds = [relateds];
 	    }
 	    collection = this._ensureCollection(model);
-	    for (_j = 0, _len1 = relateds.length; _j < _len1; _j++) {
-	      related = relateds[_j];
-	      _ref2 = collection.models;
-	      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-	        related_model = _ref2[_k];
+	    for (j = 0, len1 = relateds.length; j < len1; j++) {
+	      related = relateds[j];
+	      ref2 = collection.models;
+	      for (k = 0, len2 = ref2.length; k < len2; k++) {
+	        related_model = ref2[k];
 	        if (Utils.dataIsSameModel(related_model, related)) {
 	          collection.remove(related_model);
 	          break;
@@ -7334,13 +7356,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	    related_ids = (function() {
-	      var _l, _len3, _results;
-	      _results = [];
-	      for (_l = 0, _len3 = relateds.length; _l < _len3; _l++) {
-	        related = relateds[_l];
-	        _results.push(Utils.dataId(related));
+	      var l, len3, results;
+	      results = [];
+	      for (l = 0, len3 = relateds.length; l < len3; l++) {
+	        related = relateds[l];
+	        results.push(Utils.dataId(related));
 	      }
-	      return _results;
+	      return results;
 	    })();
 	    if (this.embed) {
 	      return callback();
@@ -7379,12 +7401,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	      return this.reverse_model_type.cursor(query).toJSON((function(_this) {
 	        return function(err, json) {
-	          var queue, related_json, _fn, _l, _len3;
+	          var fn, l, len3, queue, related_json;
 	          if (err) {
 	            return callback(err);
 	          }
 	          queue = new Queue(1);
-	          _fn = function(related_json) {
+	          fn = function(related_json) {
 	            return queue.defer(function(callback) {
 	              if (related_json[_this.reverse_relation.foreign_key] !== model.id) {
 	                return callback();
@@ -7393,9 +7415,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
 	            });
 	          };
-	          for (_l = 0, _len3 = json.length; _l < _len3; _l++) {
-	            related_json = json[_l];
-	            _fn(related_json);
+	          for (l = 0, len3 = json.length; l < len3; l++) {
+	            related_json = json[l];
+	            fn(related_json);
 	          }
 	          return queue.await(callback);
 	        };
@@ -7414,7 +7436,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Many.prototype._bindBacklinks = function(model) {
-	    var collection, events, method, _i, _len, _ref;
+	    var collection, events, i, len, method, ref;
 	    if ((collection = model.attributes[this.key]) instanceof this.collection_type) {
 	      return collection;
 	    }
@@ -7453,7 +7475,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    })(this);
 	    events.reset = (function(_this) {
 	      return function(collection, options) {
-	        var added, changes, current_models, previous_models, related_model, _i, _j, _len, _len1, _ref, _results;
+	        var added, changes, current_models, i, j, len, len1, previous_models, ref, related_model, results;
 	        Utils.orSet(model, 'rel_dirty', {})[_this.key] = true;
 	        current_models = collection.models;
 	        previous_models = options.previousModels || [];
@@ -7472,30 +7494,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        }) : current_models;
 	        if (changes.removed) {
-	          _ref = changes.removed;
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            related_model = _ref[_i];
+	          ref = changes.removed;
+	          for (i = 0, len = ref.length; i < len; i++) {
+	            related_model = ref[i];
 	            events.remove(related_model);
 	          }
 	        }
-	        _results = [];
-	        for (_j = 0, _len1 = added.length; _j < _len1; _j++) {
-	          related_model = added[_j];
-	          _results.push(events.add(related_model));
+	        results = [];
+	        for (j = 0, len1 = added.length; j < len1; j++) {
+	          related_model = added[j];
+	          results.push(events.add(related_model));
 	        }
-	        return _results;
+	        return results;
 	      };
 	    })(this);
-	    _ref = ['add', 'remove', 'reset'];
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      method = _ref[_i];
+	    ref = ['add', 'remove', 'reset'];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      method = ref[i];
 	      collection.on(method, events[method]);
 	    }
 	    return collection;
 	  };
 
 	  Many.prototype._unbindBacklinks = function(model) {
-	    var collection, events, method, _i, _len, _ref;
+	    var collection, events, i, len, method, ref;
 	    if (!(events = Utils.get(model, 'events'))) {
 	      return;
 	    }
@@ -7503,9 +7525,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    collection = model.attributes[this.key];
 	    collection.models.splice();
 	    events = _.clone();
-	    _ref = ['add', 'remove', 'reset'];
-	    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	      method = _ref[_i];
+	    ref = ['add', 'remove', 'reset'];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      method = ref[i];
 	      collection.off(method, events[method]);
 	      events[method] = null;
 	    }
@@ -7521,7 +7543,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(38));
+	})(__webpack_require__(37));
 
 
 /***/ },
@@ -7576,15 +7598,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var base64 = __webpack_require__(42)
-	var ieee754 = __webpack_require__(41)
-	var isArray = __webpack_require__(40)
+	var ieee754 = __webpack_require__(40)
+	var isArray = __webpack_require__(41)
 
 	exports.Buffer = Buffer
-	exports.SlowBuffer = Buffer
+	exports.SlowBuffer = SlowBuffer
 	exports.INSPECT_MAX_BYTES = 50
 	Buffer.poolSize = 8192 // not used by this implementation
 
 	var kMaxLength = 0x3fffffff
+	var rootParent = {}
 
 	/**
 	 * If `Buffer.TYPED_ARRAY_SUPPORT`:
@@ -7613,7 +7636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var buf = new ArrayBuffer(0)
 	    var arr = new Uint8Array(buf)
 	    arr.foo = function () { return 42 }
-	    return 42 === arr.foo() && // typed array instances can be augmented
+	    return arr.foo() === 42 && // typed array instances can be augmented
 	        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
 	        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
 	  } catch (e) {
@@ -7633,87 +7656,192 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * By augmenting the instances, we can avoid modifying the `Uint8Array`
 	 * prototype.
 	 */
-	function Buffer (subject, encoding, noZero) {
-	  if (!(this instanceof Buffer))
-	    return new Buffer(subject, encoding, noZero)
+	function Buffer (arg) {
+	  if (!(this instanceof Buffer)) {
+	    // Avoid going through an ArgumentsAdaptorTrampoline in the common case.
+	    if (arguments.length > 1) return new Buffer(arg, arguments[1])
+	    return new Buffer(arg)
+	  }
 
-	  var type = typeof subject
+	  this.length = 0
+	  this.parent = undefined
 
-	  // Find the length
-	  var length
-	  if (type === 'number')
-	    length = subject > 0 ? subject >>> 0 : 0
-	  else if (type === 'string') {
-	    if (encoding === 'base64')
-	      subject = base64clean(subject)
-	    length = Buffer.byteLength(subject, encoding)
-	  } else if (type === 'object' && subject !== null) { // assume object is array-like
-	    if (subject.type === 'Buffer' && isArray(subject.data))
-	      subject = subject.data
-	    length = +subject.length > 0 ? Math.floor(+subject.length) : 0
-	  } else
+	  // Common case.
+	  if (typeof arg === 'number') {
+	    return fromNumber(this, arg)
+	  }
+
+	  // Slightly less common case.
+	  if (typeof arg === 'string') {
+	    return fromString(this, arg, arguments.length > 1 ? arguments[1] : 'utf8')
+	  }
+
+	  // Unusual.
+	  return fromObject(this, arg)
+	}
+
+	function fromNumber (that, length) {
+	  that = allocate(that, length < 0 ? 0 : checked(length) | 0)
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+	    for (var i = 0; i < length; i++) {
+	      that[i] = 0
+	    }
+	  }
+	  return that
+	}
+
+	function fromString (that, string, encoding) {
+	  if (typeof encoding !== 'string' || encoding === '') encoding = 'utf8'
+
+	  // Assumption: byteLength() return value is always < kMaxLength.
+	  var length = byteLength(string, encoding) | 0
+	  that = allocate(that, length)
+
+	  that.write(string, encoding)
+	  return that
+	}
+
+	function fromObject (that, object) {
+	  if (Buffer.isBuffer(object)) return fromBuffer(that, object)
+
+	  if (isArray(object)) return fromArray(that, object)
+
+	  if (object == null) {
 	    throw new TypeError('must start with number, buffer, array or string')
+	  }
 
-	  if (this.length > kMaxLength)
-	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-	      'size: 0x' + kMaxLength.toString(16) + ' bytes')
+	  if (typeof ArrayBuffer !== 'undefined' && object.buffer instanceof ArrayBuffer) {
+	    return fromTypedArray(that, object)
+	  }
 
-	  var buf
+	  if (object.length) return fromArrayLike(that, object)
+
+	  return fromJsonObject(that, object)
+	}
+
+	function fromBuffer (that, buffer) {
+	  var length = checked(buffer.length) | 0
+	  that = allocate(that, length)
+	  buffer.copy(that, 0, 0, length)
+	  return that
+	}
+
+	function fromArray (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	// Duplicate of fromArray() to keep fromArray() monomorphic.
+	function fromTypedArray (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  // Truncating the elements is probably not what people expect from typed
+	  // arrays with BYTES_PER_ELEMENT > 1 but it's compatible with the behavior
+	  // of the old Buffer constructor.
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	function fromArrayLike (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	// Deserialize { type: 'Buffer', data: [1,2,3,...] } into a Buffer object.
+	// Returns a zero-length buffer for inputs that don't conform to the spec.
+	function fromJsonObject (that, object) {
+	  var array
+	  var length = 0
+
+	  if (object.type === 'Buffer' && isArray(object.data)) {
+	    array = object.data
+	    length = checked(array.length) | 0
+	  }
+	  that = allocate(that, length)
+
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	function allocate (that, length) {
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    // Preferred: Return an augmented `Uint8Array` instance for best performance
-	    buf = Buffer._augment(new Uint8Array(length))
+	    // Return an augmented `Uint8Array` instance, for best performance
+	    that = Buffer._augment(new Uint8Array(length))
 	  } else {
-	    // Fallback: Return THIS instance of Buffer (created by `new`)
-	    buf = this
-	    buf.length = length
-	    buf._isBuffer = true
+	    // Fallback: Return an object instance of the Buffer class
+	    that.length = length
+	    that._isBuffer = true
 	  }
 
-	  var i
-	  if (Buffer.TYPED_ARRAY_SUPPORT && typeof subject.byteLength === 'number') {
-	    // Speed optimization -- use set if we're copying from a typed array
-	    buf._set(subject)
-	  } else if (isArrayish(subject)) {
-	    // Treat array-ish objects as a byte array
-	    if (Buffer.isBuffer(subject)) {
-	      for (i = 0; i < length; i++)
-	        buf[i] = subject.readUInt8(i)
-	    } else {
-	      for (i = 0; i < length; i++)
-	        buf[i] = ((subject[i] % 256) + 256) % 256
-	    }
-	  } else if (type === 'string') {
-	    buf.write(subject, 0, encoding)
-	  } else if (type === 'number' && !Buffer.TYPED_ARRAY_SUPPORT && !noZero) {
-	    for (i = 0; i < length; i++) {
-	      buf[i] = 0
-	    }
-	  }
+	  var fromPool = length !== 0 && length <= Buffer.poolSize >>> 1
+	  if (fromPool) that.parent = rootParent
 
+	  return that
+	}
+
+	function checked (length) {
+	  // Note: cannot use `length < kMaxLength` here because that fails when
+	  // length is NaN (which is otherwise coerced to zero.)
+	  if (length >= kMaxLength) {
+	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+	                         'size: 0x' + kMaxLength.toString(16) + ' bytes')
+	  }
+	  return length | 0
+	}
+
+	function SlowBuffer (subject, encoding) {
+	  if (!(this instanceof SlowBuffer)) return new SlowBuffer(subject, encoding)
+
+	  var buf = new Buffer(subject, encoding)
+	  delete buf.parent
 	  return buf
 	}
 
-	Buffer.isBuffer = function (b) {
+	Buffer.isBuffer = function isBuffer (b) {
 	  return !!(b != null && b._isBuffer)
 	}
 
-	Buffer.compare = function (a, b) {
-	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b))
+	Buffer.compare = function compare (a, b) {
+	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
 	    throw new TypeError('Arguments must be Buffers')
+	  }
+
+	  if (a === b) return 0
 
 	  var x = a.length
 	  var y = b.length
-	  for (var i = 0, len = Math.min(x, y); i < len && a[i] === b[i]; i++) {}
+
+	  var i = 0
+	  var len = Math.min(x, y)
+	  while (i < len) {
+	    if (a[i] !== b[i]) break
+
+	    ++i
+	  }
+
 	  if (i !== len) {
 	    x = a[i]
 	    y = b[i]
 	  }
+
 	  if (x < y) return -1
 	  if (y < x) return 1
 	  return 0
 	}
 
-	Buffer.isEncoding = function (encoding) {
+	Buffer.isEncoding = function isEncoding (encoding) {
 	  switch (String(encoding).toLowerCase()) {
 	    case 'hex':
 	    case 'utf8':
@@ -7732,8 +7860,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	Buffer.concat = function (list, totalLength) {
-	  if (!isArray(list)) throw new TypeError('Usage: Buffer.concat(list[, length])')
+	Buffer.concat = function concat (list, length) {
+	  if (!isArray(list)) throw new TypeError('list argument must be an Array of Buffers.')
 
 	  if (list.length === 0) {
 	    return new Buffer(0)
@@ -7742,14 +7870,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var i
-	  if (totalLength === undefined) {
-	    totalLength = 0
+	  if (length === undefined) {
+	    length = 0
 	    for (i = 0; i < list.length; i++) {
-	      totalLength += list[i].length
+	      length += list[i].length
 	    }
 	  }
 
-	  var buf = new Buffer(totalLength)
+	  var buf = new Buffer(length)
 	  var pos = 0
 	  for (i = 0; i < list.length; i++) {
 	    var item = list[i]
@@ -7759,47 +7887,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return buf
 	}
 
-	Buffer.byteLength = function (str, encoding) {
-	  var ret
-	  str = str + ''
+	function byteLength (string, encoding) {
+	  if (typeof string !== 'string') string = String(string)
+
+	  if (string.length === 0) return 0
+
 	  switch (encoding || 'utf8') {
 	    case 'ascii':
 	    case 'binary':
 	    case 'raw':
-	      ret = str.length
-	      break
+	      return string.length
 	    case 'ucs2':
 	    case 'ucs-2':
 	    case 'utf16le':
 	    case 'utf-16le':
-	      ret = str.length * 2
-	      break
+	      return string.length * 2
 	    case 'hex':
-	      ret = str.length >>> 1
-	      break
+	      return string.length >>> 1
 	    case 'utf8':
 	    case 'utf-8':
-	      ret = utf8ToBytes(str).length
-	      break
+	      return utf8ToBytes(string).length
 	    case 'base64':
-	      ret = base64ToBytes(str).length
-	      break
+	      return base64ToBytes(string).length
 	    default:
-	      ret = str.length
+	      return string.length
 	  }
-	  return ret
 	}
+	Buffer.byteLength = byteLength
 
 	// pre-set for values that may exist in the future
 	Buffer.prototype.length = undefined
 	Buffer.prototype.parent = undefined
 
 	// toString(encoding, start=0, end=buffer.length)
-	Buffer.prototype.toString = function (encoding, start, end) {
+	Buffer.prototype.toString = function toString (encoding, start, end) {
 	  var loweredCase = false
 
-	  start = start >>> 0
-	  end = end === undefined || end === Infinity ? this.length : end >>> 0
+	  start = start | 0
+	  end = end === undefined || end === Infinity ? this.length : end | 0
 
 	  if (!encoding) encoding = 'utf8'
 	  if (start < 0) start = 0
@@ -7831,43 +7956,84 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return utf16leSlice(this, start, end)
 
 	      default:
-	        if (loweredCase)
-	          throw new TypeError('Unknown encoding: ' + encoding)
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
 	        encoding = (encoding + '').toLowerCase()
 	        loweredCase = true
 	    }
 	  }
 	}
 
-	Buffer.prototype.equals = function (b) {
-	  if(!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	Buffer.prototype.equals = function equals (b) {
+	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	  if (this === b) return true
 	  return Buffer.compare(this, b) === 0
 	}
 
-	Buffer.prototype.inspect = function () {
+	Buffer.prototype.inspect = function inspect () {
 	  var str = ''
 	  var max = exports.INSPECT_MAX_BYTES
 	  if (this.length > 0) {
 	    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
-	    if (this.length > max)
-	      str += ' ... '
+	    if (this.length > max) str += ' ... '
 	  }
 	  return '<Buffer ' + str + '>'
 	}
 
-	Buffer.prototype.compare = function (b) {
+	Buffer.prototype.compare = function compare (b) {
 	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	  if (this === b) return 0
 	  return Buffer.compare(this, b)
 	}
 
+	Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
+	  if (byteOffset > 0x7fffffff) byteOffset = 0x7fffffff
+	  else if (byteOffset < -0x80000000) byteOffset = -0x80000000
+	  byteOffset >>= 0
+
+	  if (this.length === 0) return -1
+	  if (byteOffset >= this.length) return -1
+
+	  // Negative offsets start from the end of the buffer
+	  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
+
+	  if (typeof val === 'string') {
+	    if (val.length === 0) return -1 // special case: looking for empty string always fails
+	    return String.prototype.indexOf.call(this, val, byteOffset)
+	  }
+	  if (Buffer.isBuffer(val)) {
+	    return arrayIndexOf(this, val, byteOffset)
+	  }
+	  if (typeof val === 'number') {
+	    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
+	      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
+	    }
+	    return arrayIndexOf(this, [ val ], byteOffset)
+	  }
+
+	  function arrayIndexOf (arr, val, byteOffset) {
+	    var foundIndex = -1
+	    for (var i = 0; byteOffset + i < arr.length; i++) {
+	      if (arr[byteOffset + i] === val[foundIndex === -1 ? 0 : i - foundIndex]) {
+	        if (foundIndex === -1) foundIndex = i
+	        if (i - foundIndex + 1 === val.length) return byteOffset + foundIndex
+	      } else {
+	        foundIndex = -1
+	      }
+	    }
+	    return -1
+	  }
+
+	  throw new TypeError('val must be string, number or Buffer')
+	}
+
 	// `get` will be removed in Node 0.13+
-	Buffer.prototype.get = function (offset) {
+	Buffer.prototype.get = function get (offset) {
 	  console.log('.get() is deprecated. Access using array indexes instead.')
 	  return this.readUInt8(offset)
 	}
 
 	// `set` will be removed in Node 0.13+
-	Buffer.prototype.set = function (v, offset) {
+	Buffer.prototype.set = function set (v, offset) {
 	  console.log('.set() is deprecated. Access using array indexes instead.')
 	  return this.writeUInt8(v, offset)
 	}
@@ -7892,21 +8058,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    length = strLen / 2
 	  }
 	  for (var i = 0; i < length; i++) {
-	    var byte = parseInt(string.substr(i * 2, 2), 16)
-	    if (isNaN(byte)) throw new Error('Invalid hex string')
-	    buf[offset + i] = byte
+	    var parsed = parseInt(string.substr(i * 2, 2), 16)
+	    if (isNaN(parsed)) throw new Error('Invalid hex string')
+	    buf[offset + i] = parsed
 	  }
 	  return i
 	}
 
 	function utf8Write (buf, string, offset, length) {
-	  var charsWritten = blitBuffer(utf8ToBytes(string), buf, offset, length)
-	  return charsWritten
+	  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
 	}
 
 	function asciiWrite (buf, string, offset, length) {
-	  var charsWritten = blitBuffer(asciiToBytes(string), buf, offset, length)
-	  return charsWritten
+	  return blitBuffer(asciiToBytes(string), buf, offset, length)
 	}
 
 	function binaryWrite (buf, string, offset, length) {
@@ -7914,73 +8078,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function base64Write (buf, string, offset, length) {
-	  var charsWritten = blitBuffer(base64ToBytes(string), buf, offset, length)
-	  return charsWritten
+	  return blitBuffer(base64ToBytes(string), buf, offset, length)
 	}
 
-	function utf16leWrite (buf, string, offset, length) {
-	  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
-	  return charsWritten
+	function ucs2Write (buf, string, offset, length) {
+	  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
 	}
 
-	Buffer.prototype.write = function (string, offset, length, encoding) {
-	  // Support both (string, offset, length, encoding)
-	  // and the legacy (string, encoding, offset, length)
-	  if (isFinite(offset)) {
-	    if (!isFinite(length)) {
+	Buffer.prototype.write = function write (string, offset, length, encoding) {
+	  // Buffer#write(string)
+	  if (offset === undefined) {
+	    encoding = 'utf8'
+	    length = this.length
+	    offset = 0
+	  // Buffer#write(string, encoding)
+	  } else if (length === undefined && typeof offset === 'string') {
+	    encoding = offset
+	    length = this.length
+	    offset = 0
+	  // Buffer#write(string, offset[, length][, encoding])
+	  } else if (isFinite(offset)) {
+	    offset = offset | 0
+	    if (isFinite(length)) {
+	      length = length | 0
+	      if (encoding === undefined) encoding = 'utf8'
+	    } else {
 	      encoding = length
 	      length = undefined
 	    }
-	  } else {  // legacy
+	  // legacy write(string, encoding, offset, length) - remove in v0.13
+	  } else {
 	    var swap = encoding
 	    encoding = offset
-	    offset = length
+	    offset = length | 0
 	    length = swap
 	  }
 
-	  offset = Number(offset) || 0
 	  var remaining = this.length - offset
-	  if (!length) {
-	    length = remaining
-	  } else {
-	    length = Number(length)
-	    if (length > remaining) {
-	      length = remaining
+	  if (length === undefined || length > remaining) length = remaining
+
+	  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
+	    throw new RangeError('attempt to write outside buffer bounds')
+	  }
+
+	  if (!encoding) encoding = 'utf8'
+
+	  var loweredCase = false
+	  for (;;) {
+	    switch (encoding) {
+	      case 'hex':
+	        return hexWrite(this, string, offset, length)
+
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8Write(this, string, offset, length)
+
+	      case 'ascii':
+	        return asciiWrite(this, string, offset, length)
+
+	      case 'binary':
+	        return binaryWrite(this, string, offset, length)
+
+	      case 'base64':
+	        // Warning: maxLength not taken into account in base64Write
+	        return base64Write(this, string, offset, length)
+
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return ucs2Write(this, string, offset, length)
+
+	      default:
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+	        encoding = ('' + encoding).toLowerCase()
+	        loweredCase = true
 	    }
 	  }
-	  encoding = String(encoding || 'utf8').toLowerCase()
-
-	  var ret
-	  switch (encoding) {
-	    case 'hex':
-	      ret = hexWrite(this, string, offset, length)
-	      break
-	    case 'utf8':
-	    case 'utf-8':
-	      ret = utf8Write(this, string, offset, length)
-	      break
-	    case 'ascii':
-	      ret = asciiWrite(this, string, offset, length)
-	      break
-	    case 'binary':
-	      ret = binaryWrite(this, string, offset, length)
-	      break
-	    case 'base64':
-	      ret = base64Write(this, string, offset, length)
-	      break
-	    case 'ucs2':
-	    case 'ucs-2':
-	    case 'utf16le':
-	    case 'utf-16le':
-	      ret = utf16leWrite(this, string, offset, length)
-	      break
-	    default:
-	      throw new TypeError('Unknown encoding: ' + encoding)
-	  }
-	  return ret
 	}
 
-	Buffer.prototype.toJSON = function () {
+	Buffer.prototype.toJSON = function toJSON () {
 	  return {
 	    type: 'Buffer',
 	    data: Array.prototype.slice.call(this._arr || this, 0)
@@ -8017,13 +8194,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  end = Math.min(buf.length, end)
 
 	  for (var i = start; i < end; i++) {
-	    ret += String.fromCharCode(buf[i])
+	    ret += String.fromCharCode(buf[i] & 0x7F)
 	  }
 	  return ret
 	}
 
 	function binarySlice (buf, start, end) {
-	  return asciiSlice(buf, start, end)
+	  var ret = ''
+	  end = Math.min(buf.length, end)
+
+	  for (var i = start; i < end; i++) {
+	    ret += String.fromCharCode(buf[i])
+	  }
+	  return ret
 	}
 
 	function hexSlice (buf, start, end) {
@@ -8048,73 +8231,99 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return res
 	}
 
-	Buffer.prototype.slice = function (start, end) {
+	Buffer.prototype.slice = function slice (start, end) {
 	  var len = this.length
 	  start = ~~start
 	  end = end === undefined ? len : ~~end
 
 	  if (start < 0) {
-	    start += len;
-	    if (start < 0)
-	      start = 0
+	    start += len
+	    if (start < 0) start = 0
 	  } else if (start > len) {
 	    start = len
 	  }
 
 	  if (end < 0) {
 	    end += len
-	    if (end < 0)
-	      end = 0
+	    if (end < 0) end = 0
 	  } else if (end > len) {
 	    end = len
 	  }
 
-	  if (end < start)
-	    end = start
+	  if (end < start) end = start
 
+	  var newBuf
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    return Buffer._augment(this.subarray(start, end))
+	    newBuf = Buffer._augment(this.subarray(start, end))
 	  } else {
 	    var sliceLen = end - start
-	    var newBuf = new Buffer(sliceLen, undefined, true)
+	    newBuf = new Buffer(sliceLen, undefined)
 	    for (var i = 0; i < sliceLen; i++) {
 	      newBuf[i] = this[i + start]
 	    }
-	    return newBuf
 	  }
+
+	  if (newBuf.length) newBuf.parent = this.parent || this
+
+	  return newBuf
 	}
 
 	/*
 	 * Need to make sure that buffer isn't trying to write out of bounds.
 	 */
 	function checkOffset (offset, ext, length) {
-	  if ((offset % 1) !== 0 || offset < 0)
-	    throw new RangeError('offset is not uint')
-	  if (offset + ext > length)
-	    throw new RangeError('Trying to access beyond buffer length')
+	  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+	  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
 	}
 
-	Buffer.prototype.readUInt8 = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 1, this.length)
+	Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var val = this[offset]
+	  var mul = 1
+	  var i = 0
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul
+	  }
+
+	  return val
+	}
+
+	Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) {
+	    checkOffset(offset, byteLength, this.length)
+	  }
+
+	  var val = this[offset + --byteLength]
+	  var mul = 1
+	  while (byteLength > 0 && (mul *= 0x100)) {
+	    val += this[offset + --byteLength] * mul
+	  }
+
+	  return val
+	}
+
+	Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 1, this.length)
 	  return this[offset]
 	}
 
-	Buffer.prototype.readUInt16LE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 2, this.length)
+	Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
 	  return this[offset] | (this[offset + 1] << 8)
 	}
 
-	Buffer.prototype.readUInt16BE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 2, this.length)
+	Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
 	  return (this[offset] << 8) | this[offset + 1]
 	}
 
-	Buffer.prototype.readUInt32LE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 
 	  return ((this[offset]) |
 	      (this[offset + 1] << 8) |
@@ -8122,93 +8331,149 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (this[offset + 3] * 0x1000000)
 	}
 
-	Buffer.prototype.readUInt32BE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 
 	  return (this[offset] * 0x1000000) +
-	      ((this[offset + 1] << 16) |
-	      (this[offset + 2] << 8) |
-	      this[offset + 3])
+	    ((this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    this[offset + 3])
 	}
 
-	Buffer.prototype.readInt8 = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 1, this.length)
-	  if (!(this[offset] & 0x80))
-	    return (this[offset])
+	Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var val = this[offset]
+	  var mul = 1
+	  var i = 0
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul
+	  }
+	  mul *= 0x80
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+	  return val
+	}
+
+	Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var i = byteLength
+	  var mul = 1
+	  var val = this[offset + --i]
+	  while (i > 0 && (mul *= 0x100)) {
+	    val += this[offset + --i] * mul
+	  }
+	  mul *= 0x80
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+	  return val
+	}
+
+	Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 1, this.length)
+	  if (!(this[offset] & 0x80)) return (this[offset])
 	  return ((0xff - this[offset] + 1) * -1)
 	}
 
-	Buffer.prototype.readInt16LE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 2, this.length)
+	Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
 	  var val = this[offset] | (this[offset + 1] << 8)
 	  return (val & 0x8000) ? val | 0xFFFF0000 : val
 	}
 
-	Buffer.prototype.readInt16BE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 2, this.length)
+	Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
 	  var val = this[offset + 1] | (this[offset] << 8)
 	  return (val & 0x8000) ? val | 0xFFFF0000 : val
 	}
 
-	Buffer.prototype.readInt32LE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 
 	  return (this[offset]) |
-	      (this[offset + 1] << 8) |
-	      (this[offset + 2] << 16) |
-	      (this[offset + 3] << 24)
+	    (this[offset + 1] << 8) |
+	    (this[offset + 2] << 16) |
+	    (this[offset + 3] << 24)
 	}
 
-	Buffer.prototype.readInt32BE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 
 	  return (this[offset] << 24) |
-	      (this[offset + 1] << 16) |
-	      (this[offset + 2] << 8) |
-	      (this[offset + 3])
+	    (this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    (this[offset + 3])
 	}
 
-	Buffer.prototype.readFloatLE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 	  return ieee754.read(this, offset, true, 23, 4)
 	}
 
-	Buffer.prototype.readFloatBE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 4, this.length)
+	Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
 	  return ieee754.read(this, offset, false, 23, 4)
 	}
 
-	Buffer.prototype.readDoubleLE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 8, this.length)
+	Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 8, this.length)
 	  return ieee754.read(this, offset, true, 52, 8)
 	}
 
-	Buffer.prototype.readDoubleBE = function (offset, noAssert) {
-	  if (!noAssert)
-	    checkOffset(offset, 8, this.length)
+	Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 8, this.length)
 	  return ieee754.read(this, offset, false, 52, 8)
 	}
 
 	function checkInt (buf, value, offset, ext, max, min) {
 	  if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
-	  if (value > max || value < min) throw new TypeError('value is out of bounds')
-	  if (offset + ext > buf.length) throw new TypeError('index out of range')
+	  if (value > max || value < min) throw new RangeError('value is out of bounds')
+	  if (offset + ext > buf.length) throw new RangeError('index out of range')
 	}
 
-	Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
+	Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 1, 0xff, 0)
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+	  var mul = 1
+	  var i = 0
+	  this[offset] = value & 0xFF
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+	  var i = byteLength - 1
+	  var mul = 1
+	  this[offset + i] = value & 0xFF
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
 	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
 	  this[offset] = value
 	  return offset + 1
@@ -8222,27 +8487,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	Buffer.prototype.writeUInt16LE = function (value, offset, noAssert) {
+	Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 2, 0xffff, 0)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = value
 	    this[offset + 1] = (value >>> 8)
-	  } else objectWriteUInt16(this, value, offset, true)
+	  } else {
+	    objectWriteUInt16(this, value, offset, true)
+	  }
 	  return offset + 2
 	}
 
-	Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
+	Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 2, 0xffff, 0)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 8)
 	    this[offset + 1] = value
-	  } else objectWriteUInt16(this, value, offset, false)
+	  } else {
+	    objectWriteUInt16(this, value, offset, false)
+	  }
 	  return offset + 2
 	}
 
@@ -8253,183 +8520,233 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
+	Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 4, 0xffffffff, 0)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset + 3] = (value >>> 24)
 	    this[offset + 2] = (value >>> 16)
 	    this[offset + 1] = (value >>> 8)
 	    this[offset] = value
-	  } else objectWriteUInt32(this, value, offset, true)
+	  } else {
+	    objectWriteUInt32(this, value, offset, true)
+	  }
 	  return offset + 4
 	}
 
-	Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
+	Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 4, 0xffffffff, 0)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 24)
 	    this[offset + 1] = (value >>> 16)
 	    this[offset + 2] = (value >>> 8)
 	    this[offset + 3] = value
-	  } else objectWriteUInt32(this, value, offset, false)
+	  } else {
+	    objectWriteUInt32(this, value, offset, false)
+	  }
 	  return offset + 4
 	}
 
-	Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
+	Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 1, 0x7f, -0x80)
+	  offset = offset | 0
+	  if (!noAssert) {
+	    var limit = Math.pow(2, 8 * byteLength - 1)
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+	  }
+
+	  var i = 0
+	  var mul = 1
+	  var sub = value < 0 ? 1 : 0
+	  this[offset] = value & 0xFF
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) {
+	    var limit = Math.pow(2, 8 * byteLength - 1)
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+	  }
+
+	  var i = byteLength - 1
+	  var mul = 1
+	  var sub = value < 0 ? 1 : 0
+	  this[offset + i] = value & 0xFF
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
 	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
 	  if (value < 0) value = 0xff + value + 1
 	  this[offset] = value
 	  return offset + 1
 	}
 
-	Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
+	Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = value
 	    this[offset + 1] = (value >>> 8)
-	  } else objectWriteUInt16(this, value, offset, true)
+	  } else {
+	    objectWriteUInt16(this, value, offset, true)
+	  }
 	  return offset + 2
 	}
 
-	Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
+	Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 8)
 	    this[offset + 1] = value
-	  } else objectWriteUInt16(this, value, offset, false)
+	  } else {
+	    objectWriteUInt16(this, value, offset, false)
+	  }
 	  return offset + 2
 	}
 
-	Buffer.prototype.writeInt32LE = function (value, offset, noAssert) {
+	Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = value
 	    this[offset + 1] = (value >>> 8)
 	    this[offset + 2] = (value >>> 16)
 	    this[offset + 3] = (value >>> 24)
-	  } else objectWriteUInt32(this, value, offset, true)
+	  } else {
+	    objectWriteUInt32(this, value, offset, true)
+	  }
 	  return offset + 4
 	}
 
-	Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
+	Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
 	  value = +value
-	  offset = offset >>> 0
-	  if (!noAssert)
-	    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
 	  if (value < 0) value = 0xffffffff + value + 1
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 24)
 	    this[offset + 1] = (value >>> 16)
 	    this[offset + 2] = (value >>> 8)
 	    this[offset + 3] = value
-	  } else objectWriteUInt32(this, value, offset, false)
+	  } else {
+	    objectWriteUInt32(this, value, offset, false)
+	  }
 	  return offset + 4
 	}
 
 	function checkIEEE754 (buf, value, offset, ext, max, min) {
-	  if (value > max || value < min) throw new TypeError('value is out of bounds')
-	  if (offset + ext > buf.length) throw new TypeError('index out of range')
+	  if (value > max || value < min) throw new RangeError('value is out of bounds')
+	  if (offset + ext > buf.length) throw new RangeError('index out of range')
+	  if (offset < 0) throw new RangeError('index out of range')
 	}
 
 	function writeFloat (buf, value, offset, littleEndian, noAssert) {
-	  if (!noAssert)
+	  if (!noAssert) {
 	    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
+	  }
 	  ieee754.write(buf, value, offset, littleEndian, 23, 4)
 	  return offset + 4
 	}
 
-	Buffer.prototype.writeFloatLE = function (value, offset, noAssert) {
+	Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
 	  return writeFloat(this, value, offset, true, noAssert)
 	}
 
-	Buffer.prototype.writeFloatBE = function (value, offset, noAssert) {
+	Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
 	  return writeFloat(this, value, offset, false, noAssert)
 	}
 
 	function writeDouble (buf, value, offset, littleEndian, noAssert) {
-	  if (!noAssert)
+	  if (!noAssert) {
 	    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
+	  }
 	  ieee754.write(buf, value, offset, littleEndian, 52, 8)
 	  return offset + 8
 	}
 
-	Buffer.prototype.writeDoubleLE = function (value, offset, noAssert) {
+	Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
 	  return writeDouble(this, value, offset, true, noAssert)
 	}
 
-	Buffer.prototype.writeDoubleBE = function (value, offset, noAssert) {
+	Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
 	  return writeDouble(this, value, offset, false, noAssert)
 	}
 
 	// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-	Buffer.prototype.copy = function (target, target_start, start, end) {
-	  var source = this
-
+	Buffer.prototype.copy = function copy (target, targetStart, start, end) {
 	  if (!start) start = 0
 	  if (!end && end !== 0) end = this.length
-	  if (!target_start) target_start = 0
+	  if (targetStart >= target.length) targetStart = target.length
+	  if (!targetStart) targetStart = 0
+	  if (end > 0 && end < start) end = start
 
 	  // Copy 0 bytes; we're done
-	  if (end === start) return
-	  if (target.length === 0 || source.length === 0) return
+	  if (end === start) return 0
+	  if (target.length === 0 || this.length === 0) return 0
 
 	  // Fatal error conditions
-	  if (end < start) throw new TypeError('sourceEnd < sourceStart')
-	  if (target_start < 0 || target_start >= target.length)
-	    throw new TypeError('targetStart out of bounds')
-	  if (start < 0 || start >= source.length) throw new TypeError('sourceStart out of bounds')
-	  if (end < 0 || end > source.length) throw new TypeError('sourceEnd out of bounds')
+	  if (targetStart < 0) {
+	    throw new RangeError('targetStart out of bounds')
+	  }
+	  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')
+	  if (end < 0) throw new RangeError('sourceEnd out of bounds')
 
 	  // Are we oob?
-	  if (end > this.length)
-	    end = this.length
-	  if (target.length - target_start < end - start)
-	    end = target.length - target_start + start
+	  if (end > this.length) end = this.length
+	  if (target.length - targetStart < end - start) {
+	    end = target.length - targetStart + start
+	  }
 
 	  var len = end - start
 
 	  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
 	    for (var i = 0; i < len; i++) {
-	      target[i + target_start] = this[i + start]
+	      target[i + targetStart] = this[i + start]
 	    }
 	  } else {
-	    target._set(this.subarray(start, start + len), target_start)
+	    target._set(this.subarray(start, start + len), targetStart)
 	  }
+
+	  return len
 	}
 
 	// fill(value, start=0, end=buffer.length)
-	Buffer.prototype.fill = function (value, start, end) {
+	Buffer.prototype.fill = function fill (value, start, end) {
 	  if (!value) value = 0
 	  if (!start) start = 0
 	  if (!end) end = this.length
 
-	  if (end < start) throw new TypeError('end < start')
+	  if (end < start) throw new RangeError('end < start')
 
 	  // Fill 0 bytes; we're done
 	  if (end === start) return
 	  if (this.length === 0) return
 
-	  if (start < 0 || start >= this.length) throw new TypeError('start out of bounds')
-	  if (end < 0 || end > this.length) throw new TypeError('end out of bounds')
+	  if (start < 0 || start >= this.length) throw new RangeError('start out of bounds')
+	  if (end < 0 || end > this.length) throw new RangeError('end out of bounds')
 
 	  var i
 	  if (typeof value === 'number') {
@@ -8451,7 +8768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
 	 * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
 	 */
-	Buffer.prototype.toArrayBuffer = function () {
+	Buffer.prototype.toArrayBuffer = function toArrayBuffer () {
 	  if (typeof Uint8Array !== 'undefined') {
 	    if (Buffer.TYPED_ARRAY_SUPPORT) {
 	      return (new Buffer(this)).buffer
@@ -8475,12 +8792,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
 	 */
-	Buffer._augment = function (arr) {
+	Buffer._augment = function _augment (arr) {
 	  arr.constructor = Buffer
 	  arr._isBuffer = true
 
-	  // save reference to original Uint8Array get/set methods before overwriting
-	  arr._get = arr.get
+	  // save reference to original Uint8Array set method before overwriting
 	  arr._set = arr.set
 
 	  // deprecated, will be removed in node 0.13+
@@ -8493,13 +8809,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arr.toJSON = BP.toJSON
 	  arr.equals = BP.equals
 	  arr.compare = BP.compare
+	  arr.indexOf = BP.indexOf
 	  arr.copy = BP.copy
 	  arr.slice = BP.slice
+	  arr.readUIntLE = BP.readUIntLE
+	  arr.readUIntBE = BP.readUIntBE
 	  arr.readUInt8 = BP.readUInt8
 	  arr.readUInt16LE = BP.readUInt16LE
 	  arr.readUInt16BE = BP.readUInt16BE
 	  arr.readUInt32LE = BP.readUInt32LE
 	  arr.readUInt32BE = BP.readUInt32BE
+	  arr.readIntLE = BP.readIntLE
+	  arr.readIntBE = BP.readIntBE
 	  arr.readInt8 = BP.readInt8
 	  arr.readInt16LE = BP.readInt16LE
 	  arr.readInt16BE = BP.readInt16BE
@@ -8510,10 +8831,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arr.readDoubleLE = BP.readDoubleLE
 	  arr.readDoubleBE = BP.readDoubleBE
 	  arr.writeUInt8 = BP.writeUInt8
+	  arr.writeUIntLE = BP.writeUIntLE
+	  arr.writeUIntBE = BP.writeUIntBE
 	  arr.writeUInt16LE = BP.writeUInt16LE
 	  arr.writeUInt16BE = BP.writeUInt16BE
 	  arr.writeUInt32LE = BP.writeUInt32LE
 	  arr.writeUInt32BE = BP.writeUInt32BE
+	  arr.writeIntLE = BP.writeIntLE
+	  arr.writeIntBE = BP.writeIntBE
 	  arr.writeInt8 = BP.writeInt8
 	  arr.writeInt16LE = BP.writeInt16LE
 	  arr.writeInt16BE = BP.writeInt16BE
@@ -8530,11 +8855,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return arr
 	}
 
-	var INVALID_BASE64_RE = /[^+\/0-9A-z]/g
+	var INVALID_BASE64_RE = /[^+\/0-9A-z\-]/g
 
 	function base64clean (str) {
 	  // Node strips out invalid characters like \n and \t from the string, base64-js does not
 	  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+	  // Node converts strings with length < 2 to ''
+	  if (str.length < 2) return ''
 	  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
 	  while (str.length % 4 !== 0) {
 	    str = str + '='
@@ -8547,33 +8874,90 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return str.replace(/^\s+|\s+$/g, '')
 	}
 
-	function isArrayish (subject) {
-	  return isArray(subject) || Buffer.isBuffer(subject) ||
-	      subject && typeof subject === 'object' &&
-	      typeof subject.length === 'number'
-	}
-
 	function toHex (n) {
 	  if (n < 16) return '0' + n.toString(16)
 	  return n.toString(16)
 	}
 
-	function utf8ToBytes (str) {
-	  var byteArray = []
-	  for (var i = 0; i < str.length; i++) {
-	    var b = str.charCodeAt(i)
-	    if (b <= 0x7F) {
-	      byteArray.push(b)
-	    } else {
-	      var start = i
-	      if (b >= 0xD800 && b <= 0xDFFF) i++
-	      var h = encodeURIComponent(str.slice(start, i+1)).substr(1).split('%')
-	      for (var j = 0; j < h.length; j++) {
-	        byteArray.push(parseInt(h[j], 16))
+	function utf8ToBytes (string, units) {
+	  units = units || Infinity
+	  var codePoint
+	  var length = string.length
+	  var leadSurrogate = null
+	  var bytes = []
+	  var i = 0
+
+	  for (; i < length; i++) {
+	    codePoint = string.charCodeAt(i)
+
+	    // is surrogate component
+	    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+	      // last char was a lead
+	      if (leadSurrogate) {
+	        // 2 leads in a row
+	        if (codePoint < 0xDC00) {
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	          leadSurrogate = codePoint
+	          continue
+	        } else {
+	          // valid surrogate pair
+	          codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+	          leadSurrogate = null
+	        }
+	      } else {
+	        // no lead yet
+
+	        if (codePoint > 0xDBFF) {
+	          // unexpected trail
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	          continue
+	        } else if (i + 1 === length) {
+	          // unpaired lead
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	          continue
+	        } else {
+	          // valid lead
+	          leadSurrogate = codePoint
+	          continue
+	        }
 	      }
+	    } else if (leadSurrogate) {
+	      // valid bmp char, but last char was a lead
+	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	      leadSurrogate = null
+	    }
+
+	    // encode utf8
+	    if (codePoint < 0x80) {
+	      if ((units -= 1) < 0) break
+	      bytes.push(codePoint)
+	    } else if (codePoint < 0x800) {
+	      if ((units -= 2) < 0) break
+	      bytes.push(
+	        codePoint >> 0x6 | 0xC0,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else if (codePoint < 0x10000) {
+	      if ((units -= 3) < 0) break
+	      bytes.push(
+	        codePoint >> 0xC | 0xE0,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else if (codePoint < 0x200000) {
+	      if ((units -= 4) < 0) break
+	      bytes.push(
+	        codePoint >> 0x12 | 0xF0,
+	        codePoint >> 0xC & 0x3F | 0x80,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else {
+	      throw new Error('Invalid code point')
 	    }
 	  }
-	  return byteArray
+
+	  return bytes
 	}
 
 	function asciiToBytes (str) {
@@ -8585,10 +8969,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return byteArray
 	}
 
-	function utf16leToBytes (str) {
+	function utf16leToBytes (str, units) {
 	  var c, hi, lo
 	  var byteArray = []
 	  for (var i = 0; i < str.length; i++) {
+	    if ((units -= 2) < 0) break
+
 	    c = str.charCodeAt(i)
 	    hi = c >> 8
 	    lo = c % 256
@@ -8600,14 +8986,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function base64ToBytes (str) {
-	  return base64.toByteArray(str)
+	  return base64.toByteArray(base64clean(str))
 	}
 
-	function blitBuffer (src, dst, offset, length, unitSize) {
-	  if (unitSize) length -= length % unitSize;
+	function blitBuffer (src, dst, offset, length) {
 	  for (var i = 0; i < length; i++) {
-	    if ((i + offset >= dst.length) || (i >= src.length))
-	      break
+	    if ((i + offset >= dst.length) || (i >= src.length)) break
 	    dst[i + offset] = src[i]
 	  }
 	  return i
@@ -8620,7 +9004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
 	  }
 	}
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32).Buffer))
 
 /***/ },
@@ -8629,192 +9013,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.8
-	  Copyright (c) 2013-2014 Vidigami
-	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
-	  Source: https://github.com/vidigami/backbone-orm
-	  Dependencies: Backbone.js and Underscore.js.
-	 */
-	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, bbCallback, _;
-
-	_ = __webpack_require__(1);
-
-	CacheCursor = __webpack_require__(39);
-
-	Schema = __webpack_require__(16);
-
-	Utils = __webpack_require__(7);
-
-	bbCallback = Utils.bbCallback;
-
-	DESTROY_BATCH_LIMIT = 1000;
-
-	DESTROY_THREADS = 100;
-
-	CacheSync = (function() {
-	  function CacheSync(model_type, wrapped_sync_fn) {
-	    this.model_type = model_type;
-	    this.wrapped_sync_fn = wrapped_sync_fn;
-	  }
-
-	  CacheSync.prototype.initialize = function() {
-	    if (this.is_initialized) {
-	      return;
-	    }
-	    this.is_initialized = true;
-	    this.wrapped_sync_fn('initialize');
-	    if (!this.model_type.model_name) {
-	      throw new Error('Missing model_name for model');
-	    }
-	  };
-
-	  CacheSync.prototype.read = function(model, options) {
-	    var cached_model;
-	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
-	      return options.success(cached_model.toJSON());
-	    }
-	    return this.wrapped_sync_fn('read', model, options);
-	  };
-
-	  CacheSync.prototype.create = function(model, options) {
-	    return this.wrapped_sync_fn('create', model, {
-	      success: (function(_this) {
-	        return function(json) {
-	          var attributes, cache_model;
-	          (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
-	          model.set(attributes);
-	          if (cache_model = _this.model_type.cache.get(model.id)) {
-	            if (cache_model !== model) {
-	              Utils.updateModel(cache_model, model);
-	            }
-	          } else {
-	            _this.model_type.cache.set(model.id, model);
-	          }
-	          return options.success(json);
-	        };
-	      })(this),
-	      error: (function(_this) {
-	        return function(resp) {
-	          return typeof options.error === "function" ? options.error(resp) : void 0;
-	        };
-	      })(this)
-	    });
-	  };
-
-	  CacheSync.prototype.update = function(model, options) {
-	    return this.wrapped_sync_fn('update', model, {
-	      success: (function(_this) {
-	        return function(json) {
-	          var cache_model;
-	          if (cache_model = _this.model_type.cache.get(model.id)) {
-	            if (cache_model !== model) {
-	              Utils.updateModel(cache_model, model);
-	            }
-	          } else {
-	            _this.model_type.cache.set(model.id, model);
-	          }
-	          return options.success(json);
-	        };
-	      })(this),
-	      error: (function(_this) {
-	        return function(resp) {
-	          return typeof options.error === "function" ? options.error(resp) : void 0;
-	        };
-	      })(this)
-	    });
-	  };
-
-	  CacheSync.prototype["delete"] = function(model, options) {
-	    this.model_type.cache.destroy(model.id);
-	    return this.wrapped_sync_fn('delete', model, options);
-	  };
-
-	  CacheSync.prototype.resetSchema = function(options, callback) {
-	    return this.model_type.cache.reset((function(_this) {
-	      return function(err) {
-	        if (err) {
-	          return callback(err);
-	        }
-	        return _this.wrapped_sync_fn('resetSchema', options, callback);
-	      };
-	    })(this));
-	  };
-
-	  CacheSync.prototype.cursor = function(query) {
-	    if (query == null) {
-	      query = {};
-	    }
-	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
-	  };
-
-	  CacheSync.prototype.destroy = function(query, callback) {
-	    return this.model_type.each(_.extend({
-	      $each: {
-	        limit: DESTROY_BATCH_LIMIT,
-	        threads: DESTROY_THREADS
-	      }
-	    }, query), ((function(_this) {
-	      return function(model, callback) {
-	        return model.destroy(callback);
-	      };
-	    })(this)), callback);
-	  };
-
-	  CacheSync.prototype.connect = function(url) {
-	    this.model_type.cache.reset();
-	    return this.wrapped_sync_fn('connect');
-	  };
-
-	  return CacheSync;
-
-	})();
-
-	module.exports = function(model_type, wrapped_sync_fn) {
-	  var sync, sync_fn;
-	  sync = new CacheSync(model_type, wrapped_sync_fn);
-	  model_type.prototype.sync = sync_fn = function(method, model, options) {
-	    if (options == null) {
-	      options = {};
-	    }
-	    sync.initialize();
-	    if (method === 'createSync') {
-	      return wrapped_sync_fn.apply(null, arguments);
-	    }
-	    if (method === 'sync') {
-	      return sync;
-	    }
-	    if (sync[method]) {
-	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
-	    }
-	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
-	  };
-	  return sync_fn;
-	};
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var ModelStream, stream,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
 	try {
 	  stream = __webpack_require__(3);
 	} catch (_error) {}
 
 	if (stream != null ? stream.Readable : void 0) {
-	  module.exports = ModelStream = (function(_super) {
-	    __extends(ModelStream, _super);
+	  module.exports = ModelStream = (function(superClass) {
+	    extend(ModelStream, superClass);
 
 	    function ModelStream(model_type, query) {
 	      this.model_type = model_type;
@@ -8854,12 +9069,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8867,16 +9082,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Cursor, Queue, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
 	Cursor = null;
 
 	module.exports = function(model_type, query, iterator, callback) {
 	  var method, model_limit, options, parsed_query, processed_count, runBatch;
 	  if (!Cursor) {
-	    Cursor = __webpack_require__(28);
+	    Cursor = __webpack_require__(23);
 	  }
 	  options = query.$each || {};
 	  method = options.json ? 'toJSON' : 'toModels';
@@ -8894,7 +9109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var cursor;
 	    cursor = model_type.cursor(parsed_query);
 	    return cursor[method].call(cursor, function(err, models) {
-	      var model, queue, _fn, _i, _len;
+	      var fn, i, len, model, queue;
 	      if (err || !models) {
 	        return callback(new Error("Failed to get models. Error: " + err));
 	      }
@@ -8902,17 +9117,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return callback(null, processed_count);
 	      }
 	      queue = new Queue(options.threads);
-	      _fn = function(model) {
+	      fn = function(model) {
 	        return queue.defer(function(callback) {
 	          return iterator(model, callback);
 	        });
 	      };
-	      for (_i = 0, _len = models.length; _i < _len; _i++) {
-	        model = models[_i];
+	      for (i = 0, len = models.length; i < len; i++) {
+	        model = models[i];
 	        if (processed_count++ >= model_limit) {
 	          break;
 	        }
-	        _fn(model);
+	        fn(model);
 	      }
 	      return queue.await(function(err) {
 	        if (err) {
@@ -8931,12 +9146,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -8944,15 +9159,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var DateUtils, INTERVAL_TYPES, JSONUtils, Queue, Utils, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
-	JSONUtils = __webpack_require__(8);
+	JSONUtils = __webpack_require__(9);
 
-	DateUtils = __webpack_require__(9);
+	DateUtils = __webpack_require__(10);
 
 	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
 
@@ -9098,24 +9313,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, Utils, collection_type, fn, key, overrides, _;
+	var Backbone, Utils, _, collection_type, fn, key, overrides;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
 	collection_type = Backbone.Collection;
 
@@ -9168,12 +9383,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9181,15 +9396,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Backbone, BackboneORM, Queue, Relation, Utils, _;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
 	Backbone = __webpack_require__(2);
 
-	BackboneORM = __webpack_require__(4);
+	BackboneORM = __webpack_require__(5);
 
-	Queue = __webpack_require__(11);
+	Queue = __webpack_require__(12);
 
-	Utils = __webpack_require__(7);
+	Utils = __webpack_require__(8);
 
 	module.exports = Relation = (function() {
 	  function Relation() {}
@@ -9242,7 +9457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return this.cursor(model, this.key).toJSON((function(_this) {
 	      return function(err, json) {
-	        var added_id, added_ids, changes, queue, related_id, related_ids, related_json, related_model, test, _fn, _fn1, _fn2, _i, _j, _k, _len, _len1, _len2, _ref;
+	        var added_id, added_ids, changes, fn, fn1, fn2, i, j, k, len, len1, len2, queue, ref, related_id, related_ids, related_json, related_model, test;
 	        if (err) {
 	          return callback(err);
 	        }
@@ -9259,14 +9474,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 	        added_ids = changes.kept ? _.difference(related_ids, (function() {
-	          var _i, _len, _ref, _results;
-	          _ref = changes.kept;
-	          _results = [];
-	          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	            test = _ref[_i];
-	            _results.push(test.id);
+	          var i, len, ref, results;
+	          ref = changes.kept;
+	          results = [];
+	          for (i = 0, len = ref.length; i < len; i++) {
+	            test = ref[i];
+	            results.push(test.id);
 	          }
-	          return _results;
+	          return results;
 	        })()) : related_ids;
 	        if (changes.removed) {
 	          if (_this.join_table) {
@@ -9275,35 +9490,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	              query = {};
 	              query[_this.reverse_relation.join_key] = {
 	                $in: (function() {
-	                  var _i, _len, _ref, _results;
-	                  _ref = changes.removed;
-	                  _results = [];
-	                  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	                    related_json = _ref[_i];
-	                    _results.push(related_json[this.reverse_model_type.prototype.idAttribute]);
+	                  var i, len, ref, results;
+	                  ref = changes.removed;
+	                  results = [];
+	                  for (i = 0, len = ref.length; i < len; i++) {
+	                    related_json = ref[i];
+	                    results.push(related_json[this.reverse_model_type.prototype.idAttribute]);
 	                  }
-	                  return _results;
+	                  return results;
 	                }).call(_this)
 	              };
 	              return _this.join_table.destroy(query, callback);
 	            });
 	          } else {
-	            _ref = changes.removed;
-	            _fn = function(related_json) {
+	            ref = changes.removed;
+	            fn = function(related_json) {
 	              return queue.defer(function(callback) {
 	                related_json[_this.reverse_relation.foreign_key] = null;
 	                return Utils.modelJSONSave(related_json, _this.reverse_model_type, callback);
 	              });
 	            };
-	            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-	              related_json = _ref[_i];
-	              _fn(related_json);
+	            for (i = 0, len = ref.length; i < len; i++) {
+	              related_json = ref[i];
+	              fn(related_json);
 	            }
 	          }
 	        }
 	        if (added_ids.length) {
 	          if (_this.join_table) {
-	            _fn1 = function(related_id) {
+	            fn1 = function(related_id) {
 	              return queue.defer(function(callback) {
 	                var attributes, join;
 	                attributes = {};
@@ -9313,12 +9528,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return join.save(callback);
 	              });
 	            };
-	            for (_j = 0, _len1 = added_ids.length; _j < _len1; _j++) {
-	              related_id = added_ids[_j];
-	              _fn1(related_id);
+	            for (j = 0, len1 = added_ids.length; j < len1; j++) {
+	              related_id = added_ids[j];
+	              fn1(related_id);
 	            }
 	          } else {
-	            _fn2 = function(related_model) {
+	            fn2 = function(related_model) {
 	              return queue.defer(function(callback) {
 	                return related_model.save(function(err, saved_model) {
 	                  var cache;
@@ -9329,15 +9544,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	              });
 	            };
-	            for (_k = 0, _len2 = added_ids.length; _k < _len2; _k++) {
-	              added_id = added_ids[_k];
+	            for (k = 0, len2 = added_ids.length; k < len2; k++) {
+	              added_id = added_ids[k];
 	              related_model = _.find(related_models, function(test) {
 	                return test.id === added_id;
 	              });
 	              if (!_this.reverse_relation._hasChanged(related_model)) {
 	                continue;
 	              }
-	              _fn2(related_model);
+	              fn2(related_model);
 	            }
 	          }
 	        }
@@ -9352,25 +9567,194 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/*
+	  backbone-orm.js 0.7.9
+	  Copyright (c) 2013-2014 Vidigami
+	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
+	  Source: https://github.com/vidigami/backbone-orm
+	  Dependencies: Backbone.js and Underscore.js.
+	 */
+	var CacheCursor, CacheSync, DESTROY_BATCH_LIMIT, DESTROY_THREADS, Schema, Utils, _, bbCallback;
+
+	_ = __webpack_require__(21);
+
+	CacheCursor = __webpack_require__(39);
+
+	Schema = __webpack_require__(16);
+
+	Utils = __webpack_require__(8);
+
+	bbCallback = Utils.bbCallback;
+
+	DESTROY_BATCH_LIMIT = 1000;
+
+	DESTROY_THREADS = 100;
+
+	CacheSync = (function() {
+	  function CacheSync(model_type1, wrapped_sync_fn1) {
+	    this.model_type = model_type1;
+	    this.wrapped_sync_fn = wrapped_sync_fn1;
+	  }
+
+	  CacheSync.prototype.initialize = function() {
+	    if (this.is_initialized) {
+	      return;
+	    }
+	    this.is_initialized = true;
+	    this.wrapped_sync_fn('initialize');
+	    if (!this.model_type.model_name) {
+	      throw new Error('Missing model_name for model');
+	    }
+	  };
+
+	  CacheSync.prototype.read = function(model, options) {
+	    var cached_model;
+	    if (!options.force && (cached_model = this.model_type.cache.get(model.id))) {
+	      return options.success(cached_model.toJSON());
+	    }
+	    return this.wrapped_sync_fn('read', model, options);
+	  };
+
+	  CacheSync.prototype.create = function(model, options) {
+	    return this.wrapped_sync_fn('create', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var attributes, cache_model;
+	          (attributes = {})[_this.model_type.prototype.idAttribute] = json[_this.model_type.prototype.idAttribute];
+	          model.set(attributes);
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype.update = function(model, options) {
+	    return this.wrapped_sync_fn('update', model, {
+	      success: (function(_this) {
+	        return function(json) {
+	          var cache_model;
+	          if (cache_model = _this.model_type.cache.get(model.id)) {
+	            if (cache_model !== model) {
+	              Utils.updateModel(cache_model, model);
+	            }
+	          } else {
+	            _this.model_type.cache.set(model.id, model);
+	          }
+	          return options.success(json);
+	        };
+	      })(this),
+	      error: (function(_this) {
+	        return function(resp) {
+	          return typeof options.error === "function" ? options.error(resp) : void 0;
+	        };
+	      })(this)
+	    });
+	  };
+
+	  CacheSync.prototype["delete"] = function(model, options) {
+	    this.model_type.cache.destroy(model.id);
+	    return this.wrapped_sync_fn('delete', model, options);
+	  };
+
+	  CacheSync.prototype.resetSchema = function(options, callback) {
+	    return this.model_type.cache.reset((function(_this) {
+	      return function(err) {
+	        if (err) {
+	          return callback(err);
+	        }
+	        return _this.wrapped_sync_fn('resetSchema', options, callback);
+	      };
+	    })(this));
+	  };
+
+	  CacheSync.prototype.cursor = function(query) {
+	    if (query == null) {
+	      query = {};
+	    }
+	    return new CacheCursor(query, _.pick(this, ['model_type', 'wrapped_sync_fn']));
+	  };
+
+	  CacheSync.prototype.destroy = function(query, callback) {
+	    return this.model_type.each(_.extend({
+	      $each: {
+	        limit: DESTROY_BATCH_LIMIT,
+	        threads: DESTROY_THREADS
+	      }
+	    }, query), ((function(_this) {
+	      return function(model, callback) {
+	        return model.destroy(callback);
+	      };
+	    })(this)), callback);
+	  };
+
+	  CacheSync.prototype.connect = function(url) {
+	    this.model_type.cache.reset();
+	    return this.wrapped_sync_fn('connect');
+	  };
+
+	  return CacheSync;
+
+	})();
+
+	module.exports = function(model_type, wrapped_sync_fn) {
+	  var sync, sync_fn;
+	  sync = new CacheSync(model_type, wrapped_sync_fn);
+	  model_type.prototype.sync = sync_fn = function(method, model, options) {
+	    if (options == null) {
+	      options = {};
+	    }
+	    sync.initialize();
+	    if (method === 'createSync') {
+	      return wrapped_sync_fn.apply(null, arguments);
+	    }
+	    if (method === 'sync') {
+	      return sync;
+	    }
+	    if (sync[method]) {
+	      return sync[method].apply(sync, Array.prototype.slice.call(arguments, 1));
+	    }
+	    return wrapped_sync_fn.apply(wrapped_sync_fn, Array.prototype.slice.call(arguments));
+	  };
+	  return sync_fn;
+	};
+
+
+/***/ },
 /* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.8
+	  backbone-orm.js 0.7.9
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
 	var CacheCursor, _,
-	  __hasProp = {}.hasOwnProperty,
-	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 
-	_ = __webpack_require__(1);
+	_ = __webpack_require__(21);
 
-	module.exports = CacheCursor = (function(_super) {
-	  __extends(CacheCursor, _super);
+	module.exports = CacheCursor = (function(superClass) {
+	  extend(CacheCursor, superClass);
 
 	  function CacheCursor() {
 	    return CacheCursor.__super__.constructor.apply(this, arguments);
@@ -9382,11 +9766,101 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(28));
+	})(__webpack_require__(23));
 
 
 /***/ },
 /* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+	  var e, m,
+	      eLen = nBytes * 8 - mLen - 1,
+	      eMax = (1 << eLen) - 1,
+	      eBias = eMax >> 1,
+	      nBits = -7,
+	      i = isLE ? (nBytes - 1) : 0,
+	      d = isLE ? -1 : 1,
+	      s = buffer[offset + i]
+
+	  i += d
+
+	  e = s & ((1 << (-nBits)) - 1)
+	  s >>= (-nBits)
+	  nBits += eLen
+	  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+	  m = e & ((1 << (-nBits)) - 1)
+	  e >>= (-nBits)
+	  nBits += mLen
+	  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+	  if (e === 0) {
+	    e = 1 - eBias
+	  } else if (e === eMax) {
+	    return m ? NaN : ((s ? -1 : 1) * Infinity)
+	  } else {
+	    m = m + Math.pow(2, mLen)
+	    e = e - eBias
+	  }
+	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+	}
+
+	exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+	  var e, m, c,
+	      eLen = nBytes * 8 - mLen - 1,
+	      eMax = (1 << eLen) - 1,
+	      eBias = eMax >> 1,
+	      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
+	      i = isLE ? 0 : (nBytes - 1),
+	      d = isLE ? 1 : -1,
+	      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+
+	  value = Math.abs(value)
+
+	  if (isNaN(value) || value === Infinity) {
+	    m = isNaN(value) ? 1 : 0
+	    e = eMax
+	  } else {
+	    e = Math.floor(Math.log(value) / Math.LN2)
+	    if (value * (c = Math.pow(2, -e)) < 1) {
+	      e--
+	      c *= 2
+	    }
+	    if (e + eBias >= 1) {
+	      value += rt / c
+	    } else {
+	      value += rt * Math.pow(2, 1 - eBias)
+	    }
+	    if (value * c >= 2) {
+	      e++
+	      c /= 2
+	    }
+
+	    if (e + eBias >= eMax) {
+	      m = 0
+	      e = eMax
+	    } else if (e + eBias >= 1) {
+	      m = (value * c - 1) * Math.pow(2, mLen)
+	      e = e + eBias
+	    } else {
+	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+	      e = 0
+	    }
+	  }
+
+	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+	  e = (e << mLen) | m
+	  eLen += mLen
+	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+	  buffer[offset + i - d] |= s * 128
+	}
+
+
+/***/ },
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -9425,96 +9899,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports.read = function(buffer, offset, isLE, mLen, nBytes) {
-	  var e, m,
-	      eLen = nBytes * 8 - mLen - 1,
-	      eMax = (1 << eLen) - 1,
-	      eBias = eMax >> 1,
-	      nBits = -7,
-	      i = isLE ? (nBytes - 1) : 0,
-	      d = isLE ? -1 : 1,
-	      s = buffer[offset + i];
-
-	  i += d;
-
-	  e = s & ((1 << (-nBits)) - 1);
-	  s >>= (-nBits);
-	  nBits += eLen;
-	  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-	  m = e & ((1 << (-nBits)) - 1);
-	  e >>= (-nBits);
-	  nBits += mLen;
-	  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-	  if (e === 0) {
-	    e = 1 - eBias;
-	  } else if (e === eMax) {
-	    return m ? NaN : ((s ? -1 : 1) * Infinity);
-	  } else {
-	    m = m + Math.pow(2, mLen);
-	    e = e - eBias;
-	  }
-	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-	};
-
-	exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
-	  var e, m, c,
-	      eLen = nBytes * 8 - mLen - 1,
-	      eMax = (1 << eLen) - 1,
-	      eBias = eMax >> 1,
-	      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-	      i = isLE ? 0 : (nBytes - 1),
-	      d = isLE ? 1 : -1,
-	      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
-
-	  value = Math.abs(value);
-
-	  if (isNaN(value) || value === Infinity) {
-	    m = isNaN(value) ? 1 : 0;
-	    e = eMax;
-	  } else {
-	    e = Math.floor(Math.log(value) / Math.LN2);
-	    if (value * (c = Math.pow(2, -e)) < 1) {
-	      e--;
-	      c *= 2;
-	    }
-	    if (e + eBias >= 1) {
-	      value += rt / c;
-	    } else {
-	      value += rt * Math.pow(2, 1 - eBias);
-	    }
-	    if (value * c >= 2) {
-	      e++;
-	      c /= 2;
-	    }
-
-	    if (e + eBias >= eMax) {
-	      m = 0;
-	      e = eMax;
-	    } else if (e + eBias >= 1) {
-	      m = (value * c - 1) * Math.pow(2, mLen);
-	      e = e + eBias;
-	    } else {
-	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-	      e = 0;
-	    }
-	  }
-
-	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
-
-	  e = (e << mLen) | m;
-	  eLen += mLen;
-	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
-
-	  buffer[offset + i - d] |= s * 128;
-	};
-
-
-/***/ },
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -9532,12 +9916,16 @@ return /******/ (function(modules) { // webpackBootstrap
 		var NUMBER = '0'.charCodeAt(0)
 		var LOWER  = 'a'.charCodeAt(0)
 		var UPPER  = 'A'.charCodeAt(0)
+		var PLUS_URL_SAFE = '-'.charCodeAt(0)
+		var SLASH_URL_SAFE = '_'.charCodeAt(0)
 
 		function decode (elt) {
 			var code = elt.charCodeAt(0)
-			if (code === PLUS)
+			if (code === PLUS ||
+			    code === PLUS_URL_SAFE)
 				return 62 // '+'
-			if (code === SLASH)
+			if (code === SLASH ||
+			    code === SLASH_URL_SAFE)
 				return 63 // '/'
 			if (code < NUMBER)
 				return -1 //no match
@@ -9643,3 +10031,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ }
 /******/ ])
 });
+;

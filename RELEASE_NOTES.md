@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.9
+* Bug fix clone to not cache non loaded models
+
 ### 0.7.8
 * Bug fix DatabaseURL for BackboneHTTP join tables
 
