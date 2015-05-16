@@ -37,15 +37,15 @@ module.exports = class IterationUtils
       for start_index in [0..count] by IterationUtils.MAX_ITERATION_COUNT
         do (start_index) => queue.defer (callback) ->
           iteration_end = Math.min(start_index+IterationUtils.MAX_ITERATION_COUNT, count)
-          next = (err, done) =>
-            return callback(err) if err or done or (index >= iteration_end)
+          next = (err) =>
+            return callback(err) if err or (index >= iteration_end)
             iterator(array[index++], next)
           next()
       queue.await callback
     else
       safeStackCall ((callback) ->
-        iterate = -> iterator array[index++], (err, done) ->
-          return callback(err) if err or done or (index >= count)
+        iterate = -> iterator array[index++], (err) ->
+          return callback(err) if err or (index >= count)
           if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then IterationUtils.nextTick(iterate) else iterate()
         iterate()
       ), callback
@@ -60,15 +60,15 @@ module.exports = class IterationUtils
       for start_index in [0..count] by IterationUtils.MAX_ITERATION_COUNT
         do (start_index) => queue.defer (callback) ->
           iteration_end = Math.min(start_index+IterationUtils.MAX_ITERATION_COUNT, count)
-          next = (err, done) =>
-            return callback(err) if err or done or (index >= iteration_end) or (array.length is 0)
+          next = (err) =>
+            return callback(err) if err or (index >= iteration_end) or (array.length is 0)
             index++; iterator(array.pop(), next)
           next()
       queue.await callback
     else
       safeStackCall ((callback) ->
-        iterate = -> index++; iterator array.pop(), (err, done) ->
-          return callback(err) if err or done or (index >= count) or (array.length is 0)
+        iterate = -> index++; iterator array.pop(), (err) ->
+          return callback(err) if err or (index >= count) or (array.length is 0)
           if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then IterationUtils.nextTick(iterate) else iterate()
         iterate()
       ), callback
