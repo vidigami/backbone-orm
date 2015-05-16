@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.10
+* Bug fix and optimizations for large data sets to use process.nextTick (node) or setImmediate (browser)
+
 ### 0.7.9
 * Bug fix clone to not cache non loaded models
 
