@@ -14,7 +14,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
 
   PICK_KEYS = ['id', 'name']
 
-  describe "hasOne #{options.$parameter_tags or ''}#{options.$tags}", ->
+  describe "hasOne #{options.$parameter_tags or ''}#{options.$tags} @has_one", ->
     Flat = Reverse = ForeignReverse = Owner = null
     before ->
       BackboneORM.configure {model_cache: {enabled: !!options.cache, max: 100}}
@@ -927,7 +927,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
         assert.equal(json.id, json.reverse.owner_id, "\nIncluded model has the correct id: Expected: #{json.id}\nActual: #{json.reverse.owner_id}")
         done()
 
-    it 'Can query on a related (belongsTo) model propery', (done) ->
+    it 'Can query on a related (belongsTo) model property', (done) ->
       Flat.findOne (err, flat) ->
         assert.ok(!err, "No errors: #{err}")
         assert.ok(flat, 'found model')

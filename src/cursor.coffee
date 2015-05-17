@@ -241,43 +241,35 @@ module.exports = class MemoryCursor extends Cursor
 
   # @nodoc
   _valueIsMatch: (find_query, key_path, model_json, callback) ->
-    key_components = key_path.split('.')
     model_type = @model_type
+    find_value = find_query[key_path]
+    (operators = (operator for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator))) if _.isObject(find_value)
+    key_components = key_path.split('.')
 
-    next = (err, models_json) =>
+    isMatch = (model_json, key) ->
+      model_value = model_json[key]
+      if operators and operators.length # an object might specify $lt, $lte, $gt, $gte, $ne
+        return false for operator in operators when !IS_MATCH_FNS[operator](model_value, find_value[operator])
+        return true
+      return (model_value is find_value) or _.isEqual(model_value, find_value)
+
+    # early out
+    return return callback(null, isMatch(model_json, key_components[0])) if key_components.length is 1
+
+    next = (err, model_json) =>
       return callback(err) if err
       key = key_components.shift()
-      key = model_type::idAttribute if key is 'id' # allow for id key override
+      key = @model_type::idAttribute if key is 'id' # allow for id key override
 
-      # done conditions
-      unless key_components.length
-        was_handled = false
-        find_value = find_query[key_path]
+      # keep traversing relations
+      if key_components.length
+        return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
+        return next(null, model_json[key])
 
-        models_json = [models_json] unless _.isArray(models_json)
-        for model_json in models_json
-          model_value = model_json[key]
-          # console.log "\nChecking value (#{key_path}): #{key}, find_value: #{JSONUtils.stringify(find_value)}, model_value: #{JSONUtils.stringify(model_value)}\nmodel_json: #{JSONUtils.stringify(model_json)}\nis equal: #{_.isEqual(model_value, find_value)}"
-
-          # an object might specify $lt, $lte, $gt, $gte, $ne
-          if _.isObject(find_value)
-            for operator in IS_MATCH_OPERATORS when find_value.hasOwnProperty(operator)
-              # console.log "Testing operator: #{operator}, model_value: #{JSONUtils.stringify(model_value)}, test_value: #{JSONUtils.stringify(find_value[operator])} result: #{IS_MATCH_FNS[operator](model_value, find_value[operator])}"
-              was_handled = true
-              break if not is_match = IS_MATCH_FNS[operator](model_value, find_value[operator])
-
-          if was_handled
-            return callback(null, is_match) if is_match
-          else if is_match = _.isEqual(model_value, find_value)
-            return callback(null, is_match)
-
-        # checked all models and none were a match
+      # check final value
+      else
+        return callback(null, isMatch(model_json, key)) if not _.isArray(model_json)
+        return callback(null, true) for json in model_json when isMatch(json, key)
         return callback(null, false)
-
-      # console.log "\nNext model (#{key_path}): #{key} model_json: #{JSONUtils.stringify(model_json)}"
-
-      # fetch relation
-      return relation.cursor(model_json, key).toJSON(next) if (relation = model_type.relation(key)) and not relation.embed
-      next(null, model_json[key])
 
     next(null, model_json) # start checking
