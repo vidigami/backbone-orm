@@ -13,7 +13,7 @@ Queue = require './queue'
 nextTick = process?.nextTick or _.defer
 
 module.exports = class IterationUtils
-  @MAX_ITERATION_COUNT: 500
+  @MAX_ITERATION_COUNT: 300
 
   ##############################
   # Iterating
@@ -24,36 +24,27 @@ module.exports = class IterationUtils
     return callback() unless count = array.length
 
     index = 0
-    queue = new Queue()
-    queue.defer (callback) ->
-      iterate = -> iterator array[index++], (err, done) ->
-        return callback(err) if err or (index >= count) or done
-        if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
-      iterate()
-    queue.await callback
+    iterate = -> iterator array[index++], (err, done) ->
+      return callback(err) if err or (index >= count) or done
+      if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
+    iterate()
 
   # @nodoc
   @each: (array, iterator, callback) =>
     return callback() unless count = array.length
 
     index = 0
-    queue = new Queue()
-    queue.defer (callback) ->
-      iterate = -> iterator array[index++], (err) ->
-        return callback(err) if err or (index >= count)
-        if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
-      iterate()
-    queue.await callback
+    iterate = -> iterator array[index++], (err) ->
+      return callback(err) if err or (index >= count)
+      if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
+    iterate()
 
   # @nodoc
   @popEach: (array, iterator, callback) =>
     return callback() unless count = array.length
 
     index = 0
-    queue = new Queue()
-    queue.defer (callback) ->
-      iterate = -> index++; iterator array.pop(), (err) ->
-        return callback(err) if err or (index >= count) or (array.length is 0)
-        if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
-      iterate()
-    queue.await callback
+    iterate = -> index++; iterator array.pop(), (err) ->
+      return callback(err) if err or (index >= count) or (array.length is 0)
+      if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
+    iterate()

@@ -44,7 +44,7 @@ testNode = (callback) ->
 
   global.test_parameters = require './test/parameters' # ensure that globals for the target backend are loaded
   gulp.src('test/spec/**/*.tests.coffee')
-    .pipe(mocha({reporter: 'dot', grep: tags}))
+    .pipe(mocha({reporter: 'spec', grep: tags, timeout: Infinity}))
     .pipe es.writeArray (err, array) ->
       delete global.test_parameters # cleanup globals
       callback(err)
@@ -57,8 +57,8 @@ testBrowsers = (callback) ->
   (require './config/karma/run')({tags: tags}, callback)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
 
-gulp.task 'test-node', ['minify'], testNode
-gulp.task 'test-browsers', ['minify'], testBrowsers
+gulp.task 'test-node', ['build'], testNode
+gulp.task 'test-browsers', ['build'], testBrowsers
 gulp.task 'test', ['minify'], (callback) ->
   Async.series [testNode, testBrowsers], (err) -> if err then process.exit(1) else callback(err)
   return # promises workaround: https://github.com/gulpjs/gulp/issues/455
