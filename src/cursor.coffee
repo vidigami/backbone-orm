@@ -70,7 +70,7 @@ module.exports = class MemoryCursor extends Cursor
         if keys.length or !ins_is_empty or !nins_is_empty
           if @_cursor.$ids
             for model_json in @store
-              json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
+              json.push(JSONUtils.deepClone(model_json)) if (model_json.id in @_cursor.$ids) and _.isEqual(_.pick(model_json, keys), find_query)
             callback()
 
           else
@@ -92,7 +92,7 @@ module.exports = class MemoryCursor extends Cursor
         else
           # filter by ids
           if @_cursor.$ids
-            json = (JSONUtils.deepClone(model_json) for model_json in @store when _.contains(@_cursor.$ids, model_json.id))
+            json = (JSONUtils.deepClone(model_json) for model_json in @store when (model_json.id in @_cursor.$ids))
           else
             json = (JSONUtils.deepClone(model_json) for model_json in @store)
           callback()
@@ -134,7 +134,7 @@ module.exports = class MemoryCursor extends Cursor
         return callback(null, (if _.isArray(json) then !!json.length else json)) if exists
 
         if @hasCursorQuery('$page')
-          count_cursor = new MemoryCursor(_.extend(_.pick(@_cursor, '$unique'), @_find), _.extend(_.pick(@, ['model_type', 'store'])))
+          count_cursor = new MemoryCursor(_.extend(_.pick(@_cursor, '$unique'), @_find), _.pick(@, ['model_type', 'store']))
           count_cursor.count (err, count) =>
             return callback(err) if err
             callback(null, {
@@ -164,7 +164,7 @@ module.exports = class MemoryCursor extends Cursor
             (related_query = {}).id = value
             reverse_relation.model_type.cursor(related_query).toJSON (err, models_json) =>
               return callback(err) if err
-              mergeQuery(find_query, '_json', _.map(models_json, (test) -> test[reverse_relation.key]))
+              mergeQuery(find_query, '_json', (model_json[reverse_relation.key] for model_json in models_json))
               callback()
           else
             (related_query = {})[key] = value
