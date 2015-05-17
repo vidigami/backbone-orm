@@ -1,5 +1,5 @@
 /*
-  backbone-orm.js 0.7.9
+  backbone-orm.js 0.7.10
   Copyright (c) 2013-2015 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -65,7 +65,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1357,7 +1357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -1619,7 +1619,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2060,7 +2060,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2469,7 +2469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2587,7 +2587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2662,7 +2662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2787,7 +2787,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -2870,7 +2870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -3304,7 +3304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -3641,7 +3641,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -4997,7 +4997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -5101,7 +5101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -5204,7 +5204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        keys = null;
 	        queue = new Queue(1);
 	        queue.defer(function(callback) {
-	          var i, ins, ins_is_empty, key, len, model_json, nins, nins_is_empty, ref, ref1, ref2, value;
+	          var i, ins, ins_is_empty, key, len, model_json, nins, nins_is_empty, ref, ref1, ref2, ref3, value;
 	          ref = [{}, {}], ins = ref[0], nins = ref[1];
 	          for (key in find_query) {
 	            value = find_query[key];
@@ -5224,21 +5224,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	              ref2 = _this.store;
 	              for (i = 0, len = ref2.length; i < len; i++) {
 	                model_json = ref2[i];
-	                if (_.contains(_this._cursor.$ids, model_json.id) && _.isEqual(_.pick(model_json, keys), find_query)) {
+	                if ((ref3 = model_json.id, indexOf.call(_this._cursor.$ids, ref3) >= 0) && _.isEqual(_.pick(model_json, keys), find_query)) {
 	                  json.push(JSONUtils.deepClone(model_json));
 	                }
 	              }
 	              return callback();
 	            } else {
 	              return Utils.each(_this.store, (function(model_json, callback) {
-	                var is_match, ref3, ref4, values;
+	                var is_match, ref4, ref5, values;
 	                if (exists && json.length) {
 	                  return callback(null, true);
 	                }
 	                if (!ins_is_empty) {
 	                  for (key in ins) {
 	                    values = ins[key];
-	                    if (ref3 = model_json[key], indexOf.call(values, ref3) < 0) {
+	                    if (ref4 = model_json[key], indexOf.call(values, ref4) < 0) {
 	                      return callback();
 	                    }
 	                  }
@@ -5246,7 +5246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!nins_is_empty) {
 	                  for (key in nins) {
 	                    values = nins[key];
-	                    if (ref4 = model_json[key], indexOf.call(values, ref4) >= 0) {
+	                    if (ref5 = model_json[key], indexOf.call(values, ref5) >= 0) {
 	                      return callback();
 	                    }
 	                  }
@@ -5265,12 +5265,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          } else {
 	            if (_this._cursor.$ids) {
 	              json = (function() {
-	                var j, len1, ref3, results;
-	                ref3 = this.store;
+	                var j, len1, ref4, ref5, results;
+	                ref4 = this.store;
 	                results = [];
-	                for (j = 0, len1 = ref3.length; j < len1; j++) {
-	                  model_json = ref3[j];
-	                  if (_.contains(this._cursor.$ids, model_json.id)) {
+	                for (j = 0, len1 = ref4.length; j < len1; j++) {
+	                  model_json = ref4[j];
+	                  if ((ref5 = model_json.id, indexOf.call(this._cursor.$ids, ref5) >= 0)) {
 	                    results.push(JSONUtils.deepClone(model_json));
 	                  }
 	                }
@@ -5278,11 +5278,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }).call(_this);
 	            } else {
 	              json = (function() {
-	                var j, len1, ref3, results;
-	                ref3 = this.store;
+	                var j, len1, ref4, results;
+	                ref4 = this.store;
 	                results = [];
-	                for (j = 0, len1 = ref3.length; j < len1; j++) {
-	                  model_json = ref3[j];
+	                for (j = 0, len1 = ref4.length; j < len1; j++) {
+	                  model_json = ref4[j];
 	                  results.push(JSONUtils.deepClone(model_json));
 	                }
 	                return results;
@@ -5348,7 +5348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return callback(null, (_.isArray(json) ? !!json.length : json));
 	          }
 	          if (_this.hasCursorQuery('$page')) {
-	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.extend(_.pick(_this, ['model_type', 'store'])));
+	            count_cursor = new MemoryCursor(_.extend(_.pick(_this._cursor, '$unique'), _this._find), _.pick(_this, ['model_type', 'store']));
 	            return count_cursor.count(function(err, count) {
 	              if (err) {
 	                return callback(err);
@@ -5448,12 +5448,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw Error("Embedded find is not yet supported. @_find: " + (JSONUtils.stringify(_this._find)));
 	                (related_query = {}).id = value;
 	                return reverse_relation.model_type.cursor(related_query).toJSON(function(err, models_json) {
+	                  var model_json;
 	                  if (err) {
 	                    return callback(err);
 	                  }
-	                  mergeQuery(find_query, '_json', _.map(models_json, function(test) {
-	                    return test[reverse_relation.key];
-	                  }));
+	                  mergeQuery(find_query, '_json', (function() {
+	                    var i, len, results;
+	                    results = [];
+	                    for (i = 0, len = models_json.length; i < len; i++) {
+	                      model_json = models_json[i];
+	                      results.push(model_json[reverse_relation.key]);
+	                    }
+	                    return results;
+	                  })());
 	                  return callback();
 	                });
 	              } else {
@@ -5607,7 +5614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */(function(process) {
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -5698,7 +5705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -6417,7 +6424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -7045,7 +7052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9025,7 +9032,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9194,7 +9201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9255,7 +9262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9332,7 +9339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9499,7 +9506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9569,7 +9576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
@@ -9837,7 +9844,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.9
+	  backbone-orm.js 0.7.10
 	  Copyright (c) 2013-2014 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
