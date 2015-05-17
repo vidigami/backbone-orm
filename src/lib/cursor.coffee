@@ -90,33 +90,6 @@ module.exports = class Cursor
   toModels: (callback) ->
     return callback(new Error "Cannot call toModels on cursor with values for model #{@model_type.model_name}. Values: #{JSONUtils.stringify(@_cursor.$values)}") if @_cursor.$values
 
-    # a cache candidate
-    # if not (@_cursor.$offset or @_cursor.$limit or @_cursor.$include) and cache = @model_type.cache
-    #   find_size = _.size(@_find)
-    #   if find_size is 0
-    #     return callback(null, model) if not (ids = @_cursor.$ids) and @_cursor.$one and (model = cache.get())
-
-    #   else if find_size is 1 and @_find.id
-    #     if not (ids = @_find.id.$in) and (model = cache.get(@_find.id))
-    #       return callback(null, if @_cursor.$one then model else [model])
-
-    #   if ids
-    #     missing_ids = [] # TODO: fetch delta ids, need to handle sorting, etc
-    #     models = []
-    #     for id in ids
-    #       (missing_ids.push(id); continue) unless model = cache.get(id)
-    #       models.push(model)
-    #       break if @_cursor.$one
-
-    #     if @_cursor.$one
-    #       return callback(null, models[0]) if models.length
-    #     else
-    #       if not missing_ids.length # found everything
-    #         if @_cursor.$sort
-    #           $sort_fields = if _.isArray(@_cursor.$sort) then @_cursor.$sort else [@_cursor.$sort]
-    #           models.sort (model, next_model) => return Utils.jsonFieldCompare(model.attributes, next_model.attributes, $sort_fields)
-    #         return callback(null, models)
-
     @toJSON (err, json) =>
       return callback(err) if err
       return callback(null, null) if @_cursor.$one and not json
