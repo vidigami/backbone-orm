@@ -6,11 +6,8 @@
   Dependencies: Backbone.js and Underscore.js.
 ###
 
-_ = require 'underscore'
-Queue = require './queue'
-
 # @nodoc
-nextTick = process?.nextTick or _.defer
+nextTick = process?.nextTick or (require 'underscore').defer
 
 module.exports = class IterationUtils
   @MAX_ITERATION_COUNT: 300
