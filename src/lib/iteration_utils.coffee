@@ -9,7 +9,7 @@
 _ = require 'underscore'
 Queue = require './queue'
 
-SPLIT = true
+SPLIT = false
 
 # @nodoc
 safeStackCall = (fn, callback) =>
