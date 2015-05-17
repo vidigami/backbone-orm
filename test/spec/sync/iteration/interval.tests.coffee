@@ -11,7 +11,7 @@ _.each BackboneORM.TestUtils.optionSets(), exports = (options) ->
   DATABASE_URL = options.database_url or ''
   BASE_SCHEMA = options.schema or {}
   SYNC = options.sync
-  BASE_COUNT = 100
+  BASE_COUNT = 50
 
   DATE_START = new Date('2013-06-09T08:00:00.000Z')
   DATE_STEP_MS = 1000

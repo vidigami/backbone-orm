@@ -1502,7 +1502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (arguments.length === 1) {
 	      ref = [{}, query], query = ref[0], callback = ref[1];
 	    }
-	    if (_.size(query) === 0) {
+	    if (JSONUtils.isEmptyObject(query)) {
 	      return Utils.popEach(this.store, ((function(_this) {
 	        return function(model_json, callback) {
 	          return Utils.patchRemove(_this.model_type, model_json, callback);
@@ -2087,6 +2087,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
+	  JSONUtils.isEmptyObject = function(obj) {
+	    var key;
+	    for (key in obj) {
+	      return false;
+	    }
+	    return true;
+	  };
+
 	  JSONUtils.parseDates = function(json) {
 	    var date, key, value;
 	    if (_.isString(json)) {
@@ -2236,7 +2244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              query = _.clone(args);
 	              delete query.key;
 	              delete query.template;
-	              if (_.size(query) === 0) {
+	              if (JSONUtils.isEmptyObject(query)) {
 	                query = null;
 	              }
 	            }
@@ -2521,11 +2529,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  DateUtils.isBefore = function(mv, tv) {
-	    return mv.getTime() < tv.getTime();
+	    return mv.valueOf() < tv.valueOf();
 	  };
 
 	  DateUtils.isAfter = function(mv, tv) {
-	    return mv.getTime() > tv.getTime();
+	    return mv.valueOf() > tv.valueOf();
+	  };
+
+	  DateUtils.isEqual = function(mv, tv) {
+	    return +mv === +tv;
 	  };
 
 	  return DateUtils;
@@ -5114,7 +5126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
-	    return !_.isEqual(mv, tv);
+	    return (_.isDate(tv) ? !DateUtils.isEqual(mv, tv) : mv !== tv);
 	  },
 	  $lt: function(mv, tv) {
 	    if (_.isNull(tv)) {
@@ -5192,7 +5204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        keys = null;
 	        queue = new Queue(1);
 	        queue.defer(function(callback) {
-	          var i, ins, ins_size, key, len, model_json, nins, nins_size, ref, ref1, ref2, value;
+	          var i, ins, ins_is_empty, key, len, model_json, nins, nins_is_empty, ref, ref1, ref2, value;
 	          ref = [{}, {}], ins = ref[0], nins = ref[1];
 	          for (key in find_query) {
 	            value = find_query[key];
@@ -5205,9 +5217,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	              nins[key] = value.$nin;
 	            }
 	          }
-	          ref1 = [_.size(ins), _.size(nins)], ins_size = ref1[0], nins_size = ref1[1];
+	          ref1 = [JSONUtils.isEmptyObject(ins), JSONUtils.isEmptyObject(nins)], ins_is_empty = ref1[0], nins_is_empty = ref1[1];
 	          keys = _.keys(find_query);
-	          if (keys.length || ins_size || nins_size) {
+	          if (keys.length || !ins_is_empty || !nins_is_empty) {
 	            if (_this._cursor.$ids) {
 	              ref2 = _this.store;
 	              for (i = 0, len = ref2.length; i < len; i++) {
@@ -5223,7 +5235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (exists && json.length) {
 	                  return callback(null, true);
 	                }
-	                if (ins_size) {
+	                if (!ins_is_empty) {
 	                  for (key in ins) {
 	                    values = ins[key];
 	                    if (ref3 = model_json[key], indexOf.call(values, ref3) < 0) {
@@ -5231,7 +5243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                  }
 	                }
-	                if (nins_size) {
+	                if (!nins_is_empty) {
 	                  for (key in nins) {
 	                    values = nins[key];
 	                    if (ref4 = model_json[key], indexOf.call(values, ref4) >= 0) {
@@ -5543,7 +5555,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return true;
 	      }
-	      return (model_value === find_value) || _.isEqual(model_value, find_value);
+	      if (_.isDate(model_value)) {
+	        return DateUtils.isEqual(model_value, find_value);
+	      } else {
+	        return model_value === find_value;
+	      }
 	    };
 	    if (key_components.length === 1) {
 	      return callback(null, isMatch(model_json, key_components[0]));
@@ -5688,7 +5704,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
 	 */
-	var Backbone, DatabaseURL, ModelStream, Queue, Utils, _, modelEach, modelInterval;
+	var Backbone, DatabaseURL, JSONUtils, ModelStream, Queue, Utils, _, modelEach, modelInterval;
 
 	_ = __webpack_require__(22);
 
@@ -5697,6 +5713,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	Queue = __webpack_require__(12);
 
 	Utils = __webpack_require__(8);
+
+	JSONUtils = __webpack_require__(9);
 
 	DatabaseURL = __webpack_require__(13);
 
@@ -6137,7 +6155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          simple_attributes[key] = value;
 	        }
 	      }
-	      if (_.size(simple_attributes)) {
+	      if (!JSONUtils.isEmptyObject(simple_attributes)) {
 	        model_type.prototype._orm_original_fns.set.call(this, simple_attributes, options);
 	      }
 	      for (key in relational_attributes) {
@@ -7592,8 +7610,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var base64 = __webpack_require__(44)
-	var ieee754 = __webpack_require__(43)
-	var isArray = __webpack_require__(42)
+	var ieee754 = __webpack_require__(42)
+	var isArray = __webpack_require__(43)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -9851,45 +9869,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-	/**
-	 * isArray
-	 */
-
-	var isArray = Array.isArray;
-
-	/**
-	 * toString
-	 */
-
-	var str = Object.prototype.toString;
-
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
-	};
-
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
 	  var e, m,
 	      eLen = nBytes * 8 - mLen - 1,
@@ -9974,6 +9953,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  buffer[offset + i - d] |= s * 128
 	}
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * isArray
+	 */
+
+	var isArray = Array.isArray;
+
+	/**
+	 * toString
+	 */
+
+	var str = Object.prototype.toString;
+
+	/**
+	 * Whether or not the given `val`
+	 * is an array.
+	 *
+	 * example:
+	 *
+	 *        isArray([]);
+	 *        // > true
+	 *        isArray(arguments);
+	 *        // > false
+	 *        isArray('');
+	 *        // > false
+	 *
+	 * @param {mixed} val
+	 * @return {bool}
+	 */
+
+	module.exports = isArray || function (val) {
+	  return !! val && '[object Array]' == str.call(val);
+	};
 
 
 /***/ },
