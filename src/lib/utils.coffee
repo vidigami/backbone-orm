@@ -220,6 +220,12 @@ module.exports = class Utils
   # @nodoc
   @popEachC: (array, callback, iterator) => IterationUtils.popEach(array, iterator, callback)
 
+  # @nodoc
+  @eachDone: IterationUtils.eachDone
+
+  # @nodoc
+  @eachDoneC: (array, callback, iterator) => IterationUtils.eachDone(array, iterator, callback)
+
   ##############################
   # Sorting
   ##############################

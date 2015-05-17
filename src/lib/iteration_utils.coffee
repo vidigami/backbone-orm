@@ -20,6 +20,19 @@ module.exports = class IterationUtils
   ##############################
 
   # @nodoc
+  @eachDone: (array, iterator, callback) =>
+    return callback() unless count = array.length
+
+    index = 0
+    queue = new Queue()
+    queue.defer (callback) ->
+      iterate = -> iterator array[index++], (err, done) ->
+        return callback(err) if err or (index >= count) or done
+        if index and (index % IterationUtils.MAX_ITERATION_COUNT is 0) then nextTick(iterate) else iterate()
+      iterate()
+    queue.await callback
+
+  # @nodoc
   @each: (array, iterator, callback) =>
     return callback() unless count = array.length
 

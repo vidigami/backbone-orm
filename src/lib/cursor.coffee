@@ -129,16 +129,11 @@ module.exports = class Cursor
           models = ((model = new @model_type(@model_type::parse(item)); model.setPartial(true); model) for item in json)
         return callback(null, if @_cursor.$one then models[0] else models)
 
-  toJSON: (callback) ->
-    parsed_query = _.extend({}, _.pick(@_cursor, CURSOR_KEYS), @_find)
-
-    model_types = @relatedModelTypesInQuery()
-    @queryToJSON callback
+  toJSON: (callback) -> @queryToJSON(callback)
 
   # @nodoc
   # Provided by a concrete cursor for a Backbone Sync type
-  queryToJSON: (callback) ->
-    throw new Error 'toJSON must be implemented by a concrete cursor for a Backbone Sync type'
+  queryToJSON: (callback) -> throw new Error 'queryToJSON must be implemented by a concrete cursor for a Backbone Sync type'
 
   ##############################################
   # Helpers

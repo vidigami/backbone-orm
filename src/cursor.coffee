@@ -53,8 +53,8 @@ module.exports = class MemoryCursor extends Cursor
     @buildFindQuery (err, find_query) =>
       return callback(err) if err
 
-      json = []
-      keys = _.keys(find_query)
+      json = [] # NOTE: we need to clone the data out of the store since the caller could modify it
+      keys = null
       queue = new Queue(1)
 
       queue.defer (callback) =>
@@ -63,7 +63,7 @@ module.exports = class MemoryCursor extends Cursor
           (delete find_query[key]; ins[key] = value.$in) if value?.$in
           (delete find_query[key]; nins[key] = value.$nin) if value?.$nin
         [ins_size, nins_size] = [_.size(ins), _.size(nins)]
-        # NOTE: we clone the data out of the store since the caller could modify it
+        keys = _.keys(find_query)
 
         # use find
         if keys.length or ins_size or nins_size
@@ -80,14 +80,12 @@ module.exports = class MemoryCursor extends Cursor
               (return callback() for key, values of ins when model_json[key] not in values) if ins_size
               (return callback() for key, values of nins when model_json[key] in values) if nins_size
 
-              find_keys = _.keys(find_query)
-              next = (err, is_match) =>
-                return callback(err) if err or not is_match # done conditions
-                (json.push(JSONUtils.deepClone(model_json)); return callback()) if find_keys.length is 0 # all matched
-
-                # check next key
-                @_valueIsMatch(find_query, find_keys.pop(), model_json, next)
-              next(null, true) # start checking
+              is_match = true
+              Utils.eachDone keys, ((key, callback) => @_valueIsMatch find_query, key, model_json, (err, _is_match) =>
+                callback(err, !(is_match = _is_match))
+              ), (err) =>
+                err or !is_match or json.push(JSONUtils.deepClone(model_json))
+                callback(err)
             ), callback
 
         else
