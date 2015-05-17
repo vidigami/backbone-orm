@@ -15,7 +15,8 @@ DateUtils = require './lib/date_utils'
 Cursor = require './lib/cursor'
 
 IS_MATCH_FNS =
-  $ne: (mv, tv) -> return not _.isEqual(mv, tv)
+  $ne: (mv, tv) ->
+    return (if _.isDate(tv) then !DateUtils.isEqual(mv, tv) else mv isnt tv)
 
   $lt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
@@ -62,11 +63,11 @@ module.exports = class MemoryCursor extends Cursor
         for key, value of find_query
           (delete find_query[key]; ins[key] = value.$in) if value?.$in
           (delete find_query[key]; nins[key] = value.$nin) if value?.$nin
-        [ins_size, nins_size] = [_.size(ins), _.size(nins)]
+        [ins_is_empty, nins_is_empty] = [JSONUtils.isEmptyObject(ins), JSONUtils.isEmptyObject(nins)]
         keys = _.keys(find_query)
 
         # use find
-        if keys.length or ins_size or nins_size
+        if keys.length or !ins_is_empty or !nins_is_empty
           if @_cursor.$ids
             for model_json in @store
               json.push(JSONUtils.deepClone(model_json)) if _.contains(@_cursor.$ids, model_json.id) and _.isEqual(_.pick(model_json, keys), find_query)
@@ -77,8 +78,8 @@ module.exports = class MemoryCursor extends Cursor
 
             Utils.each @store, ((model_json, callback) =>
               return callback(null, true) if exists and json.length # exists only needs one result
-              (return callback() for key, values of ins when model_json[key] not in values) if ins_size
-              (return callback() for key, values of nins when model_json[key] in values) if nins_size
+              (return callback() for key, values of ins when model_json[key] not in values) if !ins_is_empty
+              (return callback() for key, values of nins when model_json[key] in values) if !nins_is_empty
 
               is_match = true
               Utils.eachDone keys, ((key, callback) => @_valueIsMatch find_query, key, model_json, (err, _is_match) =>
@@ -251,7 +252,7 @@ module.exports = class MemoryCursor extends Cursor
       if operators and operators.length # an object might specify $lt, $lte, $gt, $gte, $ne
         return false for operator in operators when !IS_MATCH_FNS[operator](model_value, find_value[operator])
         return true
-      return (model_value is find_value) or _.isEqual(model_value, find_value)
+      if _.isDate(model_value) then DateUtils.isEqual(model_value, find_value) else (model_value is find_value)
 
     # early out
     return return callback(null, isMatch(model_json, key_components[0])) if key_components.length is 1

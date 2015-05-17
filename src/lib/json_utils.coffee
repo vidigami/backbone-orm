@@ -15,6 +15,9 @@ module.exports = class JSONUtils
   # @nodoc
   @stringify: (json) -> try return JSON.stringify(json) catch err then return 'Failed to stringify'
 
+  # @nodoc
+  @isEmptyObject: (obj) -> return false for key of obj; return true
+
   # Parse an object whose values are still JSON.
   #
   # @examples
@@ -153,7 +156,7 @@ module.exports = class JSONUtils
               template = args.template
               query = _.clone(args)
               delete query.key; delete query.template
-              query = null if _.size(query) is 0
+              query = null if JSONUtils.isEmptyObject(query)
           else
             template = _.clone(args)
             delete template.key

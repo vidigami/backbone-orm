@@ -11,6 +11,7 @@ Backbone = require 'backbone'
 
 Queue = require '../lib/queue'
 Utils = require '../lib/utils'
+JSONUtils = require '../lib/json_utils'
 DatabaseURL = require '../lib/database_url'
 
 ModelStream = require './model_stream'
@@ -324,7 +325,7 @@ module.exports = (model_type) ->
           relational_attributes[key] = relation
         else
           simple_attributes[key] = value
-      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if _.size(simple_attributes)
+      model_type::_orm_original_fns.set.call(@, simple_attributes, options) if !JSONUtils.isEmptyObject(simple_attributes)
 
       # then set relationships
       relation.set(@, key, attributes[key], options) for key, relation of relational_attributes

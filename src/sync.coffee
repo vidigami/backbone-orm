@@ -100,7 +100,7 @@ class MemorySync
   destroy: (query, callback) ->
     [query, callback] = [{}, query] if arguments.length is 1
 
-    if _.size(query) is 0
+    if JSONUtils.isEmptyObject(query)
       Utils.popEach @store, ((model_json, callback) => Utils.patchRemove(@model_type, model_json, callback)), callback
     else
       is_done = false

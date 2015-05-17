@@ -28,12 +28,6 @@ module.exports = class DateUtils
     return count * lookup.months * 2592e6 if lookup.months
     return count * lookup.years * 31536e6 if lookup.years
 
-  @isBefore: (mv, tv) -> mv.getTime() < tv.getTime()
-  @isAfter: (mv, tv) -> mv.getTime() > tv.getTime()
-
-  # iso_string_regex = /^[-+]?\d{4,6}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/
-  # @isISOString: (s) -> iso_string_regex.test(s)
-  # iso_parse_string_regex = /^([-+]?\d{4,6})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)\.(\d{3})Z$/
-  # @fromISOString: (s) ->
-  #   groups = iso_parse_string_regex.exec(s)
-  #   return new Date(Date.UTC(groups[1], groups[2], groups[3], groups[4], groups[5], groups[6], groups[7]))
+  @isBefore: (mv, tv) -> mv.valueOf() < tv.valueOf()
+  @isAfter: (mv, tv) -> mv.valueOf() > tv.valueOf()
+  @isEqual: (mv, tv) -> +mv is +tv
