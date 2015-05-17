@@ -23,8 +23,7 @@ module.exports = class Fabricator
   @create: (model_type, count, attributes_info, callback) ->
     models = Fabricator.new(model_type, count, attributes_info)
     queue = new Queue()
-    for model in models
-      do (model) -> queue.defer (callback) -> model.save callback
+    for model in models then do (model) -> queue.defer (callback) -> model.save callback
     queue.await (err) -> callback(err, models)
 
   # Return the same fixed value for each fabricated model
@@ -32,6 +31,12 @@ module.exports = class Fabricator
   @value: (value) ->
     return undefined if arguments.length is 0
     return -> value
+
+  # Return the same fixed value for each fabricated model
+  #
+  @increment: (value) ->
+    return undefined if arguments.length is 0
+    return -> value++
 
   # Return a unique string value for each fabricated model
   #

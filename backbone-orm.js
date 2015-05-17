@@ -1258,6 +1258,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
+	  Fabricator.increment = function(value) {
+	    if (arguments.length === 0) {
+	      return void 0;
+	    }
+	    return function() {
+	      return value++;
+	    };
+	  };
+
 	  Fabricator.uniqueId = function(prefix) {
 	    if (arguments.length === 0) {
 	      return _.uniqueId();
@@ -5126,7 +5135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
-	    return (_.isDate(tv) ? !DateUtils.isEqual(mv, tv) : mv !== tv);
+	    return !_.isEqual(mv, tv);
 	  },
 	  $lt: function(mv, tv) {
 	    if (_.isNull(tv)) {
@@ -5562,11 +5571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return true;
 	      }
-	      if (_.isDate(model_value)) {
-	        return DateUtils.isEqual(model_value, find_value);
-	      } else {
-	        return model_value === find_value;
-	      }
+	      return _.isEqual(model_value, find_value);
 	    };
 	    if (key_components.length === 1) {
 	      return callback(null, isMatch(model_json, key_components[0]));

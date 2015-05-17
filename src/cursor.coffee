@@ -15,8 +15,7 @@ DateUtils = require './lib/date_utils'
 Cursor = require './lib/cursor'
 
 IS_MATCH_FNS =
-  $ne: (mv, tv) ->
-    return (if _.isDate(tv) then !DateUtils.isEqual(mv, tv) else mv isnt tv)
+  $ne: (mv, tv) -> return not _.isEqual(mv, tv)
 
   $lt: (mv, tv) ->
     throw Error 'Cannot compare to null' if _.isNull(tv)
@@ -252,7 +251,7 @@ module.exports = class MemoryCursor extends Cursor
       if operators and operators.length # an object might specify $lt, $lte, $gt, $gte, $ne
         return false for operator in operators when !IS_MATCH_FNS[operator](model_value, find_value[operator])
         return true
-      if _.isDate(model_value) then DateUtils.isEqual(model_value, find_value) else (model_value is find_value)
+      return _.isEqual(model_value, find_value)
 
     # early out
     return return callback(null, isMatch(model_json, key_components[0])) if key_components.length is 1

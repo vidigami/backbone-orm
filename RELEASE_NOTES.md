@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.11
+* Added tests for nested json find on dynamic models
+
 ### 0.7.10
 * Bug fix and optimizations for large data sets to use process.nextTick (node) or setImmediate (browser)
 * Bug fix for cache replacing desired model during collection array set
