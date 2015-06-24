@@ -32,6 +32,9 @@ publish =
   Backbone: Backbone
 _.extend(BackboneORM, publish)
 
+# load monkey patches
+require './monkey_patches'
+
 # re-expose modules
 BackboneORM.modules =
   underscore: _
