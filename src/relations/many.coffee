@@ -337,7 +337,6 @@ module.exports = class Many extends (require './relation')
 
     collection = model.attributes[@key]
     collection.models.splice()
-    events = _.clone()
     for method in ['add', 'remove', 'reset'] # unbind
       collection.off(method, events[method])
       events[method] = null

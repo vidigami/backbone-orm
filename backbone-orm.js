@@ -9007,7 +9007,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Utils.unset(model, 'events');
 	    collection = model.attributes[this.key];
 	    collection.models.splice();
-	    events = _.clone();
 	    ref = ['add', 'remove', 'reset'];
 	    for (i = 0, len = ref.length; i < len; i++) {
 	      method = ref[i];
