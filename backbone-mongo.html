@@ -83,7 +83,7 @@ class Project extends Backbone.Model
           <pre><code class="language-javascript">var Change = Backbone.Model.extend({
   model_name: 'Change',
 });
-Task.prototype.sync = require('backbone-orm').sync(Change);
+Change.prototype.sync = require('backbone-orm').sync(Change);
 
 var Task = Backbone.Model.extend({
   urlRoot: 'mongodb://localhost:27017/tasks',
