@@ -1,5 +1,5 @@
 ###
-  backbone-orm.js 0.7.12
+  backbone-orm.js 0.7.13
   Copyright (c) 2013-2014 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
@@ -8,35 +8,36 @@
 
 {Backbone} = require '../core'
 
-# remove regression
-switch Backbone.VERSION
-  when '1.2.1'
-    `
-    // Internal method called by both remove and set.
-    // Returns removed models, or false if nothing is removed.
-    Backbone.Collection.prototype._removeModels = function(models, options) {
-      var removed = [];
-      for (var i = 0; i < models.length; i++) {
-        var model = this.get(models[i]);
-        if (!model) continue;
+# TODO: remove when regression fixed: https://github.com/jashkenas/backbone/issues/3693
+[major, minor] = Backbone.VERSION.split('.')
 
-        // MONKEY PATCH
-        var id = this.modelId(model.attributes);
-        if (id != null) delete this._byId[id];
-        delete this._byId[model.cid];
+if (+major >= 1) and (+minor >=2)
+  `
+  // Internal method called by both remove and set.
+  // Returns removed models, or false if nothing is removed.
+  Backbone.Collection.prototype._removeModels = function(models, options) {
+    var removed = [];
+    for (var i = 0; i < models.length; i++) {
+      var model = this.get(models[i]);
+      if (!model) continue;
 
-        var index = this.indexOf(model);
-        this.models.splice(index, 1);
-        this.length--;
+      // MONKEY PATCH
+      var id = this.modelId(model.attributes);
+      if (id != null) delete this._byId[id];
+      delete this._byId[model.cid];
 
-        if (!options.silent) {
-          options.index = index;
-          model.trigger('remove', model, this, options);
-        }
+      var index = this.indexOf(model);
+      this.models.splice(index, 1);
+      this.length--;
 
-        removed.push(model);
-        this._removeReference(model, options);
+      if (!options.silent) {
+        options.index = index;
+        model.trigger('remove', model, this, options);
       }
-      return removed.length ? removed : false;
+
+      removed.push(model);
+      this._removeReference(model, options);
     }
-    `
+    return removed.length ? removed : false;
+  }
+  `

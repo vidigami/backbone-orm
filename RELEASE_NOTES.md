@@ -1,5 +1,8 @@
 Please refer to the following release notes when upgrading your version of BackboneORM.
 
+### 0.7.13
+* Monkey patch for Backbone 1.2.x regression bug in _removeModels
+
 ### 0.7.12
 * Monkey patch for Backbone 1.2.1 regression bug in _removeModels
 
