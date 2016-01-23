@@ -1,6 +1,6 @@
 /*
   backbone-orm.js 0.7.13
-  Copyright (c) 2013-2015 Vidigami
+  Copyright (c) 2013-2016 Vidigami
   License: MIT (http://www.opensource.org/licenses/mit-license.php)
   Source: https://github.com/vidigami/backbone-orm
   Dependencies: Backbone.js and Underscore.js.
@@ -16,7 +16,7 @@
 		exports["BackboneORM"] = factory(require("underscore"), require("backbone"), (function webpackLoadOptionalExternalModule() { try { return require("stream"); } catch(e) {} }()));
 	else
 		root["BackboneORM"] = factory(root["_"], root["Backbone"], root["stream"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_31__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_37__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -65,8 +65,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -81,18 +81,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	publish = {
 	  configure: __webpack_require__(4),
-	  sync: __webpack_require__(41),
-	  Utils: __webpack_require__(17),
-	  JSONUtils: __webpack_require__(26),
-	  DateUtils: __webpack_require__(34),
-	  TestUtils: __webpack_require__(42),
+	  sync: __webpack_require__(47),
+	  Utils: __webpack_require__(24),
+	  JSONUtils: __webpack_require__(33),
+	  DateUtils: __webpack_require__(40),
+	  TestUtils: __webpack_require__(48),
 	  Queue: __webpack_require__(11),
-	  DatabaseURL: __webpack_require__(25),
-	  Fabricator: __webpack_require__(43),
+	  DatabaseURL: __webpack_require__(32),
+	  Fabricator: __webpack_require__(49),
 	  MemoryStore: __webpack_require__(12),
-	  Cursor: __webpack_require__(36),
-	  Schema: __webpack_require__(37),
-	  ConnectionPool: __webpack_require__(44),
+	  Cursor: __webpack_require__(42),
+	  Schema: __webpack_require__(43),
+	  ConnectionPool: __webpack_require__(50),
 	  BaseConvention: __webpack_require__(7),
 	  _: _,
 	  Backbone: Backbone
@@ -100,19 +100,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_.extend(BackboneORM, publish);
 
-	__webpack_require__(45);
+	__webpack_require__(51);
 
 	BackboneORM.modules = {
 	  underscore: _,
 	  backbone: Backbone,
-	  url: __webpack_require__(18),
-	  querystring: __webpack_require__(20),
+	  url: __webpack_require__(25),
+	  querystring: __webpack_require__(27),
 	  'lru-cache': __webpack_require__(13),
 	  inflection: __webpack_require__(6)
 	};
 
 	try {
-	  BackboneORM.modules.stream = __webpack_require__(31);
+	  BackboneORM.modules.stream = __webpack_require__(37);
 	} catch (undefined) {}
 
 
@@ -597,6 +597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      geese     : new RegExp( '^geese$'                 , 'gi' ),
 	      quizzes   : new RegExp( '(quiz)zes$'              , 'gi' ),
 	      whereases : new RegExp( '^(whereas)es$'           , 'gi' ),
+	      criteria  : new RegExp( '^(criteri)a$'            , 'gi' ),
 	      ss        : new RegExp( 'ss$'                     , 'gi' ),
 	      s         : new RegExp( 's$'                      , 'gi' )
 	    },
@@ -626,6 +627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      goose   : new RegExp( '^goose$'               , 'gi' ),
 	      quiz    : new RegExp( '(quiz)$'               , 'gi' ),
 	      whereas : new RegExp( '^(whereas)$'           , 'gi' ),
+	      criterion : new RegExp( '^(criteri)on$'       , 'gi' ),
 	      s       : new RegExp( 's$'                    , 'gi' ),
 	      common  : new RegExp( '$'                     , 'gi' )
 	    }
@@ -662,6 +664,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ regex.plural.geese     ],
 	    [ regex.plural.quizzes   ],
 	    [ regex.plural.whereases ],
+	    [ regex.plural.criteria  ],
 
 	    // original rule
 	    [ regex.singular.man    , '$1en' ],
@@ -688,6 +691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ regex.singular.goose  , 'geese' ],
 	    [ regex.singular.quiz   , '$1zes' ],
 	    [ regex.singular.whereas, '$1es' ],
+	    [ regex.singular.criterion, '$1a' ],
 
 	    [ regex.singular.s     , 's' ],
 	    [ regex.singular.common, 's' ]
@@ -723,11 +727,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    [ regex.singular.goose   ],
 	    [ regex.singular.quiz    ],
 	    [ regex.singular.whereas ],
+	    [ regex.singular.criterion ],
 
 	    // original rule
 	    [ regex.plural.men      , '$1an' ],
 	    [ regex.plural.people   , '$1rson' ],
 	    [ regex.plural.children , '$1' ],
+	    [ regex.plural.criteria, '$1on'],
 	    [ regex.plural.tia      , '$1um' ],
 	    [ regex.plural.analyses , '$1$2sis' ],
 	    [ regex.plural.hives    , '$1ve' ],
@@ -1286,7 +1292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @public
 	 */
-	  inflector.version = '1.7.1';
+	  inflector.version = '1.8.0';
 
 	  return inflector;
 	}));
@@ -1390,8 +1396,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -1442,7 +1448,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (model_type.prototype._orm_never_cache || !this.createCache(model_type)) {
 	      return sync_fn;
 	    }
-	    return (__webpack_require__(14))(model_type, sync_fn);
+	    return (__webpack_require__(21))(model_type, sync_fn);
 	  };
 
 	  ModelCache.prototype.reset = function() {
@@ -1494,8 +1500,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -1569,8 +1575,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -1648,195 +1654,357 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 13 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	;(function () { // closure for web browsers
+	module.exports = LRUCache
 
-	if (typeof module === 'object' && module.exports) {
-	  module.exports = LRUCache
+	// This will be a proper iterable 'Map' in engines that support it,
+	// or a fakey-fake PseudoMap in older versions.
+	var Map = __webpack_require__(14)
+	var util = __webpack_require__(17)
+
+	// A linked list to keep track of recently-used-ness
+	var Yallist = __webpack_require__(20)
+
+	// use symbols if possible, otherwise just _props
+	var symbols = {}
+	var hasSymbol = typeof Symbol === 'function'
+	var makeSymbol
+	if (hasSymbol) {
+	  makeSymbol = function (key) {
+	    return Symbol.for(key)
+	  }
 	} else {
-	  // just set the global for non-node platforms.
-	  this.LRUCache = LRUCache
+	  makeSymbol = function (key) {
+	    return '_' + key
+	  }
 	}
 
-	function hOP (obj, key) {
-	  return Object.prototype.hasOwnProperty.call(obj, key)
+	function priv (obj, key, val) {
+	  var sym
+	  if (symbols[key]) {
+	    sym = symbols[key]
+	  } else {
+	    sym = makeSymbol(key)
+	    symbols[key] = sym
+	  }
+	  if (arguments.length === 2) {
+	    return obj[sym]
+	  } else {
+	    obj[sym] = val
+	    return val
+	  }
 	}
 
 	function naiveLength () { return 1 }
 
+	// lruList is a yallist where the head is the youngest
+	// item, and the tail is the oldest.  the list contains the Hit
+	// objects as the entries.
+	// Each Hit object has a reference to its Yallist.Node.  This
+	// never changes.
+	//
+	// cache is a Map (or PseudoMap) that matches the keys to
+	// the Yallist.Node object.
 	function LRUCache (options) {
-	  if (!(this instanceof LRUCache))
+	  if (!(this instanceof LRUCache)) {
 	    return new LRUCache(options)
+	  }
 
-	  if (typeof options === 'number')
+	  if (typeof options === 'number') {
 	    options = { max: options }
+	  }
 
-	  if (!options)
+	  if (!options) {
 	    options = {}
+	  }
 
-	  this._max = options.max
+	  var max = priv(this, 'max', options.max)
 	  // Kind of weird to have a default max of Infinity, but oh well.
-	  if (!this._max || !(typeof this._max === "number") || this._max <= 0 )
-	    this._max = Infinity
+	  if (!max ||
+	      !(typeof max === 'number') ||
+	      max <= 0) {
+	    priv(this, 'max', Infinity)
+	  }
 
-	  this._lengthCalculator = options.length || naiveLength
-	  if (typeof this._lengthCalculator !== "function")
-	    this._lengthCalculator = naiveLength
+	  var lc = options.length || naiveLength
+	  if (typeof lc !== 'function') {
+	    lc = naiveLength
+	  }
+	  priv(this, 'lengthCalculator', lc)
 
-	  this._allowStale = options.stale || false
-	  this._maxAge = options.maxAge || null
-	  this._dispose = options.dispose
+	  priv(this, 'allowStale', options.stale || false)
+	  priv(this, 'maxAge', options.maxAge || 0)
+	  priv(this, 'dispose', options.dispose)
 	  this.reset()
 	}
 
 	// resize the cache when the max changes.
-	Object.defineProperty(LRUCache.prototype, "max",
-	  { set : function (mL) {
-	      if (!mL || !(typeof mL === "number") || mL <= 0 ) mL = Infinity
-	      this._max = mL
-	      if (this._length > this._max) trim(this)
+	Object.defineProperty(LRUCache.prototype, 'max', {
+	  set: function (mL) {
+	    if (!mL || !(typeof mL === 'number') || mL <= 0) {
+	      mL = Infinity
 	    }
-	  , get : function () { return this._max }
-	  , enumerable : true
-	  })
+	    priv(this, 'max', mL)
+	    trim(this)
+	  },
+	  get: function () {
+	    return priv(this, 'max')
+	  },
+	  enumerable: true
+	})
+
+	Object.defineProperty(LRUCache.prototype, 'allowStale', {
+	  set: function (allowStale) {
+	    priv(this, 'allowStale', !!allowStale)
+	  },
+	  get: function () {
+	    return priv(this, 'allowStale')
+	  },
+	  enumerable: true
+	})
+
+	Object.defineProperty(LRUCache.prototype, 'maxAge', {
+	  set: function (mA) {
+	    if (!mA || !(typeof mA === 'number') || mA < 0) {
+	      mA = 0
+	    }
+	    priv(this, 'maxAge', mA)
+	    trim(this)
+	  },
+	  get: function () {
+	    return priv(this, 'maxAge')
+	  },
+	  enumerable: true
+	})
 
 	// resize the cache when the lengthCalculator changes.
-	Object.defineProperty(LRUCache.prototype, "lengthCalculator",
-	  { set : function (lC) {
-	      if (typeof lC !== "function") {
-	        this._lengthCalculator = naiveLength
-	        this._length = this._itemCount
-	        for (var key in this._cache) {
-	          this._cache[key].length = 1
-	        }
-	      } else {
-	        this._lengthCalculator = lC
-	        this._length = 0
-	        for (var key in this._cache) {
-	          this._cache[key].length = this._lengthCalculator(this._cache[key].value)
-	          this._length += this._cache[key].length
-	        }
-	      }
-
-	      if (this._length > this._max) trim(this)
+	Object.defineProperty(LRUCache.prototype, 'lengthCalculator', {
+	  set: function (lC) {
+	    if (typeof lC !== 'function') {
+	      lC = naiveLength
 	    }
-	  , get : function () { return this._lengthCalculator }
-	  , enumerable : true
-	  })
+	    if (lC !== priv(this, 'lengthCalculator')) {
+	      priv(this, 'lengthCalculator', lC)
+	      priv(this, 'length', 0)
+	      priv(this, 'lruList').forEach(function (hit) {
+	        hit.length = priv(this, 'lengthCalculator').call(this, hit.value, hit.key)
+	        priv(this, 'length', priv(this, 'length') + hit.length)
+	      }, this)
+	    }
+	    trim(this)
+	  },
+	  get: function () { return priv(this, 'lengthCalculator') },
+	  enumerable: true
+	})
 
-	Object.defineProperty(LRUCache.prototype, "length",
-	  { get : function () { return this._length }
-	  , enumerable : true
-	  })
+	Object.defineProperty(LRUCache.prototype, 'length', {
+	  get: function () { return priv(this, 'length') },
+	  enumerable: true
+	})
 
+	Object.defineProperty(LRUCache.prototype, 'itemCount', {
+	  get: function () { return priv(this, 'lruList').length },
+	  enumerable: true
+	})
 
-	Object.defineProperty(LRUCache.prototype, "itemCount",
-	  { get : function () { return this._itemCount }
-	  , enumerable : true
-	  })
+	LRUCache.prototype.rforEach = function (fn, thisp) {
+	  thisp = thisp || this
+	  for (var walker = priv(this, 'lruList').tail; walker !== null;) {
+	    var prev = walker.prev
+	    forEachStep(this, fn, walker, thisp)
+	    walker = prev
+	  }
+	}
+
+	function forEachStep (self, fn, node, thisp) {
+	  var hit = node.value
+	  if (isStale(self, hit)) {
+	    del(self, node)
+	    if (!priv(self, 'allowStale')) {
+	      hit = undefined
+	    }
+	  }
+	  if (hit) {
+	    fn.call(thisp, hit.value, hit.key, self)
+	  }
+	}
 
 	LRUCache.prototype.forEach = function (fn, thisp) {
 	  thisp = thisp || this
-	  var i = 0
-	  var itemCount = this._itemCount
-
-	  for (var k = this._mru - 1; k >= 0 && i < itemCount; k--) if (this._lruList[k]) {
-	    i++
-	    var hit = this._lruList[k]
-	    if (isStale(this, hit)) {
-	      del(this, hit)
-	      if (!this._allowStale) hit = undefined
-	    }
-	    if (hit) {
-	      fn.call(thisp, hit.value, hit.key, this)
-	    }
+	  for (var walker = priv(this, 'lruList').head; walker !== null;) {
+	    var next = walker.next
+	    forEachStep(this, fn, walker, thisp)
+	    walker = next
 	  }
 	}
 
 	LRUCache.prototype.keys = function () {
-	  var keys = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    keys[i++] = hit.key
-	  }
-	  return keys
+	  return priv(this, 'lruList').toArray().map(function (k) {
+	    return k.key
+	  }, this)
 	}
 
 	LRUCache.prototype.values = function () {
-	  var values = new Array(this._itemCount)
-	  var i = 0
-	  for (var k = this._mru - 1; k >= 0 && i < this._itemCount; k--) if (this._lruList[k]) {
-	    var hit = this._lruList[k]
-	    values[i++] = hit.value
-	  }
-	  return values
+	  return priv(this, 'lruList').toArray().map(function (k) {
+	    return k.value
+	  }, this)
 	}
 
 	LRUCache.prototype.reset = function () {
-	  if (this._dispose && this._cache) {
-	    for (var k in this._cache) {
-	      this._dispose(k, this._cache[k].value)
-	    }
+	  if (priv(this, 'dispose') &&
+	      priv(this, 'lruList') &&
+	      priv(this, 'lruList').length) {
+	    priv(this, 'lruList').forEach(function (hit) {
+	      priv(this, 'dispose').call(this, hit.key, hit.value)
+	    }, this)
 	  }
 
-	  this._cache = Object.create(null) // hash of items by key
-	  this._lruList = Object.create(null) // list of items in order of use recency
-	  this._mru = 0 // most recently used
-	  this._lru = 0 // least recently used
-	  this._length = 0 // number of items in the list
-	  this._itemCount = 0
+	  priv(this, 'cache', new Map()) // hash of items by key
+	  priv(this, 'lruList', new Yallist()) // list of items in order of use recency
+	  priv(this, 'length', 0) // length of items in the list
 	}
 
-	// Provided for debugging/dev purposes only. No promises whatsoever that
-	// this API stays stable.
 	LRUCache.prototype.dump = function () {
-	  return this._cache
+	  return priv(this, 'lruList').map(function (hit) {
+	    if (!isStale(this, hit)) {
+	      return {
+	        k: hit.key,
+	        v: hit.value,
+	        e: hit.now + (hit.maxAge || 0)
+	      }
+	    }
+	  }, this).toArray().filter(function (h) {
+	    return h
+	  })
 	}
 
 	LRUCache.prototype.dumpLru = function () {
-	  return this._lruList
+	  return priv(this, 'lruList')
+	}
+
+	LRUCache.prototype.inspect = function (n, opts) {
+	  var str = 'LRUCache {'
+	  var extras = false
+
+	  var as = priv(this, 'allowStale')
+	  if (as) {
+	    str += '\n  allowStale: true'
+	    extras = true
+	  }
+
+	  var max = priv(this, 'max')
+	  if (max && max !== Infinity) {
+	    if (extras) {
+	      str += ','
+	    }
+	    str += '\n  max: ' + util.inspect(max, opts)
+	    extras = true
+	  }
+
+	  var maxAge = priv(this, 'maxAge')
+	  if (maxAge) {
+	    if (extras) {
+	      str += ','
+	    }
+	    str += '\n  maxAge: ' + util.inspect(maxAge, opts)
+	    extras = true
+	  }
+
+	  var lc = priv(this, 'lengthCalculator')
+	  if (lc && lc !== naiveLength) {
+	    if (extras) {
+	      str += ','
+	    }
+	    str += '\n  length: ' + util.inspect(priv(this, 'length'), opts)
+	    extras = true
+	  }
+
+	  var didFirst = false
+	  priv(this, 'lruList').forEach(function (item) {
+	    if (didFirst) {
+	      str += ',\n  '
+	    } else {
+	      if (extras) {
+	        str += ',\n'
+	      }
+	      didFirst = true
+	      str += '\n  '
+	    }
+	    var key = util.inspect(item.key).split('\n').join('\n  ')
+	    var val = { value: item.value }
+	    if (item.maxAge !== maxAge) {
+	      val.maxAge = item.maxAge
+	    }
+	    if (lc !== naiveLength) {
+	      val.length = item.length
+	    }
+	    if (isStale(this, item)) {
+	      val.stale = true
+	    }
+
+	    val = util.inspect(val, opts).split('\n').join('\n  ')
+	    str += key + ' => ' + val
+	  })
+
+	  if (didFirst || extras) {
+	    str += '\n'
+	  }
+	  str += '}'
+
+	  return str
 	}
 
 	LRUCache.prototype.set = function (key, value, maxAge) {
-	  maxAge = maxAge || this._maxAge
+	  maxAge = maxAge || priv(this, 'maxAge')
+
 	  var now = maxAge ? Date.now() : 0
+	  var len = priv(this, 'lengthCalculator').call(this, value, key)
 
-	  if (hOP(this._cache, key)) {
+	  if (priv(this, 'cache').has(key)) {
+	    if (len > priv(this, 'max')) {
+	      del(this, priv(this, 'cache').get(key))
+	      return false
+	    }
+
+	    var node = priv(this, 'cache').get(key)
+	    var item = node.value
+
 	    // dispose of the old one before overwriting
-	    if (this._dispose)
-	      this._dispose(key, this._cache[key].value)
+	    if (priv(this, 'dispose')) {
+	      priv(this, 'dispose').call(this, key, item.value)
+	    }
 
-	    this._cache[key].now = now
-	    this._cache[key].maxAge = maxAge
-	    this._cache[key].value = value
+	    item.now = now
+	    item.maxAge = maxAge
+	    item.value = value
+	    priv(this, 'length', priv(this, 'length') + (len - item.length))
+	    item.length = len
 	    this.get(key)
+	    trim(this)
 	    return true
 	  }
 
-	  var len = this._lengthCalculator(value)
-	  var hit = new Entry(key, value, this._mru++, len, now, maxAge)
+	  var hit = new Entry(key, value, len, now, maxAge)
 
 	  // oversized objects fall out of cache automatically.
-	  if (hit.length > this._max) {
-	    if (this._dispose) this._dispose(key, value)
+	  if (hit.length > priv(this, 'max')) {
+	    if (priv(this, 'dispose')) {
+	      priv(this, 'dispose').call(this, key, value)
+	    }
 	    return false
 	  }
 
-	  this._length += hit.length
-	  this._lruList[hit.lu] = this._cache[key] = hit
-	  this._itemCount ++
-
-	  if (this._length > this._max)
-	    trim(this)
-
+	  priv(this, 'length', priv(this, 'length') + hit.length)
+	  priv(this, 'lruList').unshift(hit)
+	  priv(this, 'cache').set(key, priv(this, 'lruList').head)
+	  trim(this)
 	  return true
 	}
 
 	LRUCache.prototype.has = function (key) {
-	  if (!hOP(this._cache, key)) return false
-	  var hit = this._cache[key]
+	  if (!priv(this, 'cache').has(key)) return false
+	  var hit = priv(this, 'cache').get(key).value
 	  if (isStale(this, hit)) {
 	    return false
 	  }
@@ -1852,88 +2020,1351 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	LRUCache.prototype.pop = function () {
-	  var hit = this._lruList[this._lru]
-	  del(this, hit)
-	  return hit || null
+	  var node = priv(this, 'lruList').tail
+	  if (!node) return null
+	  del(this, node)
+	  return node.value
 	}
 
 	LRUCache.prototype.del = function (key) {
-	  del(this, this._cache[key])
+	  del(this, priv(this, 'cache').get(key))
+	}
+
+	LRUCache.prototype.load = function (arr) {
+	  // reset the cache
+	  this.reset()
+
+	  var now = Date.now()
+	  // A previous serialized cache has the most recent items first
+	  for (var l = arr.length - 1; l >= 0; l--) {
+	    var hit = arr[l]
+	    var expiresAt = hit.e || 0
+	    if (expiresAt === 0) {
+	      // the item was created without expiration in a non aged cache
+	      this.set(hit.k, hit.v)
+	    } else {
+	      var maxAge = expiresAt - now
+	      // dont add already expired items
+	      if (maxAge > 0) {
+	        this.set(hit.k, hit.v, maxAge)
+	      }
+	    }
+	  }
+	}
+
+	LRUCache.prototype.prune = function () {
+	  var self = this
+	  priv(this, 'cache').forEach(function (value, key) {
+	    get(self, key, false)
+	  })
 	}
 
 	function get (self, key, doUse) {
-	  var hit = self._cache[key]
-	  if (hit) {
+	  var node = priv(self, 'cache').get(key)
+	  if (node) {
+	    var hit = node.value
 	    if (isStale(self, hit)) {
-	      del(self, hit)
-	      if (!self._allowStale) hit = undefined
+	      del(self, node)
+	      if (!priv(self, 'allowStale')) hit = undefined
 	    } else {
-	      if (doUse) use(self, hit)
+	      if (doUse) {
+	        priv(self, 'lruList').unshiftNode(node)
+	      }
 	    }
 	    if (hit) hit = hit.value
 	  }
 	  return hit
 	}
 
-	function isStale(self, hit) {
-	  if (!hit || (!hit.maxAge && !self._maxAge)) return false
-	  var stale = false;
+	function isStale (self, hit) {
+	  if (!hit || (!hit.maxAge && !priv(self, 'maxAge'))) {
+	    return false
+	  }
+	  var stale = false
 	  var diff = Date.now() - hit.now
 	  if (hit.maxAge) {
 	    stale = diff > hit.maxAge
 	  } else {
-	    stale = self._maxAge && (diff > self._maxAge)
+	    stale = priv(self, 'maxAge') && (diff > priv(self, 'maxAge'))
 	  }
-	  return stale;
-	}
-
-	function use (self, hit) {
-	  shiftLU(self, hit)
-	  hit.lu = self._mru ++
-	  self._lruList[hit.lu] = hit
+	  return stale
 	}
 
 	function trim (self) {
-	  while (self._lru < self._mru && self._length > self._max)
-	    del(self, self._lruList[self._lru])
+	  if (priv(self, 'length') > priv(self, 'max')) {
+	    for (var walker = priv(self, 'lruList').tail;
+	         priv(self, 'length') > priv(self, 'max') && walker !== null;) {
+	      // We know that we're about to delete this one, and also
+	      // what the next least recently used key will be, so just
+	      // go ahead and set it now.
+	      var prev = walker.prev
+	      del(self, walker)
+	      walker = prev
+	    }
+	  }
 	}
 
-	function shiftLU (self, hit) {
-	  delete self._lruList[ hit.lu ]
-	  while (self._lru < self._mru && !self._lruList[self._lru]) self._lru ++
-	}
-
-	function del (self, hit) {
-	  if (hit) {
-	    if (self._dispose) self._dispose(hit.key, hit.value)
-	    self._length -= hit.length
-	    self._itemCount --
-	    delete self._cache[ hit.key ]
-	    shiftLU(self, hit)
+	function del (self, node) {
+	  if (node) {
+	    var hit = node.value
+	    if (priv(self, 'dispose')) {
+	      priv(self, 'dispose').call(this, hit.key, hit.value)
+	    }
+	    priv(self, 'length', priv(self, 'length') - hit.length)
+	    priv(self, 'cache').delete(hit.key)
+	    priv(self, 'lruList').removeNode(node)
 	  }
 	}
 
 	// classy, since V8 prefers predictable objects.
-	function Entry (key, value, lu, length, now, maxAge) {
+	function Entry (key, value, length, now, maxAge) {
 	  this.key = key
 	  this.value = value
-	  this.lu = lu
 	  this.length = length
 	  this.now = now
-	  if (maxAge) this.maxAge = maxAge
+	  this.maxAge = maxAge || 0
 	}
-
-	})()
 
 
 /***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(process) {if (process.env.npm_package_name === 'pseudomap' &&
+	    process.env.npm_lifecycle_script === 'test')
+	  process.env.TEST_PSEUDOMAP = 'true'
+
+	if (typeof Map === 'function' && !process.env.TEST_PSEUDOMAP) {
+	  module.exports = Map
+	} else {
+	  module.exports = __webpack_require__(16)
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	var hasOwnProperty = Object.prototype.hasOwnProperty
+
+	module.exports = PseudoMap
+
+	function PseudoMap (set) {
+	  if (!(this instanceof PseudoMap)) // whyyyyyyy
+	    throw new TypeError("Constructor PseudoMap requires 'new'")
+
+	  this.clear()
+
+	  if (set) {
+	    if ((set instanceof PseudoMap) ||
+	        (typeof Map === 'function' && set instanceof Map))
+	      set.forEach(function (value, key) {
+	        this.set(key, value)
+	      }, this)
+	    else if (Array.isArray(set))
+	      set.forEach(function (kv) {
+	        this.set(kv[0], kv[1])
+	      }, this)
+	    else
+	      throw new TypeError('invalid argument')
+	  }
+	}
+
+	PseudoMap.prototype.forEach = function (fn, thisp) {
+	  thisp = thisp || this
+	  Object.keys(this._data).forEach(function (k) {
+	    if (k !== 'size')
+	      fn.call(thisp, this._data[k].value, this._data[k].key)
+	  }, this)
+	}
+
+	PseudoMap.prototype.has = function (k) {
+	  return !!find(this._data, k)
+	}
+
+	PseudoMap.prototype.get = function (k) {
+	  var res = find(this._data, k)
+	  return res && res.value
+	}
+
+	PseudoMap.prototype.set = function (k, v) {
+	  set(this._data, k, v)
+	}
+
+	PseudoMap.prototype.delete = function (k) {
+	  var res = find(this._data, k)
+	  if (res) {
+	    delete this._data[res._index]
+	    this._data.size--
+	  }
+	}
+
+	PseudoMap.prototype.clear = function () {
+	  var data = Object.create(null)
+	  data.size = 0
+
+	  Object.defineProperty(this, '_data', {
+	    value: data,
+	    enumerable: false,
+	    configurable: true,
+	    writable: false
+	  })
+	}
+
+	Object.defineProperty(PseudoMap.prototype, 'size', {
+	  get: function () {
+	    return this._data.size
+	  },
+	  set: function (n) {},
+	  enumerable: true,
+	  configurable: true
+	})
+
+	PseudoMap.prototype.values =
+	PseudoMap.prototype.keys =
+	PseudoMap.prototype.entries = function () {
+	  throw new Error('iterators are not implemented in this version')
+	}
+
+	// Either identical, or both NaN
+	function same (a, b) {
+	  return a === b || a !== a && b !== b
+	}
+
+	function Entry (k, v, i) {
+	  this.key = k
+	  this.value = v
+	  this._index = i
+	}
+
+	function find (data, k) {
+	  for (var i = 0, s = '_' + k, key = s;
+	       hasOwnProperty.call(data, key);
+	       key = s + i++) {
+	    if (same(data[key].key, k))
+	      return data[key]
+	  }
+	}
+
+	function set (data, k, v) {
+	  for (var i = 0, s = '_' + k, key = s;
+	       hasOwnProperty.call(data, key);
+	       key = s + i++) {
+	    if (same(data[key].key, k)) {
+	      data[key].value = v
+	      return
+	    }
+	  }
+	  data.size++
+	  data[key] = new Entry(k, v, key)
+	}
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	var formatRegExp = /%[sdj%]/g;
+	exports.format = function(f) {
+	  if (!isString(f)) {
+	    var objects = [];
+	    for (var i = 0; i < arguments.length; i++) {
+	      objects.push(inspect(arguments[i]));
+	    }
+	    return objects.join(' ');
+	  }
+
+	  var i = 1;
+	  var args = arguments;
+	  var len = args.length;
+	  var str = String(f).replace(formatRegExp, function(x) {
+	    if (x === '%%') return '%';
+	    if (i >= len) return x;
+	    switch (x) {
+	      case '%s': return String(args[i++]);
+	      case '%d': return Number(args[i++]);
+	      case '%j':
+	        try {
+	          return JSON.stringify(args[i++]);
+	        } catch (_) {
+	          return '[Circular]';
+	        }
+	      default:
+	        return x;
+	    }
+	  });
+	  for (var x = args[i]; i < len; x = args[++i]) {
+	    if (isNull(x) || !isObject(x)) {
+	      str += ' ' + x;
+	    } else {
+	      str += ' ' + inspect(x);
+	    }
+	  }
+	  return str;
+	};
+
+
+	// Mark that a method should not be used.
+	// Returns a modified function which warns once by default.
+	// If --no-deprecation is set, then it is a no-op.
+	exports.deprecate = function(fn, msg) {
+	  // Allow for deprecating things in the process of starting up.
+	  if (isUndefined(global.process)) {
+	    return function() {
+	      return exports.deprecate(fn, msg).apply(this, arguments);
+	    };
+	  }
+
+	  if (process.noDeprecation === true) {
+	    return fn;
+	  }
+
+	  var warned = false;
+	  function deprecated() {
+	    if (!warned) {
+	      if (process.throwDeprecation) {
+	        throw new Error(msg);
+	      } else if (process.traceDeprecation) {
+	        console.trace(msg);
+	      } else {
+	        console.error(msg);
+	      }
+	      warned = true;
+	    }
+	    return fn.apply(this, arguments);
+	  }
+
+	  return deprecated;
+	};
+
+
+	var debugs = {};
+	var debugEnviron;
+	exports.debuglog = function(set) {
+	  if (isUndefined(debugEnviron))
+	    debugEnviron = process.env.NODE_DEBUG || '';
+	  set = set.toUpperCase();
+	  if (!debugs[set]) {
+	    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+	      var pid = process.pid;
+	      debugs[set] = function() {
+	        var msg = exports.format.apply(exports, arguments);
+	        console.error('%s %d: %s', set, pid, msg);
+	      };
+	    } else {
+	      debugs[set] = function() {};
+	    }
+	  }
+	  return debugs[set];
+	};
+
+
+	/**
+	 * Echos the value of a value. Trys to print the value out
+	 * in the best way possible given the different types.
+	 *
+	 * @param {Object} obj The object to print out.
+	 * @param {Object} opts Optional options object that alters the output.
+	 */
+	/* legacy: obj, showHidden, depth, colors*/
+	function inspect(obj, opts) {
+	  // default options
+	  var ctx = {
+	    seen: [],
+	    stylize: stylizeNoColor
+	  };
+	  // legacy...
+	  if (arguments.length >= 3) ctx.depth = arguments[2];
+	  if (arguments.length >= 4) ctx.colors = arguments[3];
+	  if (isBoolean(opts)) {
+	    // legacy...
+	    ctx.showHidden = opts;
+	  } else if (opts) {
+	    // got an "options" object
+	    exports._extend(ctx, opts);
+	  }
+	  // set default options
+	  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+	  if (isUndefined(ctx.depth)) ctx.depth = 2;
+	  if (isUndefined(ctx.colors)) ctx.colors = false;
+	  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+	  if (ctx.colors) ctx.stylize = stylizeWithColor;
+	  return formatValue(ctx, obj, ctx.depth);
+	}
+	exports.inspect = inspect;
+
+
+	// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+	inspect.colors = {
+	  'bold' : [1, 22],
+	  'italic' : [3, 23],
+	  'underline' : [4, 24],
+	  'inverse' : [7, 27],
+	  'white' : [37, 39],
+	  'grey' : [90, 39],
+	  'black' : [30, 39],
+	  'blue' : [34, 39],
+	  'cyan' : [36, 39],
+	  'green' : [32, 39],
+	  'magenta' : [35, 39],
+	  'red' : [31, 39],
+	  'yellow' : [33, 39]
+	};
+
+	// Don't use 'blue' not visible on cmd.exe
+	inspect.styles = {
+	  'special': 'cyan',
+	  'number': 'yellow',
+	  'boolean': 'yellow',
+	  'undefined': 'grey',
+	  'null': 'bold',
+	  'string': 'green',
+	  'date': 'magenta',
+	  // "name": intentionally not styling
+	  'regexp': 'red'
+	};
+
+
+	function stylizeWithColor(str, styleType) {
+	  var style = inspect.styles[styleType];
+
+	  if (style) {
+	    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+	           '\u001b[' + inspect.colors[style][1] + 'm';
+	  } else {
+	    return str;
+	  }
+	}
+
+
+	function stylizeNoColor(str, styleType) {
+	  return str;
+	}
+
+
+	function arrayToHash(array) {
+	  var hash = {};
+
+	  array.forEach(function(val, idx) {
+	    hash[val] = true;
+	  });
+
+	  return hash;
+	}
+
+
+	function formatValue(ctx, value, recurseTimes) {
+	  // Provide a hook for user-specified inspect functions.
+	  // Check that value is an object with an inspect function on it
+	  if (ctx.customInspect &&
+	      value &&
+	      isFunction(value.inspect) &&
+	      // Filter out the util module, it's inspect function is special
+	      value.inspect !== exports.inspect &&
+	      // Also filter out any prototype objects using the circular check.
+	      !(value.constructor && value.constructor.prototype === value)) {
+	    var ret = value.inspect(recurseTimes, ctx);
+	    if (!isString(ret)) {
+	      ret = formatValue(ctx, ret, recurseTimes);
+	    }
+	    return ret;
+	  }
+
+	  // Primitive types cannot have properties
+	  var primitive = formatPrimitive(ctx, value);
+	  if (primitive) {
+	    return primitive;
+	  }
+
+	  // Look up the keys of the object.
+	  var keys = Object.keys(value);
+	  var visibleKeys = arrayToHash(keys);
+
+	  if (ctx.showHidden) {
+	    keys = Object.getOwnPropertyNames(value);
+	  }
+
+	  // IE doesn't make error fields non-enumerable
+	  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+	  if (isError(value)
+	      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+	    return formatError(value);
+	  }
+
+	  // Some type of object without properties can be shortcutted.
+	  if (keys.length === 0) {
+	    if (isFunction(value)) {
+	      var name = value.name ? ': ' + value.name : '';
+	      return ctx.stylize('[Function' + name + ']', 'special');
+	    }
+	    if (isRegExp(value)) {
+	      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+	    }
+	    if (isDate(value)) {
+	      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+	    }
+	    if (isError(value)) {
+	      return formatError(value);
+	    }
+	  }
+
+	  var base = '', array = false, braces = ['{', '}'];
+
+	  // Make Array say that they are Array
+	  if (isArray(value)) {
+	    array = true;
+	    braces = ['[', ']'];
+	  }
+
+	  // Make functions say that they are functions
+	  if (isFunction(value)) {
+	    var n = value.name ? ': ' + value.name : '';
+	    base = ' [Function' + n + ']';
+	  }
+
+	  // Make RegExps say that they are RegExps
+	  if (isRegExp(value)) {
+	    base = ' ' + RegExp.prototype.toString.call(value);
+	  }
+
+	  // Make dates with properties first say the date
+	  if (isDate(value)) {
+	    base = ' ' + Date.prototype.toUTCString.call(value);
+	  }
+
+	  // Make error with message first say the error
+	  if (isError(value)) {
+	    base = ' ' + formatError(value);
+	  }
+
+	  if (keys.length === 0 && (!array || value.length == 0)) {
+	    return braces[0] + base + braces[1];
+	  }
+
+	  if (recurseTimes < 0) {
+	    if (isRegExp(value)) {
+	      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+	    } else {
+	      return ctx.stylize('[Object]', 'special');
+	    }
+	  }
+
+	  ctx.seen.push(value);
+
+	  var output;
+	  if (array) {
+	    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+	  } else {
+	    output = keys.map(function(key) {
+	      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+	    });
+	  }
+
+	  ctx.seen.pop();
+
+	  return reduceToSingleString(output, base, braces);
+	}
+
+
+	function formatPrimitive(ctx, value) {
+	  if (isUndefined(value))
+	    return ctx.stylize('undefined', 'undefined');
+	  if (isString(value)) {
+	    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+	                                             .replace(/'/g, "\\'")
+	                                             .replace(/\\"/g, '"') + '\'';
+	    return ctx.stylize(simple, 'string');
+	  }
+	  if (isNumber(value))
+	    return ctx.stylize('' + value, 'number');
+	  if (isBoolean(value))
+	    return ctx.stylize('' + value, 'boolean');
+	  // For some reason typeof null is "object", so special case here.
+	  if (isNull(value))
+	    return ctx.stylize('null', 'null');
+	}
+
+
+	function formatError(value) {
+	  return '[' + Error.prototype.toString.call(value) + ']';
+	}
+
+
+	function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+	  var output = [];
+	  for (var i = 0, l = value.length; i < l; ++i) {
+	    if (hasOwnProperty(value, String(i))) {
+	      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+	          String(i), true));
+	    } else {
+	      output.push('');
+	    }
+	  }
+	  keys.forEach(function(key) {
+	    if (!key.match(/^\d+$/)) {
+	      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+	          key, true));
+	    }
+	  });
+	  return output;
+	}
+
+
+	function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+	  var name, str, desc;
+	  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+	  if (desc.get) {
+	    if (desc.set) {
+	      str = ctx.stylize('[Getter/Setter]', 'special');
+	    } else {
+	      str = ctx.stylize('[Getter]', 'special');
+	    }
+	  } else {
+	    if (desc.set) {
+	      str = ctx.stylize('[Setter]', 'special');
+	    }
+	  }
+	  if (!hasOwnProperty(visibleKeys, key)) {
+	    name = '[' + key + ']';
+	  }
+	  if (!str) {
+	    if (ctx.seen.indexOf(desc.value) < 0) {
+	      if (isNull(recurseTimes)) {
+	        str = formatValue(ctx, desc.value, null);
+	      } else {
+	        str = formatValue(ctx, desc.value, recurseTimes - 1);
+	      }
+	      if (str.indexOf('\n') > -1) {
+	        if (array) {
+	          str = str.split('\n').map(function(line) {
+	            return '  ' + line;
+	          }).join('\n').substr(2);
+	        } else {
+	          str = '\n' + str.split('\n').map(function(line) {
+	            return '   ' + line;
+	          }).join('\n');
+	        }
+	      }
+	    } else {
+	      str = ctx.stylize('[Circular]', 'special');
+	    }
+	  }
+	  if (isUndefined(name)) {
+	    if (array && key.match(/^\d+$/)) {
+	      return str;
+	    }
+	    name = JSON.stringify('' + key);
+	    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+	      name = name.substr(1, name.length - 2);
+	      name = ctx.stylize(name, 'name');
+	    } else {
+	      name = name.replace(/'/g, "\\'")
+	                 .replace(/\\"/g, '"')
+	                 .replace(/(^"|"$)/g, "'");
+	      name = ctx.stylize(name, 'string');
+	    }
+	  }
+
+	  return name + ': ' + str;
+	}
+
+
+	function reduceToSingleString(output, base, braces) {
+	  var numLinesEst = 0;
+	  var length = output.reduce(function(prev, cur) {
+	    numLinesEst++;
+	    if (cur.indexOf('\n') >= 0) numLinesEst++;
+	    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+	  }, 0);
+
+	  if (length > 60) {
+	    return braces[0] +
+	           (base === '' ? '' : base + '\n ') +
+	           ' ' +
+	           output.join(',\n  ') +
+	           ' ' +
+	           braces[1];
+	  }
+
+	  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+	}
+
+
+	// NOTE: These type checking functions intentionally don't use `instanceof`
+	// because it is fragile and can be easily faked with `Object.create()`.
+	function isArray(ar) {
+	  return Array.isArray(ar);
+	}
+	exports.isArray = isArray;
+
+	function isBoolean(arg) {
+	  return typeof arg === 'boolean';
+	}
+	exports.isBoolean = isBoolean;
+
+	function isNull(arg) {
+	  return arg === null;
+	}
+	exports.isNull = isNull;
+
+	function isNullOrUndefined(arg) {
+	  return arg == null;
+	}
+	exports.isNullOrUndefined = isNullOrUndefined;
+
+	function isNumber(arg) {
+	  return typeof arg === 'number';
+	}
+	exports.isNumber = isNumber;
+
+	function isString(arg) {
+	  return typeof arg === 'string';
+	}
+	exports.isString = isString;
+
+	function isSymbol(arg) {
+	  return typeof arg === 'symbol';
+	}
+	exports.isSymbol = isSymbol;
+
+	function isUndefined(arg) {
+	  return arg === void 0;
+	}
+	exports.isUndefined = isUndefined;
+
+	function isRegExp(re) {
+	  return isObject(re) && objectToString(re) === '[object RegExp]';
+	}
+	exports.isRegExp = isRegExp;
+
+	function isObject(arg) {
+	  return typeof arg === 'object' && arg !== null;
+	}
+	exports.isObject = isObject;
+
+	function isDate(d) {
+	  return isObject(d) && objectToString(d) === '[object Date]';
+	}
+	exports.isDate = isDate;
+
+	function isError(e) {
+	  return isObject(e) &&
+	      (objectToString(e) === '[object Error]' || e instanceof Error);
+	}
+	exports.isError = isError;
+
+	function isFunction(arg) {
+	  return typeof arg === 'function';
+	}
+	exports.isFunction = isFunction;
+
+	function isPrimitive(arg) {
+	  return arg === null ||
+	         typeof arg === 'boolean' ||
+	         typeof arg === 'number' ||
+	         typeof arg === 'string' ||
+	         typeof arg === 'symbol' ||  // ES6 symbol
+	         typeof arg === 'undefined';
+	}
+	exports.isPrimitive = isPrimitive;
+
+	exports.isBuffer = __webpack_require__(18);
+
+	function objectToString(o) {
+	  return Object.prototype.toString.call(o);
+	}
+
+
+	function pad(n) {
+	  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+	}
+
+
+	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+	              'Oct', 'Nov', 'Dec'];
+
+	// 26 Feb 16:19:34
+	function timestamp() {
+	  var d = new Date();
+	  var time = [pad(d.getHours()),
+	              pad(d.getMinutes()),
+	              pad(d.getSeconds())].join(':');
+	  return [d.getDate(), months[d.getMonth()], time].join(' ');
+	}
+
+
+	// log is just a thin wrapper to console.log that prepends a timestamp
+	exports.log = function() {
+	  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+	};
+
+
+	/**
+	 * Inherit the prototype methods from one constructor into another.
+	 *
+	 * The Function.prototype.inherits from lang.js rewritten as a standalone
+	 * function (not on Function.prototype). NOTE: If this file is to be loaded
+	 * during bootstrapping this function needs to be rewritten using some native
+	 * functions as prototype setup using normal JavaScript does not work as
+	 * expected during bootstrapping (see mirror.js in r114903).
+	 *
+	 * @param {function} ctor Constructor function which needs to inherit the
+	 *     prototype.
+	 * @param {function} superCtor Constructor function to inherit prototype from.
+	 */
+	exports.inherits = __webpack_require__(19);
+
+	exports._extend = function(origin, add) {
+	  // Don't do anything if add isn't an object
+	  if (!add || !isObject(add)) return origin;
+
+	  var keys = Object.keys(add);
+	  var i = keys.length;
+	  while (i--) {
+	    origin[keys[i]] = add[keys[i]];
+	  }
+	  return origin;
+	};
+
+	function hasOwnProperty(obj, prop) {
+	  return Object.prototype.hasOwnProperty.call(obj, prop);
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(15)))
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	module.exports = function isBuffer(arg) {
+	  return arg && typeof arg === 'object'
+	    && typeof arg.copy === 'function'
+	    && typeof arg.fill === 'function'
+	    && typeof arg.readUInt8 === 'function';
+	}
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	if (typeof Object.create === 'function') {
+	  // implementation from standard node.js 'util' module
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    ctor.prototype = Object.create(superCtor.prototype, {
+	      constructor: {
+	        value: ctor,
+	        enumerable: false,
+	        writable: true,
+	        configurable: true
+	      }
+	    });
+	  };
+	} else {
+	  // old school shim for old browsers
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    var TempCtor = function () {}
+	    TempCtor.prototype = superCtor.prototype
+	    ctor.prototype = new TempCtor()
+	    ctor.prototype.constructor = ctor
+	  }
+	}
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	module.exports = Yallist
+
+	Yallist.Node = Node
+	Yallist.create = Yallist
+
+	function Yallist (list) {
+	  var self = this
+	  if (!(self instanceof Yallist)) {
+	    self = new Yallist()
+	  }
+
+	  self.tail = null
+	  self.head = null
+	  self.length = 0
+
+	  if (list && typeof list.forEach === 'function') {
+	    list.forEach(function (item) {
+	      self.push(item)
+	    })
+	  } else if (arguments.length > 0) {
+	    for (var i = 0, l = arguments.length; i < l; i++) {
+	      self.push(arguments[i])
+	    }
+	  }
+
+	  return self
+	}
+
+	Yallist.prototype.removeNode = function (node) {
+	  if (node.list !== this) {
+	    throw new Error('removing node which does not belong to this list')
+	  }
+
+	  var next = node.next
+	  var prev = node.prev
+
+	  if (next) {
+	    next.prev = prev
+	  }
+
+	  if (prev) {
+	    prev.next = next
+	  }
+
+	  if (node === this.head) {
+	    this.head = next
+	  }
+	  if (node === this.tail) {
+	    this.tail = prev
+	  }
+
+	  node.list.length --
+	  node.next = null
+	  node.prev = null
+	  node.list = null
+	}
+
+	Yallist.prototype.unshiftNode = function (node) {
+	  if (node === this.head) {
+	    return
+	  }
+
+	  if (node.list) {
+	    node.list.removeNode(node)
+	  }
+
+	  var head = this.head
+	  node.list = this
+	  node.next = head
+	  if (head) {
+	    head.prev = node
+	  }
+
+	  this.head = node
+	  if (!this.tail) {
+	    this.tail = node
+	  }
+	  this.length ++
+	}
+
+	Yallist.prototype.pushNode = function (node) {
+	  if (node === this.tail) {
+	    return
+	  }
+
+	  if (node.list) {
+	    node.list.removeNode(node)
+	  }
+
+	  var tail = this.tail
+	  node.list = this
+	  node.prev = tail
+	  if (tail) {
+	    tail.next = node
+	  }
+
+	  this.tail = node
+	  if (!this.head) {
+	    this.head = node
+	  }
+	  this.length ++
+	}
+
+	Yallist.prototype.push = function () {
+	  for (var i = 0, l = arguments.length; i < l; i++) {
+	    push(this, arguments[i])
+	  }
+	  return this.length
+	}
+
+	Yallist.prototype.unshift = function () {
+	  for (var i = 0, l = arguments.length; i < l; i++) {
+	    unshift(this, arguments[i])
+	  }
+	  return this.length
+	}
+
+	Yallist.prototype.pop = function () {
+	  if (!this.tail)
+	    return undefined
+
+	  var res = this.tail.value
+	  this.tail = this.tail.prev
+	  this.tail.next = null
+	  this.length --
+	  return res
+	}
+
+	Yallist.prototype.shift = function () {
+	  if (!this.head)
+	    return undefined
+
+	  var res = this.head.value
+	  this.head = this.head.next
+	  this.head.prev = null
+	  this.length --
+	  return res
+	}
+
+	Yallist.prototype.forEach = function (fn, thisp) {
+	  thisp = thisp || this
+	  for (var walker = this.head, i = 0; walker !== null; i++) {
+	    fn.call(thisp, walker.value, i, this)
+	    walker = walker.next
+	  }
+	}
+
+	Yallist.prototype.forEachReverse = function (fn, thisp) {
+	  thisp = thisp || this
+	  for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
+	    fn.call(thisp, walker.value, i, this)
+	    walker = walker.prev
+	  }
+	}
+
+	Yallist.prototype.get = function (n) {
+	  for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
+	    // abort out of the list early if we hit a cycle
+	    walker = walker.next
+	  }
+	  if (i === n && walker !== null) {
+	    return walker.value
+	  }
+	}
+
+	Yallist.prototype.getReverse = function (n) {
+	  for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
+	    // abort out of the list early if we hit a cycle
+	    walker = walker.prev
+	  }
+	  if (i === n && walker !== null) {
+	    return walker.value
+	  }
+	}
+
+	Yallist.prototype.map = function (fn, thisp) {
+	  thisp = thisp || this
+	  var res = new Yallist()
+	  for (var walker = this.head; walker !== null; ) {
+	    res.push(fn.call(thisp, walker.value, this))
+	    walker = walker.next
+	  }
+	  return res
+	}
+
+	Yallist.prototype.mapReverse = function (fn, thisp) {
+	  thisp = thisp || this
+	  var res = new Yallist()
+	  for (var walker = this.tail; walker !== null;) {
+	    res.push(fn.call(thisp, walker.value, this))
+	    walker = walker.prev
+	  }
+	  return res
+	}
+
+	Yallist.prototype.reduce = function (fn, initial) {
+	  var acc
+	  var walker = this.head
+	  if (arguments.length > 1) {
+	    acc = initial
+	  } else if (this.head) {
+	    walker = this.head.next
+	    acc = this.head.value
+	  } else {
+	    throw new TypeError('Reduce of empty list with no initial value')
+	  }
+
+	  for (var i = 0; walker !== null; i++) {
+	    acc = fn(acc, walker.value, i)
+	    walker = walker.next
+	  }
+
+	  return acc
+	}
+
+	Yallist.prototype.reduceReverse = function (fn, initial) {
+	  var acc
+	  var walker = this.tail
+	  if (arguments.length > 1) {
+	    acc = initial
+	  } else if (this.tail) {
+	    walker = this.tail.prev
+	    acc = this.tail.value
+	  } else {
+	    throw new TypeError('Reduce of empty list with no initial value')
+	  }
+
+	  for (var i = this.length - 1; walker !== null; i--) {
+	    acc = fn(acc, walker.value, i)
+	    walker = walker.prev
+	  }
+
+	  return acc
+	}
+
+	Yallist.prototype.toArray = function () {
+	  var arr = new Array(this.length)
+	  for (var i = 0, walker = this.head; walker !== null; i++) {
+	    arr[i] = walker.value
+	    walker = walker.next
+	  }
+	  return arr
+	}
+
+	Yallist.prototype.toArrayReverse = function () {
+	  var arr = new Array(this.length)
+	  for (var i = 0, walker = this.tail; walker !== null; i++) {
+	    arr[i] = walker.value
+	    walker = walker.prev
+	  }
+	  return arr
+	}
+
+	Yallist.prototype.slice = function (from, to) {
+	  to = to || this.length
+	  if (to < 0) {
+	    to += this.length
+	  }
+	  from = from || 0
+	  if (from < 0) {
+	    from += this.length
+	  }
+	  var ret = new Yallist()
+	  if (to < from || to < 0) {
+	    return ret
+	  }
+	  if (from < 0) {
+	    from = 0
+	  }
+	  if (to > this.length) {
+	    to = this.length
+	  }
+	  for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
+	    walker = walker.next
+	  }
+	  for (; walker !== null && i < to; i++, walker = walker.next) {
+	    ret.push(walker.value)
+	  }
+	  return ret
+	}
+
+	Yallist.prototype.sliceReverse = function (from, to) {
+	  to = to || this.length
+	  if (to < 0) {
+	    to += this.length
+	  }
+	  from = from || 0
+	  if (from < 0) {
+	    from += this.length
+	  }
+	  var ret = new Yallist()
+	  if (to < from || to < 0) {
+	    return ret
+	  }
+	  if (from < 0) {
+	    from = 0
+	  }
+	  if (to > this.length) {
+	    to = this.length
+	  }
+	  for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
+	    walker = walker.prev
+	  }
+	  for (; walker !== null && i > from; i--, walker = walker.prev) {
+	    ret.push(walker.value)
+	  }
+	  return ret
+	}
+
+	Yallist.prototype.reverse = function () {
+	  var head = this.head
+	  var tail = this.tail
+	  for (var walker = head; walker !== null; walker = walker.prev) {
+	    var p = walker.prev
+	    walker.prev = walker.next
+	    walker.next = p
+	  }
+	  this.head = tail
+	  this.tail = head
+	  return this
+	}
+
+	function push (self, item) {
+	  self.tail = new Node(item, self.tail, null, self)
+	  if (!self.head) {
+	    self.head = self.tail
+	  }
+	  self.length ++
+	}
+
+	function unshift (self, item) {
+	  self.head = new Node(item, null, self.head, self)
+	  if (!self.tail) {
+	    self.tail = self.head
+	  }
+	  self.length ++
+	}
+
+	function Node (value, prev, next, list) {
+	  if (!(this instanceof Node)) {
+	    return new Node(value, prev, next, list)
+	  }
+
+	  this.list = list
+	  this.value = value
+
+	  if (prev) {
+	    prev.next = this
+	    this.prev = prev
+	  } else {
+	    this.prev = null
+	  }
+
+	  if (next) {
+	    next.prev = this
+	    this.next = next
+	  } else {
+	    this.next = null
+	  }
+	}
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -1942,11 +3373,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	CacheCursor = __webpack_require__(15);
+	CacheCursor = __webpack_require__(22);
 
-	Schema = __webpack_require__(37);
+	Schema = __webpack_require__(43);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
 	bbCallback = Utils.bbCallback;
 
@@ -2096,13 +3527,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -2126,17 +3557,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return CacheCursor;
 
-	})(__webpack_require__(16));
+	})(__webpack_require__(23));
 
 
 /***/ },
-/* 16 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -2150,13 +3581,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
-	DateUtils = __webpack_require__(34);
+	DateUtils = __webpack_require__(40);
 
-	Cursor = __webpack_require__(36);
+	Cursor = __webpack_require__(42);
 
 	IS_MATCH_FNS = {
 	  $ne: function(mv, tv) {
@@ -2639,13 +4070,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -2654,7 +4085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	URL = __webpack_require__(18);
+	URL = __webpack_require__(25);
 
 	Backbone = __webpack_require__(2);
 
@@ -2662,13 +4093,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(3);
 
-	DatabaseURL = __webpack_require__(25);
+	DatabaseURL = __webpack_require__(32);
 
 	Queue = __webpack_require__(11);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
-	IterationUtils = __webpack_require__(27);
+	IterationUtils = __webpack_require__(34);
 
 	modelExtensions = null;
 
@@ -2815,7 +4246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  Utils.configureModelType = function(type) {
-	    modelExtensions || (modelExtensions = __webpack_require__(29));
+	    modelExtensions || (modelExtensions = __webpack_require__(35));
 	    return modelExtensions(type);
 	  };
 
@@ -3080,7 +4511,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -3106,7 +4537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var punycode = { encode : function (s) { return s } };
 	var _ = __webpack_require__(1);
-	var shims = __webpack_require__(19);
+	var shims = __webpack_require__(26);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -3178,7 +4609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      'gopher:': true,
 	      'file:': true
 	    },
-	    querystring = __webpack_require__(20);
+	    querystring = __webpack_require__(27);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
 	  if (url && _.isObject(url) && url instanceof Url) return url;
@@ -3786,7 +5217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 26 */
 /***/ function(module, exports) {
 
 	//
@@ -3826,7 +5257,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
@@ -4044,22 +5475,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return obj;
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28).Buffer))
 
 /***/ },
-/* 21 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {/*!
+	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
 	 * The buffer module from node.js, for the browser.
 	 *
 	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
 	 * @license  MIT
 	 */
+	/* eslint-disable no-proto */
 
-	var base64 = __webpack_require__(22)
-	var ieee754 = __webpack_require__(23)
-	var isArray = __webpack_require__(24)
+	'use strict'
+
+	var base64 = __webpack_require__(29)
+	var ieee754 = __webpack_require__(30)
+	var isArray = __webpack_require__(31)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -4095,7 +5529,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
 	 * get the Object implementation, which is slower but behaves correctly.
 	 */
-	Buffer.TYPED_ARRAY_SUPPORT = (function () {
+	Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+	  ? global.TYPED_ARRAY_SUPPORT
+	  : typedArraySupport()
+
+	function typedArraySupport () {
 	  function Bar () {}
 	  try {
 	    var arr = new Uint8Array(1)
@@ -4108,7 +5546,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } catch (e) {
 	    return false
 	  }
-	})()
+	}
 
 	function kMaxLength () {
 	  return Buffer.TYPED_ARRAY_SUPPORT
@@ -4135,8 +5573,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new Buffer(arg)
 	  }
 
-	  this.length = 0
-	  this.parent = undefined
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+	    this.length = 0
+	    this.parent = undefined
+	  }
 
 	  // Common case.
 	  if (typeof arg === 'number') {
@@ -4264,10 +5704,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return that
 	}
 
+	if (Buffer.TYPED_ARRAY_SUPPORT) {
+	  Buffer.prototype.__proto__ = Uint8Array.prototype
+	  Buffer.__proto__ = Uint8Array
+	} else {
+	  // pre-set for values that may exist in the future
+	  Buffer.prototype.length = undefined
+	  Buffer.prototype.parent = undefined
+	}
+
 	function allocate (that, length) {
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    // Return an augmented `Uint8Array` instance, for best performance
 	    that = Buffer._augment(new Uint8Array(length))
+	    that.__proto__ = Buffer.prototype
 	  } else {
 	    // Fallback: Return an object instance of the Buffer class
 	    that.length = length
@@ -4410,10 +5860,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 	Buffer.byteLength = byteLength
-
-	// pre-set for values that may exist in the future
-	Buffer.prototype.length = undefined
-	Buffer.prototype.parent = undefined
 
 	function slowToString (encoding, start, end) {
 	  var loweredCase = false
@@ -5056,7 +6502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  offset = offset | 0
 	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
 	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
-	  this[offset] = value
+	  this[offset] = (value & 0xff)
 	  return offset + 1
 	}
 
@@ -5073,7 +6519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  offset = offset | 0
 	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = value
+	    this[offset] = (value & 0xff)
 	    this[offset + 1] = (value >>> 8)
 	  } else {
 	    objectWriteUInt16(this, value, offset, true)
@@ -5087,7 +6533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 8)
-	    this[offset + 1] = value
+	    this[offset + 1] = (value & 0xff)
 	  } else {
 	    objectWriteUInt16(this, value, offset, false)
 	  }
@@ -5109,7 +6555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this[offset + 3] = (value >>> 24)
 	    this[offset + 2] = (value >>> 16)
 	    this[offset + 1] = (value >>> 8)
-	    this[offset] = value
+	    this[offset] = (value & 0xff)
 	  } else {
 	    objectWriteUInt32(this, value, offset, true)
 	  }
@@ -5124,7 +6570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this[offset] = (value >>> 24)
 	    this[offset + 1] = (value >>> 16)
 	    this[offset + 2] = (value >>> 8)
-	    this[offset + 3] = value
+	    this[offset + 3] = (value & 0xff)
 	  } else {
 	    objectWriteUInt32(this, value, offset, false)
 	  }
@@ -5177,7 +6623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
 	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
 	  if (value < 0) value = 0xff + value + 1
-	  this[offset] = value
+	  this[offset] = (value & 0xff)
 	  return offset + 1
 	}
 
@@ -5186,7 +6632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  offset = offset | 0
 	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = value
+	    this[offset] = (value & 0xff)
 	    this[offset + 1] = (value >>> 8)
 	  } else {
 	    objectWriteUInt16(this, value, offset, true)
@@ -5200,7 +6646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
 	    this[offset] = (value >>> 8)
-	    this[offset + 1] = value
+	    this[offset + 1] = (value & 0xff)
 	  } else {
 	    objectWriteUInt16(this, value, offset, false)
 	  }
@@ -5212,7 +6658,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  offset = offset | 0
 	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
 	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = value
+	    this[offset] = (value & 0xff)
 	    this[offset + 1] = (value >>> 8)
 	    this[offset + 2] = (value >>> 16)
 	    this[offset + 3] = (value >>> 24)
@@ -5231,7 +6677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this[offset] = (value >>> 24)
 	    this[offset + 1] = (value >>> 16)
 	    this[offset + 2] = (value >>> 8)
-	    this[offset + 3] = value
+	    this[offset + 3] = (value & 0xff)
 	  } else {
 	    objectWriteUInt32(this, value, offset, false)
 	  }
@@ -5506,7 +6952,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      // valid surrogate pair
-	      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+	      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
 	    } else if (leadSurrogate) {
 	      // valid bmp char, but last char was a lead
 	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
@@ -5584,10 +7030,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return i
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28).Buffer, (function() { return this; }())))
 
 /***/ },
-/* 22 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -5717,7 +7163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 30 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -5807,52 +7253,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 31 */
 /***/ function(module, exports) {
 
-	
-	/**
-	 * isArray
-	 */
+	var toString = {}.toString;
 
-	var isArray = Array.isArray;
-
-	/**
-	 * toString
-	 */
-
-	var str = Object.prototype.toString;
-
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
+	module.exports = Array.isArray || function (arr) {
+	  return toString.call(arr) == '[object Array]';
 	};
 
 
 /***/ },
-/* 25 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -5861,7 +7279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	URL = __webpack_require__(18);
+	URL = __webpack_require__(25);
 
 	BackboneORM = __webpack_require__(3);
 
@@ -5971,13 +7389,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -5988,7 +7406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	IterationUtils = __webpack_require__(27);
+	IterationUtils = __webpack_require__(34);
 
 	module.exports = JSONUtils = (function() {
 	  function JSONUtils() {}
@@ -6380,13 +7798,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -6468,112 +7886,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	})();
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
 
 /***/ },
-/* 28 */
-/***/ function(module, exports) {
-
-	// shim for using process in browser
-
-	var process = module.exports = {};
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = setTimeout(cleanUpNextTick);
-	    draining = true;
-
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            currentQueue[queueIndex].run();
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    clearTimeout(timeout);
-	}
-
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
-	    }
-	};
-
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	// TODO(shtylman)
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
-
-
-/***/ },
-/* 29 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -6586,19 +7908,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
-	DatabaseURL = __webpack_require__(25);
+	DatabaseURL = __webpack_require__(32);
 
-	ModelStream = __webpack_require__(30);
+	ModelStream = __webpack_require__(36);
 
-	modelEach = __webpack_require__(32);
+	modelEach = __webpack_require__(38);
 
-	modelInterval = __webpack_require__(33);
+	modelInterval = __webpack_require__(39);
 
-	__webpack_require__(35);
+	__webpack_require__(41);
 
 	module.exports = function(model_type) {
 	  var BackboneModelExtensions, _findOrClone, fn, key, overrides, results;
@@ -7286,13 +8608,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7302,7 +8624,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  hasProp = {}.hasOwnProperty;
 
 	try {
-	  stream = __webpack_require__(31);
+	  stream = __webpack_require__(37);
 	} catch (undefined) {}
 
 	if (stream != null ? stream.Readable : void 0) {
@@ -7347,20 +8669,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 37 */
 /***/ function(module, exports) {
 
-	if(typeof __WEBPACK_EXTERNAL_MODULE_31__ === 'undefined') {var e = new Error("Cannot find module \"stream\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
-	module.exports = __WEBPACK_EXTERNAL_MODULE_31__;
+	if(typeof __WEBPACK_EXTERNAL_MODULE_37__ === 'undefined') {var e = new Error("Cannot find module \"stream\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
+	module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
 
 /***/ },
-/* 32 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7376,7 +8698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function(model_type, query, iterator, callback) {
 	  var method, model_limit, options, parsed_query, processed_count, runBatch;
 	  if (!Cursor) {
-	    Cursor = __webpack_require__(16);
+	    Cursor = __webpack_require__(23);
 	  }
 	  options = query.$each || {};
 	  method = options.json ? 'toJSON' : 'toModels';
@@ -7431,13 +8753,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7448,11 +8770,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
-	DateUtils = __webpack_require__(34);
+	DateUtils = __webpack_require__(40);
 
 	INTERVAL_TYPES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
 
@@ -7598,13 +8920,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7680,13 +9002,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7697,7 +9019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Backbone = __webpack_require__(2);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
 	collection_type = Backbone.Collection;
 
@@ -7750,13 +9072,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -7766,9 +9088,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_ = __webpack_require__(1);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
 	CURSOR_KEYS = ['$count', '$exists', '$zero', '$one', '$offset', '$limit', '$page', '$sort', '$unique', '$whitelist', '$select', '$include', '$values', '$ids', '$or'];
 
@@ -8184,13 +9506,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -8205,15 +9527,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	BackboneORM = __webpack_require__(3);
 
-	One = __webpack_require__(38);
+	One = __webpack_require__(44);
 
-	Many = __webpack_require__(40);
+	Many = __webpack_require__(46);
 
-	DatabaseURL = __webpack_require__(25);
+	DatabaseURL = __webpack_require__(32);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
 	RELATION_VARIANTS = {
 	  'hasOne': 'hasOne',
@@ -8521,13 +9843,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -8544,7 +9866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
 	module.exports = One = (function(superClass) {
 	  extend(One, superClass);
@@ -9036,17 +10358,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return One;
 
-	})(__webpack_require__(39));
+	})(__webpack_require__(45));
 
 
 /***/ },
-/* 39 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -9061,7 +10383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
 	module.exports = Relation = (function() {
 	  function Relation() {}
@@ -9145,6 +10467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            queue.defer(function(callback) {
 	              var query, related_json;
 	              query = {};
+	              query[_this.join_key] = model.id;
 	              query[_this.reverse_relation.join_key] = {
 	                $in: (function() {
 	                  var i, len, ref, results;
@@ -9212,13 +10535,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -9235,9 +10558,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
 	module.exports = Many = (function(superClass) {
 	  extend(Many, superClass);
@@ -9835,17 +11158,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return Many;
 
-	})(__webpack_require__(39));
+	})(__webpack_require__(45));
 
 
 /***/ },
-/* 41 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -9859,13 +11182,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Queue = __webpack_require__(11);
 
-	MemoryCursor = __webpack_require__(16);
+	MemoryCursor = __webpack_require__(23);
 
-	Schema = __webpack_require__(37);
+	Schema = __webpack_require__(43);
 
-	Utils = __webpack_require__(17);
+	Utils = __webpack_require__(24);
 
-	JSONUtils = __webpack_require__(26);
+	JSONUtils = __webpack_require__(33);
 
 	DESTROY_BATCH_LIMIT = 2000;
 
@@ -10101,7 +11424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 48 */
 /***/ function(module, exports) {
 
 	var TestUtils;
@@ -10137,7 +11460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 43 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Fabricator, Queue, _;
@@ -10234,13 +11557,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 44 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
@@ -10257,13 +11580,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 45 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 	/*
-	  backbone-orm.js 0.7.13
-	  Copyright (c) 2013-2014 Vidigami
+	  backbone-orm.js 0.7.14
+	  Copyright (c) 2013-2016 Vidigami
 	  License: MIT (http://www.opensource.org/licenses/mit-license.php)
 	  Source: https://github.com/vidigami/backbone-orm
 	  Dependencies: Backbone.js and Underscore.js.
