@@ -155,6 +155,53 @@ new RestController(app, {
         </div>
       </div>
     </div>
+    <div class="row block">
+      <div class="col-lg-5 col-md-5"><h3>Using with Express</h3>
+
+<p>When using express, you will need to include the json body-parser.</p>
+      </div>
+      <div class="col-lg-7 col-md-7">
+        <div class="row block"><a class="btn btn-xs language-toggle pull-right"><span>CoffeeScript</span><i class="glyphicon glyphicon-random"></i></a></div>
+        <div class="row block example coffeescript">
+          <pre><code class="language-coffeescript">"use strict";
+
+var app = require('express')();
+app.use(require('body-parser').json({}));
+app.listen(3000);
+
+class Project extends require('backbone').Model {
+  constructor(options) {
+    super(options);
+    this.urlRoot = '/projects';
+  }
+}
+Project.sync = require('backbone-orm').sync(Project);
+
+var RESTController = require('backbone-rest');
+new RESTController(app, {model_type: Project, route: '/projects'});
+</code></pre>
+        </div>
+        <div class="row block example javascript">
+          <pre><code class="language-javascript">"use strict";
+
+var app = require('express')();
+app.use(require('body-parser').json({}));
+app.listen(3000);
+
+class Project extends require('backbone').Model {
+  constructor(options) {
+    super(options);
+    this.urlRoot = '/projects';
+  }
+}
+Project.sync = require('backbone-orm').sync(Project);
+
+var RESTController = require('backbone-rest');
+new RESTController(app, {model_type: Project, route: '/projects'});
+</code></pre>
+        </div>
+      </div>
+    </div>
   </div>
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

@@ -1,1 +1,28 @@
-(function(){$(function(){var a,b,c;return c=["CoffeeScript","JavaScript"],a=function(a){var b;return null==a&&(a="CoffeeScript"),b=a.toLowerCase(),$(".example:not(."+b+")").hide(),$(".example."+b).show(),"undefined"!=typeof localStorage&&null!==localStorage&&localStorage.setItem("type",a),$(".btn.language-toggle span").text(a)},b="undefined"!=typeof localStorage&&null!==localStorage?localStorage.getItem("type"):void 0,a(b),$(".btn.language-toggle").on("click",function(b){var d,e;return d=$(this).find("span"),e=c[Math.abs(c.indexOf(d.text())-1)],a(e)})})}).call(this);
+(function() {
+  $(function() {
+    var setType, type, types;
+    types = ['CoffeeScript', 'JavaScript'];
+    setType = function(type) {
+      var cls;
+      if (type == null) {
+        type = 'CoffeeScript';
+      }
+      cls = type.toLowerCase();
+      $(".example:not(." + cls + ")").hide();
+      $(".example." + cls).show();
+      if (typeof localStorage !== "undefined" && localStorage !== null) {
+        localStorage.setItem('type', type);
+      }
+      return $('.btn.language-toggle span').text(type);
+    };
+    type = typeof localStorage !== "undefined" && localStorage !== null ? localStorage.getItem('type') : void 0;
+    setType(type);
+    return $('.btn.language-toggle').on('click', function(e) {
+      var $span, to_type;
+      $span = $(this).find('span');
+      to_type = types[Math.abs(types.indexOf($span.text()) - 1)];
+      return setType(to_type);
+    });
+  });
+
+}).call(this);
